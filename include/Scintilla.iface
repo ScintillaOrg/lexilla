@@ -56,6 +56,7 @@
 ##     string -> pointer to const character
 ##     stringresult -> pointer to character, NULL-> return size of result
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
+##     pointer -> void* pointer that may point to a document, loader, internal text storage or similar
 ##     textrange -> range of a min and a max position with an output string
 ##     findtext -> searchrange, text -> foundposition
 ##     keymod -> integer containing key in low half and modifiers in high half
@@ -1076,11 +1077,11 @@ fun position GetText=2182(position length, stringresult text)
 get position GetTextLength=2183(,)
 
 # Retrieve a pointer to a function that processes messages for this Scintilla.
-get int GetDirectFunction=2184(,)
+get pointer GetDirectFunction=2184(,)
 
 # Retrieve a pointer value to use as the first argument when calling
 # the function returned by GetDirectFunction.
-get int GetDirectPointer=2185(,)
+get pointer GetDirectPointer=2185(,)
 
 # Set to overtype (true) or insert mode.
 set void SetOvertype=2186(bool overType,)
@@ -1725,10 +1726,10 @@ get bool GetViewEOL=2355(,)
 set void SetViewEOL=2356(bool visible,)
 
 # Retrieve a pointer to the document object.
-get int GetDocPointer=2357(,)
+get pointer GetDocPointer=2357(,)
 
 # Change the document object used.
-set void SetDocPointer=2358(, int doc)
+set void SetDocPointer=2358(, pointer doc)
 
 # Set which document modification events are sent to the container.
 set void SetModEventMask=2359(int eventMask,)
@@ -1804,11 +1805,11 @@ val SC_DOCUMENTOPTION_TEXT_LARGE=0x100
 
 # Create a new document object.
 # Starts with reference count of 1 and not selected into editor.
-fun int CreateDocument=2375(position bytes, int documentOptions)
+fun pointer CreateDocument=2375(position bytes, int documentOptions)
 # Extend life of document.
-fun void AddRefDocument=2376(, int doc)
+fun void AddRefDocument=2376(, pointer doc)
 # Release a reference to the document, deleting document if it fades to black.
-fun void ReleaseDocument=2377(, int doc)
+fun void ReleaseDocument=2377(, pointer doc)
 
 # Get which document options are set.
 get int GetDocumentOptions=2379(,)
@@ -2239,12 +2240,12 @@ fun void CopyAllowLine=2519(,)
 
 # Compact the document buffer and return a read-only pointer to the
 # characters in the document.
-get int GetCharacterPointer=2520(,)
+get pointer GetCharacterPointer=2520(,)
 
 # Return a read-only pointer to a range of characters in the document.
 # May move the gap so that the range is contiguous, but will only move up
 # to lengthRange bytes.
-get int GetRangePointer=2643(position start, position lengthRange)
+get pointer GetRangePointer=2643(position start, position lengthRange)
 
 # Return a position which, to avoid performance costs, should not be within
 # the range of a call to GetRangePointer.
@@ -2588,7 +2589,7 @@ set void SetTechnology=2630(int technology,)
 get int GetTechnology=2631(,)
 
 # Create an ILoader*.
-fun int CreateLoader=2632(position bytes, int documentOptions)
+fun pointer CreateLoader=2632(position bytes, int documentOptions)
 
 # On OS X, show a find indicator.
 fun void FindIndicatorShow=2640(position start, position end)
@@ -2687,7 +2688,7 @@ get int GetPropertyInt=4010(string key, int defaultValue)
 get int GetLexerLanguage=4012(, stringresult language)
 
 # For private communication between an application and a known lexer.
-fun int PrivateLexerCall=4013(int operation, int pointer)
+fun pointer PrivateLexerCall=4013(int operation, pointer pointer)
 
 # Retrieve a '\n' separated list of properties understood by the current lexer.
 # Result is NUL-terminated.
