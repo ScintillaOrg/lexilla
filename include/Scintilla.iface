@@ -46,7 +46,7 @@
 ## to enu. The name may not be the same as that used within the lexer so the lexerVal
 ## should be used to tie these entities together.
 
-## Types:
+## Types: Never start with a capital letter
 ##     void
 ##     int
 ##     bool -> integer, 1=true, 0=false
@@ -61,6 +61,7 @@
 ##     findtext -> searchrange, text -> foundposition
 ##     keymod -> integer containing key in low half and modifiers in high half
 ##     formatrange
+## Enumeration types always start with a capital letter
 ## Types no longer used:
 ##     findtextex -> searchrange
 ##     charrange -> range of a min and a max position
@@ -165,10 +166,10 @@ val SCWS_VISIBLEONLYININDENT=3
 
 # Are white space characters currently visible?
 # Returns one of SCWS_* constants.
-get int GetViewWS=2020(,)
+get WhiteSpace GetViewWS=2020(,)
 
 # Make white space characters invisible, always visible or visible outside indentation.
-set void SetViewWS=2021(int viewWS,)
+set void SetViewWS=2021(WhiteSpace viewWS,)
 
 enu TabDrawMode=SCTD_
 val SCTD_LONGARROW=0
@@ -176,10 +177,10 @@ val SCTD_STRIKEOUT=1
 
 # Retrieve the current tab draw mode.
 # Returns one of SCTD_* constants.
-get int GetTabDrawMode=2698(,)
+get TabDrawMode GetTabDrawMode=2698(,)
 
 # Set how tabs are drawn when visible.
-set void SetTabDrawMode=2699(int tabDrawMode,)
+set void SetTabDrawMode=2699(TabDrawMode tabDrawMode,)
 
 # Find the position from a point within the window.
 fun position PositionFromPoint=2022(int x, int y)
@@ -212,13 +213,13 @@ val SC_EOL_CR=1
 val SC_EOL_LF=2
 
 # Convert all line endings in the document to one mode.
-fun void ConvertEOLs=2029(int eolMode,)
+fun void ConvertEOLs=2029(EndOfLine eolMode,)
 
 # Retrieve the current end of line mode - one of CRLF, CR, or LF.
-get int GetEOLMode=2030(,)
+get EndOfLine GetEOLMode=2030(,)
 
 # Set the current end of line mode.
-set void SetEOLMode=2031(int eolMode,)
+set void SetEOLMode=2031(EndOfLine eolMode,)
 
 # Set the current styling position to start.
 # The unused parameter is no longer used and should be set to 0.
@@ -263,10 +264,10 @@ val SC_IME_WINDOWED=0
 val SC_IME_INLINE=1
 
 # Is the IME displayed in a window or inline?
-get int GetIMEInteraction=2678(,)
+get IMEInteraction GetIMEInteraction=2678(,)
 
 # Choose to display the the IME in a winow or inline.
-set void SetIMEInteraction=2679(int imeInteraction,)
+set void SetIMEInteraction=2679(IMEInteraction imeInteraction,)
 
 enu MarkerSymbol=SC_MARK_
 val MARKER_MAX=31
@@ -324,7 +325,7 @@ val SC_MARKNUM_FOLDEROPEN=31
 val SC_MASK_FOLDERS=0xFE000000
 
 # Set the symbol used for a particular marker number.
-fun void MarkerDefine=2040(int markerNumber, int markerSymbol)
+fun void MarkerDefine=2040(int markerNumber, MarkerSymbol markerSymbol)
 
 # Set the foreground colour used for a particular marker number.
 set void MarkerSetFore=2041(int markerNumber, colour fore)
@@ -364,7 +365,7 @@ fun void MarkerDefinePixmap=2049(int markerNumber, string pixmap)
 fun void MarkerAddSet=2466(line line, int markerSet)
 
 # Set the alpha used for a marker that is drawn in the text area, not the margin.
-set void MarkerSetAlpha=2476(int markerNumber, int alpha)
+set void MarkerSetAlpha=2476(int markerNumber, Alpha alpha)
 
 val SC_MAX_MARGIN=4
 
@@ -521,10 +522,10 @@ get bool StyleGetEOLFilled=2487(int style,)
 get bool StyleGetUnderline=2488(int style,)
 
 # Get is a style mixed case, or to force upper or lower case.
-get int StyleGetCase=2489(int style,)
+get CaseVisible StyleGetCase=2489(int style,)
 
 # Get the character get of the font in a style.
-get int StyleGetCharacterSet=2490(int style,)
+get CharacterSet StyleGetCharacterSet=2490(int style,)
 
 # Get is a style visible or not.
 get bool StyleGetVisible=2491(int style,)
@@ -537,7 +538,7 @@ get bool StyleGetChangeable=2492(int style,)
 get bool StyleGetHotSpot=2493(int style,)
 
 # Set a style to be mixed case, or to force upper or lower case.
-set void StyleSetCase=2060(int style, int caseVisible)
+set void StyleSetCase=2060(int style, CaseVisible caseVisible)
 
 val SC_FONT_SIZE_MULTIPLIER=100
 
@@ -553,13 +554,13 @@ val SC_WEIGHT_SEMIBOLD=600
 val SC_WEIGHT_BOLD=700
 
 # Set the weight of characters of a style.
-set void StyleSetWeight=2063(int style, int weight)
+set void StyleSetWeight=2063(int style, FontWeight weight)
 
 # Get the weight of characters of a style.
-get int StyleGetWeight=2064(int style,)
+get FontWeight StyleGetWeight=2064(int style,)
 
 # Set the character set of the font in a style.
-set void StyleSetCharacterSet=2066(int style, int characterSet)
+set void StyleSetCharacterSet=2066(int style, CharacterSet characterSet)
 
 # Set a style to be a hotspot or not.
 set void StyleSetHotSpot=2409(int style, bool hotspot)
@@ -571,10 +572,10 @@ fun void SetSelFore=2067(bool useSetting, colour fore)
 fun void SetSelBack=2068(bool useSetting, colour back)
 
 # Get the alpha of the selection.
-get int GetSelAlpha=2477(,)
+get Alpha GetSelAlpha=2477(,)
 
 # Set the alpha of the selection.
-set void SetSelAlpha=2478(int alpha,)
+set void SetSelAlpha=2478(Alpha alpha,)
 
 # Is the selection end of line filled?
 get bool GetSelEOLFilled=2479(,)
@@ -667,10 +668,10 @@ val INDICATOR_IME_MAX=35
 val INDICATOR_MAX=35
 
 # Set an indicator to plain, squiggle or TT.
-set void IndicSetStyle=2080(int indicator, int indicatorStyle)
+set void IndicSetStyle=2080(int indicator, IndicatorStyle indicatorStyle)
 
 # Retrieve the style of an indicator.
-get int IndicGetStyle=2081(int indicator,)
+get IndicatorStyle IndicGetStyle=2081(int indicator,)
 
 # Set the foreground colour of an indicator.
 set void IndicSetFore=2082(int indicator, colour fore)
@@ -685,10 +686,10 @@ set void IndicSetUnder=2510(int indicator, bool under)
 get bool IndicGetUnder=2511(int indicator,)
 
 # Set a hover indicator to plain, squiggle or TT.
-set void IndicSetHoverStyle=2680(int indicator, int indicatorStyle)
+set void IndicSetHoverStyle=2680(int indicator, IndicatorStyle indicatorStyle)
 
 # Retrieve the hover style of an indicator.
-get int IndicGetHoverStyle=2681(int indicator,)
+get IndicatorStyle IndicGetHoverStyle=2681(int indicator,)
 
 # Set the foreground hover colour of an indicator.
 set void IndicSetHoverFore=2682(int indicator, colour fore)
@@ -704,10 +705,10 @@ enu IndicFlag=SC_INDICFLAG_
 val SC_INDICFLAG_VALUEFORE=1
 
 # Set the attributes of an indicator.
-set void IndicSetFlags=2684(int indicator, int flags)
+set void IndicSetFlags=2684(int indicator, IndicFlag flags)
 
 # Retrieve the attributes of an indicator.
-get int IndicGetFlags=2685(int indicator,)
+get IndicFlag IndicGetFlags=2685(int indicator,)
 
 # Set the foreground colour of all whitespace and whether to use this setting.
 fun void SetWhitespaceFore=2084(bool useSetting, colour fore)
@@ -894,10 +895,10 @@ val SC_IV_LOOKFORWARD=2
 val SC_IV_LOOKBOTH=3
 
 # Show or hide indentation guides.
-set void SetIndentationGuides=2132(int indentView,)
+set void SetIndentationGuides=2132(IndentView indentView,)
 
 # Are the indentation guides visible?
-get int GetIndentationGuides=2133(,)
+get IndentView GetIndentationGuides=2133(,)
 
 # Set the highlighted indentation guide column.
 # 0 = no highlighted guide.
@@ -958,10 +959,10 @@ val SC_PRINT_COLOURONWHITEDEFAULTBG=4
 val SC_PRINT_SCREENCOLOURS=5
 
 # Modify colours when printing for clearer printed text.
-set void SetPrintColourMode=2148(int mode,)
+set void SetPrintColourMode=2148(PrintOption mode,)
 
 # Returns the print colour mode.
-get int GetPrintColourMode=2149(,)
+get PrintOption GetPrintColourMode=2149(,)
 
 enu FindOption=SCFIND_
 val SCFIND_NONE=0x0
@@ -973,7 +974,7 @@ val SCFIND_POSIX=0x00400000
 val SCFIND_CXX11REGEX=0x00800000
 
 # Find some text in the document.
-fun position FindText=2150(int searchFlags, findtext ft)
+fun position FindText=2150(FindOption searchFlags, findtext ft)
 
 # On Windows, will draw the document into a display context such as a printer.
 fun position FormatRange=2151(bool draw, formatrange fr)
@@ -1149,10 +1150,10 @@ fun position ReplaceTargetRE=2195(position length, string text)
 fun position SearchInTarget=2197(position length, string text)
 
 # Set the search flags used by SearchInTarget.
-set void SetSearchFlags=2198(int searchFlags,)
+set void SetSearchFlags=2198(FindOption searchFlags,)
 
 # Get the search flags used by SearchInTarget.
-get int GetSearchFlags=2199(,)
+get FindOption GetSearchFlags=2199(,)
 
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
@@ -1205,13 +1206,13 @@ val SC_FOLDLEVELNUMBERMASK=0x0FFF
 # Set the fold level of a line.
 # This encodes an integer level along with flags indicating whether the
 # line is a header and whether it is effectively white space.
-set void SetFoldLevel=2222(line line, int level)
+set void SetFoldLevel=2222(line line, FoldLevel level)
 
 # Retrieve the fold level of a line.
-get int GetFoldLevel=2223(line line,)
+get FoldLevel GetFoldLevel=2223(line line,)
 
 # Find the last child line of a header line.
-get line GetLastChild=2224(line line, int level)
+get line GetLastChild=2224(line line, FoldLevel level)
 
 # Find the parent line of a child line.
 get line GetFoldParent=2225(line line,)
@@ -1246,10 +1247,10 @@ val SC_FOLDDISPLAYTEXT_STANDARD=1
 val SC_FOLDDISPLAYTEXT_BOXED=2
 
 # Set the style of fold display text.
-set void FoldDisplayTextSetStyle=2701(int style,)
+set void FoldDisplayTextSetStyle=2701(FoldDisplayTextStyle style,)
 
 # Get the style of fold display text.
-get int FoldDisplayTextGetStyle=2707(,)
+get FoldDisplayTextStyle FoldDisplayTextGetStyle=2707(,)
 
 # Set the default fold display text.
 fun void SetDefaultFoldDisplayText=2722(, string text)
@@ -1263,16 +1264,16 @@ val SC_FOLDACTION_EXPAND=1
 val SC_FOLDACTION_TOGGLE=2
 
 # Expand or contract a fold header.
-fun void FoldLine=2237(line line, int action)
+fun void FoldLine=2237(line line, FoldAction action)
 
 # Expand or contract a fold header and its children.
-fun void FoldChildren=2238(line line, int action)
+fun void FoldChildren=2238(line line, FoldAction action)
 
 # Expand a fold header and all children. Use the level argument instead of the line's current level.
-fun void ExpandChildren=2239(line line, int level)
+fun void ExpandChildren=2239(line line, FoldLevel level)
 
 # Expand or contract all fold headers.
-fun void FoldAll=2662(int action,)
+fun void FoldAll=2662(FoldAction action,)
 
 # Ensure a particular line is visible by expanding any header line hiding it.
 fun void EnsureVisible=2232(line line,)
@@ -1283,10 +1284,10 @@ val SC_AUTOMATICFOLD_CLICK=0x0002
 val SC_AUTOMATICFOLD_CHANGE=0x0004
 
 # Set automatic folding behaviours.
-set void SetAutomaticFold=2663(int automaticFold,)
+set void SetAutomaticFold=2663(AutomaticFold automaticFold,)
 
 # Get automatic folding behaviours.
-get int GetAutomaticFold=2664(,)
+get AutomaticFold GetAutomaticFold=2664(,)
 
 enu FoldFlag=SC_FOLDFLAG_
 val SC_FOLDFLAG_LINEBEFORE_EXPANDED=0x0002
@@ -1297,7 +1298,7 @@ val SC_FOLDFLAG_LEVELNUMBERS=0x0040
 val SC_FOLDFLAG_LINESTATE=0x0080
 
 # Set some style options for folding.
-set void SetFoldFlags=2233(int flags,)
+set void SetFoldFlags=2233(FoldFlag flags,)
 
 # Ensure a particular line is visible by expanding any header line hiding it.
 # Use the currently set visibility policy to determine which range to display.
@@ -1339,10 +1340,10 @@ val SC_IDLESTYLING_AFTERVISIBLE=2
 val SC_IDLESTYLING_ALL=3
 
 # Sets limits to idle styling.
-set void SetIdleStyling=2692(int idleStyling,)
+set void SetIdleStyling=2692(IdleStyling idleStyling,)
 
 # Retrieve the limits to idle styling.
-get int GetIdleStyling=2693(,)
+get IdleStyling GetIdleStyling=2693(,)
 
 enu Wrap=SC_WRAP_
 val SC_WRAP_NONE=0
@@ -1351,10 +1352,10 @@ val SC_WRAP_CHAR=2
 val SC_WRAP_WHITESPACE=3
 
 # Sets whether text is word wrapped.
-set void SetWrapMode=2268(int wrapMode,)
+set void SetWrapMode=2268(Wrap wrapMode,)
 
 # Retrieve whether text is word wrapped.
-get int GetWrapMode=2269(,)
+get Wrap GetWrapMode=2269(,)
 
 enu WrapVisualFlag=SC_WRAPVISUALFLAG_
 val SC_WRAPVISUALFLAG_NONE=0x0000
@@ -1363,10 +1364,10 @@ val SC_WRAPVISUALFLAG_START=0x0002
 val SC_WRAPVISUALFLAG_MARGIN=0x0004
 
 # Set the display mode of visual flags for wrapped lines.
-set void SetWrapVisualFlags=2460(int wrapVisualFlags,)
+set void SetWrapVisualFlags=2460(WrapVisualFlag wrapVisualFlags,)
 
 # Retrive the display mode of visual flags for wrapped lines.
-get int GetWrapVisualFlags=2461(,)
+get WrapVisualFlag GetWrapVisualFlags=2461(,)
 
 enu WrapVisualLocation=SC_WRAPVISUALFLAGLOC_
 val SC_WRAPVISUALFLAGLOC_DEFAULT=0x0000
@@ -1374,10 +1375,10 @@ val SC_WRAPVISUALFLAGLOC_END_BY_TEXT=0x0001
 val SC_WRAPVISUALFLAGLOC_START_BY_TEXT=0x0002
 
 # Set the location of visual flags for wrapped lines.
-set void SetWrapVisualFlagsLocation=2462(int wrapVisualFlagsLocation,)
+set void SetWrapVisualFlagsLocation=2462(WrapVisualLocation wrapVisualFlagsLocation,)
 
 # Retrive the location of visual flags for wrapped lines.
-get int GetWrapVisualFlagsLocation=2463(,)
+get WrapVisualLocation GetWrapVisualFlagsLocation=2463(,)
 
 # Set the start indent for wrapped lines.
 set void SetWrapStartIndent=2464(int indent,)
@@ -1392,10 +1393,10 @@ val SC_WRAPINDENT_INDENT=2
 val SC_WRAPINDENT_DEEPINDENT=3
 
 # Sets how wrapped sublines are placed. Default is fixed.
-set void SetWrapIndentMode=2472(int wrapIndentMode,)
+set void SetWrapIndentMode=2472(WrapIndentMode wrapIndentMode,)
 
 # Retrieve how wrapped sublines are placed. Default is fixed.
-get int GetWrapIndentMode=2473(,)
+get WrapIndentMode GetWrapIndentMode=2473(,)
 
 enu LineCache=SC_CACHE_
 val SC_CACHE_NONE=0
@@ -1404,10 +1405,10 @@ val SC_CACHE_PAGE=2
 val SC_CACHE_DOCUMENT=3
 
 # Sets the degree of caching of layout information.
-set void SetLayoutCache=2272(int cacheMode,)
+set void SetLayoutCache=2272(LineCache cacheMode,)
 
 # Retrieve the degree of caching of layout information.
-get int GetLayoutCache=2273(,)
+get LineCache GetLayoutCache=2273(,)
 
 # Sets the document width assumed for scrolling.
 set void SetScrollWidth=2274(int pixelWidth,)
@@ -1453,13 +1454,13 @@ val SC_PHASES_TWO=1
 val SC_PHASES_MULTIPLE=2
 
 # How many phases is drawing done in?
-get int GetPhasesDraw=2673(,)
+get PhasesDraw GetPhasesDraw=2673(,)
 
 # In one phase draw, text is drawn in a series of rectangular blocks with no overlap.
 # In two phase draw, text is drawn in a series of lines allowing runs to overlap horizontally.
 # In multiple phase draw, each element is drawn over the whole drawing area, allowing text
 # to overlap from one line to the next.
-set void SetPhasesDraw=2674(int phases,)
+set void SetPhasesDraw=2674(PhasesDraw phases,)
 
 # Control font anti-aliasing.
 
@@ -1471,10 +1472,10 @@ val SC_EFF_QUALITY_ANTIALIASED=2
 val SC_EFF_QUALITY_LCD_OPTIMIZED=3
 
 # Choose the quality level for text from the FontQuality enumeration.
-set void SetFontQuality=2611(int fontQuality,)
+set void SetFontQuality=2611(FontQuality fontQuality,)
 
 # Retrieve the quality level for text.
-get int GetFontQuality=2612(,)
+get FontQuality GetFontQuality=2612(,)
 
 # Scroll so that a display line is at the top of the display.
 set void SetFirstVisibleLine=2613(line displayLine,)
@@ -1484,10 +1485,10 @@ val SC_MULTIPASTE_ONCE=0
 val SC_MULTIPASTE_EACH=1
 
 # Change the effect of pasting when there are multiple selections.
-set void SetMultiPaste=2614(int multiPaste,)
+set void SetMultiPaste=2614(MultiPaste multiPaste,)
 
 # Retrieve the effect of pasting when there are multiple selections.
-get int GetMultiPaste=2615(,)
+get MultiPaste GetMultiPaste=2615(,)
 
 # Retrieve the value of a tag from a regular expression search.
 # Result is NUL-terminated.
@@ -1510,10 +1511,10 @@ val SC_ACCESSIBILITY_DISABLED=0
 val SC_ACCESSIBILITY_ENABLED=1
 
 # Enable or disable accessibility.
-set void SetAccessibility=2702(int accessibility,)
+set void SetAccessibility=2702(Accessibility accessibility,)
 
 # Report accessibility status.
-get int GetAccessibility=2703(,)
+get Accessibility GetAccessibility=2703(,)
 
 ## New messages go here
 
@@ -1741,7 +1742,7 @@ get pointer GetDocPointer=2357(,)
 set void SetDocPointer=2358(, pointer doc)
 
 # Set which document modification events are sent to the container.
-set void SetModEventMask=2359(int eventMask,)
+set void SetModEventMask=2359(ModificationFlags eventMask,)
 
 enu EdgeVisualStyle=EDGE_
 val EDGE_NONE=0
@@ -1757,11 +1758,11 @@ get position GetEdgeColumn=2360(,)
 set void SetEdgeColumn=2361(position column,)
 
 # Retrieve the edge highlight mode.
-get int GetEdgeMode=2362(,)
+get EdgeVisualStyle GetEdgeMode=2362(,)
 
 # The edge may be displayed by a line (EDGE_LINE/EDGE_MULTILINE) or by highlighting text that
 # goes beyond it (EDGE_BACKGROUND) or not displayed at all (EDGE_NONE).
-set void SetEdgeMode=2363(int edgeMode,)
+set void SetEdgeMode=2363(EdgeVisualStyle edgeMode,)
 
 # Retrieve the colour used in edge indication.
 get colour GetEdgeColour=2364(,)
@@ -1780,11 +1781,11 @@ fun void SearchAnchor=2366(,)
 
 # Find some text starting at the search anchor.
 # Does not ensure the selection is visible.
-fun position SearchNext=2367(int searchFlags, string text)
+fun position SearchNext=2367(FindOption searchFlags, string text)
 
 # Find some text starting at the search anchor and moving backwards.
 # Does not ensure the selection is visible.
-fun position SearchPrev=2368(int searchFlags, string text)
+fun position SearchPrev=2368(FindOption searchFlags, string text)
 
 # Retrieves the number of lines completely visible.
 get line LinesOnScreen=2370(,)
@@ -1796,7 +1797,7 @@ val SC_POPUP_TEXT=2
 
 # Set whether a pop up menu is displayed automatically when the user presses
 # the wrong mouse button on certain areas.
-fun void UsePopUp=2371(int popUpMode,)
+fun void UsePopUp=2371(PopUp popUpMode,)
 
 # Is the selection rectangular? The alternative is the more common stream selection.
 get bool SelectionIsRectangle=2372(,)
@@ -1814,17 +1815,17 @@ val SC_DOCUMENTOPTION_TEXT_LARGE=0x100
 
 # Create a new document object.
 # Starts with reference count of 1 and not selected into editor.
-fun pointer CreateDocument=2375(position bytes, int documentOptions)
+fun pointer CreateDocument=2375(position bytes, DocumentOption documentOptions)
 # Extend life of document.
 fun void AddRefDocument=2376(, pointer doc)
 # Release a reference to the document, deleting document if it fades to black.
 fun void ReleaseDocument=2377(, pointer doc)
 
 # Get which document options are set.
-get int GetDocumentOptions=2379(,)
+get DocumentOption GetDocumentOptions=2379(,)
 
 # Get which document modification events are sent to the container.
-get int GetModEventMask=2378(,)
+get ModificationFlags GetModEventMask=2378(,)
 
 # Set whether command events are sent to the container.
 set void SetCommandEvents=2717(bool commandEvents,)
@@ -1845,9 +1846,9 @@ val SC_STATUS_WARN_START=1000
 val SC_STATUS_WARN_REGEX=1001
 
 # Change error status - 0 = OK.
-set void SetStatus=2382(int status,)
+set void SetStatus=2382(Status status,)
 # Get error status.
-get int GetStatus=2383(,)
+get Status GetStatus=2383(,)
 
 # Set whether the mouse is captured when its button is pressed.
 set void SetMouseDownCaptures=2384(bool captures,)
@@ -1865,9 +1866,9 @@ val SC_CURSORARROW=2
 val SC_CURSORWAIT=4
 val SC_CURSORREVERSEARROW=7
 # Sets the cursor to one of the SC_CURSOR* values.
-set void SetCursor=2386(int cursorType,)
+set void SetCursor=2386(CursorShape cursorType,)
 # Get cursor type.
-get int GetCursor=2387(,)
+get CursorShape GetCursor=2387(,)
 
 # Change the way control characters are displayed:
 # If symbol is < 32, keep the drawn way, else, use the given character.
@@ -1892,7 +1893,7 @@ val VISIBLE_SLOP=0x01
 val VISIBLE_STRICT=0x04
 # Set the way the display area is determined when a particular line
 # is to be moved to by Find, FindNext, GotoLine, etc.
-fun void SetVisiblePolicy=2394(int visiblePolicy, int visibleSlop)
+fun void SetVisiblePolicy=2394(VisiblePolicy visiblePolicy, int visibleSlop)
 
 # Delete back from the current position to the start of the line.
 fun void DelLineLeft=2395(,)
@@ -1938,17 +1939,17 @@ val CARET_EVEN=0x08
 
 # Set the way the caret is kept visible when going sideways.
 # The exclusion zone is given in pixels.
-fun void SetXCaretPolicy=2402(int caretPolicy, int caretSlop)
+fun void SetXCaretPolicy=2402(CaretPolicy caretPolicy, int caretSlop)
 
 # Set the way the line the caret is on is kept visible.
 # The exclusion zone is given in lines.
-fun void SetYCaretPolicy=2403(int caretPolicy, int caretSlop)
+fun void SetYCaretPolicy=2403(CaretPolicy caretPolicy, int caretSlop)
 
 # Set printing to line wrapped (SC_WRAP_WORD) or not line wrapped (SC_WRAP_NONE).
-set void SetPrintWrapMode=2406(int wrapMode,)
+set void SetPrintWrapMode=2406(Wrap wrapMode,)
 
 # Is printing line wrapped?
-get int GetPrintWrapMode=2407(,)
+get Wrap GetPrintWrapMode=2407(,)
 
 # Set a fore colour for active hotspots.
 set void SetHotspotActiveFore=2410(bool useSetting, colour fore)
@@ -2014,10 +2015,10 @@ val SC_SEL_THIN=3
 
 # Set the selection mode to stream (SC_SEL_STREAM) or rectangular (SC_SEL_RECTANGLE/SC_SEL_THIN) or
 # by lines (SC_SEL_LINES).
-set void SetSelectionMode=2422(int selectionMode,)
+set void SetSelectionMode=2422(SelectionMode selectionMode,)
 
 # Get the mode of the current selection.
-get int GetSelectionMode=2423(,)
+get SelectionMode GetSelectionMode=2423(,)
 
 # Get whether or not regular caret moves will extend or reduce the selection.
 get bool GetMoveExtendsSelection=2706(,)
@@ -2114,20 +2115,20 @@ val SC_CASEINSENSITIVEBEHAVIOUR_RESPECTCASE=0
 val SC_CASEINSENSITIVEBEHAVIOUR_IGNORECASE=1
 
 # Set auto-completion case insensitive behaviour to either prefer case-sensitive matches or have no preference.
-set void AutoCSetCaseInsensitiveBehaviour=2634(int behaviour,)
+set void AutoCSetCaseInsensitiveBehaviour=2634(CaseInsensitiveBehaviour behaviour,)
 
 # Get auto-completion case insensitive behaviour.
-get int AutoCGetCaseInsensitiveBehaviour=2635(,)
+get CaseInsensitiveBehaviour AutoCGetCaseInsensitiveBehaviour=2635(,)
 
 enu MultiAutoComplete=SC_MULTIAUTOC_
 val SC_MULTIAUTOC_ONCE=0
 val SC_MULTIAUTOC_EACH=1
 
 # Change the effect of autocompleting when there are multiple selections.
-set void AutoCSetMulti=2636(int multi,)
+set void AutoCSetMulti=2636(MultiAutoComplete multi,)
 
 # Retrieve the effect of autocompleting when there are multiple selections.
-get int AutoCGetMulti=2637(,)
+get MultiAutoComplete AutoCGetMulti=2637(,)
 
 enu Ordering=SC_ORDER_
 val SC_ORDER_PRESORTED=0
@@ -2135,10 +2136,10 @@ val SC_ORDER_PERFORMSORT=1
 val SC_ORDER_CUSTOM=2
 
 # Set the way autocompletion lists are ordered.
-set void AutoCSetOrder=2660(int order,)
+set void AutoCSetOrder=2660(Ordering order,)
 
 # Get the way autocompletion lists are ordered.
-get int AutoCGetOrder=2661(,)
+get Ordering AutoCGetOrder=2661(,)
 
 # Enlarge the document to a particular size of text bytes.
 fun void Allocate=2446(position bytes,)
@@ -2161,10 +2162,10 @@ fun position EncodedFromUTF8=2449(string utf8, stringresult encoded)
 fun position FindColumn=2456(line line, position column)
 
 # Can the caret preferred x position only be changed by explicit movement commands?
-get int GetCaretSticky=2457(,)
+get CaretSticky GetCaretSticky=2457(,)
 
 # Stop the caret preferred x position changing when the user types.
-set void SetCaretSticky=2458(int useCaretStickyBehaviour,)
+set void SetCaretSticky=2458(CaretSticky useCaretStickyBehaviour,)
 
 enu CaretSticky=SC_CARETSTICKY_
 val SC_CARETSTICKY_OFF=0
@@ -2189,10 +2190,10 @@ val SC_ALPHA_OPAQUE=255
 val SC_ALPHA_NOALPHA=256
 
 # Set background alpha of the caret line.
-set void SetCaretLineBackAlpha=2470(int alpha,)
+set void SetCaretLineBackAlpha=2470(Alpha alpha,)
 
 # Get the background alpha of the caret line.
-get int GetCaretLineBackAlpha=2471(,)
+get Alpha GetCaretLineBackAlpha=2471(,)
 
 enu CaretStyle=CARETSTYLE_
 val CARETSTYLE_INVISIBLE=0
@@ -2203,10 +2204,10 @@ val CARETSTYLE_OVERSTRIKE_BLOCK=16
 val CARETSTYLE_INS_MASK=0xF
 
 # Set the style of the caret to be drawn.
-set void SetCaretStyle=2512(int caretStyle,)
+set void SetCaretStyle=2512(CaretStyle caretStyle,)
 
 # Returns the current style of the caret.
-get int GetCaretStyle=2513(,)
+get CaretStyle GetCaretStyle=2513(,)
 
 # Set the indicator used for IndicatorFillRange and IndicatorClearRange
 set void SetIndicatorCurrent=2500(int indicator,)
@@ -2261,16 +2262,16 @@ get pointer GetRangePointer=2643(position start, position lengthRange)
 get position GetGapPosition=2644(,)
 
 # Set the alpha fill colour of the given indicator.
-set void IndicSetAlpha=2523(int indicator, int alpha)
+set void IndicSetAlpha=2523(int indicator, Alpha alpha)
 
 # Get the alpha fill colour of the given indicator.
-get int IndicGetAlpha=2524(int indicator,)
+get Alpha IndicGetAlpha=2524(int indicator,)
 
 # Set the alpha outline colour of the given indicator.
-set void IndicSetOutlineAlpha=2558(int indicator, int alpha)
+set void IndicSetOutlineAlpha=2558(int indicator, Alpha alpha)
 
 # Get the alpha outline colour of the given indicator.
-get int IndicGetOutlineAlpha=2559(int indicator,)
+get Alpha IndicGetOutlineAlpha=2559(int indicator,)
 
 # Set extra ascent for each line
 set void SetExtraAscent=2525(int extraAscent,)
@@ -2319,10 +2320,10 @@ val SC_MARGINOPTION_NONE=0
 val SC_MARGINOPTION_SUBLINESELECT=1
 
 # Set the margin options.
-set void SetMarginOptions=2539(int marginOptions,)
+set void SetMarginOptions=2539(MarginOption marginOptions,)
 
 # Get the margin options.
-get int GetMarginOptions=2557(,)
+get MarginOption GetMarginOptions=2557(,)
 
 # Set the annotation text for a line
 set void AnnotationSetText=2540(line line, string text)
@@ -2355,10 +2356,10 @@ val ANNOTATION_BOXED=2
 val ANNOTATION_INDENTED=3
 
 # Set the visibility for the annotations for a view
-set void AnnotationSetVisible=2548(int visible,)
+set void AnnotationSetVisible=2548(AnnotationVisible visible,)
 
 # Get the visibility for the annotations for a view
-get int AnnotationGetVisible=2549(,)
+get AnnotationVisible AnnotationGetVisible=2549(,)
 
 # Get the start of the range of style numbers used for annotations
 set void AnnotationSetStyleOffset=2550(int style,)
@@ -2377,7 +2378,7 @@ val UNDO_NONE=0
 val UNDO_MAY_COALESCE=1
 
 # Add a container action to the undo stack
-fun void AddUndoAction=2560(int token, int flags)
+fun void AddUndoAction=2560(int token, UndoFlags flags)
 
 # Find the position of a character from a point within the window.
 fun position CharPositionFromPoint=2561(int x, int y)
@@ -2493,9 +2494,9 @@ val SCVS_USERACCESSIBLE=2
 val SCVS_NOWRAPLINESTART=4
 
 # Set options for virtual space behaviour.
-set void SetVirtualSpaceOptions=2596(int virtualSpaceOptions,)
+set void SetVirtualSpaceOptions=2596(VirtualSpace virtualSpaceOptions,)
 # Return options for virtual space behaviour.
-get int GetVirtualSpaceOptions=2597(,)
+get VirtualSpace GetVirtualSpaceOptions=2597(,)
 
 # On GTK, allow selecting the modifier key to use for mouse-based
 # rectangular selection. Often the window manager requires Alt+Mouse Drag
@@ -2516,10 +2517,10 @@ set void SetAdditionalSelFore=2600(colour fore,)
 set void SetAdditionalSelBack=2601(colour back,)
 
 # Set the alpha of the selection.
-set void SetAdditionalSelAlpha=2602(int alpha,)
+set void SetAdditionalSelAlpha=2602(Alpha alpha,)
 
 # Get the alpha of the selection.
-get int GetAdditionalSelAlpha=2603(,)
+get Alpha GetAdditionalSelAlpha=2603(,)
 
 # Set the foreground colour of additional carets.
 set void SetAdditionalCaretFore=2604(colour fore,)
@@ -2594,13 +2595,13 @@ val SC_TECHNOLOGY_DIRECTWRITERETAIN=2
 val SC_TECHNOLOGY_DIRECTWRITEDC=3
 
 # Set the technology used.
-set void SetTechnology=2630(int technology,)
+set void SetTechnology=2630(Technology technology,)
 
 # Get the tech.
-get int GetTechnology=2631(,)
+get Technology GetTechnology=2631(,)
 
 # Create an ILoader*.
-fun pointer CreateLoader=2632(position bytes, int documentOptions)
+fun pointer CreateLoader=2632(position bytes, DocumentOption documentOptions)
 
 # On OS X, show a find indicator.
 fun void FindIndicatorShow=2640(position start, position end)
@@ -2632,13 +2633,13 @@ val SC_LINE_END_TYPE_DEFAULT=0
 val SC_LINE_END_TYPE_UNICODE=1
 
 # Set the line end types that the application wants to use. May not be used if incompatible with lexer or encoding.
-set void SetLineEndTypesAllowed=2656(int lineEndBitSet,)
+set void SetLineEndTypesAllowed=2656(LineEndType lineEndBitSet,)
 
 # Get the line end types currently allowed.
-get int GetLineEndTypesAllowed=2657(,)
+get LineEndType GetLineEndTypesAllowed=2657(,)
 
 # Get the line end types currently recognised. May be a subset of the allowed types due to lexer limitation.
-get int GetLineEndTypesActive=2658(,)
+get LineEndType GetLineEndTypesActive=2658(,)
 
 # Set the way a character is drawn.
 set void SetRepresentation=2665(string encodedCharacter, string representation)
@@ -2711,7 +2712,7 @@ val SC_TYPE_INTEGER=1
 val SC_TYPE_STRING=2
 
 # Retrieve the type of a property.
-fun int PropertyType=4015(string name,)
+fun TypeProperty PropertyType=4015(string name,)
 
 # Describe a property.
 # Result is NUL-terminated.
@@ -5043,10 +5044,10 @@ val SC_BIDIRECTIONAL_L2R=1
 val SC_BIDIRECTIONAL_R2L=2
 
 # Retrieve bidirectional text display state.
-get int GetBidirectional=2708(,)
+get Bidirectional GetBidirectional=2708(,)
 
 # Set bidirectional text display state.
-set void SetBidirectional=2709(int bidirectional,)
+set void SetBidirectional=2709(Bidirectional bidirectional,)
 
 enu LineCharacterIndexType=SC_LINECHARACTERINDEX_
 val SC_LINECHARACTERINDEX_NONE=0
@@ -5054,19 +5055,19 @@ val SC_LINECHARACTERINDEX_UTF32=1
 val SC_LINECHARACTERINDEX_UTF16=2
 
 # Retrieve line character index state.
-get int GetLineCharacterIndex=2710(,)
+get LineCharacterIndexType GetLineCharacterIndex=2710(,)
 
 # Request line character index be created or its use count increased.
-fun void AllocateLineCharacterIndex=2711(int lineCharacterIndex,)
+fun void AllocateLineCharacterIndex=2711(LineCharacterIndexType lineCharacterIndex,)
 
 # Decrease use count of line character index and remove if 0.
-fun void ReleaseLineCharacterIndex=2712(int lineCharacterIndex,)
+fun void ReleaseLineCharacterIndex=2712(LineCharacterIndexType lineCharacterIndex,)
 
 # Retrieve the document line containing a position measured in index units.
-fun line LineFromIndexPosition=2713(position pos, int lineCharacterIndex)
+fun line LineFromIndexPosition=2713(position pos, LineCharacterIndexType lineCharacterIndex)
 
 # Retrieve the position measured in index units at the start of a document line.
-fun position IndexPositionFromLine=2714(line line, int lineCharacterIndex)
+fun position IndexPositionFromLine=2714(line line, LineCharacterIndexType lineCharacterIndex)
 
 cat Deprecated
 
