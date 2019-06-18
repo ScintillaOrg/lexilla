@@ -320,6 +320,7 @@ val SC_MARKNUM_FOLDERSUB=29
 val SC_MARKNUM_FOLDER=30
 val SC_MARKNUM_FOLDEROPEN=31
 
+# SC_MASK_FOLDERS doesn't go in an enumeration as larger than max 32-bit positive integer
 val SC_MASK_FOLDERS=0xFE000000
 
 # Set the symbol used for a particular marker number.
