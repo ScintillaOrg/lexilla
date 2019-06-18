@@ -47,6 +47,7 @@ class Face:
 		self.features = {}
 		self.values = {}
 		self.events = {}
+		self.aliases = {}
 
 	def ReadFromFile(self, name):
 		currentCategory = ""
@@ -119,5 +120,10 @@ class Face:
 							"Value": value,
 							"Comment": currentComment }
 						self.order.append(name)
+						currentComment = []
+					elif featureType == "ali":
+						# Enumeration alias
+						name, value = featureVal.split("=", 1)
+						self.aliases[name] = value
 						currentComment = []
 
