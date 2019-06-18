@@ -83,7 +83,7 @@ class ScintillaCallable:
 				not name.startswith("Get") and \
 				not feature["Param1Type"] and \
 				not feature["Param2Type"] and \
-				feature["ReturnType"] in ["bool", "int", "position", "line"]:
+				feature["ReturnType"] in ["bool", "int", "position", "line", "pointer"]:
 				#~ print("property", feature)
 				return self._scifn(self._sciptr, value, None, None)
 		elif name.startswith("SCN_") and name in self.k:
