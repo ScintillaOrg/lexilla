@@ -228,6 +228,14 @@
         </tr>
 
         <tr>
+          <th align="left"><code>pointer</code></th>
+
+          <td>A memory address.
+          In some cases this is a pointer to a sequence of char inside Scintilla that will only be available for a limited period.
+          Equivalent to void *.</td>
+        </tr>
+
+        <tr>
           <th align="left" id="colour"><code>colour</code></th>
 
           <td>Colours are set using the RGB format (Red, Green, Blue). The intensity of each colour
@@ -5721,10 +5729,10 @@ struct Sci_RangeToFormat {
      between words.</p>
 
     <h2 id="DirectAccess">Direct access</h2>
-    <code><a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; int</a><br />
-     <a class="message" href="#SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER &rarr; int</a><br />
-     <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER &rarr; int</a><br />
-     <a class="message" href="#SCI_GETRANGEPOINTER">SCI_GETRANGEPOINTER(position start, position lengthRange) &rarr; int</a><br />
+    <code><a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; pointer</a><br />
+     <a class="message" href="#SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER &rarr; pointer</a><br />
+     <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER &rarr; pointer</a><br />
+     <a class="message" href="#SCI_GETRANGEPOINTER">SCI_GETRANGEPOINTER(position start, position lengthRange) &rarr; pointer</a><br />
      <a class="message" href="#SCI_GETGAPPOSITION">SCI_GETGAPPOSITION &rarr; position</a><br />
     </code>
 
@@ -5760,18 +5768,18 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SCI_GETDIRECTFUNCTION</code> and the need to call Scintilla indirectly via the function
     pointer.</p>
 
-    <p><b id="SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; int</b><br />
+    <p><b id="SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; pointer</b><br />
      This message returns the address of the function to call to handle Scintilla messages without
     the overhead of passing through the Windows messaging system. You need only call this once,
     regardless of the number of Scintilla windows you create.</p>
 
-    <p><b id="SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER &rarr; int</b><br />
+    <p><b id="SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER &rarr; pointer</b><br />
      This returns a pointer to data that identifies which Scintilla window is in use. You must call
     this once for each Scintilla window you create. When you call the direct function, you must
     pass in the direct pointer associated with the target window.</p>
 
-    <p><b id="SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER &rarr; int</b><br />
-    <b id="SCI_GETRANGEPOINTER">SCI_GETRANGEPOINTER(position start, position lengthRange) &rarr; int</b><br />
+    <p><b id="SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER &rarr; pointer</b><br />
+    <b id="SCI_GETRANGEPOINTER">SCI_GETRANGEPOINTER(position start, position lengthRange) &rarr; pointer</b><br />
     <b id="SCI_GETGAPPOSITION">SCI_GETGAPPOSITION &rarr; position</b><br />
      Grant temporary direct read-only access to the memory used by Scintilla to store
      the document.</p>
@@ -5813,26 +5821,23 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     documents in a single Scintilla window and so you can display a single document in multiple
     windows (for use with splitter windows).</p>
 
-    <p>Although these messages use <code>document *doc</code>, to ensure compatibility with future
-    releases of Scintilla you should treat <code class="parameter">doc</code> as an opaque <code>void*</code>. That
+    <p>These messages use <code>pointer</code> returns and arguments to refer to documents.
+    They point to internal objects inside Scintilla and should be treated as an opaque <code>void*</code>. That
     is, you can use and store the pointer as described in this section but you should not
     dereference it.</p>
-    <code><a class="message" href="#SCI_GETDOCPOINTER">SCI_GETDOCPOINTER &rarr; document *</a><br />
-     <a class="message" href="#SCI_SETDOCPOINTER">SCI_SETDOCPOINTER(&lt;unused&gt;, document
-    *doc)</a><br />
-     <a class="message" href="#SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT(position bytes, int documentOptions) &rarr; document *</a><br />
-     <a class="message" href="#SCI_ADDREFDOCUMENT">SCI_ADDREFDOCUMENT(&lt;unused&gt;, document
-    *doc)</a><br />
-     <a class="message" href="#SCI_RELEASEDOCUMENT">SCI_RELEASEDOCUMENT(&lt;unused&gt;, document
-    *doc)</a><br />
+    <code><a class="message" href="#SCI_GETDOCPOINTER">SCI_GETDOCPOINTER &rarr; pointer</a><br />
+     <a class="message" href="#SCI_SETDOCPOINTER">SCI_SETDOCPOINTER(&lt;unused&gt;, pointer doc)</a><br />
+     <a class="message" href="#SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT(position bytes, int documentOptions) &rarr; pointer</a><br />
+     <a class="message" href="#SCI_ADDREFDOCUMENT">SCI_ADDREFDOCUMENT(&lt;unused&gt;, pointer doc)</a><br />
+     <a class="message" href="#SCI_RELEASEDOCUMENT">SCI_RELEASEDOCUMENT(&lt;unused&gt;, pointer doc)</a><br />
      <a class="message" href="#SCI_GETDOCUMENTOPTIONS">SCI_GETDOCUMENTOPTIONS &rarr; int</a><br />
     </code>
 
-    <p><b id="SCI_GETDOCPOINTER">SCI_GETDOCPOINTER &rarr; document *</b><br />
+    <p><b id="SCI_GETDOCPOINTER">SCI_GETDOCPOINTER &rarr; pointer</b><br />
      This returns a pointer to the document currently in use by the window. It has no other
     effect.</p>
 
-    <p><b id="SCI_SETDOCPOINTER">SCI_SETDOCPOINTER(&lt;unused&gt;, document *doc)</b><br />
+    <p><b id="SCI_SETDOCPOINTER">SCI_SETDOCPOINTER(&lt;unused&gt;, pointer doc)</b><br />
      This message does the following:<br />
      1. It removes the current window from the list held by the current document.<br />
      2. It reduces the reference count of the current document by 1.<br />
@@ -5842,7 +5847,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     window.<br />
      6. If <code class="parameter">doc</code> was not 0, its reference count is increased by 1.</p>
 
-    <p><b id="SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT(position bytes, int documentOptions) &rarr; document *</b><br />
+    <p><b id="SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT(position bytes, int documentOptions) &rarr; pointer</b><br />
      This message creates a new, empty document and returns a pointer to it. This document is not
      selected into the editor and starts with a reference count of 1. This means that you have
      ownership of it and must either reduce its reference count by 1 after using
@@ -5909,7 +5914,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
       </tbody>
     </table>
 
-    <p><b id="SCI_ADDREFDOCUMENT">SCI_ADDREFDOCUMENT(&lt;unused&gt;, document *doc)</b><br />
+    <p><b id="SCI_ADDREFDOCUMENT">SCI_ADDREFDOCUMENT(&lt;unused&gt;, pointer doc)</b><br />
      This increases the reference count of a document by 1. If you want to replace the current
     document in the Scintilla window and take ownership of the current document, for example if you
     are editing many documents in one window, do the following:<br />
@@ -5919,7 +5924,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      3. Use <code>SCI_SETDOCPOINTER(0, docNew)</code> to set a different document or
     <code>SCI_SETDOCPOINTER(0, 0)</code> to set a new, empty document.</p>
 
-    <p><b id="SCI_RELEASEDOCUMENT">SCI_RELEASEDOCUMENT(&lt;unused&gt;, document *doc)</b><br />
+    <p><b id="SCI_RELEASEDOCUMENT">SCI_RELEASEDOCUMENT(&lt;unused&gt;, pointer doc)</b><br />
      This message reduces the reference count of the document identified by <code class="parameter">doc</code>. doc
     must be the result of <code>SCI_GETDOCPOINTER</code> or <code>SCI_CREATEDOCUMENT</code> and
     must point at a document that still exists. If you call this on a document with a reference
@@ -5937,7 +5942,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <h3 id="BackgroundLoad">Loading in the background</h3>
 
-    <code><a class="message" href="#SCI_CREATELOADER">SCI_CREATELOADER(position bytes, int documentOptions) &rarr; int</a><br />
+    <code><a class="message" href="#SCI_CREATELOADER">SCI_CREATELOADER(position bytes, int documentOptions) &rarr; pointer</a><br />
     </code>
 
     <p>An application can load all of a file into a buffer it allocates on a background thread and then add the data in that buffer
@@ -5946,7 +5951,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p>To avoid these issues, a loader object may be created and used to load the file. The loader object supports the ILoader interface.</p>
 
-    <p><b id="SCI_CREATELOADER">SCI_CREATELOADER(position bytes, int documentOptions) &rarr; int</b><br />
+    <p><b id="SCI_CREATELOADER">SCI_CREATELOADER(position bytes, int documentOptions) &rarr; pointer</b><br />
      Create an object that supports the <code>ILoader</code> interface which can be used to load data and then
      be turned into a Scintilla document object for attachment to a view object.
      The <code class="parameter">bytes</code> argument determines the initial memory allocation for the document as it is more efficient
@@ -6836,7 +6841,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETSTYLEFROMSUBSTYLE">SCI_GETSTYLEFROMSUBSTYLE(int subStyle) &rarr; int</a><br />
      <a class="message" href="#SCI_GETPRIMARYSTYLEFROMSTYLE">SCI_GETPRIMARYSTYLEFROMSTYLE(int style) &rarr; int</a><br />
      <a class="message" href="#SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</a><br />
-     <a class="message" href="#SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL(int operation, int pointer) &rarr; int</a><br />
+     <a class="message" href="#SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL(int operation, pointer pointer) &rarr; pointer</a><br />
      <a class="message" href="#SCI_GETNAMEDSTYLES">SCI_GETNAMEDSTYLES &rarr; int</a><br />
      <a class="message" href="#SCI_NAMEOFSTYLE">SCI_NAMEOFSTYLE(int style, char *name) &rarr; int</a><br />
      <a class="message" href="#SCI_TAGSOFSTYLE">SCI_TAGSOFSTYLE(int style, char *tags) &rarr; int</a><br />
@@ -7015,7 +7020,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      Similar to <code>SCI_SETKEYWORDS</code> but for substyles.
      The prefix feature available with <code>SCI_SETKEYWORDS</code> is not implemented for <code>SCI_SETIDENTIFIERS</code>.</p>
 
-    <p><b id="SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL(int operation, int pointer) &rarr; int</b><br />
+    <p><b id="SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL(int operation, pointer pointer) &rarr; pointer</b><br />
      Call into a lexer in a way not understood by Scintilla.</p>
 
     <h3 id="StyleMetadata">Style Metadata</h3>
