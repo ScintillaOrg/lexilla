@@ -83,7 +83,7 @@ class ScintillaCallable:
 				not name.startswith("Get") and \
 				not feature["Param1Type"] and \
 				not feature["Param2Type"] and \
-				feature["ReturnType"] in ["bool", "int", "position"]:
+				feature["ReturnType"] in ["bool", "int", "position", "line"]:
 				#~ print("property", feature)
 				return self._scifn(self._sciptr, value, None, None)
 		elif name.startswith("SCN_") and name in self.k:
@@ -101,7 +101,7 @@ class ScintillaCallable:
 			value = int(feature["Value"], 0)
 			#~ print("setproperty", feature)
 			if feature["FeatureType"] == "set" and not name.startswith("Set"):
-				if feature["Param1Type"] in ["bool", "int", "position"]:
+				if feature["Param1Type"] in ["bool", "int", "position", "line"]:
 					return self._scifn(self._sciptr, value, c_char_p(val), None)
 				elif feature["Param2Type"] in ["string"]:
 					return self._scifn(self._sciptr, value, None, c_char_p(val))
