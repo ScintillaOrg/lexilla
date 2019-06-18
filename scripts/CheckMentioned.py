@@ -65,6 +65,8 @@ def convertIFaceTypeToC(t):
 		return "Sci_TextToFind *"
 	elif t == "formatrange":
 		return "Sci_RangeToFormat *"
+	elif Face.IsEnumeration(t):
+		return "int "
 	return t + " "
 
 def makeParm(t, n, v):
@@ -86,6 +88,8 @@ def makeSig(params):
 	retType = params["ReturnType"]
 	if retType in ["void", "string", "stringresult"]:
 		retType = ""
+	elif Face.IsEnumeration(retType):
+		retType = "int"
 	if retType:
 		retType = " &rarr; " + retType
 

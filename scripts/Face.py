@@ -37,6 +37,9 @@ def decodeParam(p):
 			name = nv
 	return type, name, value
 
+def IsEnumeration(t):
+	return t[:1].isupper()
+
 class Face:
 
 	def __init__(self):
