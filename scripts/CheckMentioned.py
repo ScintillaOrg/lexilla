@@ -51,9 +51,7 @@ with open(docFileName, "rt") as docFile:
 				symbols[word] = 1
 
 def convertIFaceTypeToC(t):
-	if t == "position":
-		return "int "
-	elif t == "keymod":
+	if t == "keymod":
 		return "int "
 	elif t == "string":
 		return "const char *"
@@ -129,12 +127,14 @@ def flattenSpaces(s):
 def printCtag(ident, path):
 	print(ident.strip() + "\t" + path + "\t" + "/^" + ident + "$/")
 
+showCTags = True
+
 def checkDocumentation():
 	with open(docFileName, "rt") as docFile:
 		docs = docFile.read()
 
 	face, sciToFeature, sccToValue = retrieveFeatures()
-	
+
 	headers = {}
 	definitions = {}
 
@@ -152,9 +152,9 @@ def checkDocumentation():
 			name = sciToFeature[api]
 			sigFromFace = api + makeSig(face.features[name])
 			if sigFlat != sigFromFace:
-				pass
-				print(sigFlat, sigFromFace)
-				#~ printCtag(api, docFileName)
+				print(sigFlat, "|", sigFromFace)
+				if showCTags:
+					printCtag(api, docFileName)
 				#~ printCtag(" " + name, pathIface)
 		if api != sigApi:
 			print(sigApi, ";;", sig, ";;", api)
@@ -183,8 +183,9 @@ def checkDocumentation():
 				name = sciToFeature[api]
 				sigFromFace = api + makeSig(face.features[name])
 				if sigFlat != sigFromFace:
-					print(sigFlat, sigFromFace)
-					#~ printCtag('="' + api, docFileName)
+					print(sigFlat, "|", sigFromFace)
+					if showCTags:
+						printCtag('="' + api, docFileName)
 					#~ printCtag(" " + name, pathIface)
 			except KeyError:
 				pass		# Feature removed but still has documentation
