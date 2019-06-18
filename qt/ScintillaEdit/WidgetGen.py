@@ -39,6 +39,7 @@ def normalisedName(s, options, role=None):
 
 typeAliases = {
 	"position": "int",
+	"line": "int",
 	"colour": "int",
 	"keymod": "int",
 	"string": "const char *",
@@ -52,7 +53,7 @@ def cppAlias(s):
 	else:
 		return s
 
-understoodTypes = ["", "void", "int", "bool", "position",
+understoodTypes = ["", "void", "int", "bool", "position", "line",
 	"colour", "keymod", "string", "stringresult", "cells"]
 
 def checkTypes(name, v):
