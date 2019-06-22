@@ -1863,7 +1863,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETFIRSTVISIBLELINE">SCI_GETFIRSTVISIBLELINE &rarr; line</a><br />
      <a class="message" href="#SCI_SETXOFFSET">SCI_SETXOFFSET(int xOffset)</a><br />
      <a class="message" href="#SCI_GETXOFFSET">SCI_GETXOFFSET &rarr; int</a><br />
-     <a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(int columns, line lines)</a><br />
+     <a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(position columns, line lines)</a><br />
      <a class="message" href="#SCI_SCROLLCARET">SCI_SCROLLCARET</a><br />
      <a class="message" href="#SCI_SCROLLRANGE">SCI_SCROLLRANGE(position secondary, position primary)</a><br />
      <a class="message" href="#SCI_SETXCARETPOLICY">SCI_SETXCARETPOLICY(int caretPolicy, int
@@ -1896,7 +1896,7 @@ struct Sci_TextToFind {
     view. A value of 0 is the normal position with the first text column visible at the left of the
     view.</p>
 
-    <p><b id="SCI_LINESCROLL">SCI_LINESCROLL(int columns, line lines)</b><br />
+    <p><b id="SCI_LINESCROLL">SCI_LINESCROLL(position columns, line lines)</b><br />
      This will attempt to scroll the display by the number of columns and lines that you specify.
     Positive line values increase the line number at the top of the screen (i.e. they move the text
     upwards as far as the user is concerned), Negative line values do the reverse.</p>

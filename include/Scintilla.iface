@@ -421,10 +421,10 @@ val SC_MARGIN_COLOUR=6
 ali SC_MARGIN_RTEXT=R_TEXT
 
 # Set a margin to be either numeric or symbolic.
-set void SetMarginTypeN=2240(int margin, int marginType)
+set void SetMarginTypeN=2240(int margin, MarginType marginType)
 
 # Retrieve the type of a margin.
-get int GetMarginTypeN=2241(int margin,)
+get MarginType GetMarginTypeN=2241(int margin,)
 
 # Set the width of a margin to a width expressed in pixels.
 set void SetMarginWidthN=2242(int margin, int pixelWidth)
@@ -445,10 +445,10 @@ set void SetMarginSensitiveN=2246(int margin, bool sensitive)
 get bool GetMarginSensitiveN=2247(int margin,)
 
 # Set the cursor shown when the mouse is inside a margin.
-set void SetMarginCursorN=2248(int margin, int cursor)
+set void SetMarginCursorN=2248(int margin, CursorShape cursor)
 
 # Retrieve the cursor shown in a margin.
-get int GetMarginCursorN=2249(int margin,)
+get CursorShape GetMarginCursorN=2249(int margin,)
 
 # Set the background colour of a margin. Only visible for SC_MARGIN_COLOUR.
 set void SetMarginBackN=2250(int margin, colour back)
@@ -1122,7 +1122,7 @@ fun line LineFromPosition=2166(position pos,)
 fun position PositionFromLine=2167(line line,)
 
 # Scroll horizontally and vertically.
-fun void LineScroll=2168(int columns, line lines)
+fun void LineScroll=2168(position columns, line lines)
 
 # Ensure the caret is visible.
 fun void ScrollCaret=2169(,)
