@@ -296,7 +296,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define INDIC_CONTAINER 8
 #define INDIC_IME 32
 #define INDIC_IME_MAX 35
-#define INDICATOR_MAX 35
+#define INDIC_MAX 35
 #define INDICATOR_CONTAINER 8
 #define INDICATOR_IME 32
 #define INDICATOR_IME_MAX 35
