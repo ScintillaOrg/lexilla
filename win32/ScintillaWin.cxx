@@ -128,10 +128,10 @@ constexpr UINT SC_WIN_IDLE = 5001;
 // and delivering SCN_UPDATEUI
 constexpr UINT SC_WORK_IDLE = 5002;
 
-#define SC_INDICATOR_INPUT INDIC_IME
-#define SC_INDICATOR_TARGET INDIC_IME+1
-#define SC_INDICATOR_CONVERTED INDIC_IME+2
-#define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
+#define SC_INDICATOR_INPUT INDICATOR_IME
+#define SC_INDICATOR_TARGET INDICATOR_IME+1
+#define SC_INDICATOR_CONVERTED INDICATOR_IME+2
+#define SC_INDICATOR_UNKNOWN INDICATOR_IME_MAX
 
 #ifndef SCS_CAP_SETRECONVERTSTRING
 #define SCS_CAP_SETRECONVERTSTRING 0x00000004
@@ -926,7 +926,7 @@ void ScintillaWin::DrawImeIndicator(int indicator, int len) {
 	// Draw an indicator on the character before caret by the character bytes of len
 	// so it should be called after InsertCharacter().
 	// It does not affect caret positions.
-	if (indicator < 8 || indicator > INDIC_MAX) {
+	if (indicator < 8 || indicator > INDICATOR_MAX) {
 		return;
 	}
 	pdoc->DecorationSetCurrentIndicator(indicator);

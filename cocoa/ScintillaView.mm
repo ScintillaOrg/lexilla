@@ -624,7 +624,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		posRangeCurrent.length = lengthInserted;
 		mMarkedTextRange = mOwner.backend->CharactersFromPositions(posRangeCurrent);
 		// Mark the just inserted text. Keep the marked range for later reset.
-		[mOwner setGeneralProperty: SCI_SETINDICATORCURRENT value: INDIC_IME];
+		[mOwner setGeneralProperty: SCI_SETINDICATORCURRENT value: INDICATOR_IME];
 		[mOwner setGeneralProperty: SCI_INDICATORFILLRANGE
 				 parameter: posRangeCurrent.location
 				     value: posRangeCurrent.length];
@@ -1374,10 +1374,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * input composition, depending on language, keyboard etc.
  */
 - (void) updateIndicatorIME {
-	[self setColorProperty: SCI_INDICSETFORE parameter: INDIC_IME fromHTML: @"#FF0000"];
+	[self setColorProperty: SCI_INDICSETFORE parameter: INDICATOR_IME fromHTML: @"#FF0000"];
 	const bool drawInBackground = [self message: SCI_GETPHASESDRAW] != 0;
-	[self setGeneralProperty: SCI_INDICSETUNDER parameter: INDIC_IME value: drawInBackground];
-	[self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDIC_IME value: INDIC_PLAIN];
+	[self setGeneralProperty: SCI_INDICSETUNDER parameter: INDICATOR_IME value: drawInBackground];
+	[self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDICATOR_IME value: INDIC_PLAIN];
 	[self setGeneralProperty: SCI_INDICSETALPHA parameter: INDIC_IME value: 100];
 }
 
