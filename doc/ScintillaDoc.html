@@ -3259,6 +3259,10 @@ struct Sci_TextToFind {
     for overtype mode is the bar caret (CARETSTYLE_OVERSTRIKE_BAR=0).
     You can determine the current caret style setting using <code>SCI_GETCARETSTYLE</code>.</p>
 
+    <p>When the caret end of a range is at the end and a block caret style is chosen, the block is
+    drawn just inside the selection instead of after.
+    This can be switched with an option (CARETSTYLE_BLOCK_AFTER=256).</p>
+
     <p>The block caret draws most combining and multibyte character sequences successfully,
     though some fonts like Thai Fonts (and possibly others) can sometimes appear strange when
     the cursor is positioned at these characters, which may result in only drawing a part of the
