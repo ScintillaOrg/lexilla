@@ -1378,7 +1378,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	const bool drawInBackground = [self message: SCI_GETPHASESDRAW] != 0;
 	[self setGeneralProperty: SCI_INDICSETUNDER parameter: INDICATOR_IME value: drawInBackground];
 	[self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDICATOR_IME value: INDIC_PLAIN];
-	[self setGeneralProperty: SCI_INDICSETALPHA parameter: INDIC_IME value: 100];
+	[self setGeneralProperty: SCI_INDICSETALPHA parameter: INDICATOR_IME value: 100];
 }
 
 //--------------------------------------------------------------------------------------------------
