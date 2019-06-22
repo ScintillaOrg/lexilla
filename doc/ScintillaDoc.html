@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 18 June 2019 NH</p>
+    <p>Last edited 22 June 2019 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -791,6 +791,12 @@ struct Sci_TextRange {
     <table class="standard" summary="Search flags">
       <tbody>
         <tr>
+          <td><code>SCFIND_NONE</code></td>
+
+          <td>Default setting is case-insensitive literal match.</td>
+        </tr>
+
+        <tr>
           <td><code>SCFIND_MATCHCASE</code></td>
 
           <td>A match only occurs with text that matches the case of the search string.</td>
@@ -1201,7 +1207,8 @@ struct Sci_TextToFind {
      and <code>SCI_ENDUNDOACTION</code>.</p>
 
      <p>The flags argument can be <code>UNDO_MAY_COALESCE</code> (1) if the container action may be
-     coalesced along with any insertion and deletion actions into a single compound action, otherwise 0.
+     coalesced along with any insertion and deletion actions into a single compound action, otherwise
+     <code>UNDO_NONE</code> (0).
      Coalescing treats coalescible container actions as transparent so will still only group together insertions that
      look like typing or deletions that look like multiple uses of the Backspace or Delete keys.
      </p>
@@ -4355,11 +4362,16 @@ struct Sci_TextToFind {
     They may also be invisible when used to track pieces of content for the application as <code>INDIC_HIDDEN</code>.</p>
 
     <p>The <code>SCI_INDIC*</code> messages allow you to get and set the visual appearance of the
-    indicators. They all use an <code class="parameter">indicator</code> argument in the range 0 to INDIC_MAX(35)
+    indicators. They all use an <code class="parameter">indicator</code> argument in the range 0 to INDICATOR_MAX(35)
     to set the indicator to style. To prevent interference the set of indicators is divided up into a range for use
     by lexers (0..7) a range for use by containers
-    (8=<code>INDIC_CONTAINER</code> .. 31=<code>INDIC_IME-1</code>)
-    and a range for IME indicators (32=<code>INDIC_IME</code> .. 35=<code>INDIC_IME_MAX</code>).</p>
+    (8=<code>INDICATOR_CONTAINER</code> .. 31=<code>INDICATOR_IME-1</code>)
+    and a range for IME indicators (32=<code>INDICATOR_IME</code> .. 35=<code>INDICATOR_IME_MAX</code>).</p>
+
+    <p>The <code>INDICATOR_*</code> values used for dividing up indicators
+    were previously <code>INDIC_CONTAINER</code>, <code>INDIC_IME</code>,
+    <code>INDIC_IME_MAX</code>, and <code>INDIC_MAX</code>
+    but these were confused with indicator styles so the new names should be used.</p>
 
     <p>Indicators are stored in a format similar to run length encoding which is efficient in both
     speed and storage for sparse information.</p>
@@ -7542,6 +7554,16 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
       </tbody>
 
       <tbody valign="top">
+        <tr>
+          <td align="left"><code>SC_MOD_NONE</code></td>
+
+          <td align="right">0x00</td>
+
+          <td>Base value with no fields valid. Will not occur but is useful in tests.</td>
+
+          <td><code></code></td>
+        </tr>
+
         <tr>
           <td align="left"><code>SC_MOD_INSERTTEXT</code></td>
 
