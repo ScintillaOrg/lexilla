@@ -2176,25 +2176,38 @@ bool ScintillaCocoa::KeyboardInput(NSEvent *event) {
  * Used to insert already processed text provided by the Cocoa text input system.
  */
 ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
-	CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-				    vs.styles[STYLE_DEFAULT].characterSet);
-	std::string encoded = EncodedBytesString((__bridge CFStringRef)input, encoding);
+	if ([input length] == 0) {
+		return 0;
+	}
 
-	if (encoded.length() > 0) {
-		if (encoding == kCFStringEncodingUTF8) {
-			// There may be multiple characters in input so loop over them
-			std::string_view sv = encoded;
-			while (sv.length()) {
-				const unsigned char leadByte = sv[0];
-				const unsigned int bytesInCharacter = UTF8BytesOfLead[leadByte];
-				InsertCharacter(sv.substr(0, bytesInCharacter));
-				sv.remove_prefix(bytesInCharacter);
-			}
-		} else {
+	// There may be multiple characters in input so loop over them
+	if (IsUnicodeMode()) {
+		// There may be non-BMP characters as 2 elements in NSString so
+		// convert to UTF-8 and use UTF8BytesOfLead.
+		std::string encoded = EncodedBytesString((__bridge CFStringRef)input,
+							 kCFStringEncodingUTF8);
+		std::string_view sv = encoded;
+		while (sv.length()) {
+			const unsigned char leadByte = sv[0];
+			const unsigned int bytesInCharacter = UTF8BytesOfLead[leadByte];
+			InsertCharacter(sv.substr(0, bytesInCharacter));
+			sv.remove_prefix(bytesInCharacter);
+		}
+		return encoded.length();
+	} else {
+		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+									   vs.styles[STYLE_DEFAULT].characterSet);
+		ptrdiff_t lengthInserted = 0;
+		for (NSInteger i = 0; i < [input length]; i++) {
+			NSString *character = [input substringWithRange:NSMakeRange(i, 1)];
+			std::string encoded = EncodedBytesString((__bridge CFStringRef)character,
+								 encoding);
+			lengthInserted += encoded.length();
 			InsertCharacter(encoded);
 		}
+
+		return lengthInserted;
 	}
-	return encoded.length();
 }
 
 //--------------------------------------------------------------------------------------------------
