@@ -537,7 +537,7 @@ void SCI_METHOD LexerSQL::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			if (options.sqlBackslashEscapes && sc.ch == '\\') {
 				sc.Forward();
 			} else if (sc.ch == '\'') {
-				if (sc.chNext == '\"') {
+				if (sc.chNext == '\'') {
 					sc.Forward();
 				} else {
 					sc.ForwardSetState(SCE_SQL_DEFAULT);
