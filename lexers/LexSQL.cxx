@@ -442,9 +442,8 @@ void SCI_METHOD LexerSQL::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	LexAccessor styler(pAccess);
 	StyleContext sc(startPos, length, initStyle, styler);
 	int styleBeforeDCKeyword = SCE_SQL_DEFAULT;
-	Sci_Position offset = 0;
 
-	for (; sc.More(); sc.Forward(), offset++) {
+	for (; sc.More(); sc.Forward()) {
 		// Determine if the current state should terminate.
 		switch (sc.state) {
 		case SCE_SQL_OPERATOR:
