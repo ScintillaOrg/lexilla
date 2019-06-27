@@ -605,22 +605,37 @@ bool Document::IsCrLf(Sci::Position pos) const {
 }
 
 int Document::LenChar(Sci::Position pos) {
-	if (pos < 0) {
+	if (pos < 0 || pos >= Length()) {
+		// Returning 1 instead of 0 to defend against hanging with a loop that goes (or starts) out of bounds.
 		return 1;
 	} else if (IsCrLf(pos)) {
 		return 2;
-	} else if (SC_CP_UTF8 == dbcsCodePage) {
-		const unsigned char leadByte = cb.UCharAt(pos);
-		const int widthCharBytes = UTF8BytesOfLead[leadByte];
-		const Sci::Position lengthDoc = Length();
-		if ((pos + widthCharBytes) > lengthDoc)
-			return static_cast<int>(lengthDoc - pos);
-		else
-			return widthCharBytes;
-	} else if (dbcsCodePage) {
-		return IsDBCSLeadByteNoExcept(cb.CharAt(pos)) ? 2 : 1;
-	} else {
+	}
+
+	const unsigned char leadByte = cb.UCharAt(pos);
+	if (!dbcsCodePage || UTF8IsAscii(leadByte)) {
+		// Common case: ASCII character
 		return 1;
+	}
+	if (SC_CP_UTF8 == dbcsCodePage) {
+		const int widthCharBytes = UTF8BytesOfLead[leadByte];
+		unsigned char charBytes[UTF8MaxBytes] = { leadByte, 0, 0, 0 };
+		for (int b = 1; b < widthCharBytes; b++) {
+			charBytes[b] = cb.UCharAt(pos + b);
+		}
+		const int utf8status = UTF8Classify(charBytes, widthCharBytes);
+		if (utf8status & UTF8MaskInvalid) {
+			// Treat as invalid and use up just one byte
+			return 1;
+		} else {
+			return utf8status & UTF8MaskWidth;
+		}
+	} else {
+		if (IsDBCSLeadByteNoExcept(leadByte) && ((pos + 1) < Length())) {
+			return 2;
+		} else {
+			return 1;
+		}
 	}
 }
 
