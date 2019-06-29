@@ -1727,16 +1727,9 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		if (event->type != GDK_BUTTON_PRESS)
 			return FALSE;
 
-		if (im_context) {
-			PreEditString pes(im_context);
-			if (strlen(pes.str) > 0)
-				gtk_im_context_reset(im_context);
-		}
-
 		if (evbtn) {
 			gdk_event_free(evbtn);
 		}
-
 		evbtn = gdk_event_copy(reinterpret_cast<GdkEvent *>(event));
 		buttonMouse = event->button;
 		const Point pt = PointOfEvent(event);
