@@ -258,7 +258,7 @@ void ScintillaEditBase::keyPressEvent(QKeyEvent *event)
 		QString text = event->text();
 		if (input && !text.isEmpty() && text[0].isPrint()) {
 			QByteArray utext = sqt->BytesForDocument(text);
-			sqt->InsertCharacter(std::string_view(utext.data(), utext.size()));
+			sqt->InsertCharacter(std::string_view(utext.data(), utext.size()), EditModel::CharacterSource::directInput);
 		} else {
 			event->ignore();
 		}
@@ -548,7 +548,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			const QString oneCharUTF16 = commitStr.mid(i, ucWidth);
 			const QByteArray oneChar = sqt->BytesForDocument(oneCharUTF16);
 
-			sqt->InsertCharacter(std::string_view(oneChar.data(), oneChar.length()));
+			sqt->InsertCharacter(std::string_view(oneChar.data(), oneChar.length()), EditModel::CharacterSource::directInput);
 			i += ucWidth;
 		}
 
@@ -566,20 +566,17 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 		std::vector<int> imeIndicator = MapImeIndicators(event);
 
-		const bool recording = sqt->recordingMacro;
-		sqt->recordingMacro = false;
 		for (unsigned int i = 0; i < preeditStrLen;) {
 			const unsigned int ucWidth = preeditStr.at(i).isHighSurrogate() ? 2 : 1;
 			const QString oneCharUTF16 = preeditStr.mid(i, ucWidth);
 			const QByteArray oneChar = sqt->BytesForDocument(oneCharUTF16);
 			const int oneCharLen = oneChar.length();
 
-			sqt->InsertCharacter(std::string_view(oneChar.data(), oneCharLen));
+			sqt->InsertCharacter(std::string_view(oneChar.data(), oneCharLen), EditModel::CharacterSource::tentativeInput);
 
 			DrawImeIndicator(imeIndicator[i], oneCharLen);
 			i += ucWidth;
 		}
-		sqt->recordingMacro = recording;
 
 		// Move IME carets.
 		int imeCaretPos = GetImeCaretPos(event);

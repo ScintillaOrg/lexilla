@@ -529,7 +529,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	else if ([aString isKindOfClass: [NSAttributedString class]])
 		newText = (NSString *) [aString string];
 
-	mOwner.backend->InsertText(newText);
+	mOwner.backend->InsertText(newText, EditModel::CharacterSource::directInput);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -622,7 +622,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		NSRange posRangeCurrent = mOwner.backend->PositionsFromCharacters(NSMakeRange(replacementRange.location, 0));
 		// Note: Scintilla internally works almost always with bytes instead chars, so we need to take
 		//       this into account when determining selection ranges and such.
-		ptrdiff_t lengthInserted = mOwner.backend->InsertText(newText);
+		ptrdiff_t lengthInserted = mOwner.backend->InsertText(newText, EditModel::CharacterSource::tentativeInput);
 		posRangeCurrent.length = lengthInserted;
 		mMarkedTextRange = mOwner.backend->CharactersFromPositions(posRangeCurrent);
 		// Mark the just inserted text. Keep the marked range for later reset.
@@ -1965,9 +1965,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 
 - (void) insertText: (id) aString {
 	if ([aString isKindOfClass: [NSString class]])
-		mBackend->InsertText(aString);
+		mBackend->InsertText(aString, EditModel::CharacterSource::directInput);
 	else if ([aString isKindOfClass: [NSAttributedString class]])
-		mBackend->InsertText([aString string]);
+		mBackend->InsertText([aString string], EditModel::CharacterSource::directInput);
 }
 
 //--------------------------------------------------------------------------------------------------

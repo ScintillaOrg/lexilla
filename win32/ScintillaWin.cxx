@@ -340,7 +340,7 @@ class ScintillaWin :
 	void SelectionToHangul();
 	void EscapeHanja();
 	void ToggleHanja();
-	void AddWString(std::wstring_view wsv);
+	void AddWString(std::wstring_view wsv, CharacterSource charSource);
 
 	UINT CodePageOfDocument() const;
 	bool ValidCodePage(int codePage) const override;
@@ -893,7 +893,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 	if (lParam & GCS_RESULTSTR) {
 		IMContext imc(MainHWND());
 		if (imc.hIMC) {
-			AddWString(imc.GetCompositionString(GCS_RESULTSTR));
+			AddWString(imc.GetCompositionString(GCS_RESULTSTR), CharacterSource::imeResult);
 
 			// Set new position after converted
 			const Point pos = PointMainCaret();
@@ -1046,7 +1046,7 @@ std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
 
 }
 
-void ScintillaWin::AddWString(std::wstring_view wsv) {
+void ScintillaWin::AddWString(std::wstring_view wsv, CharacterSource charSource) {
 	if (wsv.empty())
 		return;
 
@@ -1055,7 +1055,7 @@ void ScintillaWin::AddWString(std::wstring_view wsv) {
 		const size_t ucWidth = UTF16CharLength(wsv[i]);
 		const std::string docChar = StringEncode(wsv.substr(i, ucWidth), codePage);
 
-		InsertCharacter(docChar);
+		InsertCharacter(docChar, charSource);
 		i += ucWidth;
 	}
 }
@@ -1096,20 +1096,17 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		std::vector<int> imeIndicator = MapImeIndicators(imc.GetImeAttributes());
 
-		const bool tmpRecordingMacro = recordingMacro;
-		recordingMacro = false;
 		const int codePage = CodePageOfDocument();
 		const std::wstring_view wsv = wcs;
 		for (size_t i = 0; i < wsv.size(); ) {
 			const size_t ucWidth = UTF16CharLength(wsv[i]);
 			const std::string docChar = StringEncode(wsv.substr(i, ucWidth), codePage);
 
-			InsertCharacter(docChar);
+			InsertCharacter(docChar, CharacterSource::tentativeInput);
 
 			DrawImeIndicator(imeIndicator[i], static_cast<unsigned int>(docChar.size()));
 			i += ucWidth;
 		}
-		recordingMacro = tmpRecordingMacro;
 
 		// Move IME caret from current last position to imeCaretPos.
 		const int imeEndToImeCaretU16 = imc.GetImeCaretPos() - static_cast<unsigned int>(wcs.size());
@@ -1121,7 +1118,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			view.imeCaretBlockOverride = true;
 		}
 	} else if (lParam & GCS_RESULTSTR) {
-		AddWString(imc.GetCompositionString(GCS_RESULTSTR));
+		AddWString(imc.GetCompositionString(GCS_RESULTSTR), CharacterSource::imeResult);
 	}
 	EnsureCaretVisible();
 	SetCandidateWindowPos();
@@ -1479,7 +1476,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					lastHighSurrogateChar = 0;
 					wclen = 2;
 				}
-				AddWString(std::wstring_view(wcs, wclen));
+				AddWString(std::wstring_view(wcs, wclen), CharacterSource::directInput);
 			}
 			return 0;
 
@@ -1491,7 +1488,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			} else {
 				wchar_t wcs[3] = {0};
 				const unsigned int wclen = UTF16FromUTF32Character(static_cast<unsigned int>(wParam), wcs);
-				AddWString(std::wstring_view(wcs, wclen));
+				AddWString(std::wstring_view(wcs, wclen), CharacterSource::directInput);
 				return FALSE;
 			}
 
