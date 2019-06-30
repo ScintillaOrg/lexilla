@@ -137,23 +137,23 @@ public:
 		firstChangeableLineAfter = -1;
 	}
 
-	bool NeedsDrawing(Sci::Line line) const {
+	bool NeedsDrawing(Sci::Line line) const noexcept {
 		return isEnabled && (line <= firstChangeableLineBefore || line >= firstChangeableLineAfter);
 	}
 
-	bool IsFoldBlockHighlighted(Sci::Line line) const {
+	bool IsFoldBlockHighlighted(Sci::Line line) const noexcept {
 		return isEnabled && beginFoldBlock != -1 && beginFoldBlock <= line && line <= endFoldBlock;
 	}
 
-	bool IsHeadOfFoldBlock(Sci::Line line) const {
+	bool IsHeadOfFoldBlock(Sci::Line line) const noexcept {
 		return beginFoldBlock == line && line < endFoldBlock;
 	}
 
-	bool IsBodyOfFoldBlock(Sci::Line line) const {
+	bool IsBodyOfFoldBlock(Sci::Line line) const noexcept {
 		return beginFoldBlock != -1 && beginFoldBlock < line && line < endFoldBlock;
 	}
 
-	bool IsTailOfFoldBlock(Sci::Line line) const {
+	bool IsTailOfFoldBlock(Sci::Line line) const noexcept {
 		return beginFoldBlock != -1 && beginFoldBlock < line && line == endFoldBlock;
 	}
 
