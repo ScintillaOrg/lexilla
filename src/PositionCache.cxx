@@ -723,11 +723,10 @@ bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, const char *s_,
 }
 
 unsigned int PositionCacheEntry::Hash(unsigned int styleNumber_, const char *s, unsigned int len_) noexcept {
-	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-	unsigned int ret = us[0] << 7;
+	unsigned int ret = s[0] << 7;
 	for (unsigned int i=0; i<len_; i++) {
 		ret *= 1000003;
-		ret ^= us[i];
+		ret ^= s[i];
 	}
 	ret *= 1000003;
 	ret ^= len_;
