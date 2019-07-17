@@ -23,6 +23,10 @@
 #include <memory>
 #include <chrono>
 
+// Want to use std::min and std::max so don't want Windows.h version of min and max
+#if !defined(NOMINMAX)
+#define NOMINMAX
+#endif
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
 #undef WINVER
@@ -945,7 +949,7 @@ void ScintillaWin::SetCandidateWindowPos() {
 		CandForm.dwIndex = 0;
 		CandForm.dwStyle = CFS_EXCLUDE;
 		CandForm.ptCurrentPos.x = static_cast<int>(pos.x);
-		CandForm.ptCurrentPos.y = static_cast<int>(pos.y + vs.lineHeight);
+		CandForm.ptCurrentPos.y = static_cast<int>(pos.y + std::max(4, vs.lineHeight/4));
 		// Exclude the area of the whole caret line
 		CandForm.rcArea.top = static_cast<int>(pos.y);
 		CandForm.rcArea.bottom = static_cast<int>(pos.y + vs.lineHeight);
