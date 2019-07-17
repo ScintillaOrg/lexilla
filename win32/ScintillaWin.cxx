@@ -940,11 +940,17 @@ void ScintillaWin::SetCandidateWindowPos() {
 	IMContext imc(MainHWND());
 	if (imc.hIMC) {
 		const Point pos = PointMainCaret();
-		CANDIDATEFORM CandForm;
+		const PRectangle rcClient = GetTextRectangle();
+		CANDIDATEFORM CandForm{};
 		CandForm.dwIndex = 0;
-		CandForm.dwStyle = CFS_CANDIDATEPOS;
+		CandForm.dwStyle = CFS_EXCLUDE;
 		CandForm.ptCurrentPos.x = static_cast<int>(pos.x);
 		CandForm.ptCurrentPos.y = static_cast<int>(pos.y + vs.lineHeight);
+		// Exclude the area of the whole caret line
+		CandForm.rcArea.top = static_cast<int>(pos.y);
+		CandForm.rcArea.bottom = static_cast<int>(pos.y + vs.lineHeight);
+		CandForm.rcArea.left = static_cast<int>(rcClient.left);
+		CandForm.rcArea.right = static_cast<int>(rcClient.right);
 		::ImmSetCandidateWindow(imc.hIMC, &CandForm);
 	}
 }
