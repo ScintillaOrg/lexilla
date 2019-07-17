@@ -1100,8 +1100,12 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			return 0;
 		}
 
-		if (initialCompose)
+		if (initialCompose) {
 			ClearBeforeTentativeStart();
+		}
+
+		// Set candidate window left aligned to beginning of preedit string.
+		SetCandidateWindowPos();
 		pdoc->TentativeStart(); // TentativeActive from now on.
 
 		std::vector<int> imeIndicator = MapImeIndicators(imc.GetImeAttributes());
@@ -1131,7 +1135,6 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		AddWString(imc.GetCompositionString(GCS_RESULTSTR), CharacterSource::imeResult);
 	}
 	EnsureCaretVisible();
-	SetCandidateWindowPos();
 	ShowCaretAtCurrentPosition();
 	return 0;
 }
