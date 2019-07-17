@@ -1128,6 +1128,11 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		MoveImeCarets(- CurrentPosition() + imeCaretPosDoc);
 
+		if (std::find(imeIndicator.begin(), imeIndicator.end(), SC_INDICATOR_TARGET) != imeIndicator.end()) {
+			// set candidate window left aligned to beginning of target string.
+			SetCandidateWindowPos();
+		}
+
 		if (KoreanIME()) {
 			view.imeCaretBlockOverride = true;
 		}
