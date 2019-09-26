@@ -1701,6 +1701,12 @@ void SCI_METHOD LexerPerl::Fold(Sci_PositionU startPos, Sci_Position length, int
 			} else if (ch == ']') {
 				levelCurrent--;
 			}
+		} else if (style == SCE_PL_STRING_QW) {
+			// qw
+			if (stylePrevCh != style)
+				levelCurrent++;
+			else if (styleNext != style)
+				levelCurrent--;
 		}
 		// POD folding
 		if (options.foldPOD && atLineStart) {
