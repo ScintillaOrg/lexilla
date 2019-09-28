@@ -139,7 +139,6 @@ class LineVector : public ILineVector {
 	LineStartIndex<POS> startsUTF32;
 public:
 	LineVector() : starts(256), perLine(nullptr) {
-		Init();
 	}
 	// Deleted so LineVector objects can not be copied.
 	LineVector(const LineVector &) = delete;
