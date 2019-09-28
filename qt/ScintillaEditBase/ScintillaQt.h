@@ -126,7 +126,9 @@ private:
 	int timers[tickDwell+1];
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
+	void CancelTimers();
 	void FineTickerCancel(TickReason reason) override;
+	bool ChangeIdle(bool on);
 	bool SetIdle(bool on) override;
 	void SetMouseCapture(bool on) override;
 	bool HaveMouseCapture() override;
