@@ -81,6 +81,11 @@ public:
 		pfd = pfd_;
 		characterSet = characterSet_;
 	}
+	// Deleted so FontHandle objects can not be copied.
+	FontHandle(const FontHandle &) = delete;
+	FontHandle(FontHandle &&) = delete;
+	FontHandle &operator=(const FontHandle &) = delete;
+	FontHandle &operator=(FontHandle &&) = delete;
 	~FontHandle() {
 		if (pfd)
 			pango_font_description_free(pfd);
@@ -146,6 +151,11 @@ class SurfaceImpl : public Surface {
 	void SetConverter(int characterSet_);
 public:
 	SurfaceImpl() noexcept;
+	// Deleted so SurfaceImpl objects can not be copied.
+	SurfaceImpl(const SurfaceImpl&) = delete;
+	SurfaceImpl(SurfaceImpl&&) = delete;
+	SurfaceImpl&operator=(const SurfaceImpl&) = delete;
+	SurfaceImpl&operator=(SurfaceImpl&&) = delete;
 	~SurfaceImpl() override;
 
 	void Init(WindowID wid) override;
@@ -755,6 +765,12 @@ public:
 		iter = pango_layout_get_iter(layout);
 		pango_layout_iter_get_cluster_extents(iter, nullptr, &pos);
 	}
+	// Deleted so ClusterIterator objects can not be copied.
+	ClusterIterator(const ClusterIterator&) = delete;
+	ClusterIterator(ClusterIterator&&) = delete;
+	ClusterIterator&operator=(const ClusterIterator&) = delete;
+	ClusterIterator&operator=(ClusterIterator&&) = delete;
+
 	~ClusterIterator() {
 		pango_layout_iter_free(iter);
 	}
@@ -1219,6 +1235,11 @@ public:
 #endif
 		delegate(nullptr) {
 	}
+	// Deleted so ListBoxX objects can not be copied.
+	ListBoxX(const ListBoxX&) = delete;
+	ListBoxX(ListBoxX&&) = delete;
+	ListBoxX&operator=(const ListBoxX&) = delete;
+	ListBoxX&operator=(ListBoxX&&) = delete;
 	~ListBoxX() override {
 		if (pixhash) {
 			g_hash_table_foreach((GHashTable *) pixhash, list_image_free, nullptr);
@@ -1958,7 +1979,11 @@ public:
 	explicit DynamicLibraryImpl(const char *modulePath) noexcept {
 		m = g_module_open(modulePath, G_MODULE_BIND_LAZY);
 	}
-
+	// Deleted so DynamicLibraryImpl objects can not be copied.
+	DynamicLibraryImpl(const DynamicLibraryImpl&) = delete;
+	DynamicLibraryImpl(DynamicLibraryImpl&&) = delete;
+	DynamicLibraryImpl&operator=(const DynamicLibraryImpl&) = delete;
+	DynamicLibraryImpl&operator=(DynamicLibraryImpl&&) = delete;
 	~DynamicLibraryImpl() override {
 		if (m != nullptr)
 			g_module_close(m);

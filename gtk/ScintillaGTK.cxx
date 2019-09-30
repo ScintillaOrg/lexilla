@@ -433,6 +433,11 @@ public:
 		uniStr = g_utf8_to_ucs4_fast(str, strlen(str), &uniStrLen);
 		pscript = pango_script_for_unichar(uniStr[0]);
 	}
+	// Deleted so PreEditString objects can not be copied.
+	PreEditString(const PreEditString&) = delete;
+	PreEditString(PreEditString&&) = delete;
+	PreEditString&operator=(const PreEditString&) = delete;
+	PreEditString&operator=(PreEditString&&) = delete;
 	~PreEditString() {
 		g_free(str);
 		g_free(uniStr);
@@ -1202,6 +1207,11 @@ struct CaseMapper {
 			mapped = g_utf8_strdown(sUTF8.c_str(), sUTF8.length());
 		}
 	}
+	// Deleted so CaseMapper objects can not be copied.
+	CaseMapper(const CaseMapper&) = delete;
+	CaseMapper(CaseMapper&&) = delete;
+	CaseMapper&operator=(const CaseMapper&) = delete;
+	CaseMapper&operator=(CaseMapper&&) = delete;
 	~CaseMapper() {
 		g_free(mapped);
 	}

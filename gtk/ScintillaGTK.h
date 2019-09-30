@@ -274,6 +274,12 @@ public:
 		g_object_weak_ref(weakRef, WeakNotify, this);
 	}
 
+	// Deleted so GObjectWatcher objects can not be copied.
+	GObjectWatcher(const GObjectWatcher&) = delete;
+	GObjectWatcher(GObjectWatcher&&) = delete;
+	GObjectWatcher&operator=(const GObjectWatcher&) = delete;
+	GObjectWatcher&operator=(GObjectWatcher&&) = delete;
+
 	virtual ~GObjectWatcher() {
 		if (weakRef) {
 			g_object_weak_unref(weakRef, WeakNotify, this);
