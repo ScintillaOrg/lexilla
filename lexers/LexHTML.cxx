@@ -286,9 +286,10 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (!tag.empty() && (tag[0] == '!')) {
 		chAttr = SCE_H_SGML_DEFAULT;
-		styler.ColourTo(end, chAttr);
 	} else if (!keywords || keywords.InList(tag.c_str())) {
 		chAttr = SCE_H_TAG;
+	}
+	if (chAttr != SCE_H_TAGUNKNOWN) {
 		styler.ColourTo(end, chAttr);
 	}
 	if (chAttr == SCE_H_TAG) {
