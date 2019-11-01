@@ -286,10 +286,11 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (!tag.empty() && (tag[0] == '!')) {
 		chAttr = SCE_H_SGML_DEFAULT;
+		styler.ColourTo(end, chAttr);
 	} else if (!keywords || keywords.InList(tag.c_str())) {
 		chAttr = SCE_H_TAG;
+		styler.ColourTo(end, chAttr);
 	}
-	styler.ColourTo(end, chAttr);
 	if (chAttr == SCE_H_TAG) {
 		if (allowScripts && (tag == "script")) {
 			// check to see if this is a self-closing tag by sniffing ahead
