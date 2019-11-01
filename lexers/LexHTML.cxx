@@ -827,6 +827,7 @@ const char *tagsThatDoNotFold[] = {
 };
 
 }
+
 class LexerHTML : public DefaultLexer {
 	bool isXml;
 	bool isPHPScript;
