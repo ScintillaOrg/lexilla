@@ -266,6 +266,18 @@ void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, const WordList &
 	styler.ColourTo(end, chAttr);
 }
 
+// https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-core-concepts
+bool isHTMLCustomElement(const std::string &tag) {
+	// check valid HTML custom element name: starts with an ASCII lower alpha and contains hyphen.
+	if (tag.length() < 2 || !IsLowerCase(tag[0])) {
+		return false;
+	}
+	if (tag.find('-') == std::string::npos) {
+		return false;
+	}
+	return true;
+}
+
 int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
                            const WordList &keywords, Accessor &styler, bool &tagDontFold,
                     bool caseSensitive, bool isXml, bool allowScripts,
@@ -287,6 +299,8 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 	if (!tag.empty() && (tag[0] == '!')) {
 		chAttr = SCE_H_SGML_DEFAULT;
 	} else if (!keywords || keywords.InList(tag.c_str())) {
+		chAttr = SCE_H_TAG;
+	} else if (!isXml && isHTMLCustomElement(tag)) {
 		chAttr = SCE_H_TAG;
 	}
 	if (chAttr != SCE_H_TAGUNKNOWN) {
