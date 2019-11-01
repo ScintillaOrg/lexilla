@@ -1130,7 +1130,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			return i == SC_INDICATOR_TARGET;
 		});
 		if (!onlyTarget) {
-			// CS_NOMOVECARET: keep caret at beginning if composition string which already moved in InsertCharacter().
+			// CS_NOMOVECARET: keep caret at beginning of composition string which already moved in InsertCharacter().
 			// GCS_CURSORPOS: current caret position is provided by IME.
 			Sci::Position imeEndToImeCaretU16 = -static_cast<Sci::Position>(wcs.size());
 			if (!(lParam & CS_NOMOVECARET) && (lParam & GCS_CURSORPOS)) {
