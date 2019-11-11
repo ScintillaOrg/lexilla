@@ -155,6 +155,7 @@ LEXOBJS=\
 	$(DIR_O)\LexGui4Cli.obj \
 	$(DIR_O)\LexHaskell.obj \
 	$(DIR_O)\LexHex.obj \
+	$(DIR_O)\LexHollywood.obj \
 	$(DIR_O)\LexHTML.obj \
 	$(DIR_O)\LexIndent.obj \
 	$(DIR_O)\LexInno.obj \
