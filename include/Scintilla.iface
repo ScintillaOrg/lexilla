@@ -2599,8 +2599,14 @@ set void SetSelectionNStart=2584(int selection, position anchor)
 # Returns the position at the start of the selection.
 get position GetSelectionNStart=2585(int selection,)
 
+# Returns the virtual space at the start of the selection.
+get position GetSelectionNStartVirtualSpace=2726(int selection,)
+
 # Sets the position that ends the selection - this becomes the currentPosition.
 set void SetSelectionNEnd=2586(int selection, position caret)
+
+# Returns the virtual space at the end of the selection.
+get position GetSelectionNEndVirtualSpace=2727(int selection,)
 
 # Returns the position at the end of the selection.
 get position GetSelectionNEnd=2587(int selection,)

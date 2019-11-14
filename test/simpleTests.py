@@ -1407,10 +1407,14 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 3)
 		self.ed.SetSelectionNAnchorVirtualSpace(0, 2)
 		self.assertEquals(self.ed.GetSelectionNAnchorVirtualSpace(0), 2)
+		self.assertEquals(self.ed.GetSelectionNStartVirtualSpace(0), 3)
+		self.assertEquals(self.ed.GetSelectionNEndVirtualSpace(0), 2)
 		# Does not check that virtual space is valid by being at end of line
 		self.ed.SetSelection(1, 1)
 		self.ed.SetSelectionNCaretVirtualSpace(0, 3)
 		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 3)
+		self.assertEquals(self.ed.GetSelectionNStartVirtualSpace(0), 0)
+		self.assertEquals(self.ed.GetSelectionNEndVirtualSpace(0), 3)
 
 	def testRectangularVirtualSpace(self):
 		self.ed.VirtualSpaceOptions=1
