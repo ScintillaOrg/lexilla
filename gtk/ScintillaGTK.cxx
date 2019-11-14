@@ -757,16 +757,16 @@ std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 // Returns the target converted to UTF8.
 // Return the length in bytes.
 Sci::Position ScintillaGTK::TargetAsUTF8(char *text) const {
-	const Sci::Position targetLength = targetEnd - targetStart;
+	const Sci::Position targetLength = targetRange.Length();
 	if (IsUnicodeMode()) {
 		if (text) {
-			pdoc->GetCharRange(text, targetStart, targetLength);
+			pdoc->GetCharRange(text, targetRange.start.Position(), targetLength);
 		}
 	} else {
 		// Need to convert
 		const char *charSetBuffer = CharacterSetID();
 		if (*charSetBuffer) {
-			std::string s = RangeText(targetStart, targetEnd);
+			std::string s = RangeText(targetRange.start.Position(), targetRange.end.Position());
 			std::string tmputf = ConvertText(&s[0], targetLength, "UTF-8", charSetBuffer, false);
 			if (text) {
 				memcpy(text, tmputf.c_str(), tmputf.length());
@@ -774,7 +774,7 @@ Sci::Position ScintillaGTK::TargetAsUTF8(char *text) const {
 			return tmputf.length();
 		} else {
 			if (text) {
-				pdoc->GetCharRange(text, targetStart, targetLength);
+				pdoc->GetCharRange(text, targetRange.start.Position(), targetLength);
 			}
 		}
 	}

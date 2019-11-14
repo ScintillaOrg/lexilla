@@ -609,6 +609,26 @@ class TestSimple(unittest.TestCase):
 		self.ed.ReplaceTargetRE(len(rep), rep)
 		self.assertEquals(self.ed.Contents(), b"a\\nd")
 
+	def testTargetVirtualSpace(self):
+		self.ed.SetContents(b"a\nbcd")
+		self.assertEquals(self.ed.TargetStart, 0)
+		self.assertEquals(self.ed.TargetStartVirtualSpace, 0)
+		self.assertEquals(self.ed.TargetEnd, 5)
+		self.assertEquals(self.ed.TargetEndVirtualSpace, 0)
+		self.ed.TargetStart = 1
+		self.ed.TargetStartVirtualSpace = 2
+		self.ed.TargetEnd = 3
+		self.ed.TargetEndVirtualSpace = 4
+		# Adds 2 spaces to first line due to virtual space, and replace 2 characters with 3
+		rep = b"12\n"
+		self.ed.ReplaceTarget(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a  12\ncd")
+		# 1+2v realized to 3
+		self.assertEquals(self.ed.TargetStart, 3)
+		self.assertEquals(self.ed.TargetStartVirtualSpace, 0)
+		self.assertEquals(self.ed.TargetEnd, 6)
+		self.assertEquals(self.ed.TargetEndVirtualSpace, 0)
+
 	def testPointsAndPositions(self):
 		self.ed.AddText(1, b"x")
 		# Start of text

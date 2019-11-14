@@ -72,6 +72,9 @@ struct SelectionSegment {
 	bool Empty() const noexcept {
 		return start == end;
 	}
+	Sci::Position Length() const noexcept {
+		return end.Position() - start.Position();
+	}
 	void Extend(SelectionPosition p) noexcept {
 		if (start > p)
 			start = p;

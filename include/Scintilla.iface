@@ -1208,12 +1208,24 @@ set void SetTargetStart=2190(position start,)
 # Get the position that starts the target.
 get position GetTargetStart=2191(,)
 
+# Sets the virtual space of the target start
+set void SetTargetStartVirtualSpace=2728(position space,)
+
+# Get the virtual space of the target start
+get position GetTargetStartVirtualSpace=2729(,)
+
 # Sets the position that ends the target which is used for updating the
 # document without affecting the scroll position.
 set void SetTargetEnd=2192(position end,)
 
 # Get the position that ends the target.
 get position GetTargetEnd=2193(,)
+
+# Sets the virtual space of the target end
+set void SetTargetEndVirtualSpace=2730(position space,)
+
+# Get the virtual space of the target end
+get position GetTargetEndVirtualSpace=2731(,)
 
 # Sets both the start and end of the target in one call.
 fun void SetTargetRange=2686(position start, position end)
