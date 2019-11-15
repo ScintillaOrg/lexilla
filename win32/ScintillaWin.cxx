@@ -2743,6 +2743,9 @@ void ScintillaWin::ImeStartComposition() {
 
 /** Called when IME Window closed. */
 void ScintillaWin::ImeEndComposition() {
+	// clear IME composition state.
+	view.imeCaretBlockOverride = false;
+	pdoc->TentativeUndo();
 	ShowCaretAtCurrentPosition();
 }
 
