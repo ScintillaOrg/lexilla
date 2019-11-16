@@ -269,7 +269,8 @@ void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, const WordList &
 // https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-core-concepts
 bool isHTMLCustomElement(const std::string &tag) {
 	// check valid HTML custom element name: starts with an ASCII lower alpha and contains hyphen.
-	if (tag.length() < 2 || !IsLowerCase(tag[0])) {
+	// IsUpperOrLowerCase() is used for `html.tags.case.sensitive=1`.
+	if (tag.length() < 2 || !IsUpperOrLowerCase(tag[0])) {
 		return false;
 	}
 	if (tag.find('-') == std::string::npos) {
