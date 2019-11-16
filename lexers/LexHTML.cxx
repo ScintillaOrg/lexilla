@@ -283,9 +283,12 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
                     bool caseSensitive, bool isXml, bool allowScripts,
                     const std::set<std::string> &nonFoldingTags) {
 	std::string tag;
-	// Copy after the '<'
+	// Copy after the '<' and stop before ' '
 	for (Sci_PositionU cPos = start; cPos <= end; cPos++) {
 		const char ch = styler[cPos];
+		if (IsASpace(ch)) {
+			break;
+		}
 		if ((ch != '<') && (ch != '/')) {
 			tag.push_back(caseSensitive ? ch : MakeLowerCase(ch));
 		}
