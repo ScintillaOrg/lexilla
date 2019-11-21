@@ -1008,6 +1008,10 @@ class TestIndicators(unittest.TestCase):
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
 
+	def indicatorValueString(self, indicator):
+		# create a string with -/X where indicator off/on to make checks simple
+		return "".join("-X"[self.ed.IndicatorValueAt(indicator, index)] for index in range(self.ed.TextLength))
+
 	def testSetIndicator(self):
 		self.assertEquals(self.ed.IndicGetStyle(0), 1)
 		self.assertEquals(self.ed.IndicGetFore(0), 0x007f00)
@@ -1020,9 +1024,7 @@ class TestIndicators(unittest.TestCase):
 		self.ed.InsertText(0, b"abc")
 		self.ed.IndicatorCurrent = 3
 		self.ed.IndicatorFillRange(1,1)
-		self.assertEquals(self.ed.IndicatorValueAt(3, 0), 0)
-		self.assertEquals(self.ed.IndicatorValueAt(3, 1), 1)
-		self.assertEquals(self.ed.IndicatorValueAt(3, 2), 0)
+		self.assertEquals(self.indicatorValueString(3), "-X-")
 		self.assertEquals(self.ed.IndicatorStart(3, 0), 0)
 		self.assertEquals(self.ed.IndicatorEnd(3, 0), 1)
 		self.assertEquals(self.ed.IndicatorStart(3, 1), 1)
@@ -1048,6 +1050,41 @@ class TestIndicators(unittest.TestCase):
 		self.assertEquals(self.ed.IndicatorEnd(3, 0), 0)
 		self.assertEquals(self.ed.IndicatorStart(3, 1), 0)
 		self.assertEquals(self.ed.IndicatorEnd(3, 1), 0)
+
+	def testIndicatorMovement(self):
+		# Create a two character indicator over "BC" in "aBCd" and ensure that it doesn't
+		# leak onto surrounding characters when insertions made at either end but 
+		# insertion inside indicator does extend length
+		self.ed.InsertText(0, b"aBCd")
+		self.ed.IndicatorCurrent = 3
+		self.ed.IndicatorFillRange(1,2)
+		self.assertEquals(self.indicatorValueString(3), "-XX-")
+
+		# Insertion 1 before
+		self.ed.InsertText(0, b"1")
+		self.assertEquals(b"1aBCd", self.ed.Contents())
+		self.assertEquals(self.indicatorValueString(3), "--XX-")
+
+		# Insertion at start of indicator
+		self.ed.InsertText(2, b"2")
+		self.assertEquals(b"1a2BCd", self.ed.Contents())
+		self.assertEquals(self.indicatorValueString(3), "---XX-")
+
+		# Insertion inside indicator
+		self.ed.InsertText(4, b"3")
+		self.assertEquals(b"1a2B3Cd", self.ed.Contents())
+		self.assertEquals(self.indicatorValueString(3), "---XXX-")
+
+		# Insertion at end of indicator
+		self.ed.InsertText(6, b"4")
+		self.assertEquals(b"1a2B3C4d", self.ed.Contents())
+		self.assertEquals(self.indicatorValueString(3), "---XXX--")
+
+		# Insertion 1 after
+		self.ed.InsertText(8, b"5")
+		self.assertEquals(self.indicatorValueString(3), "---XXX---")
+		self.assertEquals(b"1a2B3C4d5", self.ed.Contents())
+
 
 class TestScrolling(unittest.TestCase):
 
