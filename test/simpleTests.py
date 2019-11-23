@@ -1387,6 +1387,11 @@ class TestMultiSelection(unittest.TestCase):
 		# 3 lines of 3 characters
 		t = b"xxx\nxxx\nxxx"
 		self.ed.AddText(len(t), t)
+		
+	def textOfSelection(self, n):
+		self.ed.TargetStart = self.ed.GetSelectionNStart(n)
+		self.ed.TargetEnd = self.ed.GetSelectionNEnd(n)
+		return bytes(self.ed.GetTargetText())
 
 	def testSelectionCleared(self):
 		self.ed.ClearSelections()
@@ -1541,6 +1546,93 @@ class TestMultiSelection(unittest.TestCase):
 		self.ed.MainSelection = 0
 		self.ed.DropSelectionN(0)
 		self.assertEquals(self.ed.MainSelection, 2)
+
+	def partFromSelection(self, n):
+		# Return a tuple (order, text) from a selection part
+		# order is a boolean whether the caret is before the anchor
+		self.ed.TargetStart = self.ed.GetSelectionNStart(n)
+		self.ed.TargetEnd = self.ed.GetSelectionNEnd(n)
+		return (self.ed.GetSelectionNCaret(n) < self.ed.GetSelectionNAnchor(n), self.textOfSelection(n))
+
+	def replacePart(self, n, part):
+		startSelection = self.ed.GetSelectionNStart(n)
+		self.ed.TargetStart = startSelection
+		self.ed.TargetEnd = self.ed.GetSelectionNEnd(n)
+		direction, text = part
+		length = len(text)
+		self.ed.ReplaceTarget(len(text), text)
+		if direction:
+			self.ed.SetSelectionNCaret(n, startSelection)
+			self.ed.SetSelectionNAnchor(n, startSelection + length)
+		else:
+			self.ed.SetSelectionNAnchor(n, startSelection)
+			self.ed.SetSelectionNCaret(n, startSelection + length)
+
+	def swapSelections(self):
+		# Swap the selections
+		part0 = self.partFromSelection(0)
+		part1 = self.partFromSelection(1)
+
+		self.replacePart(1, part0)
+		self.replacePart(0, part1)
+
+	def checkAdjacentSelections(self, selections, invert):
+		# Only called from testAdjacentSelections to try one permutation
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		t = b"ab"
+		texts = (b'b', b'a') if invert else (b'a', b'b')
+		self.ed.AddText(len(t), t)
+		sel0, sel1 = selections
+		self.ed.SetSelection(sel0[0], sel0[1])
+		self.ed.AddSelection(sel1[0], sel1[1])
+		self.assertEquals(self.ed.Selections, 2)
+		self.assertEquals(self.textOfSelection(0), texts[0])
+		self.assertEquals(self.textOfSelection(1), texts[1])
+		self.swapSelections()
+		self.assertEquals(self.ed.Contents(), b'ba')
+		self.assertEquals(self.ed.Selections, 2)
+		self.assertEquals(self.textOfSelection(0), texts[1])
+		self.assertEquals(self.textOfSelection(1), texts[0])
+
+	def testAdjacentSelections(self):
+		# For various permutations of selections, try swapping the text and ensure that the
+		# selections remain distinct
+		self.checkAdjacentSelections(((1, 0),(1, 2)), False)
+		self.checkAdjacentSelections(((0, 1),(1, 2)), False)
+		self.checkAdjacentSelections(((1, 0),(2, 1)), False)
+		self.checkAdjacentSelections(((0, 1),(2, 1)), False)
+
+		# Reverse order, first selection is after second
+		self.checkAdjacentSelections(((1, 2),(1, 0)), True)
+		self.checkAdjacentSelections(((1, 2),(0, 1)), True)
+		self.checkAdjacentSelections(((2, 1),(1, 0)), True)
+		self.checkAdjacentSelections(((2, 1),(0, 1)), True)
+
+	def testInsertBefore(self):
+		self.ed.ClearAll()
+		t = b"a"
+		self.ed.AddText(len(t), t)
+		self.ed.SetSelection(0, 1)
+		self.assertEquals(self.textOfSelection(0), b'a')
+
+		self.ed.SetTargetRange(0, 0)
+		self.ed.ReplaceTarget(1, b'1')
+		self.assertEquals(self.ed.Contents(), b'1a')
+		self.assertEquals(self.textOfSelection(0), b'a')
+
+	def testInsertAfter(self):
+		self.ed.ClearAll()
+		t = b"a"
+		self.ed.AddText(len(t), t)
+		self.ed.SetSelection(0, 1)
+		self.assertEquals(self.textOfSelection(0), b'a')
+
+		self.ed.SetTargetRange(1, 1)
+		self.ed.ReplaceTarget(1, b'9')
+		self.assertEquals(self.ed.Contents(), b'a9')
+		self.assertEquals(self.textOfSelection(0), b'a')
+
 
 class TestModalSelection(unittest.TestCase):
 
