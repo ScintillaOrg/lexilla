@@ -96,8 +96,8 @@ void SelectionRange::MoveForInsertDelete(bool insertion, Sci::Position startChan
 	// which position is the start and pass this into
 	// SelectionPosition::MoveForInsertDelete.
 	// There isn't any reason to move an empty selection so don't move it.
-	const bool caretStart = caret < anchor;
-	const bool anchorStart = anchor < caret;
+	const bool caretStart = caret.Position() < anchor.Position();
+	const bool anchorStart = anchor.Position() < caret.Position();
 
 	caret.MoveForInsertDelete(insertion, startChange, length, caretStart);
 	anchor.MoveForInsertDelete(insertion, startChange, length, anchorStart);

@@ -1665,6 +1665,24 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b'a1')
 		self.assertEquals(self.textOfSelection(0), b'')
 
+	def testInsertThroughVirtualSpace(self):
+		self.ed.SetContents(b"a")
+		self.ed.SetSelection(1, 1)
+		self.ed.SetSelectionNAnchorVirtualSpace(0, 2)
+		self.ed.SetSelectionNCaretVirtualSpace(0, 3)
+		self.assertEquals(self.selectionRepresentation(0), "1+2v-1+3v")
+		self.assertEquals(self.textOfSelection(0), b'')
+
+		# Append '1' past current virtual space
+		self.ed.SetTargetRange(1, 1)
+		self.ed.SetTargetStartVirtualSpace(4)
+		self.ed.SetTargetEndVirtualSpace(5)
+		self.ed.ReplaceTarget(1, b'1')
+		# Virtual space of selection all converted to real positions
+		self.assertEquals(self.selectionRepresentation(0), "3-4")
+		self.assertEquals(self.ed.Contents(), b'a    1')
+		self.assertEquals(self.textOfSelection(0), b' ')
+
 
 class TestModalSelection(unittest.TestCase):
 
