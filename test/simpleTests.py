@@ -1377,6 +1377,17 @@ class TestAnnotation(unittest.TestCase):
 		self.assertEquals(self.ed.AnnotationGetVisible(), 2)
 		self.ed.AnnotationSetVisible(0)
 
+def selectionPositionRepresentation(selectionPosition):
+	position, virtualSpace = selectionPosition
+	representation = str(position)
+	if virtualSpace > 0:
+		representation += "+" + str(virtualSpace) + "v"
+	return representation
+
+def selectionRangeRepresentation(selectionRange):
+	anchor, caret = selectionRange
+	return selectionPositionRepresentation(anchor) + "-" + selectionPositionRepresentation(caret)
+
 class TestMultiSelection(unittest.TestCase):
 
 	def setUp(self):
@@ -1594,6 +1605,11 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.Selections, 2)
 		self.assertEquals(self.textOfSelection(0), texts[1])
 		self.assertEquals(self.textOfSelection(1), texts[0])
+	
+	def selectionRepresentation(self, n):
+		anchor = (self.ed.GetSelectionNAnchor(0), self.ed.GetSelectionNAnchorVirtualSpace(0))
+		caret = (self.ed.GetSelectionNCaret(0), self.ed.GetSelectionNCaretVirtualSpace(0))
+		return selectionRangeRepresentation((anchor, caret))
 
 	def testAdjacentSelections(self):
 		# For various permutations of selections, try swapping the text and ensure that the
@@ -1632,6 +1648,22 @@ class TestMultiSelection(unittest.TestCase):
 		self.ed.ReplaceTarget(1, b'9')
 		self.assertEquals(self.ed.Contents(), b'a9')
 		self.assertEquals(self.textOfSelection(0), b'a')
+
+	def testInsertBeforeVirtualSpace(self):
+		self.ed.SetContents(b"a")
+		self.ed.SetSelection(1, 1)
+		self.ed.SetSelectionNAnchorVirtualSpace(0, 2)
+		self.ed.SetSelectionNCaretVirtualSpace(0, 2)
+		self.assertEquals(self.selectionRepresentation(0), "1+2v-1+2v")
+		self.assertEquals(self.textOfSelection(0), b'')
+
+		# Append '1'
+		self.ed.SetTargetRange(1, 1)
+		self.ed.ReplaceTarget(1, b'1')
+		# Selection moved on 1, but still empty
+		self.assertEquals(self.selectionRepresentation(0), "2+1v-2+1v")
+		self.assertEquals(self.ed.Contents(), b'a1')
+		self.assertEquals(self.textOfSelection(0), b'')
 
 
 class TestModalSelection(unittest.TestCase):

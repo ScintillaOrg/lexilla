@@ -29,6 +29,7 @@ void SelectionPosition::MoveForInsertDelete(bool insertion, Sci::Position startC
 			// Always consume virtual space
 			const Sci::Position virtualLengthRemove = std::min(length, virtualSpace);
 			virtualSpace -= virtualLengthRemove;
+			position += virtualLengthRemove;
 			if (moveForEqual) {
 				const Sci::Position lengthAfterVirtualRemove = length - virtualLengthRemove;
 				position += lengthAfterVirtualRemove;
