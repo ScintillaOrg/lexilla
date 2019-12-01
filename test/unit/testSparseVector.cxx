@@ -165,6 +165,22 @@ TEST_CASE("SparseVector") {
 		st.Check();
 	}
 
+	SECTION("CheckDeletionLeavesOrdered") {
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(0, 1);
+		st.SetValueAt(0, UniqueStringCopy("1"));
+		REQUIRE("1" == Representation(st));
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(1, 1);
+		st.SetValueAt(1, UniqueStringCopy("2"));
+		REQUIRE("12" == Representation(st));
+		st.DeletePosition(0);
+		REQUIRE("2" == Representation(st));
+		REQUIRE(1 == st.Elements());
+		st.DeletePosition(0);
+		REQUIRE("" == Representation(st));
+	}
+
 	SECTION("DeleteAll") {
 		REQUIRE(1 == st.Elements());
 		st.InsertSpace(0, 10);

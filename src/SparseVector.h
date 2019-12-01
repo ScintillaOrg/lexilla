@@ -120,6 +120,14 @@ public:
 		if (startPartition == position) {
 			if (partition == 0) {
 				ClearValue(0);
+				if (starts->PositionFromPartition(1) == 1) {
+					// Removing all space of first partition, so remove next partition
+					// and move value if not last
+					if (Elements() > 1) {
+						starts->RemovePartition(partition + 1);
+						values->Delete(partition);
+					}
+				}
 			} else if (partition == starts->Partitions()) {
 				// This should not be possible
 				ClearValue(partition);
@@ -133,14 +141,11 @@ public:
 			}
 		}
 		starts->InsertText(partition, -1);
+		Check();
 	}
 	void Check() const {
-		if (Length() < 0) {
-			throw std::runtime_error("SparseVector: Length can not be negative.");
-		}
-		if (starts->Partitions() < 1) {
-			throw std::runtime_error("SparseVector: Must always have 1 or more partitions.");
-		}
+#ifdef CHECK_CORRECTNESS
+		starts->Check();
 		if (starts->Partitions() != values->Length() - 1) {
 			throw std::runtime_error("SparseVector: Partitions and values different lengths.");
 		}
@@ -148,6 +153,7 @@ public:
 		if (values->ValueAt(values->Length() - 1) != T()) {
 			throw std::runtime_error("SparseVector: Unused style at end changed.");
 		}
+#endif
 	}
 };
 
