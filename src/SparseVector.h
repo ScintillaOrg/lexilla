@@ -154,6 +154,13 @@ public:
 		starts->InsertText(partition, -1);
 		Check();
 	}
+	Sci::Position IndexAfter(Sci::Position position) const noexcept {
+		assert(position < Length());
+		if (position < 0)
+			return 0;
+		const Sci::Position partition = starts->PartitionFromPosition(position);
+		return partition + 1;
+	}
 	void Check() const {
 #ifdef CHECK_CORRECTNESS
 		starts->Check();

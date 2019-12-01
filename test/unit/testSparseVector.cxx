@@ -249,6 +249,23 @@ TEST_CASE("SparseTextInt") {
 		REQUIRE(0 == st.ValueAt(4));
 		st.Check();
 	}
+
+	SECTION("IndexAfter") {
+		st.InsertSpace(0, 5);
+		REQUIRE(1 == st.Elements());
+		REQUIRE(0 == st.IndexAfter(-1));
+		REQUIRE(0 == st.PositionOfElement(0));
+		REQUIRE(1 == st.IndexAfter(0));
+		REQUIRE(5 == st.PositionOfElement(1));
+		st.SetValueAt(3, 3);
+		REQUIRE(2 == st.Elements());
+		REQUIRE(0 == st.IndexAfter(-1));
+		REQUIRE(0 == st.PositionOfElement(0));
+		REQUIRE(1 == st.IndexAfter(0));
+		REQUIRE(3 == st.PositionOfElement(1));
+		REQUIRE(2 == st.IndexAfter(3));
+		REQUIRE(5 == st.PositionOfElement(2));
+	}
 }
 
 TEST_CASE("SparseTextString") {
