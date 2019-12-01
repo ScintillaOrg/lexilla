@@ -12,13 +12,17 @@ namespace Scintilla {
 
 // SparseVector is similar to RunStyles but is more efficient for cases where values occur
 // for one position instead of over a range of positions.
+// There are always elements at the start and end, so the element type should have
+// a reasonable empty value that will cause no problems.
+// The element type should have a noexcept default constructor as that allows methods to
+// be noexcept.
 template <typename T>
 class SparseVector {
 private:
 	std::unique_ptr<Partitioning<Sci::Position>> starts;
 	std::unique_ptr<SplitVector<T>> values;
-	T empty;
-	void ClearValue(Sci::Position partition) {
+	T empty;	// Return from ValueAt when no element at a position.
+	void ClearValue(Sci::Position partition) noexcept {
 		values->SetValueAt(partition, T());
 	}
 public:
@@ -40,18 +44,25 @@ public:
 		}
 		values.reset();
 	}
-	Sci::Position Length() const {
-		return starts->PositionFromPartition(starts->Partitions());
+	Sci::Position Length() const noexcept {
+		return starts->Length();
 	}
-	Sci::Position Elements() const {
+	Sci::Position Elements() const noexcept {
 		return starts->Partitions();
 	}
-	Sci::Position PositionOfElement(int element) const {
+	Sci::Position PositionOfElement(Sci::Position element) const noexcept {
 		return starts->PositionFromPartition(element);
 	}
-	const T& ValueAt(Sci::Position position) const {
-		assert(position < Length());
-		const Sci::Position partition = starts->PartitionFromPosition(position);
+	Sci::Position ElementFromPosition(Sci::Position position) const noexcept {
+		if (position < Length()) {
+			return starts->PartitionFromPosition(position);
+		} else {
+			return starts->Partitions();
+		}
+	}
+	const T& ValueAt(Sci::Position position) const noexcept {
+		assert(position <= Length());
+		const Sci::Position partition = ElementFromPosition(position);
 		const Sci::Position startPartition = starts->PositionFromPartition(partition);
 		if (startPartition == position) {
 			return values->ValueAt(partition);
@@ -61,8 +72,8 @@ public:
 	}
 	template <typename ParamType>
 	void SetValueAt(Sci::Position position, ParamType &&value) {
-		assert(position < Length());
-		const Sci::Position partition = starts->PartitionFromPosition(position);
+		assert(position <= Length());
+		const Sci::Position partition = ElementFromPosition(position);
 		const Sci::Position startPartition = starts->PositionFromPartition(partition);
 		if (value == T()) {
 			// Setting the empty value is equivalent to deleting the position
@@ -88,7 +99,7 @@ public:
 		}
 	}
 	void InsertSpace(Sci::Position position, Sci::Position insertLength) {
-		assert(position <= Length());	// Only operation that works at end.
+		assert(position <= Length());
 		const Sci::Position partition = starts->PartitionFromPosition(position);
 		const Sci::Position startPartition = starts->PositionFromPartition(partition);
 		if (startPartition == position) {
@@ -148,10 +159,6 @@ public:
 		starts->Check();
 		if (starts->Partitions() != values->Length() - 1) {
 			throw std::runtime_error("SparseVector: Partitions and values different lengths.");
-		}
-		// The final element can not be set
-		if (values->ValueAt(values->Length() - 1) != T()) {
-			throw std::runtime_error("SparseVector: Unused style at end changed.");
 		}
 #endif
 	}
