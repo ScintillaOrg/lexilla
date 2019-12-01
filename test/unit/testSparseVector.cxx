@@ -218,6 +218,112 @@ TEST_CASE("SparseVector") {
 		REQUIRE("-" == Representation(st));
 	}
 
+	SECTION("DeleteRange") {
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(0, 10);
+		st.SetValueAt(9, UniqueStringCopy("9"));
+		st.SetValueAt(7, UniqueStringCopy("7"));
+		st.SetValueAt(4, UniqueStringCopy("4"));
+		st.SetValueAt(3, UniqueStringCopy("3"));
+		REQUIRE(5 == st.Elements());
+		REQUIRE(10 == st.Length());
+		REQUIRE("---34--7-9-" == Representation(st));
+		// Delete in space
+		st.DeleteRange(1, 1);
+		REQUIRE(5 == st.Elements());
+		REQUIRE(9 == st.Length());
+		REQUIRE("--34--7-9-" == Representation(st));
+		// Delete 2 values
+		st.DeleteRange(3, 4);
+		REQUIRE(3 == st.Elements());
+		REQUIRE(5 == st.Length());
+		REQUIRE("--3-9-" == Representation(st));
+		// Deletion at start
+		st.DeleteRange(0, 1);
+		REQUIRE(3 == st.Elements());
+		REQUIRE(4 == st.Length());
+		REQUIRE("-3-9-" == Representation(st));
+	}
+
+	SECTION("DeleteRangeAtEnds") {
+		// There are always elements at start and end although they can be nulled
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(0, 4);
+		REQUIRE(4 == st.Length());
+		st.SetValueAt(1, UniqueStringCopy("3"));
+		st.SetValueAt(4, UniqueStringCopy("9"));
+		REQUIRE("-3--9" == Representation(st));
+		REQUIRE(2 == st.Elements());
+		// Empty deletion at end -> no effect
+		st.DeleteRange(4, 0);
+		REQUIRE(2 == st.Elements());
+		REQUIRE(4 == st.Length());
+		REQUIRE("-3--9" == Representation(st));
+		// Delete value at start
+		st.InsertSpace(0, 1);
+		st.SetValueAt(0, UniqueStringCopy("0"));
+		REQUIRE(2 == st.Elements());
+		REQUIRE(5 == st.Length());
+		REQUIRE("0-3--9" == Representation(st));
+		st.DeleteRange(0, 1);
+		REQUIRE(2 == st.Elements());
+		REQUIRE(4 == st.Length());
+		REQUIRE("03--9" == Representation(st));
+		// Empty deletion at start -> no effect
+		st.InsertSpace(0, 1);
+		st.SetValueAt(0, UniqueStringCopy("1"));
+		REQUIRE(3 == st.Elements());
+		REQUIRE(5 == st.Length());
+		REQUIRE("103--9" == Representation(st));
+		st.DeleteRange(0, 0);
+		REQUIRE(3 == st.Elements());
+		REQUIRE(5 == st.Length());
+		REQUIRE("103--9" == Representation(st));
+	}
+
+	SECTION("DeleteStartingRange") {
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(0, 2);
+		st.SetValueAt(0, UniqueStringCopy("1"));
+		st.SetValueAt(1, UniqueStringCopy("2"));
+		REQUIRE(2 == st.Length());
+		REQUIRE("12-" == Representation(st));
+		st.DeleteRange(0,1);
+		REQUIRE(1 == st.Length());
+		REQUIRE("2-" == Representation(st));
+		st.DeleteRange(0,1);
+		REQUIRE(0 == st.Length());
+		REQUIRE("-" == Representation(st));
+		st.InsertSpace(0, 2);
+		st.SetValueAt(1, UniqueStringCopy("1"));
+		REQUIRE(2 == st.Length());
+		REQUIRE("-1-" == Representation(st));
+		st.DeleteRange(0, 2);
+		REQUIRE("-" == Representation(st));
+		st.InsertSpace(0, 4);
+		st.SetValueAt(1, UniqueStringCopy("1"));
+		st.SetValueAt(3, UniqueStringCopy("3"));
+		REQUIRE(4 == st.Length());
+		REQUIRE("-1-3-" == Representation(st));
+		st.DeleteRange(0, 3);
+		REQUIRE("3-" == Representation(st));
+		st.DeleteRange(0, 1);
+		REQUIRE("-" == Representation(st));
+		st.InsertSpace(0, 4);
+		st.SetValueAt(1, UniqueStringCopy("1"));
+		st.SetValueAt(4, UniqueStringCopy("4"));
+		st.SetValueAt(3, UniqueStringCopy("3"));
+		REQUIRE("-1-34" == Representation(st));
+		st.DeleteRange(1, 3);
+		REQUIRE("-4" == Representation(st));
+		st.InsertSpace(1, 3);
+		REQUIRE("----4" == Representation(st));
+		st.SetValueAt(4, UniqueStringCopy("4"));
+		st.SetValueAt(3, UniqueStringCopy("3"));
+		REQUIRE("---34" == Representation(st));
+		st.DeleteRange(1, 3);
+		REQUIRE("-4" == Representation(st));
+	}
 }
 
 TEST_CASE("SparseTextInt") {

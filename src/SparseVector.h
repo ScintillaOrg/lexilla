@@ -154,6 +154,43 @@ public:
 		starts->InsertText(partition, -1);
 		Check();
 	}
+	void DeleteRange(Sci::Position position, Sci::Position deleteLength) {
+		// For now, delete elements in range - may want to leave value at start
+		// or combine onto position.
+		if (position > Length() || (deleteLength == 0)) {
+			return;
+		}
+		const Sci::Position positionEnd = position + deleteLength;
+		assert(positionEnd <= Length());
+		if (position == 0) {
+			// Remove all partitions in range, moving values to start
+			while ((Elements() > 1) && (starts->PositionFromPartition(1) <= deleteLength)) {
+				starts->RemovePartition(1);
+				values->Delete(0);
+			}
+			starts->InsertText(0, -deleteLength);
+			if (Length() == 0) {
+				ClearValue(0);
+			}
+		} else {
+			const Sci::Position partition = starts->PartitionFromPosition(position);
+			const bool atPartitionStart = position == starts->PositionFromPartition(partition);
+			const Sci::Position partitionDelete = partition + (atPartitionStart ? 0 : 1);
+			assert(partitionDelete > 0);
+			for (;;) {
+				const Sci::Position positionAtIndex = starts->PositionFromPartition(partitionDelete);
+				assert(position <= positionAtIndex);
+				if (positionAtIndex >= positionEnd) {
+					break;
+				}
+				assert(partitionDelete <= Elements());
+				starts->RemovePartition(partitionDelete);
+				values->Delete(partitionDelete);
+			}
+			starts->InsertText(partition - (atPartitionStart ? 1 : 0), -deleteLength);
+		}
+		Check();
+	}
 	Sci::Position IndexAfter(Sci::Position position) const noexcept {
 		assert(position < Length());
 		if (position < 0)
