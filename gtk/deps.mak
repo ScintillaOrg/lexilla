@@ -18,10 +18,8 @@ ScintillaGTK.o: \
 	../include/ILexer.h \
 	../include/Scintilla.h \
 	../include/ScintillaWidget.h \
-	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/CharacterCategory.h \
-	../lexlib/LexerModule.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -49,7 +47,6 @@ ScintillaGTK.o: \
 	../src/Editor.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h \
-	../src/ExternalLexer.h \
 	ScintillaGTK.h \
 	scintilla-marshal.h \
 	ScintillaGTKAccessible.h \
@@ -62,10 +59,8 @@ ScintillaGTKAccessible.o: \
 	../include/ILexer.h \
 	../include/Scintilla.h \
 	../include/ScintillaWidget.h \
-	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/CharacterCategory.h \
-	../lexlib/LexerModule.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -432,7 +427,8 @@ ScintillaBase.o: \
 	../src/EditView.h \
 	../src/Editor.h \
 	../src/AutoComplete.h \
-	../src/ScintillaBase.h
+	../src/ScintillaBase.h \
+	../src/ExternalLexer.h
 Selection.o: \
 	../src/Selection.cxx \
 	../include/Platform.h \

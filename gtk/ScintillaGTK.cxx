@@ -42,14 +42,8 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
-#ifdef SCI_LEXER
-#include "SciLexer.h"
-#endif
 #include "StringCopy.h"
 #include "CharacterCategory.h"
-#ifdef SCI_LEXER
-#include "LexerModule.h"
-#endif
 #include "Position.h"
 #include "UniqueString.h"
 #include "SplitVector.h"
@@ -77,10 +71,6 @@
 #include "Editor.h"
 #include "AutoComplete.h"
 #include "ScintillaBase.h"
-
-#ifdef SCI_LEXER
-#include "ExternalLexer.h"
-#endif
 
 #include "ScintillaGTK.h"
 #include "scintilla-marshal.h"
@@ -833,11 +823,6 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case SCI_GETDIRECTPOINTER:
 			return reinterpret_cast<sptr_t>(this);
 
-#ifdef SCI_LEXER
-		case SCI_LOADLEXERLIBRARY:
-			LexerManager::GetInstance()->Load(ConstCharPtrFromSPtr(lParam));
-			break;
-#endif
 		case SCI_TARGETASUTF8:
 			return TargetAsUTF8(CharPtrFromSPtr(lParam));
 

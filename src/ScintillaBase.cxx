@@ -62,6 +62,10 @@
 #include "AutoComplete.h"
 #include "ScintillaBase.h"
 
+#ifdef SCI_LEXER
+#include "ExternalLexer.h"
+#endif
+
 using namespace Scintilla;
 
 ScintillaBase::ScintillaBase() {
@@ -1087,6 +1091,10 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_GETLEXERLANGUAGE:
 		return StringResult(lParam, DocumentLexState()->GetName());
+
+	case SCI_LOADLEXERLIBRARY:
+		LexerManager::GetInstance()->Load(ConstCharPtrFromSPtr(lParam));
+		break;
 
 	case SCI_PRIVATELEXERCALL:
 		return reinterpret_cast<sptr_t>(

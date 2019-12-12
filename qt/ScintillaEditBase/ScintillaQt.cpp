@@ -10,10 +10,6 @@
 
 #include "ScintillaQt.h"
 #include "PlatQt.h"
-#ifdef SCI_LEXER
-#include "LexerModule.h"
-#include "ExternalLexer.h"
-#endif
 
 #include <QApplication>
 #include <QDrag>
@@ -703,12 +699,6 @@ sptr_t ScintillaQt::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 
 		case SCI_GETDIRECTPOINTER:
 			return reinterpret_cast<sptr_t>(this);
-
-#ifdef SCI_LEXER
-		case SCI_LOADLEXERLIBRARY:
-			LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));
-			break;
-#endif
 
 		default:
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);

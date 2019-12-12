@@ -23,9 +23,7 @@ ScintillaWin.o: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../include/SciLexer.h \
 	../lexlib/CharacterCategory.h \
-	../lexlib/LexerModule.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -54,7 +52,6 @@ ScintillaWin.o: \
 	../src/ElapsedPeriod.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h \
-	../src/ExternalLexer.h \
 	PlatWin.h \
 	HanjaDic.h \
 	ScintillaWin.h
@@ -65,9 +62,7 @@ ScintillaWinL.o: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../include/SciLexer.h \
 	../lexlib/CharacterCategory.h \
-	../lexlib/LexerModule.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -96,7 +91,6 @@ ScintillaWinL.o: \
 	../src/ElapsedPeriod.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h \
-	../src/ExternalLexer.h \
 	PlatWin.h \
 	HanjaDic.h \
 	ScintillaWin.h
@@ -437,7 +431,8 @@ ScintillaBase.o: \
 	../src/EditView.h \
 	../src/Editor.h \
 	../src/AutoComplete.h \
-	../src/ScintillaBase.h
+	../src/ScintillaBase.h \
+	../src/ExternalLexer.h
 ScintillaBaseL.o: \
 	../src/ScintillaBase.cxx \
 	../include/Platform.h \
@@ -474,7 +469,8 @@ ScintillaBaseL.o: \
 	../src/EditView.h \
 	../src/Editor.h \
 	../src/AutoComplete.h \
-	../src/ScintillaBase.h
+	../src/ScintillaBase.h \
+	../src/ExternalLexer.h
 Selection.o: \
 	../src/Selection.cxx \
 	../include/Platform.h \
