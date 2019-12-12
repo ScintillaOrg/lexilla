@@ -1093,7 +1093,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return StringResult(lParam, DocumentLexState()->GetName());
 
 	case SCI_LOADLEXERLIBRARY:
-		LexerManager::GetInstance()->Load(ConstCharPtrFromSPtr(lParam));
+		ExternalLexerLoad(ConstCharPtrFromSPtr(lParam));
 		break;
 
 	case SCI_PRIVATELEXERCALL:
