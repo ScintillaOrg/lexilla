@@ -3257,13 +3257,12 @@ public:
 	// Use GetProcAddress to get a pointer to the relevant function.
 	Function FindFunction(const char *name) noexcept override {
 		if (h) {
-			// C++ standard doesn't like casts between function pointers and void pointers so use a union
-			union {
-				FARPROC fp;
-				Function f;
-			} fnConv;
-			fnConv.fp = ::GetProcAddress(h, name);
-			return fnConv.f;
+			// Use memcpy as it doesn't invoke undefined or conditionally defined behaviour.
+			FARPROC fp = ::GetProcAddress(h, name);
+			Function f = nullptr;
+			static_assert(sizeof(f) == sizeof(fp));
+			memcpy(&f, &fp, sizeof(f));
+			return f;
 		} else {
 			return nullptr;
 		}

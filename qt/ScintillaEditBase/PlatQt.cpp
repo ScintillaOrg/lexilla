@@ -1119,17 +1119,17 @@ public:
 	}
 	Function FindFunction(const char *name) override {
 		if (lib) {
-			// C++ standard doesn't like casts between function pointers and void pointers so use a union
-			union {
+			// Use memcpy as it doesn't invoke undefined or conditionally defined behaviour.
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-				QFunctionPointer fp;
+			QFunctionPointer fp {};
 #else
-				void *fp;
+			void *fp = nullptr;
 #endif
-				Function f;
-			} fnConv;
-			fnConv.fp = lib->resolve(name);
-			return fnConv.f;
+			fp = lib->resolve(name);
+			Function f = nullptr;
+			static_assert(sizeof(f) == sizeof(fp));
+			memcpy(&f, &fp, sizeof(f));
+			return f;
 		}
 		return nullptr;
 	}
