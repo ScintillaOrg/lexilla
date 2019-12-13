@@ -35,6 +35,8 @@ using namespace Scintilla;
 
 namespace {
 
+int nextLanguage = SCLEX_AUTOMATIC + 1;
+
 typedef int (EXT_LEXER_DECL *GetLexerCountFn)();
 typedef void (EXT_LEXER_DECL *GetLexerNameFn)(unsigned int Index, char *name, int buflength);
 typedef LexerFactoryFunction(EXT_LEXER_DECL *GetLexerFactoryFunction)(unsigned int Index);
@@ -138,7 +140,9 @@ LexerLibrary::LexerLibrary(const char *moduleName_) {
 				// Assign a buffer for the lexer name.
 				char lexname[100] = "";
 				GetLexerName(i, lexname, sizeof(lexname));
-				ExternalLexerModule *lex = new ExternalLexerModule(SCLEX_AUTOMATIC, nullptr, lexname, nullptr);
+				ExternalLexerModule *lex = new ExternalLexerModule(nextLanguage, nullptr, lexname, nullptr);
+				nextLanguage++;
+
 				// This is storing a second reference to lex in the Catalogue as well as in modules.
 				// TODO: Should use std::shared_ptr or similar to ensure allocation safety.
 				Catalogue::AddLexerModule(lex);
