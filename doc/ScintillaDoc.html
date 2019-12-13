@@ -6857,6 +6857,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     styling and fold points for an unsupported language you can either do this in the container or
     better still, write your own lexer following the pattern of one of the existing ones.</p>
 
+    <p>If the symbol <code>SCI_EMPTYCATALOGUE</code> is defined when building
+    Scintilla, then no lexers are made available but other lexing support code may be present.</p>
+
     <p>Scintilla also supports external lexers. These are DLLs (on Windows), .dylib modules (on macOS),
     or .so modules (on GTK/Linux) that export three
     functions: <code>GetLexerCount</code>, <code>GetLexerName</code>, and
