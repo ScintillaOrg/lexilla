@@ -1,6 +1,6 @@
 /**
  * Scintilla source code edit control
- * PlatCocoa.mm - implementation of platform facilities on MacOS X/Cocoa
+ * @file PlatCocoa.mm - implementation of platform facilities on MacOS X/Cocoa
  *
  * Written by Mike Lischke
  * Based on PlatMacOSX.cxx

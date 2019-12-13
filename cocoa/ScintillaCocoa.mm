@@ -1,7 +1,7 @@
 
 /**
  * Scintilla source code edit control
- * ScintillaCocoa.mm - Cocoa subclass of ScintillaBase
+ * @file ScintillaCocoa.mm - Cocoa subclass of ScintillaBase
  *
  * Written by Mike Lischke <mlischke@sun.com>
  *

@@ -1,4 +1,5 @@
 // Scintilla Lexer for X12
+// @file LexX12.cxx
 // Written by Iain Clarke, IMCSoft & Inobiz AB.
 // X12 official documentation is behind a paywall, but there's a description of the syntax here:
 // http://www.rawlinsecconsulting.com/x12tutorial/x12syn.html

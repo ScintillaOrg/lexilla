@@ -1,4 +1,5 @@
 // Scintilla Lexer for EDIFACT
+// @file LexEDIFACT.cxx
 // Written by Iain Clarke, IMCSoft & Inobiz AB.
 // EDIFACT documented here: https://www.unece.org/cefact/edifact/welcome.html
 // and more readably here: https://en.wikipedia.org/wiki/EDIFACT
