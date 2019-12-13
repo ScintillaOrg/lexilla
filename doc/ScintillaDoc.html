@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 15 November 2019 NH</p>
+    <p>Last edited 21 December 2019 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -265,6 +265,28 @@
         </tr>
       </tbody>
     </table>
+
+    <h2 class="provisional">Lexilla</h2>
+
+    <p>For Scintilla 5.0, lexers will be split off into a separate Lexilla library.
+    Scintilla will be responsible for the GUI and calling lexers and Lexilla will provide the lexers.
+    To allow work towards this with Scintilla 4.x, the first stage is to allow building Lexilla but
+    also include the lexers in Scintilla.</p>
+
+    <p>Lexilla is built as both a shared library and static library and applications may choose to
+    link to one or the other.</p>
+
+    <p>To build Lexilla, in the lexilla/src directory, run make (for gcc or clang)<br />
+    <code>make</code><br />
+    or nmake for MSVC<br />
+    <code>nmake -f lexilla.mak</code><br />
+    </p>
+
+    <p>Lexilla follows the <a class="seealso" href="#SCI_LOADLEXERLIBRARY">external lexer protocol</a>
+    so can be loaded by applications that support this.
+    As the protocol only supports object lexers, an additional function <code>CreateLexer(const char *name)</code>
+    is exposed which will create a lexer object (ILexer4 *) for any object lexer or function lexer.
+    </p>
 
     <h2 id="MessageCategories">Contents</h2>
 
