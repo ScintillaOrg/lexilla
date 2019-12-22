@@ -13,6 +13,8 @@
 #include <cstring>
 #include <cctype>
 
+#include <string>
+
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
@@ -29,13 +31,13 @@ public:
 	LexerEDIFACT();
 	virtual ~LexerEDIFACT() {} // virtual destructor, as we inherit from ILexer
 
-	static ILexer4 *Factory() {
+	static ILexer5 *Factory() {
 		return new LexerEDIFACT;
 	}
 
 	int SCI_METHOD Version() const override
 	{
-		return lvRelease4;
+		return lvRelease5;
 	}
 	void SCI_METHOD Release() override
 	{
@@ -73,6 +75,21 @@ public:
 		}
 		return -1;
 	}
+
+	const char * SCI_METHOD PropertyGet(const char *key) override
+	{
+		m_lastPropertyValue = "";
+		if (!strcmp(key, "fold"))
+		{
+			m_lastPropertyValue = m_bFold ? "1" : "0";
+		}
+		if (!strcmp(key, "lexer.edifact.highlight.un.all"))	// GetProperty
+		{
+			m_lastPropertyValue = m_bHighlightAllUN ? "1" : "0";
+		}
+		return m_lastPropertyValue.c_str();
+	}
+
 	const char * SCI_METHOD DescribeWordListSets() override
 	{
 		return NULL;
@@ -105,6 +122,8 @@ protected:
 	char m_chDecimal;
 	char m_chRelease;
 	char m_chSegment;
+
+	std::string m_lastPropertyValue;
 };
 
 LexerModule lmEDIFACT(SCLEX_EDIFACT, LexerEDIFACT::Factory, "edifact");
@@ -115,7 +134,7 @@ LexerModule lmEDIFACT(SCLEX_EDIFACT, LexerEDIFACT::Factory, "edifact");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-LexerEDIFACT::LexerEDIFACT()
+LexerEDIFACT::LexerEDIFACT() : DefaultLexer("edifact", SCLEX_EDIFACT)
 {
 	m_bFold = false;
 	m_bHighlightAllUN = false;

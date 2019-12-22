@@ -322,7 +322,7 @@ LexerFactoryFunction EXPORT_FUNCTION GetLexerFactory(unsigned int index) {
 	return catalogueLexilla.Factory(index);
 }
 
-ILexer4 EXPORT_FUNCTION *CreateLexer(const char *name) {
+ILexer5 EXPORT_FUNCTION *CreateLexer(const char *name) {
 	AddEachLexer();
 	for (unsigned int i = 0; i < catalogueLexilla.Count(); i++) {
 		const char *lexerName = catalogueLexilla.Name(i);

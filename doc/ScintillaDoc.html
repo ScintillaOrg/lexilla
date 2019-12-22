@@ -285,7 +285,7 @@
     <p>Lexilla follows the <a class="seealso" href="#SCI_LOADLEXERLIBRARY">external lexer protocol</a>
     so can be loaded by applications that support this.
     As the protocol only supports object lexers, an additional function <code>CreateLexer(const char *name)</code>
-    is exposed which will create a lexer object (ILexer4 *) for any object lexer or function lexer.
+    is exposed which will create a lexer object (ILexer5 *) for any object lexer or function lexer.
     </p>
 
     <h2 id="MessageCategories">Contents</h2>
@@ -7123,6 +7123,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     can be used during lexing. For example a C++ lexer may store a set of preprocessor definitions
     or variable declarations and style these depending on their role.</p>
 
+    <p class="provisional">ILexer4 is extended with the provisional ILexer5 interface to support use of Lexilla.</p>
+
     <p>A set of helper classes allows older lexers defined by functions to be used in Scintilla.</p>
 <h4>ILexer4</h4>
 
@@ -7155,6 +7157,18 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>TagsOfStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DescriptionOfStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
+</div>
+
+<h4 class="provisional">ILexer5</h4>
+
+<div class="highlighted">
+<span><span class="S5">class</span><span class="S0"> </span>ILexer5<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>ILexer4<span class="S0"> </span><span class="S10">{</span><br />
+<span class="S5">public</span><span class="S10">:</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetName<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> &nbsp;</span>GetIdentifier<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>PropertyGet<span class="S10">(</span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>key<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S10">};</span><br />
+<span class="S0"></span></span>
 </div>
 
 <p>
@@ -7203,6 +7217,15 @@ are used to provide information on the set of styles used by this lexer.
 A set of common tags and conventions for combining them is <a  class="jump" href="StyleMetadata.html">described here</a>.
 <code>DescriptionOfStyle</code> is an English description of the style like "<code>Function or method name definition</code>".
 </p>
+
+<p class="provisional"><code>GetName</code> and <code>GetIdentifier</code> may be called
+to discover the identity of a lexer and be used to implement
+<a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE</a> and
+<a class="message" href="#SCI_GETLEXER">SCI_GETLEXER</a>.</p>
+
+<p class="provisional"><code>PropertyGet</code> may be called
+to discover the value of a property stored by a lexer and be used to implement
+<a class="message" href="#SCI_GETPROPERTY">SCI_GETPROPERTY</a>.</p>
 
 <h4>IDocument</h4>
 

@@ -16,7 +16,7 @@ struct LexicalClass;
 
 typedef void (*LexerFunction)(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler);
-typedef ILexer4 *(*LexerFactoryFunction)();
+typedef ILexer5 *(*LexerFactoryFunction)();
 
 /**
  * A LexerModule is responsible for lexing and folding a particular language.
@@ -58,7 +58,7 @@ public:
 	const LexicalClass *LexClasses() const;
 	size_t NamedStyles() const;
 
-	ILexer4 *Create() const;
+	ILexer5 *Create() const;
 
 	virtual void Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler) const;

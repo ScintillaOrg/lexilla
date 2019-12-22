@@ -56,7 +56,7 @@ public:
 		return lexerCatalogue[index]->fnFactory;
 	}
 
-	ILexer4 *Create(unsigned int index) {
+	ILexer5 *Create(unsigned int index) {
 		const LexerModule *plm = lexerCatalogue[index];
 		if (!plm) {
 			return nullptr;

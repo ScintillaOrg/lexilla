@@ -8,6 +8,6 @@
 
 extern "C" {
 
-Scintilla::ILexer4 *CreateLexer(const char *name);
+Scintilla::ILexer5 *CreateLexer(const char *name);
 
 }
