@@ -49,6 +49,8 @@
 #include <regex>
 #include <iostream>
 #include <sstream>
+#include <fstream>
+#include <filesystem>
 
 // POSIX
 #include <dlfcn.h>
@@ -155,6 +157,10 @@
 #include "ScintillaBase.h"
 
 #include "ExternalLexer.h"
+
+#include "Lexilla.h"
+#include "TestDocument.h"
+#include "LexillaAccess.h"
 
 // Platform-specific headers
 

@@ -71,7 +71,6 @@ constParameter:scintilla/lexers/LexFortran.cxx
 variableScope:scintilla/lexers/LexGui4Cli.cxx
 constParameter:scintilla/lexers/LexHaskell.cxx
 constParameter:scintilla/lexers/LexHex.cxx
-missingOverride:scintilla/lexers/LexHollywood.cxx
 constParameter:scintilla/lexers/LexHTML.cxx
 variableScope:scintilla/lexers/LexInno.cxx
 constParameter:scintilla/lexers/LexJSON.cxx
