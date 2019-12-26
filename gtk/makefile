@@ -35,14 +35,16 @@ ifndef windir
 BASE_FLAGS += -fPIC
 endif
 
+# Take care of changing Unix style '/' directory separator to '\' on Windows
+normalize = $(if $(windir),$(subst /,\,$1),$1)
+
 ifdef windir
 CC = gcc
 DEL = del /q
-COMPLIB=$(srcdir)\..\bin\scintilla.a
 else
 DEL = rm -f
-COMPLIB=$(basedir)/bin/scintilla.a
 endif
+COMPLIB=$(basedir)/bin/scintilla.a
 
 vpath %.h $(srcdir) $(basedir)/src $(basedir)/include $(basedir)/lexlib
 vpath %.c $(srcdir)
@@ -68,7 +70,7 @@ MARSHALLER=scintilla-marshal.o
 all: $(COMPLIB)
 
 clean:
-	$(DEL) *.o $(COMPLIB) *.plist
+	$(DEL) *.o $(call normalize,$(COMPLIB)) *.plist
 
 .cxx.o:
 	$(CXX) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(CXX_BASE_FLAGS) $(CXXFLAGS) -c $<
