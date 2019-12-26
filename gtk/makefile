@@ -99,13 +99,58 @@ analyze:
 depend deps.mak:
 	python DepGen.py
 
-$(COMPLIB): Accessor.o CharacterSet.o DefaultLexer.o LexerBase.o LexerModule.o LexerSimple.o StyleContext.o WordList.o \
-	CharClassify.o Decoration.o Document.o PerLine.o Catalogue.o CallTip.o CaseConvert.o CaseFolder.o \
-	ScintillaBase.o ContractionState.o EditModel.o Editor.o EditView.o ExternalLexer.o MarginView.o \
-	PropSetSimple.o PlatGTK.o \
-	KeyMap.o LineMarker.o PositionCache.o ScintillaGTK.o ScintillaGTKAccessible.o CellBuffer.o CharacterCategory.o ViewStyle.o \
-	RESearch.o RunStyles.o Selection.o Style.o Indicator.o AutoComplete.o UniConversion.o UniqueString.o XPM.o \
-	$(MARSHALLER) $(LEXOBJS)
+# Required for base Scintilla
+SRC_OBJS = \
+	AutoComplete.o \
+	CallTip.o \
+	CaseConvert.o \
+	CaseFolder.o \
+	CellBuffer.o \
+	CharacterCategory.o \
+	CharacterSet.o \
+	CharClassify.o \
+	ContractionState.o \
+	DBCS.o \
+	Decoration.o \
+	Document.o \
+	EditModel.o \
+	Editor.o \
+	EditView.o \
+	Indicator.o \
+	KeyMap.o \
+	LineMarker.o \
+	MarginView.o \
+	PerLine.o \
+	PositionCache.o \
+	RESearch.o \
+	RunStyles.o \
+	Selection.o \
+	Style.o \
+	UniConversion.o \
+	UniqueString.o \
+	ViewStyle.o \
+	XPM.o
+
+# Required by lexers
+LEXLIB_OBJS = \
+	Accessor.o \
+	Catalogue.o \
+	DefaultLexer.o \
+	ExternalLexer.o \
+	LexerBase.o \
+	LexerModule.o \
+	LexerSimple.o \
+	PropSetSimple.o \
+	StyleContext.o \
+	WordList.o
+
+GTK_OBJS = \
+	ScintillaBase.o \
+	PlatGTK.o \
+	ScintillaGTK.o \
+	ScintillaGTKAccessible.o
+
+$(COMPLIB): $(SRC_OBJS) $(LEXLIB_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEXOBJS)
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
