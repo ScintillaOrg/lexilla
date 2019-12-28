@@ -21,7 +21,6 @@ CXX = clang++
 CLANG_OPTS = -Wno-missing-braces -Wno-language-extension-token -Xclang -flto-visibility-public-std
 else
 # MinGW GCC
-LDMINGW = -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias
 LIBSMINGW = -lstdc++
 STRIPOPTION = -s
 endif
@@ -39,7 +38,7 @@ WINDRES ?= windres
 vpath %.h ../src ../include ../lexlib
 vpath %.cxx ../src ../lexlib ../lexers
 
-LDFLAGS=-shared -static -mwindows $(LDMINGW)
+LDFLAGS=-shared -static -mwindows
 LIBS=-lgdi32 -luser32 -limm32 -lole32 -luuid -loleaut32 -lmsimg32 $(LIBSMINGW)
 # Add -MMD to get dependencies
 INCLUDEDIRS=-I ../include -I ../src -I../lexlib
