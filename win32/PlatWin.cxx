@@ -58,6 +58,11 @@
 #define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
 #endif
 
+// __uuidof is a Microsoft extension but makes COM code neater, so disable warning
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
+
 namespace Scintilla {
 
 UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
