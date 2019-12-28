@@ -54,24 +54,18 @@ vpath %.cxx $(srcdir) $(srcdir)/../src $(srcdir)/../lexlib $(srcdir)/../lexers
 INCLUDEDIRS=-I $(srcdir)/../include -I $(srcdir)/../src -I $(srcdir)/../lexlib
 CXXBASEFLAGS=$(CXXWARNFLAGS) $(PICFLAGS) -DGTK -DSCI_LEXER $(INCLUDEDIRS)
 
-ifdef NOTHREADS
-THREADFLAGS=-DG_THREADS_IMPL_NONE
-else
-THREADFLAGS=
-endif
-
 ifdef NO_CXX11_REGEX
 REFLAGS=-DNO_CXX11_REGEX
 endif
 
 ifdef DEBUG
 ifdef CLANG
-CTFLAGS=-DDEBUG -g -fsanitize=$(SANITIZE) $(CXXBASEFLAGS) $(THREADFLAGS)
+CTFLAGS=-DDEBUG -g -fsanitize=$(SANITIZE) $(CXXBASEFLAGS)
 else
-CTFLAGS=-DDEBUG -g $(CXXBASEFLAGS) $(THREADFLAGS)
+CTFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
 endif
 else
-CTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(THREADFLAGS)
+CTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)
 endif
 
 CXXTFLAGS:=--std=gnu++17 $(CTFLAGS) $(REFLAGS)
