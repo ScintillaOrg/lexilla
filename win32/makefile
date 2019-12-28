@@ -17,8 +17,7 @@ ifdef CLANG
 CXX = clang++
 # Clang doesn't like omitting braces in array initialization but they just add noise,
 # __uuidof is a Microsoft extension but makes COM code neater,
-# public visibility avoids warnings like 'locally defined symbol __std_terminate imported'
-CLANG_OPTS = -Wno-missing-braces -Wno-language-extension-token -Xclang -flto-visibility-public-std
+CLANG_OPTS = -Wno-missing-braces -Wno-language-extension-token
 else
 # MinGW GCC
 LIBSMINGW = -lstdc++
