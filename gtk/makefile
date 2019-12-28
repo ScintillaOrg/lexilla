@@ -13,7 +13,7 @@ srcdir ?= .
 
 ifdef CLANG
 CXX = clang++
-CXXWARNFLAGS = -Wall -pedantic -Wno-deprecated-register -Wno-missing-braces
+CXXWARNFLAGS = -Wall -pedantic -Wno-deprecated-register
 CC = clang
 # Can choose aspect to sanitize: address and undefined can simply change SANITIZE but for
 # thread also need to create Position Independent Executable -> search online documentation

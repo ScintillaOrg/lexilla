@@ -82,6 +82,12 @@ inline int Maximum(int a, int b) {
 #pragma GCC diagnostic ignored "-Wshadow"
 #endif
 
+// Clang doesn't like omitting braces in array initialization but they just add
+// noise to LexicalClass arrays in lexers
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
+
 }
 
 #endif

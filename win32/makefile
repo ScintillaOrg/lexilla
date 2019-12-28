@@ -15,8 +15,6 @@ LIBSCI = $(DIR_BIN)/libscintilla.a
 
 ifdef CLANG
 CXX = clang++
-# Clang doesn't like omitting braces in array initialization but they just add noise,
-CLANG_OPTS = -Wno-missing-braces
 else
 # MinGW GCC
 LIBSMINGW = -lstdc++
@@ -41,7 +39,7 @@ LIBS=-lgdi32 -luser32 -limm32 -lole32 -luuid -loleaut32 -lmsimg32 $(LIBSMINGW)
 # Add -MMD to get dependencies
 INCLUDEDIRS=-I ../include -I ../src -I../lexlib
 
-CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS)
+CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) -D_CRT_SECURE_NO_DEPRECATE=1
 
 ifdef NO_CXX11_REGEX
 REFLAGS=-DNO_CXX11_REGEX
