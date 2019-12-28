@@ -10,17 +10,18 @@
 .SUFFIXES: .cxx .c .o .h .a .list
 
 srcdir ?= .
+basedir = $(srcdir)/..
 
+WARNINGS = -Wpedantic -Wall
 ifdef CLANG
 CXX = clang++
-CXXWARNFLAGS = -Wall -pedantic -Wno-deprecated-register
 CC = clang
+WARNINGS += -Wno-deprecated-register
 # Can choose aspect to sanitize: address and undefined can simply change SANITIZE but for
 # thread also need to create Position Independent Executable -> search online documentation
 SANITIZE = address
 #SANITIZE = undefined
-else
-CXXWARNFLAGS = -Wall -pedantic
+BASE_FLAGS += -fsanitize=$(SANITIZE)
 endif
 ARFLAGS = rc
 RANLIB ?= ranlib
@@ -35,7 +36,7 @@ endif
 
 # Enable Position Independent Code except on Windows where it is the default so the flag produces a warning
 ifndef windir
-PICFLAGS = -fPIC
+BASE_FLAGS += -fPIC
 endif
 
 ifdef windir
@@ -44,33 +45,28 @@ DEL = del /q
 COMPLIB=$(srcdir)\..\bin\scintilla.a
 else
 DEL = rm -f
-COMPLIB=$(srcdir)/../bin/scintilla.a
+COMPLIB=$(basedir)/bin/scintilla.a
 endif
 
-vpath %.h $(srcdir) $(srcdir)/../src $(srcdir)/../include $(srcdir)/../lexlib
+vpath %.h $(srcdir) $(basedir)/src $(basedir)/include $(basedir)/lexlib
 vpath %.c $(srcdir)
-vpath %.cxx $(srcdir) $(srcdir)/../src $(srcdir)/../lexlib $(srcdir)/../lexers
+vpath %.cxx $(srcdir) $(basedir)/src $(basedir)/lexlib $(basedir)/lexers
 
-INCLUDEDIRS=-I $(srcdir)/../include -I $(srcdir)/../src -I $(srcdir)/../lexlib
-CXXBASEFLAGS=$(CXXWARNFLAGS) $(PICFLAGS) -DGTK -DSCI_LEXER $(INCLUDEDIRS)
+INCLUDES=-I $(basedir)/include -I $(basedir)/src -I $(basedir)/lexlib
+DEFINES += -DGTK -DSCI_LEXER
+BASE_FLAGS += $(WARNINGS)
 
 ifdef NO_CXX11_REGEX
-REFLAGS=-DNO_CXX11_REGEX
+DEFINES += -DNO_CXX11_REGEX
 endif
 
-ifdef DEBUG
-ifdef CLANG
-CTFLAGS=-DDEBUG -g -fsanitize=$(SANITIZE) $(CXXBASEFLAGS)
-else
-CTFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
-endif
-else
-CTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)
-endif
+DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
+BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
-CXXTFLAGS:=--std=gnu++17 $(CTFLAGS) $(REFLAGS)
+CXX_BASE_FLAGS =--std=gnu++17 $(BASE_FLAGS)
 
-CONFIGFLAGS:=$(shell pkg-config --cflags $(GTKVERSION))
+
+CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTKVERSION))
 MARSHALLER=scintilla-marshal.o
 
 all: $(COMPLIB)
@@ -79,9 +75,9 @@ clean:
 	$(DEL) *.o $(COMPLIB) *.plist
 
 .cxx.o:
-	$(CXX) $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) -c $<
+	$(CXX) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(CXX_BASE_FLAGS) $(CXXFLAGS) -c $<
 .c.o:
-	$(CC) $(CONFIGFLAGS) $(CTFLAGS) $(CFLAGS) -w -c $<
+	$(CC) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
 
 GLIB_GENMARSHAL = glib-genmarshal
 GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
@@ -91,10 +87,10 @@ GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
 .list.c:
 	$(GLIB_GENMARSHAL) --body $(GLIB_GENMARSHAL_FLAGS) $< > $@
 
-LEXOBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(srcdir)/../lexers/Lex*.cxx)))))
+LEX_OBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(srcdir)/../lexers/Lex*.cxx)))))
 
 analyze:
-	clang --analyze $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(srcdir)/../src/*.cxx $(srcdir)/../lexlib/*.cxx $(srcdir)/../lexers/*.cxx
+	clang --analyze $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(CXX_BASE_FLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(basedir)/src/*.cxx $(basedir)/lexlib/*.cxx $(basedir)/lexers/*.cxx
 
 depend deps.mak:
 	python DepGen.py
@@ -150,7 +146,7 @@ GTK_OBJS = \
 	ScintillaGTK.o \
 	ScintillaGTKAccessible.o
 
-$(COMPLIB): $(SRC_OBJS) $(LEXLIB_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEXOBJS)
+$(COMPLIB): $(SRC_OBJS) $(LEXLIB_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEX_OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
