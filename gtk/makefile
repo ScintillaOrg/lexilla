@@ -26,11 +26,7 @@ endif
 ARFLAGS = rc
 RANLIB ?= ranlib
 
-ifdef GTK3
-GTKVERSION=gtk+-3.0
-else
-GTKVERSION=gtk+-2.0
-endif
+GTK_VERSION = $(if $(GTK3),gtk+-3.0,gtk+-2.0)
 
 # Environment variable windir always defined on Win32
 
@@ -66,7 +62,7 @@ BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 CXX_BASE_FLAGS =--std=gnu++17 $(BASE_FLAGS)
 
 
-CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTKVERSION))
+CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTK_VERSION))
 MARSHALLER=scintilla-marshal.o
 
 all: $(COMPLIB)
