@@ -23,7 +23,7 @@ else
 CXXWARNFLAGS = -Wall -pedantic
 endif
 ARFLAGS = rc
-RANLIB = touch
+RANLIB ?= ranlib
 
 ifdef GTK3
 GTKVERSION=gtk+-3.0
@@ -32,12 +32,6 @@ GTKVERSION=gtk+-2.0
 endif
 
 # Environment variable windir always defined on Win32
-
-ifndef windir
-ifeq ($(shell uname),Darwin)
-RANLIB = ranlib
-endif
-endif
 
 # Enable Position Independent Code except on Windows where it is the default so the flag produces a warning
 ifndef windir
