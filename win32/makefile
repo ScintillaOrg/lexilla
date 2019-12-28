@@ -1,8 +1,9 @@
 # Make file for Scintilla on Windows
+# @file makefile
 # Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile assumes the Mingw-w64 version of GCC 7.1+ is used and changes will
-# be needed to use other compilers.
+# This makefile assumes Mingw-w64 GCC 9.0+ is used and changes will be needed to use other compilers.
+# Clang 9.0+ can be used with CLANG=1 on command line.
 
 .SUFFIXES: .cxx
 

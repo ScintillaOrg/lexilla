@@ -1,9 +1,10 @@
-# Make file for Scintilla on Linux or compatible OS
+# Make file for Scintilla on Linux, macOS, or Windows
+# @file makefile
 # Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile assumes GCC 4.3 is used and changes will be needed to use other compilers.
-# GNU make does not like \r\n line endings so should be saved to CVS in binary form.
-# Builds for GTK+ 2 and no longer supports GTK+ 1.
+# This makefile assumes GCC 9.0+ is used and changes will be needed to use other compilers.
+# Clang 9.0+ can be used with CLANG=1 on command line.
+# Builds for GTK+ 2 and 3. GTK 3 requires GTK3=1 on command line.
 # Also works with ming32-make on Windows.
 
 .SUFFIXES: .cxx .c .o .h .a .list
