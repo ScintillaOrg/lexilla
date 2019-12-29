@@ -74,7 +74,7 @@ DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
 BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
 CXX_BASE_FLAGS =--std=gnu++17 $(BASE_FLAGS)
-
+CXX_ALL_FLAGS =$(DEFINES) $(INCLUDES) $(CXX_BASE_FLAGS) $(CONFIG_FLAGS) 
 
 CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTK_VERSION))
 MARSHALLER=scintilla-marshal.o
@@ -85,7 +85,7 @@ clean:
 	$(DEL) *.o $(call normalize,$(COMPLIB)) *.plist
 
 .cxx.o:
-	$(CXX) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(CXX_BASE_FLAGS) $(CXXFLAGS) -c $<
+	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
 .c.o:
 	$(CC) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
 
@@ -97,13 +97,13 @@ GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
 .list.c:
 	$(GLIB_GENMARSHAL) --body $(GLIB_GENMARSHAL_FLAGS) $< > $@
 
-LEX_OBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(srcdir)/../lexers/Lex*.cxx)))))
-
 analyze:
 	clang --analyze $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(CXX_BASE_FLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(basedir)/src/*.cxx $(basedir)/lexlib/*.cxx $(basedir)/lexers/*.cxx
 
 depend deps.mak:
 	python DepGen.py
+
+LEX_OBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(basedir)/lexers/Lex*.cxx)))))
 
 # Required for base Scintilla
 SRC_OBJS = \
