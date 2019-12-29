@@ -5,6 +5,8 @@
 # This makefile assumes Mingw-w64 GCC 9.0+ is used and changes will be needed to use other compilers.
 # Clang 9.0+ can be used with CLANG=1 on command line.
 
+.PHONY: all clean analyze depend
+
 .SUFFIXES: .cxx .c .o .h .a
 
 DIR_BIN=../bin
@@ -64,7 +66,7 @@ all:	$(COMPONENT) $(LEXCOMPONENT) $(LIBSCI)
 clean:
 	$(DEL) *.exe *.o *.a *.obj *.dll *.res *.map *.plist
 
-.cxx.o:
+%.o: %.cxx
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
 
 analyze:

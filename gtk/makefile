@@ -7,6 +7,8 @@
 # Builds for GTK+ 2 and 3. GTK 3 requires GTK3=1 on command line.
 # Also works with ming32-make on Windows.
 
+.PHONY: all clean analyze depend
+
 .SUFFIXES: .cxx .c .o .h .a .list
 
 srcdir ?= .
@@ -84,17 +86,17 @@ all: $(COMPLIB)
 clean:
 	$(DEL) *.o $(call normalize,$(COMPLIB)) *.plist
 
-.cxx.o:
+%.o: %.cxx
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
-.c.o:
+%.o: %.c
 	$(CC) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
 
 GLIB_GENMARSHAL = glib-genmarshal
 GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
 
-.list.h:
+%.h: %.list
 	$(GLIB_GENMARSHAL) --header $(GLIB_GENMARSHAL_FLAGS) $< > $@
-.list.c:
+%.c: %.list
 	$(GLIB_GENMARSHAL) --body $(GLIB_GENMARSHAL_FLAGS) $< > $@
 
 analyze:
