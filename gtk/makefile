@@ -17,6 +17,18 @@ ifdef CLANG
 CXX = clang++
 CC = clang
 WARNINGS += -Wno-deprecated-register
+ifdef windir
+# Turn off some warnings that occur when Clang is being used on Windows where it
+# is including Microsoft headers.
+# incompatible-ms-struct is because more complex structs are not quite the same as MSVC
+WARNINGS += -Wno-incompatible-ms-struct
+# language-extension-token is because of __int64 in glib-2.0 glibconfig.h
+WARNINGS += -Wno-language-extension-token
+# register may be used in glib
+# This produces a warning since -Wno-register is not valid for C files but it still works
+WARNINGS += -Wno-register
+DEFINES += -D_CRT_SECURE_NO_DEPRECATE
+endif
 # Can choose aspect to sanitize: address and undefined can simply change SANITIZE but for
 # thread also need to create Position Independent Executable -> search online documentation
 SANITIZE = address
