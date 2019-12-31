@@ -31,6 +31,9 @@ WINDRES ?= windres
 
 # Environment variable windir always defined on Win32
 
+# Take care of changing Unix style '/' directory separator to '\' on Windows
+normalize = $(if $(windir),$(subst /,\,$1),$1)
+
 ifdef windir
 DEL = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
 else
@@ -64,7 +67,7 @@ CXX_ALL_FLAGS =$(DEFINES) $(INCLUDES) $(CXX_BASE_FLAGS)
 all:	$(COMPONENT) $(LEXCOMPONENT) $(LIBSCI)
 
 clean:
-	$(DEL) *.exe *.o *.a *.obj *.dll *.res *.map *.plist
+	$(DEL) *.exe *.o *.a *.obj *.dll *.res *.map *.plist $(call normalize,$(LIBSCI))
 
 %.o: %.cxx
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<

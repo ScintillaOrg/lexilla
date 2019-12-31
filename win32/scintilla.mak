@@ -61,7 +61,8 @@ all:	$(COMPONENT) $(LEXCOMPONENT) $(LIBSCI)
 
 clean:
 	-del /q $(DIR_O)\*.obj $(DIR_O)\*.pdb $(DIR_O)\*.asm $(COMPONENT) $(LEXCOMPONENT) \
-	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb $(DIR_BIN)\*.lib
+	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb \
+	$(DIR_BIN)\Scintilla.lib $(DIR_BIN)\SciLexer.lib $(LIBSCI)
 
 depend:
 	python DepGen.py
