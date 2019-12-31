@@ -88,6 +88,15 @@ $(DIR_O)/Catalogue.obj: \
 	../lexlib/LexerModule.h \
 	../lexlib/CatalogueModules.h \
 	../src/Catalogue.h
+$(DIR_O)/CatalogueL.obj: \
+	../src/Catalogue.cxx \
+	../include/ILexer.h \
+	../include/Sci_Position.h \
+	../include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/LexerModule.h \
+	../lexlib/CatalogueModules.h \
+	../src/Catalogue.h
 $(DIR_O)/CellBuffer.obj: \
 	../src/CellBuffer.cxx \
 	../include/Platform.h \

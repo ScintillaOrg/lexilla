@@ -269,7 +269,7 @@
     <h2 class="provisional">Lexilla</h2>
 
     <p>For Scintilla 5.0, lexers will be split off into a separate Lexilla library.
-    Scintilla will be responsible for the GUI and calling lexers and Lexilla will provide the lexers.
+    Scintilla will be responsible for the GUI and calling lexers with Lexilla providing the lexers.
     To allow work towards this with Scintilla 4.x, the first stage is to allow building Lexilla but
     also include the lexers in Scintilla.</p>
 
@@ -287,6 +287,9 @@
     As the protocol only supports object lexers, an additional function <code>CreateLexer(const char *name)</code>
     is exposed which will create a lexer object (ILexer5 *) for any object lexer or function lexer.
     </p>
+
+    <p>A lexer created by Lexilla may be used in Scintilla by calling
+    <a class="seealso" href="#SCI_SETILEXER">SCI_SETILEXER</a>.</p>
 
     <h2 id="MessageCategories">Contents</h2>
 
@@ -6891,6 +6894,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char
     *language)</a><br />
      <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language) &rarr; int</a><br />
+     <a class="message" href="#SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer lexer)</a><br />
      <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(position start, position end)</a><br />
@@ -6940,6 +6944,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     or "Python". To locate the name for the built-in lexers, open the relevant
     <code>Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
     <code>LexerModule</code> constructor is the name to use.</p>
+
+     <p class="provisional"><b id="SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer lexer)</b><br />
+     <code>SCI_SETILEXER</code> allows setting a lexer as an <code>ILexer5*</code>.
+     The lexer may be implemented by an application or a shared library such as Lexilla.</p>
 
     <p>To test if your lexer assignment worked, use <a class="message"
     href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to

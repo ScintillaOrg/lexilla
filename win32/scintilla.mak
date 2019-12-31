@@ -221,14 +221,14 @@ LEX_OBJS=\
 # Required by lexers
 LEXLIB_OBJS = \
 	$(DIR_O)\Accessor.obj \
-	$(DIR_O)\Catalogue.obj \
+	$(DIR_O)\CatalogueL.obj \
 	$(DIR_O)\ExternalLexer.obj \
 	$(DIR_O)\DefaultLexer.obj \
 	$(DIR_O)\LexerBase.obj \
 	$(DIR_O)\LexerModule.obj \
 	$(DIR_O)\LexerSimple.obj \
 	$(DIR_O)\StyleContext.obj \
-	$(DIR_O)\WordList.obj \
+	$(DIR_O)\WordList.obj
 
 # Required by libraries and DLLs that include lexing
 SCILEX_OBJS = \
@@ -241,11 +241,17 @@ SCILEX_OBJS = \
 	$(DIR_O)\ScintillaWin.obj
 
 COMPONENT_OBJS = \
+	$(DIR_O)\Accessor.obj \
+	$(DIR_O)\Catalogue.obj \
 	$(DIR_O)\HanjaDic.obj \
+	$(DIR_O)\LexerBase.obj \
+	$(DIR_O)\LexerModule.obj \
+	$(DIR_O)\LexerSimple.obj \
 	$(DIR_O)\PlatWin.obj \
 	$(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\ScintillaDLL.obj \
 	$(DIR_O)\ScintillaWin.obj \
+	$(DIR_O)\WordList.obj \
 	$(SRC_OBJS)
 
 LEXCOMPONENT_OBJS = \
@@ -278,6 +284,12 @@ $(LIBSCI): $(SCILEX_OBJS)
 # Some source files are compiled into more than one object because of different conditional compilation
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
 	$(CXX) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ..\src\ScintillaBase.cxx
+
+$(DIR_O)\CatalogueL.obj: ..\src\Catalogue.cxx
+	$(CXX) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ..\src\Catalogue.cxx
+
+$(DIR_O)\Catalogue.obj: ..\src\Catalogue.cxx
+	$(CXX) $(CXXFLAGS) -DSCI_LEXER -DSCI_EMPTYCATALOGUE -c $(NAME)$@ ..\src\Catalogue.cxx
 
 # Dependencies
 
