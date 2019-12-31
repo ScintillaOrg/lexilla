@@ -238,7 +238,7 @@ SCILEX_OBJS = \
 	$(DIR_O)\HanjaDic.obj \
 	$(DIR_O)\PlatWin.obj \
 	$(DIR_O)\ScintillaBaseL.obj \
-	$(DIR_O)\ScintillaWinL.obj
+	$(DIR_O)\ScintillaWin.obj
 
 COMPONENT_OBJS = \
 	$(DIR_O)\HanjaDic.obj \
@@ -251,14 +251,6 @@ COMPONENT_OBJS = \
 LEXCOMPONENT_OBJS = \
 	$(DIR_O)\ScintillaDLL.obj \
 	$(SCILEX_OBJS)
-
-SOBJS = \
-	$(SRC_OBJS) \
-	$(DIR_O)\HanjaDic.obj \
-	$(DIR_O)\PlatWin.obj \
-	$(DIR_O)\ScintillaBase.obj \
-	$(DIR_O)\ScintillaWin.obj \
-	$(DIR_O)\ScintillaDLL.obj
 
 $(DIR_O)\ScintRes.res : ScintRes.rc
 	$(RC) -fo$@ $**
@@ -286,9 +278,6 @@ $(LIBSCI): $(SCILEX_OBJS)
 # Some source files are compiled into more than one object because of different conditional compilation
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
 	$(CXX) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ..\src\ScintillaBase.cxx
-
-$(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx
-	$(CXX) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ScintillaWin.cxx
 
 # Dependencies
 

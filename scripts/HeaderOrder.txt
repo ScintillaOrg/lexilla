@@ -105,6 +105,7 @@
 #include "CharacterSet.h"
 #include "CharacterCategory.h"
 #include "LexerModule.h"
+#include "CatalogueModules.h"
 #include "OptionSet.h"
 #include "SparseState.h"
 #include "SubStyles.h"

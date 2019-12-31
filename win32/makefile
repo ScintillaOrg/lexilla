@@ -130,7 +130,7 @@ SCILEX_OBJS=\
 	HanjaDic.o \
 	PlatWin.o \
 	ScintillaBaseL.o \
-	ScintillaWinL.o
+	ScintillaWin.o
 
 COMPONENT_OBJS = \
 	$(SRC_OBJS) \
@@ -160,9 +160,6 @@ $(LIBSCI): $(SCILEX_OBJS)
 include deps.mak
 
 ScintillaBaseL.o:
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
-
-ScintillaWinL.o:
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 
 ScintRes.o:	ScintRes.rc

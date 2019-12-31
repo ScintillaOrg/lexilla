@@ -3030,9 +3030,6 @@ GType scintilla_object_get_type() {
 
 void ScintillaGTK::ClassInit(OBJECT_CLASS *object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class) {
 	Platform_Initialise();
-#ifdef SCI_LEXER
-	Scintilla_LinkLexers();
-#endif
 	atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
 	atomString = GDK_SELECTION_TYPE_STRING;
 	atomUriList = gdk_atom_intern("text/uri-list", FALSE);

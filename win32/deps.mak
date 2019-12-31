@@ -55,45 +55,6 @@ ScintillaWin.o: \
 	PlatWin.h \
 	HanjaDic.h \
 	ScintillaWin.h
-ScintillaWinL.o: \
-	ScintillaWin.cxx \
-	../include/Platform.h \
-	../include/ILoader.h \
-	../include/Sci_Position.h \
-	../include/ILexer.h \
-	../include/Scintilla.h \
-	../lexlib/CharacterCategory.h \
-	../src/Position.h \
-	../src/UniqueString.h \
-	../src/SplitVector.h \
-	../src/Partitioning.h \
-	../src/RunStyles.h \
-	../src/ContractionState.h \
-	../src/CellBuffer.h \
-	../src/CallTip.h \
-	../src/KeyMap.h \
-	../src/Indicator.h \
-	../src/LineMarker.h \
-	../src/Style.h \
-	../src/ViewStyle.h \
-	../src/CharClassify.h \
-	../src/Decoration.h \
-	../src/CaseFolder.h \
-	../src/Document.h \
-	../src/CaseConvert.h \
-	../src/UniConversion.h \
-	../src/Selection.h \
-	../src/PositionCache.h \
-	../src/EditModel.h \
-	../src/MarginView.h \
-	../src/EditView.h \
-	../src/Editor.h \
-	../src/ElapsedPeriod.h \
-	../src/AutoComplete.h \
-	../src/ScintillaBase.h \
-	PlatWin.h \
-	HanjaDic.h \
-	ScintillaWin.h
 AutoComplete.o: \
 	../src/AutoComplete.cxx \
 	../include/Platform.h \
@@ -125,6 +86,7 @@ Catalogue.o: \
 	../include/Scintilla.h \
 	../include/SciLexer.h \
 	../lexlib/LexerModule.h \
+	../lexlib/CatalogueModules.h \
 	../src/Catalogue.h
 CellBuffer.o: \
 	../src/CellBuffer.cxx \

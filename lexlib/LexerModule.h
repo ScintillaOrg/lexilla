@@ -65,7 +65,7 @@ public:
 	virtual void Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler) const;
 
-	friend class Catalogue;
+	friend class CatalogueModules;
 };
 
 inline int Maximum(int a, int b) {

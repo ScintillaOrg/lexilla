@@ -423,7 +423,6 @@ ScintillaCocoa::~ScintillaCocoa() {
  * Core initialization of the control. Everything that needs to be set up happens here.
  */
 void ScintillaCocoa::Init() {
-	Scintilla_LinkLexers();
 
 	// Tell Scintilla not to buffer: Quartz buffers drawing for us.
 	WndProc(SCI_SETBUFFEREDDRAW, 0, 0);

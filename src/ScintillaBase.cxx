@@ -73,6 +73,9 @@ ScintillaBase::ScintillaBase() {
 	listType = 0;
 	maxListWidth = 0;
 	multiAutoCMode = SC_MULTIAUTOC_ONCE;
+#ifdef SCI_LEXER
+	Scintilla_LinkLexers();
+#endif
 }
 
 ScintillaBase::~ScintillaBase() {

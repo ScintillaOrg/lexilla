@@ -121,6 +121,7 @@ Catalogue.o: \
 	../include/Scintilla.h \
 	../include/SciLexer.h \
 	../lexlib/LexerModule.h \
+	../lexlib/CatalogueModules.h \
 	../src/Catalogue.h
 CellBuffer.o: \
 	../src/CellBuffer.cxx \
