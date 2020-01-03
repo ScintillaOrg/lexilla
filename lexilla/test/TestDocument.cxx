@@ -52,6 +52,10 @@ namespace {
 		}
 	}
 
+	inline constexpr bool UTF8IsTrailByte(unsigned char ch) noexcept {
+		return (ch >= 0x80) && (ch < 0xc0);
+	}
+
 }
 
 void TestDocument::Set(std::string_view sv) {
@@ -187,10 +191,30 @@ Sci_Position SCI_METHOD TestDocument::LineEnd(Sci_Position line) const {
 }
 
 Sci_Position SCI_METHOD TestDocument::GetRelativePosition(Sci_Position positionStart, Sci_Position characterOffset) const {
-	// TODO: negative characterOffset
+	Sci_Position pos = positionStart;
+	if (characterOffset < 0) {
+		while (characterOffset < 0) {
+			if (pos <= 0) {
+				return 0;
+			}
+			unsigned char previousByte = text.at(pos - 1);
+			if (previousByte < 0x80) {
+				pos--;
+				characterOffset++;
+			} else {
+				while ((pos > 1) && UTF8IsTrailByte(previousByte)) {
+					pos--;
+					previousByte = text.at(pos - 1);
+				}
+				pos--;
+				// text[pos] is now a character start
+				characterOffset++;
+			}
+		}
+		return pos;
+	}
 	assert(characterOffset >= 0);
 	// TODO: invalid UTF-8
-	Sci_Position pos = positionStart;
 	while (characterOffset > 0) {
 		Sci_Position width = 0;
 		GetCharacterAndWidth(pos, &width);
