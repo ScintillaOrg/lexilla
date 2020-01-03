@@ -99,6 +99,8 @@ constParameter:scintilla/lexers/LexPython.cxx
 shadowVariable:scintilla/lexers/LexPowerPro.cxx
 constParameter:scintilla/lexers/LexProgress.cxx
 variableScope:scintilla/lexers/LexProgress.cxx
+constParameter:scintilla/lexers/LexRaku.cxx
+variableScope:scintilla/lexers/LexRaku.cxx
 redundantInitialization:scintilla/lexers/LexRegistry.cxx
 constParameter:scintilla/lexers/LexRuby.cxx
 variableScope:scintilla/lexers/LexRuby.cxx

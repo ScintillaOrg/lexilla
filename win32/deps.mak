@@ -1642,6 +1642,20 @@ LexR.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
+LexRaku.o: \
+	../lexers/LexRaku.cxx \
+	../include/ILexer.h \
+	../include/Sci_Position.h \
+	../include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 LexRebol.o: \
 	../lexers/LexRebol.cxx \
 	../include/ILexer.h \

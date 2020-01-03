@@ -143,6 +143,7 @@ LEX_OBJS=\
 	$(DIR_O)\LexPS.obj \
 	$(DIR_O)\LexPython.obj \
 	$(DIR_O)\LexR.obj \
+	$(DIR_O)\LexRaku.obj \
 	$(DIR_O)\LexRebol.obj \
 	$(DIR_O)\LexRegistry.obj \
 	$(DIR_O)\LexRuby.obj \

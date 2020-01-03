@@ -121,6 +121,7 @@ extern LexerModule lmPS;
 extern LexerModule lmPureBasic;
 extern LexerModule lmPython;
 extern LexerModule lmR;
+extern LexerModule lmRaku;
 extern LexerModule lmREBOL;
 extern LexerModule lmRegistry;
 extern LexerModule lmRuby;
@@ -263,6 +264,7 @@ void AddEachLexer() {
 	catalogueLexilla.AddLexerModule(&lmPureBasic);
 	catalogueLexilla.AddLexerModule(&lmPython);
 	catalogueLexilla.AddLexerModule(&lmR);
+	catalogueLexilla.AddLexerModule(&lmRaku);
 	catalogueLexilla.AddLexerModule(&lmREBOL);
 	catalogueLexilla.AddLexerModule(&lmRegistry);
 	catalogueLexilla.AddLexerModule(&lmRuby);
