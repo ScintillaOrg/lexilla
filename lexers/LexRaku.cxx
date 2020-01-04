@@ -892,6 +892,7 @@ void LexerRaku::ProcessStringVars(StyleContext &sc, const Sci_Position length, c
 bool LexerRaku::ProcessValidRegQlangStart(StyleContext &sc, Sci_Position length, const int type,
 		WordList &wordsAdverbs, DelimPair &dp) {
 	Sci_Position startPos = sc.currentPos;
+	Sci_Position startLen = length;
 	const int target_state = sc.state;
 	int state = SCE_RAKU_DEFAULT;
 	std::string str;
@@ -908,7 +909,7 @@ bool LexerRaku::ProcessValidRegQlangStart(StyleContext &sc, Sci_Position length,
 		if (!got_all_adverbs && was_space) {
 			sc.Forward(LengthToNextChar(sc, length));
 		}
-		length -= sc.currentPos - startPos; // update length remaining
+		length = startLen - (sc.currentPos - startPos); // update length remaining
 
 		// parse / eat an identifier (if type == RAKUTYPE_REGEX)
 		if (dp.opener == 0 && !got_ident && type == RAKUTYPE_REGEX && IsAlphabet(sc.ch)) {
@@ -1067,7 +1068,7 @@ void SCI_METHOD LexerRaku::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_RAKU_DEFAULT);
 				break; // FIXME: better valid operator sequences needed?
 			case SCE_RAKU_COMMENTLINE:
-				if (sc.atLineEnd) {
+				if (IsANewLine(sc.ch)) {
 					sc.SetState(SCE_RAKU_DEFAULT);
 				}
 				break;
@@ -1424,7 +1425,9 @@ void SCI_METHOD LexerRaku::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 
 			// --- Heredoc: begin ---------------------------------------------
-			else if (sc.atLineEnd && !hereDelim.empty()) {
+			else if (!hereDelim.empty() && sc.atLineEnd) {
+				if (IsANewLine(sc.ch))
+					sc.Forward(); // skip a possible CRLF situation
 				sc.SetState(hereState);
 			}
 

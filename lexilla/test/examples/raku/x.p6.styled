@@ -21,14 +21,14 @@
 POD Documentation...
 =end pod{0}
 
-{20}say{0} {10}qq{15}:to{10}/END/{18};{7}
-A multi-line
+{20}say{0} {10}qq{15}:to{10}/END/{18};{0}
+{7}A multi-line
 string with interpolated vars: {12}$i{7}, {12}$r{7}
 END{0}
 
 {20}sub{0} {21}function{0} {18}{{0}
-	{20}return{0} {9}q{15}:to{9}/END/{18};{6}
-Here is
+	{20}return{0} {9}q{15}:to{9}/END/{18};{0}
+{6}Here is
 some multi-line
 string
 END{0}
