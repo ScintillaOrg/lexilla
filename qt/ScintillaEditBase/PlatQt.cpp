@@ -223,7 +223,7 @@ void SurfaceImpl::Release()
 
 bool SurfaceImpl::Initialised()
 {
-	return device != 0;
+	return device != nullptr;
 }
 
 void SurfaceImpl::PenColour(ColourDesired fore)
@@ -238,7 +238,7 @@ void SurfaceImpl::BrushColour(ColourDesired back)
 	GetPainter()->setBrush(QBrush(QColorFromCA(back)));
 }
 
-void SurfaceImpl::SetCodec(Font &font)
+void SurfaceImpl::SetCodec(const Font &font)
 {
 	if (font.GetID()) {
 		const char *csid = "UTF-8";

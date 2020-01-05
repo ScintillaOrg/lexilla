@@ -37,7 +37,7 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 	// On OS X drawing text into a pixmap moves it around 1 pixel to
 	// the right compared to drawing it directly onto a window.
 	// Buffered drawing turned off by default to avoid this.
-	WndProc(SCI_SETBUFFEREDDRAW, false, 0);
+	view.bufferedDraw = false;
 
 	Init();
 
