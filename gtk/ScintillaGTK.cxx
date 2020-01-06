@@ -2388,8 +2388,11 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			return;
 		}
 
-		if (initialCompose)
+		if (initialCompose) {
 			ClearBeforeTentativeStart();
+		}
+
+		SetCandidateWindowPos();
 		pdoc->TentativeStart(); // TentativeActive() from now on
 
 		std::vector<int> indicator = MapImeIndicators(preeditStr.attrs, preeditStr.str);
@@ -2423,7 +2426,6 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 		}
 
 		EnsureCaretVisible();
-		SetCandidateWindowPos();
 		ShowCaretAtCurrentPosition();
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
