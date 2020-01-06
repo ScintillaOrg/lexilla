@@ -2432,6 +2432,8 @@ void ScintillaGTK::PreeditChangedWindowedThis() {
 	try {
 		PreEditString pes(im_context);
 		if (strlen(pes.str) > 0) {
+			SetCandidateWindowPos();
+
 			PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
 			pango_layout_set_attributes(layout, pes.attrs);
 
