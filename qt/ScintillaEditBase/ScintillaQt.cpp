@@ -295,7 +295,6 @@ void ScintillaQt::ReconfigureScrollBars()
 void ScintillaQt::CopyToModeClipboard(const SelectionText &selectedText, QClipboard::Mode clipboardMode_)
 {
 	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->clear(clipboardMode_);
 	QString su = StringFromSelectedText(selectedText);
 	QMimeData *mimeData = new QMimeData();
 	mimeData->setText(su);
