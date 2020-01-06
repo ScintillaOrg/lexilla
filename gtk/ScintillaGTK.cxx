@@ -2315,8 +2315,10 @@ void ScintillaGTK::SetCandidateWindowPos() {
 	// Composition box accompanies candidate box.
 	const Point pt = PointMainCaret();
 	GdkRectangle imeBox = {0}; // No need to set width
-	imeBox.x = static_cast<gint>(pt.x);           // Only need positiion
-	imeBox.y = static_cast<gint>(pt.y) + vs.lineHeight; // underneath the first charater
+	imeBox.x = static_cast<gint>(pt.x);
+	imeBox.y = static_cast<gint>(pt.y + std::max(4, vs.lineHeight/4));
+	// prevent overlapping with current line
+	imeBox.height = vs.lineHeight;
 	gtk_im_context_set_cursor_location(im_context, &imeBox);
 }
 
