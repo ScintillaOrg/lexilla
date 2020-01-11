@@ -340,6 +340,7 @@ class ScintillaWin :
 
 	UINT CodePageOfDocument() const;
 	bool ValidCodePage(int codePage) const override;
+	std::string EncodeWString(std::wstring_view wsv);
 	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 	void IdleWork() override;
 	void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) override;
@@ -1232,6 +1233,18 @@ UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) noexcept {
 
 UINT ScintillaWin::CodePageOfDocument() const {
 	return CodePageFromCharSet(vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
+}
+
+std::string ScintillaWin::EncodeWString(std::wstring_view wsv) {
+	if (IsUnicodeMode()) {
+		const size_t len = UTF8Length(wsv);
+		std::string putf(len, 0);
+		UTF8FromUTF16(wsv, putf.data(), len);
+		return putf;
+	} else {
+		// Not in Unicode mode so convert from Unicode to current Scintilla code page
+		return StringEncode(wsv, CodePageOfDocument());
+	}
 }
 
 sptr_t ScintillaWin::GetTextLength() {
@@ -2294,31 +2307,11 @@ void ScintillaWin::Paste() {
 	}
 	const PasteShape pasteShape = isRectangular ? pasteRectangular : (isLine ? pasteLine : pasteStream);
 
-	// Always use CF_UNICODETEXT if available
+	// Use CF_UNICODETEXT if available
 	GlobalMemory memUSelection(::GetClipboardData(CF_UNICODETEXT));
-	if (memUSelection) {
-		const wchar_t *uptr = static_cast<const wchar_t *>(memUSelection.ptr);
-		if (uptr) {
-			size_t len;
-			std::vector<char> putf;
-			// Default Scintilla behaviour in Unicode mode
-			if (IsUnicodeMode()) {
-				const size_t bytes = memUSelection.Size();
-				const std::wstring_view wsv(uptr, bytes / 2);
-				len = UTF8Length(wsv);
-				putf.resize(len + 1);
-				UTF8FromUTF16(wsv, &putf[0], len);
-			} else {
-				// CF_UNICODETEXT available, but not in Unicode mode
-				// Convert from Unicode to current Scintilla code page
-				const UINT cpDest = CodePageOfDocument();
-				len = MultiByteLenFromWideChar(cpDest, uptr);
-				putf.resize(len);
-				MultiByteFromWideChar(cpDest, uptr, &putf[0], len);
-			}
-
-			InsertPasteShape(&putf[0], len, pasteShape);
-		}
+	if (const wchar_t *uptr = static_cast<const wchar_t *>(memUSelection.ptr)) {
+		const std::string putf = EncodeWString(uptr);
+		InsertPasteShape(putf.c_str(), putf.length(), pasteShape);
 		memUSelection.Unlock();
 	}
 	::CloseClipboard();
