@@ -1549,7 +1549,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN: {
-			//Platform::DebugPrintf("S keydown %d %x %x %x %x\n",iMessage, wParam, lParam, ::IsKeyDown(VK_SHIFT), ::IsKeyDown(VK_CONTROL));
+				// Platform::DebugPrintf("Keydown %c %c%c%c%c %x %x\n",
+				// iMessage == WM_KEYDOWN ? 'K' : 'S',
+				// (lParam & 1 << 24) ? '-' : 'E',
+				// KeyboardIsKeyDown(VK_SHIFT) ? 'S' : '-',
+				// KeyboardIsKeyDown(VK_CONTROL) ? 'C' : '-',
+				// KeyboardIsKeyDown(VK_MENU) ? 'A' : '-',
+				// wParam, lParam);
 				lastKeyDownConsumed = false;
 				const int ret = KeyDownWithModifiers(KeyTranslate(static_cast<int>(wParam)),
 					ModifierFlags(KeyboardIsKeyDown(VK_SHIFT),
