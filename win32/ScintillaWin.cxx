@@ -169,6 +169,30 @@ bool KeyboardIsKeyDown(int key) noexcept {
 	return (::GetKeyState(key) & 0x80000000) != 0;
 }
 
+constexpr bool KeyboardIsNumericKeypadFunction(uptr_t wParam, sptr_t lParam) {
+	// Bit 24 is the extended keyboard flag and the numeric keypad is non-extended
+	if ((lParam & (1 << 24)) != 0) {
+		// Not from the numeric keypad
+		return false;
+	}
+
+	switch (wParam) {
+	case VK_INSERT:	// 0
+	case VK_END:	// 1
+	case VK_DOWN:	// 2
+	case VK_NEXT:	// 3
+	case VK_LEFT:	// 4
+	case VK_CLEAR:	// 5
+	case VK_RIGHT:	// 6
+	case VK_HOME:	// 7
+	case VK_UP:		// 8
+	case VK_PRIOR:	// 9
+		return true;
+	default:
+		return false;
+	}
+}
+
 }
 
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
@@ -1551,16 +1575,21 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_KEYDOWN: {
 				// Platform::DebugPrintf("Keydown %c %c%c%c%c %x %x\n",
 				// iMessage == WM_KEYDOWN ? 'K' : 'S',
-				// (lParam & 1 << 24) ? '-' : 'E',
+				// (lParam & (1 << 24)) ? 'E' : '-',
 				// KeyboardIsKeyDown(VK_SHIFT) ? 'S' : '-',
 				// KeyboardIsKeyDown(VK_CONTROL) ? 'C' : '-',
 				// KeyboardIsKeyDown(VK_MENU) ? 'A' : '-',
 				// wParam, lParam);
 				lastKeyDownConsumed = false;
+				const bool altDown = KeyboardIsKeyDown(VK_MENU);
+				if (altDown && KeyboardIsNumericKeypadFunction(wParam, lParam)) {
+					// Don't interpret these as they may be characters entered by number.
+					return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+				}
 				const int ret = KeyDownWithModifiers(KeyTranslate(static_cast<int>(wParam)),
 					ModifierFlags(KeyboardIsKeyDown(VK_SHIFT),
 					KeyboardIsKeyDown(VK_CONTROL),
-					KeyboardIsKeyDown(VK_MENU)),
+					altDown),
 					&lastKeyDownConsumed);
 				if (!ret && !lastKeyDownConsumed) {
 					return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);

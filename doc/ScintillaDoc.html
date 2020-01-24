@@ -5549,6 +5549,12 @@ struct Sci_TextToFind {
     If you are building a table, you might
     want to use <code>SCMOD_NORM</code>, which has the value 0, to mean no modifiers.</p>
 
+    <p>On Win32, the numeric keypad with Alt pressed can be used to enter characters by number.
+    This can produce unexpected results in non-numlock mode when function keys are assigned so
+    potentially problematic keys are ignored. For example, setting
+    <code>SCMOD_ALT</code>,<code>SCK_UP</code> will only be active for the Up key on the
+    main cursor keys, not the numeric keypad.</p>
+
     <p><b id="SCI_ASSIGNCMDKEY">SCI_ASSIGNCMDKEY(int <a class="jump"
     href="#keyDefinition">keyDefinition</a>, int sciCommand)</b><br />
      This assigns the given key definition to a Scintilla command identified by
