@@ -2122,14 +2122,6 @@ Surface *Surface::Allocate(int technology) {
 #endif
 }
 
-namespace {
-
-HWND HwndFromWindowID(WindowID wid) noexcept {
-	return static_cast<HWND>(wid);
-}
-
-}
-
 Window::~Window() {
 }
 
@@ -2175,7 +2167,7 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo) {
 	const LONG style = ::GetWindowLong(HwndFromWindowID(wid), GWL_STYLE);
 	if (style & WS_POPUP) {
 		POINT ptOther = {0, 0};
-		::ClientToScreen(HwndFromWindowID(relativeTo->GetID()), &ptOther);
+		::ClientToScreen(HwndFromWindow(*relativeTo), &ptOther);
 		rc.Move(static_cast<XYPOSITION>(ptOther.x), static_cast<XYPOSITION>(ptOther.y));
 
 		const RECT rcMonitor = RectFromPRectangle(rc);
@@ -2471,7 +2463,7 @@ void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHei
 	lineHeight = lineHeight_;
 	unicodeMode = unicodeMode_;
 	technology = technology_;
-	HWND hwndParent = HwndFromWindowID(parent->GetID());
+	HWND hwndParent = HwndFromWindow(*parent);
 	HINSTANCE hinstanceParent = GetWindowInstance(hwndParent);
 	// Window created as popup so not clipped within parent client area
 	wid = ::CreateWindowEx(
@@ -3055,7 +3047,7 @@ LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam,
 LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	switch (iMessage) {
 	case WM_CREATE: {
-			HINSTANCE hinstanceParent = GetWindowInstance(HwndFromWindowID(parent->GetID()));
+			HINSTANCE hinstanceParent = GetWindowInstance(HwndFromWindow(*parent));
 			// Note that LBS_NOINTEGRALHEIGHT is specified to fix cosmetic issue when resizing the list
 			// but has useful side effect of speeding up list population significantly
 			lb = ::CreateWindowEx(
@@ -3091,7 +3083,7 @@ LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam
 	case WM_COMMAND:
 		// This is not actually needed now - the registered double click action is used
 		// directly to action a choice from the list.
-		::SendMessage(HwndFromWindowID(parent->GetID()), iMessage, wParam, lParam);
+		::SendMessage(HwndFromWindow(*parent), iMessage, wParam, lParam);
 		break;
 
 	case WM_MEASUREITEM: {
@@ -3237,7 +3229,7 @@ void Menu::Destroy() {
 void Menu::Show(Point pt, Window &w) {
 	::TrackPopupMenu(static_cast<HMENU>(mid),
 		TPM_RIGHTBUTTON, static_cast<int>(pt.x - 4), static_cast<int>(pt.y), 0,
-		HwndFromWindowID(w.GetID()), nullptr);
+		HwndFromWindow(w), nullptr);
 	Destroy();
 }
 

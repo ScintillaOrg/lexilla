@@ -659,7 +659,7 @@ void ScintillaWin::DropRenderTarget() {
 #endif
 
 HWND ScintillaWin::MainHWND() const noexcept {
-	return static_cast<HWND>(wMain.GetID());
+	return HwndFromWindow(wMain);
 }
 
 bool ScintillaWin::DragThreshold(Point ptStart, Point ptNow) {
@@ -1444,7 +1444,7 @@ sptr_t ScintillaWin::MouseMessage(unsigned int iMessage, uptr_t wParam, sptr_t l
 		}
 		// if autocomplete list active then send mousewheel message to it
 		if (ac.Active()) {
-			HWND hWnd = static_cast<HWND>(ac.lb->GetID());
+			HWND hWnd = HwndFromWindow(*(ac.lb));
 			::SendMessage(hWnd, iMessage, wParam, lParam);
 			break;
 		}
@@ -1561,7 +1561,7 @@ sptr_t ScintillaWin::FocusMessage(unsigned int iMessage, uptr_t wParam, sptr_t) 
 	case WM_KILLFOCUS: {
 		HWND wOther = reinterpret_cast<HWND>(wParam);
 		HWND wThis = MainHWND();
-		const HWND wCT = static_cast<HWND>(ct.wCallTip.GetID());
+		const HWND wCT = HwndFromWindow(ct.wCallTip);
 		if (!wParam ||
 			!(::IsChild(wThis, wOther) || (wOther == wCT))) {
 			SetFocusState(false);
@@ -1818,7 +1818,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		switch (iMessage) {
 
 		case WM_CREATE:
-			ctrlID = ::GetDlgCtrlID(static_cast<HWND>(wMain.GetID()));
+			ctrlID = ::GetDlgCtrlID(HwndFromWindow(wMain));
 			// Get Intellimouse scroll line parameters
 			GetIntelliMouseParameters();
 			::RegisterDragDrop(MainHWND(), reinterpret_cast<IDropTarget *>(&dt));
@@ -2202,11 +2202,11 @@ void ScintillaWin::NotifyFocus(bool focus) {
 }
 
 void ScintillaWin::SetCtrlID(int identifier) {
-	::SetWindowID(static_cast<HWND>(wMain.GetID()), identifier);
+	::SetWindowID(HwndFromWindow(wMain), identifier);
 }
 
 int ScintillaWin::GetCtrlID() {
-	return ::GetDlgCtrlID(static_cast<HWND>(wMain.GetID()));
+	return ::GetDlgCtrlID(HwndFromWindow(wMain));
 }
 
 void ScintillaWin::NotifyParent(SCNotification scn) {
