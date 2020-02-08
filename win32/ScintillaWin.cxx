@@ -336,7 +336,7 @@ class ScintillaWin :
 	static LRESULT PASCAL CTWndProc(
 		    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
-	enum { invalidTimerID, standardTimerID, idleTimerID, fineTimerStart };
+	enum : UINT_PTR { invalidTimerID, standardTimerID, idleTimerID, fineTimerStart };
 
 	bool DragThreshold(Point ptStart, Point ptNow) override;
 	void StartDrag() override;
