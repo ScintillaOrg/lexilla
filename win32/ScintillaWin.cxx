@@ -1634,20 +1634,20 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 	switch (iMessage) {
 
 	case EM_LINEFROMCHAR:
-		if (static_cast<int>(wParam) < 0) {
+		if (static_cast<Sci::Position>(wParam) < 0) {
 			wParam = SelectionStart().Position();
 		}
-		return pdoc->LineFromPosition(static_cast<int>(wParam));
+		return pdoc->LineFromPosition(static_cast<Sci::Position>(wParam));
 
 	case EM_EXLINEFROMCHAR:
-		return pdoc->LineFromPosition(static_cast<int>(lParam));
+		return pdoc->LineFromPosition(lParam);
 
 	case EM_GETSEL:
 		if (wParam) {
-			*reinterpret_cast<int *>(wParam) = static_cast<int>(SelectionStart().Position());
+			*reinterpret_cast<DWORD *>(wParam) = static_cast<DWORD>(SelectionStart().Position());
 		}
 		if (lParam) {
-			*reinterpret_cast<int *>(lParam) = static_cast<int>(SelectionEnd().Position());
+			*reinterpret_cast<DWORD *>(lParam) = static_cast<DWORD>(SelectionEnd().Position());
 		}
 		return MAKELRESULT(SelectionStart().Position(), SelectionEnd().Position());
 
@@ -1655,9 +1655,9 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 			if (lParam == 0) {
 				return 0;
 			}
-			Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
-			pCR->cpMin = static_cast<Sci_PositionCR>(SelectionStart().Position());
-			pCR->cpMax = static_cast<Sci_PositionCR>(SelectionEnd().Position());
+			CHARRANGE *pCR = reinterpret_cast<CHARRANGE *>(lParam);
+			pCR->cpMin = static_cast<LONG>(SelectionStart().Position());
+			pCR->cpMax = static_cast<LONG>(SelectionEnd().Position());
 		}
 		break;
 
@@ -1679,7 +1679,7 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 			if (lParam == 0) {
 				return 0;
 			}
-			const Sci_CharacterRange *pCR = reinterpret_cast<const Sci_CharacterRange *>(lParam);
+			const CHARRANGE *pCR = reinterpret_cast<const CHARRANGE *>(lParam);
 			sel.selType = Selection::selStream;
 			if (pCR->cpMin == 0 && pCR->cpMax == -1) {
 				SetSelection(pCR->cpMin, pdoc->Length());
