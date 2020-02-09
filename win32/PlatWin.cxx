@@ -214,12 +214,12 @@ HFONT FormatAndMetrics::HFont() {
 #if defined(USE_D2D)
 	if (technology == SCWIN_TECH_GDI) {
 		if (0 == ::GetObjectW(hfont, sizeof(lf), &lf)) {
-			return 0;
+			return {};
 		}
 	} else {
 		const HRESULT hr = pTextFormat->GetFontFamilyName(lf.lfFaceName, LF_FACESIZE);
 		if (!SUCCEEDED(hr)) {
-			return 0;
+			return {};
 		}
 		lf.lfWeight = pTextFormat->GetFontWeight();
 		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
@@ -227,7 +227,7 @@ HFONT FormatAndMetrics::HFont() {
 	}
 #else
 	if (0 == ::GetObjectW(hfont, sizeof(lf), &lf)) {
-		return 0;
+		return {};
 	}
 #endif
 	return ::CreateFontIndirectW(&lf);
@@ -507,29 +507,29 @@ void SurfaceGDI::Clear() noexcept {
 	if (penOld) {
 		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
-		penOld = 0;
+		penOld = {};
 	}
-	pen = 0;
+	pen = {};
 	if (brushOld) {
 		::SelectObject(hdc, brushOld);
 		::DeleteObject(brush);
-		brushOld = 0;
+		brushOld = {};
 	}
-	brush = 0;
+	brush = {};
 	if (fontOld) {
 		// Fonts are not deleted as they are owned by a Font object
 		::SelectObject(hdc, fontOld);
-		fontOld = 0;
+		fontOld = {};
 	}
 	if (bitmapOld) {
 		::SelectObject(hdc, bitmapOld);
 		::DeleteObject(bitmap);
-		bitmapOld = 0;
+		bitmapOld = {};
 	}
-	bitmap = 0;
+	bitmap = {};
 	if (hdcOwned) {
 		::DeleteDC(hdc);
-		hdc = 0;
+		hdc = {};
 		hdcOwned = false;
 	}
 }
@@ -544,7 +544,7 @@ bool SurfaceGDI::Initialised() {
 
 void SurfaceGDI::Init(WindowID) {
 	Release();
-	hdc = ::CreateCompatibleDC(NULL);
+	hdc = ::CreateCompatibleDC({});
 	hdcOwned = true;
 	::SetTextAlign(hdc, TA_BASELINE);
 }
@@ -571,8 +571,8 @@ void SurfaceGDI::PenColour(ColourDesired fore) {
 	if (pen) {
 		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
-		pen = 0;
-		penOld = 0;
+		pen = {};
+		penOld = {};
 	}
 	pen = ::CreatePen(0,1,fore.AsInteger());
 	penOld = SelectPen(hdc, pen);
@@ -582,8 +582,8 @@ void SurfaceGDI::BrushColour(ColourDesired back) noexcept {
 	if (brush) {
 		::SelectObject(hdc, brushOld);
 		::DeleteObject(brush);
-		brush = 0;
-		brushOld = 0;
+		brush = {};
+		brushOld = {};
 	}
 	// Only ever want pure, non-dithered brushes
 	const ColourDesired colourNearest = ColourDesired(::GetNearestColor(hdc, back.AsInteger()));
@@ -959,8 +959,8 @@ void SurfaceGDI::SetClip(PRectangle rc) {
 }
 
 void SurfaceGDI::FlushCachedState() {
-	pen = 0;
-	brush = 0;
+	pen = {};
+	brush = {};
 }
 
 void SurfaceGDI::SetUnicodeMode(bool unicodeMode_) {
@@ -1113,7 +1113,7 @@ void SurfaceD2D::Release() {
 }
 
 void SurfaceD2D::SetScale() {
-	HDC hdcMeasure = ::CreateCompatibleDC(NULL);
+	HDC hdcMeasure = ::CreateCompatibleDC({});
 	logPixelsY = ::GetDeviceCaps(hdcMeasure, LOGPIXELSY);
 	dpiScaleX = ::GetDeviceCaps(hdcMeasure, LOGPIXELSX) / 96.0f;
 	dpiScaleY = logPixelsY / 96.0f;
@@ -2225,7 +2225,7 @@ void Window::SetFont(Font &font) {
 namespace {
 
 void FlipBitmap(HBITMAP bitmap, int width, int height) noexcept {
-	HDC hdc = ::CreateCompatibleDC(NULL);
+	HDC hdc = ::CreateCompatibleDC({});
 	if (hdc) {
 		HBITMAP prevBmp = SelectBitmap(hdc, bitmap);
 		::StretchBlt(hdc, width - 1, 0, -width, height, hdc, 0, 0, width, height, SRCCOPY);
