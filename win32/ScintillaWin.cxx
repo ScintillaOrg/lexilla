@@ -200,10 +200,10 @@ typedef void VFunction(void);
 class FormatEnumerator {
 public:
 	VFunction **vtbl;
-	int ref;
-	unsigned int pos;
+	ULONG ref;
+	ULONG pos;
 	std::vector<CLIPFORMAT> formats;
-	FormatEnumerator(int pos_, CLIPFORMAT formats_[], size_t formatsLen_);
+	FormatEnumerator(ULONG pos_, const CLIPFORMAT formats_[], size_t formatsLen_);
 };
 
 /**
@@ -2438,13 +2438,16 @@ bool OpenClipboardRetry(HWND hwnd) noexcept {
 	return false;
 }
 
-bool SupportedFormat(const FORMATETC *pFE) noexcept {
-	return
-		pFE->cfFormat == CF_UNICODETEXT &&
-		pFE->ptd == nullptr &&
+bool IsValidFormatEtc(const FORMATETC *pFE) noexcept {
+	return pFE->ptd == nullptr &&
 		(pFE->dwAspect & DVASPECT_CONTENT) != 0 &&
 		pFE->lindex == -1 &&
 		(pFE->tymed & TYMED_HGLOBAL) != 0;
+}
+
+bool SupportedFormat(const FORMATETC *pFE) noexcept {
+	return pFE->cfFormat == CF_UNICODETEXT &&
+		IsValidFormatEtc(pFE);
 }
 
 }
@@ -2534,7 +2537,7 @@ STDMETHODIMP_(ULONG)FormatEnumerator_Release(FormatEnumerator *fe) {
 /// Implement IEnumFORMATETC
 STDMETHODIMP FormatEnumerator_Next(FormatEnumerator *fe, ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched) {
 	if (!rgelt) return E_POINTER;
-	unsigned int putPos = 0;
+	ULONG putPos = 0;
 	while ((fe->pos < fe->formats.size()) && (putPos < celt)) {
 		rgelt->cfFormat = fe->formats[fe->pos];
 		rgelt->ptd = nullptr;
@@ -2578,7 +2581,7 @@ static VFunction *vtFormatEnumerator[] = {
 	(VFunction *)(FormatEnumerator_Clone)
 };
 
-FormatEnumerator::FormatEnumerator(int pos_, CLIPFORMAT formats_[], size_t formatsLen_) {
+FormatEnumerator::FormatEnumerator(ULONG pos_, const CLIPFORMAT formats_[], size_t formatsLen_) {
 	vtbl = vtFormatEnumerator;
 	ref = 0;   // First QI adds first reference...
 	pos = pos_;
@@ -2644,12 +2647,7 @@ STDMETHODIMP DataObject_GetDataHere(DataObject *, FORMATETC *, STGMEDIUM *) {
 }
 
 STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
-	if (pd->sci->DragIsRectangularOK(pFE->cfFormat) &&
-	    pFE->ptd == nullptr &&
-	    (pFE->dwAspect & DVASPECT_CONTENT) != 0 &&
-	    pFE->lindex == -1 &&
-	    (pFE->tymed & TYMED_HGLOBAL) != 0
-	) {
+	if (pd->sci->DragIsRectangularOK(pFE->cfFormat) && IsValidFormatEtc(pFE)) {
 		return S_OK;
 	}
 
@@ -2682,7 +2680,8 @@ STDMETHODIMP DataObject_EnumFormatEtc(DataObject *pd, DWORD dwDirection, IEnumFO
 			*ppEnum = nullptr;
 			return E_FAIL;
 		}
-		CLIPFORMAT formats[] = {CF_UNICODETEXT};
+
+		const CLIPFORMAT formats[] = {CF_UNICODETEXT};
 		FormatEnumerator *pfe = new FormatEnumerator(0, formats, std::size(formats));
 		return FormatEnumerator_QueryInterface(pfe, IID_IEnumFORMATETC,
 											   reinterpret_cast<void **>(ppEnum));
@@ -3232,10 +3231,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		DropAt(movePos, putf.c_str(), putf.size(), *pdwEffect == DROPEFFECT_MOVE, isRectangular);
 
 		// Free data
-		if (medium.pUnkForRelease)
-			medium.pUnkForRelease->Release();
-		else
-			::GlobalFree(medium.hGlobal);
+		::ReleaseStgMedium(&medium);
 
 		return S_OK;
 	} catch (...) {
