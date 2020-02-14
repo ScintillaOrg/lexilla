@@ -1107,7 +1107,9 @@ void SurfaceD2D::Clear() noexcept {
 			clipsActive--;
 		}
 		if (ownRenderTarget) {
+			pRenderTarget->EndDraw();
 			pRenderTarget->Release();
+			ownRenderTarget = false;
 		}
 		pRenderTarget = nullptr;
 	}
