@@ -601,18 +601,13 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 		rc.top += (rc.Height() - height) / 2;
 	rc.bottom = rc.top + height;
 
-	int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+	const int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
 	const int ucs = stride * height;
 	std::vector<unsigned char> image(ucs);
-	for (int iy=0; iy<height; iy++) {
-		for (int ix=0; ix<width; ix++) {
-			unsigned char *pixel = &image[0] + iy*stride + ix * 4;
-			const unsigned char alpha = pixelsImage[3];
-			pixel[2] = (*pixelsImage++) * alpha / 255;
-			pixel[1] = (*pixelsImage++) * alpha / 255;
-			pixel[0] = (*pixelsImage++) * alpha / 255;
-			pixel[3] = *pixelsImage++;
-		}
+	for (ptrdiff_t iy=0; iy<height; iy++) {
+		unsigned char *pixel = &image[0] + iy*stride;
+		RGBAImage::BGRAFromRGBA(pixel, pixelsImage, width);
+		pixelsImage += RGBAImage::bytesPerPixel * width;
 	}
 
 	cairo_surface_t *psurfImage = cairo_image_surface_create_for_data(&image[0], CAIRO_FORMAT_ARGB32, width, height, stride);
