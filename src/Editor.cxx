@@ -565,7 +565,7 @@ Sci::Position Editor::CurrentPosition() const {
 	return sel.MainCaret();
 }
 
-bool Editor::SelectionEmpty() const {
+bool Editor::SelectionEmpty() const noexcept {
 	return sel.Empty();
 }
 
@@ -789,7 +789,7 @@ void Editor::MultipleSelectAdd(AddNumber addNumber) {
 	}
 }
 
-bool Editor::RangeContainsProtected(Sci::Position start, Sci::Position end) const {
+bool Editor::RangeContainsProtected(Sci::Position start, Sci::Position end) const noexcept {
 	if (vs.ProtectionActive()) {
 		if (start > end) {
 			const Sci::Position t = start;
@@ -804,7 +804,7 @@ bool Editor::RangeContainsProtected(Sci::Position start, Sci::Position end) cons
 	return false;
 }
 
-bool Editor::SelectionContainsProtected() {
+bool Editor::SelectionContainsProtected() const {
 	for (size_t r=0; r<sel.Count(); r++) {
 		if (RangeContainsProtected(sel.Range(r).Start().Position(),
 			sel.Range(r).End().Position())) {
@@ -1924,7 +1924,7 @@ void Editor::InsertCharacter(std::string_view sv, CharacterSource charSource) {
 		}
 		// Order selections by position in document.
 		std::sort(selPtrs.begin(), selPtrs.end(),
-			[](const SelectionRange *a, const SelectionRange *b) {return *a < *b;});
+			[](const SelectionRange *a, const SelectionRange *b) noexcept {return *a < *b;});
 
 		// Loop in reverse to avoid disturbing positions of selections yet to be processed.
 		for (std::vector<SelectionRange *>::reverse_iterator rit = selPtrs.rbegin();
