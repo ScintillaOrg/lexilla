@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
 # Script to check that headers are in a consistent order
-# Requires Python 2.6 or later
+# Canonical header order is defined in scripts/HeaderOrder.txt
+# Requires Python 3.6 or later
 
 from __future__ import print_function
 import codecs, glob, os, platform, sys, unicodedata
