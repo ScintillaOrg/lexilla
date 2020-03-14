@@ -5800,17 +5800,16 @@ struct Sci_RangeToFormat {
     <p><b id="SCI_SETPRINTWRAPMODE">SCI_SETPRINTWRAPMODE(int wrapMode)</b><br />
      <b id="SCI_GETPRINTWRAPMODE">SCI_GETPRINTWRAPMODE &rarr; int</b><br />
      These two functions get and set the printer wrap mode. <code class="parameter">wrapMode</code> can be
-     set to <code>SC_WRAP_NONE</code> (0), <code>SC_WRAP_WORD</code> (1) or
-     <code>SC_WRAP_CHAR</code> (2). The default is
+     set to <code>SC_WRAP_NONE</code> (0) or <code>SC_WRAP_WORD</code> (1).
+     The default is
      <code>SC_WRAP_WORD</code>, which wraps printed output so that all characters fit
      into the print rectangle. If you set <code>SC_WRAP_NONE</code>, each line of text
      generates one line of output and the line is truncated if it is too long to fit
      into the print area.<br />
      <code>SC_WRAP_WORD</code> tries to wrap only between words as indicated by
      white space or style changes although if a word is longer than a line, it will be wrapped before
-     the line end. <code>SC_WRAP_CHAR</code> is preferred to
-     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space
-     between words.</p>
+     the line end. <br />
+     <code>SC_WRAP_CHAR</code> is not supported for printing.</p>
 
     <h2 id="DirectAccess">Direct access</h2>
     <code><a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; pointer</a><br />
