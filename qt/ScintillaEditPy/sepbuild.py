@@ -8,6 +8,9 @@ import subprocess
 import stat
 import sys
 
+# ScintillaEditPy can only be built against Python 2.x so fail if Python 3.x
+assert sys.version_info < (3,0), "sepbuild.py requires Python 2.x"
+
 sys.path.append(os.path.join("..", "ScintillaEdit"))
 import WidgetGen
 
