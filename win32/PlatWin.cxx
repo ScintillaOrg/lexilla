@@ -247,7 +247,6 @@ void SetWindowPointer(HWND hWnd, void *ptr) noexcept {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
 
-CRITICAL_SECTION crPlatformLock;
 HINSTANCE hinstPlatformRes {};
 
 HCURSOR reverseArrowCursor {};
@@ -2227,35 +2226,24 @@ void FlipBitmap(HBITMAP bitmap, int width, int height) noexcept {
 	}
 }
 
-HCURSOR GetReverseArrowCursor() noexcept {
-	if (reverseArrowCursor)
-		return reverseArrowCursor;
-
-	::EnterCriticalSection(&crPlatformLock);
-	HCURSOR cursor = reverseArrowCursor;
-	if (!cursor) {
-		cursor = ::LoadCursor(NULL, IDC_ARROW);
-		ICONINFO info;
-		if (::GetIconInfo(cursor, &info)) {
-			BITMAP bmp;
-			if (::GetObject(info.hbmMask, sizeof(bmp), &bmp)) {
-				FlipBitmap(info.hbmMask, bmp.bmWidth, bmp.bmHeight);
-				if (info.hbmColor)
-					FlipBitmap(info.hbmColor, bmp.bmWidth, bmp.bmHeight);
-				info.xHotspot = bmp.bmWidth - 1 - info.xHotspot;
-
-				reverseArrowCursor = ::CreateIconIndirect(&info);
-				if (reverseArrowCursor)
-					cursor = reverseArrowCursor;
-			}
-
-			::DeleteObject(info.hbmMask);
+void LoadReverseArrowCursor() noexcept {
+	HCURSOR cursor = ::LoadCursor({}, IDC_ARROW);
+	ICONINFO info;
+	if (::GetIconInfo(cursor, &info)) {
+		BITMAP bmp;
+		if (::GetObject(info.hbmMask, sizeof(bmp), &bmp)) {
+			FlipBitmap(info.hbmMask, bmp.bmWidth, bmp.bmHeight);
 			if (info.hbmColor)
-				::DeleteObject(info.hbmColor);
+				FlipBitmap(info.hbmColor, bmp.bmWidth, bmp.bmHeight);
+			info.xHotspot = bmp.bmWidth - 1 - info.xHotspot;
+
+			reverseArrowCursor = ::CreateIconIndirect(&info);
 		}
+
+		::DeleteObject(info.hbmMask);
+		if (info.hbmColor)
+			::DeleteObject(info.hbmColor);
 	}
-	::LeaveCriticalSection(&crPlatformLock);
-	return cursor;
 }
 
 }
@@ -2281,7 +2269,7 @@ void Window::SetCursor(Cursor curs) {
 		::SetCursor(::LoadCursor(NULL,IDC_HAND));
 		break;
 	case cursorReverseArrow:
-		::SetCursor(GetReverseArrowCursor());
+		::SetCursor(reverseArrowCursor);
 		break;
 	case cursorArrow:
 	case cursorInvalid:	// Should not occur, but just in case.
@@ -3331,8 +3319,8 @@ void Platform::Assert(const char *c, const char *file, int line) {
 }
 
 void Platform_Initialise(void *hInstance) {
-	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
+	LoadReverseArrowCursor();
 	ListBoxX_Register();
 }
 
@@ -3368,7 +3356,6 @@ void Platform_Finalise(bool fromDllMain) {
 	if (reverseArrowCursor)
 		::DestroyCursor(reverseArrowCursor);
 	ListBoxX_Unregister();
-	::DeleteCriticalSection(&crPlatformLock);
 }
 
 }
