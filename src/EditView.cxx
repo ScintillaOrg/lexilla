@@ -1458,18 +1458,17 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 			const bool caretVisibleState = additionalCaretsVisible || mainCaret;
 			if ((xposCaret >= 0) && vsDraw.IsCaretVisible() &&
 				(drawDrag || (caretBlinkState && caretVisibleState))) {
-				bool caretAtEOF = false;
-				bool caretAtEOL = false;
+				bool canDrawBlockCaret = true;
 				bool drawBlockCaret = false;
 				XYPOSITION widthOverstrikeCaret;
 				XYPOSITION caretWidthOffset = 0;
 				PRectangle rcCaret = rcLine;
 
 				if (posCaret.Position() == model.pdoc->Length()) {   // At end of document
-					caretAtEOF = true;
+					canDrawBlockCaret = false;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
 				} else if ((posCaret.Position() - posLineStart) >= ll->numCharsInLine) {	// At end of line
-					caretAtEOL = true;
+					canDrawBlockCaret = false;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
 				} else {
 					const int widthChar = model.pdoc->LenChar(posCaret.Position());
@@ -1494,7 +1493,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 				} else if ((caretShape == ViewStyle::CaretShape::block) || imeCaretBlockOverride) {
 					/* Block caret */
 					rcCaret.left = xposCaret;
-					if (!caretAtEOL && !caretAtEOF && (ll->chars[offset] != '\t') && !(IsControlCharacter(ll->chars[offset]))) {
+					if (canDrawBlockCaret && !(IsControlCharacter(ll->chars[offset]))) {
 						drawBlockCaret = true;
 						rcCaret.right = xposCaret + widthOverstrikeCaret;
 					} else {
