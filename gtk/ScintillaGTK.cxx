@@ -122,23 +122,18 @@ enum {
 	TARGET_URI
 };
 
-GdkAtom ScintillaGTK::atomUTF8 = nullptr;
-GdkAtom ScintillaGTK::atomString = nullptr;
-GdkAtom ScintillaGTK::atomUriList = nullptr;
-GdkAtom ScintillaGTK::atomDROPFILES_DND = nullptr;
-
 static const GtkTargetEntry clipboardCopyTargets[] = {
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-static const gint nClipboardCopyTargets = ELEMENTS(clipboardCopyTargets);
+static constexpr gint nClipboardCopyTargets = ELEMENTS(clipboardCopyTargets);
 
 static const GtkTargetEntry clipboardPasteTargets[] = {
 	{ (gchar *) "text/uri-list", 0, TARGET_URI },
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-static const gint nClipboardPasteTargets = ELEMENTS(clipboardPasteTargets);
+static constexpr gint nClipboardPasteTargets = ELEMENTS(clipboardPasteTargets);
 
 static const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
@@ -146,7 +141,7 @@ static GtkWidget *PWidget(const Window &w) noexcept {
 	return static_cast<GtkWidget *>(w.GetID());
 }
 
-ScintillaGTK *ScintillaGTK::FromWidget(GtkWidget *widget) {
+ScintillaGTK *ScintillaGTK::FromWidget(GtkWidget *widget) noexcept {
 	ScintillaObject *scio = SCINTILLA(widget);
 	return static_cast<ScintillaGTK *>(scio->pscin);
 }
@@ -208,7 +203,7 @@ ScintillaGTK::~ScintillaGTK() {
 	wPreedit.Destroy();
 }
 
-static void UnRefCursor(GdkCursor *cursor) {
+static void UnRefCursor(GdkCursor *cursor) noexcept {
 #if GTK_CHECK_VERSION(3,0,0)
 	g_object_unref(cursor);
 #else
@@ -333,7 +328,7 @@ void ScintillaGTK::UnRealize(GtkWidget *widget) {
 	sciThis->UnRealizeThis(widget);
 }
 
-static void MapWidget(GtkWidget *widget) {
+static void MapWidget(GtkWidget *widget) noexcept {
 	if (widget &&
 			gtk_widget_get_visible(GTK_WIDGET(widget)) &&
 			!IS_WIDGET_MAPPED(widget)) {
@@ -416,7 +411,7 @@ public:
 	gunichar *uniStr;
 	PangoScript pscript;
 
-	explicit PreEditString(GtkIMContext *im_context) {
+	explicit PreEditString(GtkIMContext *im_context) noexcept {
 		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
 		validUTF8 = g_utf8_validate(str, strlen(str), nullptr);
 		uniStr = g_utf8_to_ucs4_fast(str, strlen(str), &uniStrLen);
@@ -531,7 +526,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 }
 
 void ScintillaGTK::Init() {
-	parentClass = reinterpret_cast<GtkWidgetClass *>(
+	parentClass = static_cast<GtkWidgetClass *>(
 			      g_type_class_ref(gtk_container_get_type()));
 
 	gint maskSmooth = 0;
@@ -1263,7 +1258,7 @@ namespace {
 class SelectionReceiver : GObjectWatcher {
 	ScintillaGTK *sci;
 
-	void Destroyed() override {
+	void Destroyed() noexcept override {
 		sci = nullptr;
 	}
 
@@ -1369,10 +1364,10 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
-static const guchar *DataOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_data(sd); }
-static gint LengthOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_length(sd); }
-static GdkAtom TypeOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_data_type(sd); }
-static GdkAtom SelectionOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_selection(sd); }
+static const guchar *DataOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_data(sd); }
+static gint LengthOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_length(sd); }
+static GdkAtom TypeOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_data_type(sd); }
+static GdkAtom SelectionOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_selection(sd); }
 
 // Detect rectangular text, convert line ends to current mode, convert from or to UTF-8
 void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText) {
@@ -1679,7 +1674,7 @@ void ScintillaGTK::Resize(int width, int height) {
 
 namespace {
 
-void SetAdjustmentValue(GtkAdjustment *object, int value) {
+void SetAdjustmentValue(GtkAdjustment *object, int value) noexcept {
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(object);
 	const int maxValue = static_cast<int>(
 				     gtk_adjustment_get_upper(adjustment) - gtk_adjustment_get_page_size(adjustment));
@@ -1944,7 +1939,7 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 			return FALSE;
 		int x = 0;
 		int y = 0;
-		GdkModifierType state;
+		GdkModifierType state {};
 		if (event->is_hint) {
 #if GTK_CHECK_VERSION(3,0,0)
 			gdk_window_get_device_position(event->window,
@@ -1972,7 +1967,7 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 }
 
 // Map the keypad keys to their equivalent functions
-static int KeyTranslate(int keyIn) {
+static int KeyTranslate(int keyIn) noexcept {
 	switch (keyIn) {
 #if GTK_CHECK_VERSION(3,0,0)
 	case GDK_KEY_ISO_Left_Tab:
