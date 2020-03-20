@@ -46,6 +46,7 @@ class ScintillaGTK : public ScintillaBase {
 	CLIPFORMAT cfColumnSelect;
 #endif
 
+	bool preeditInitialized;
 	Window wPreedit;
 	Window wPreeditDraw;
 	GtkIMContext *im_context;

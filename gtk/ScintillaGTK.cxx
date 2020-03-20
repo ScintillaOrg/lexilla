@@ -155,6 +155,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	lastKey(0), rectangularSelectionModifier(SCMOD_CTRL),
 	parentClass(nullptr),
 	atomSought(nullptr),
+	preeditInitialized(false),
 	im_context(nullptr),
 	lastNonCommonScript(PANGO_SCRIPT_INVALID_CODE),
 	lastWheelMouseTime(0),
@@ -254,6 +255,8 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_show(widget->window);
 	UnRefCursor(cursor);
 #endif
+
+	preeditInitialized = false;
 	gtk_widget_realize(PWidget(wPreedit));
 	gtk_widget_realize(PWidget(wPreeditDraw));
 
@@ -263,6 +266,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	g_signal_connect(G_OBJECT(im_context), "preedit_changed",
 			 G_CALLBACK(PreeditChanged), this);
 	gtk_im_context_set_client_window(im_context, WindowFromWidget(widget));
+
 	GtkWidget *widtxt = PWidget(wText);	//	// No code inside the G_OBJECT macro
 	g_signal_connect_after(G_OBJECT(widtxt), "style_set",
 			       G_CALLBACK(ScintillaGTK::StyleSetText), nullptr);
@@ -434,18 +438,24 @@ public:
 gint ScintillaGTK::FocusInThis(GtkWidget *) {
 	try {
 		SetFocusState(true);
+
 		if (im_context) {
+			gtk_im_context_focus_in(im_context);
 			PreEditString pes(im_context);
 			if (PWidget(wPreedit)) {
+				if (!preeditInitialized) {
+					GtkWidget *top = gtk_widget_get_toplevel(PWidget(wMain));
+					gtk_window_set_transient_for(GTK_WINDOW(PWidget(wPreedit)), GTK_WINDOW(top));
+					preeditInitialized = true;
+				}
+
 				if (strlen(pes.str) > 0) {
 					gtk_widget_show(PWidget(wPreedit));
 				} else {
 					gtk_widget_hide(PWidget(wPreedit));
 				}
 			}
-			gtk_im_context_focus_in(im_context);
 		}
-
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
