@@ -186,23 +186,23 @@ void Document::RemoveLine(Sci::Line line) {
 }
 
 LineMarkers *Document::Markers() const noexcept {
-	return static_cast<LineMarkers *>(perLineData[ldMarkers].get());
+	return dynamic_cast<LineMarkers *>(perLineData[ldMarkers].get());
 }
 
 LineLevels *Document::Levels() const noexcept {
-	return static_cast<LineLevels *>(perLineData[ldLevels].get());
+	return dynamic_cast<LineLevels *>(perLineData[ldLevels].get());
 }
 
 LineState *Document::States() const noexcept {
-	return static_cast<LineState *>(perLineData[ldState].get());
+	return dynamic_cast<LineState *>(perLineData[ldState].get());
 }
 
 LineAnnotation *Document::Margins() const noexcept {
-	return static_cast<LineAnnotation *>(perLineData[ldMargin].get());
+	return dynamic_cast<LineAnnotation *>(perLineData[ldMargin].get());
 }
 
 LineAnnotation *Document::Annotations() const noexcept {
-	return static_cast<LineAnnotation *>(perLineData[ldAnnotation].get());
+	return dynamic_cast<LineAnnotation *>(perLineData[ldAnnotation].get());
 }
 
 int Document::LineEndTypesSupported() const {
