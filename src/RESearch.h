@@ -24,9 +24,9 @@ public:
 	explicit RESearch(CharClassify *charClassTable);
 	// No dynamic allocation so default copy constructor and assignment operator are OK.
 	~RESearch();
-	void Clear();
+	void Clear() noexcept;
 	void GrabMatches(const CharacterIndexer &ci);
-	const char *Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix);
+	const char *Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix) noexcept;
 	int Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp);
 
 	enum { MAXTAG=10 };
@@ -45,9 +45,9 @@ private:
 	enum { CHRBIT = 8 };
 	enum { BITBLK = MAXCHR / CHRBIT };
 
-	void ChSet(unsigned char c);
-	void ChSetWithCase(unsigned char c, bool caseSensitive);
-	int GetBackslashExpression(const char *pattern, int &incr);
+	void ChSet(unsigned char c) noexcept;
+	void ChSetWithCase(unsigned char c, bool caseSensitive) noexcept;
+	int GetBackslashExpression(const char *pattern, int &incr) noexcept;
 
 	Sci::Position PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp, char *ap);
 
@@ -58,7 +58,7 @@ private:
 	unsigned char bittab[BITBLK]; /* bit table for CCL pre-set bits */
 	int failure;
 	CharClassify *charClass;
-	bool iswordc(unsigned char x) const {
+	bool iswordc(unsigned char x) const noexcept {
 		return charClass->IsWord(x);
 	}
 };
