@@ -329,7 +329,7 @@ FontID CreateFontFromParameters(const FontParameters &fp) {
 			hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat,
 					100.0f, 100.0f, &pTextLayout);
 			if (SUCCEEDED(hr)) {
-				const int maxLines = 2;
+				constexpr int maxLines = 2;
 				DWRITE_LINE_METRICS lineMetrics[maxLines]{};
 				UINT32 lineCount = 0;
 				hr = pTextLayout->GetLineMetrics(lineMetrics, maxLines, &lineCount);
@@ -402,7 +402,7 @@ public:
 	}
 };
 
-const int stackBufferLength = 1000;
+constexpr int stackBufferLength = 1000;
 class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
 public:
 	int tlen;	// Using int instead of size_t as most Win32 APIs take int.
@@ -1974,7 +1974,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *p
 	if (!SUCCEEDED(hrCreate)) {
 		return;
 	}
-	const int clusters = stackBufferLength;
+	constexpr int clusters = stackBufferLength;
 	DWRITE_CLUSTER_METRICS clusterMetrics[clusters];
 	UINT32 count = 0;
 	const HRESULT hrGetCluster = pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count);
@@ -2387,9 +2387,9 @@ class ListBoxX : public ListBox {
 	void Paint(HDC);
 	static LRESULT PASCAL ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
-	static const Point ItemInset;	// Padding around whole item
-	static const Point TextInset;	// Padding around text
-	static const Point ImageInset;	// Padding around image
+	static constexpr Point ItemInset {0, 0};	// Padding around whole item
+	static constexpr Point TextInset {2, 0};	// Padding around text
+	static constexpr Point ImageInset {1, 0};	// Padding around image
 
 public:
 	ListBoxX() : lineHeight(10), fontCopy{}, technology(0), lb{}, unicodeMode(false),
@@ -2427,10 +2427,6 @@ public:
 	LRESULT WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	static LRESULT PASCAL StaticWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 };
-
-const Point ListBoxX::ItemInset(0, 0);
-const Point ListBoxX::TextInset(2, 0);
-const Point ListBoxX::ImageInset(1, 0);
 
 ListBox *ListBox::Allocate() {
 	ListBoxX *lb = new ListBoxX();
