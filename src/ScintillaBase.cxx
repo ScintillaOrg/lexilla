@@ -622,7 +622,7 @@ LexState *ScintillaBase::DocumentLexState() {
 	if (!pdoc->GetLexInterface()) {
 		pdoc->SetLexInterface(new LexState(pdoc));
 	}
-	return static_cast<LexState *>(pdoc->GetLexInterface());
+	return dynamic_cast<LexState *>(pdoc->GetLexInterface());
 }
 
 void LexState::SetLexerModule(const LexerModule *lex) {
