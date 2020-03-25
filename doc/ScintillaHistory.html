@@ -577,6 +577,12 @@
 	On GTK with Wayland fix display of windowed IME.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2149/">Bug #2149</a>.
 	</li>
+	<li>
+	For Python programs, SciTE defaults to running python3 on Unix and pyw on Windows which will run
+	the most recently installed Python in many cases.
+	Set the "python.command" property to override this.
+	Scripts distributed with Scintilla and SciTE are checked with Python 3 and may not work with Python 2.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scite432.zip">Release 4.3.2</a>
