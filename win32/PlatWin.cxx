@@ -2839,7 +2839,7 @@ void ListBoxX::StartResize(WPARAM hitCode) {
 			break;
 
 		// Note that the current hit test code prevents the left edge cases ever firing
-		// as we don't want the left edge to be moveable
+		// as we don't want the left edge to be movable
 		case HTLEFT:
 		case HTTOP:
 		case HTTOPLEFT:
@@ -2875,7 +2875,7 @@ LRESULT ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
 		}
 	}
 
-	// Nerver permit resizing that moves the left edge. Allow movement of top or bottom edge
+	// Never permit resizing that moves the left edge. Allow movement of top or bottom edge
 	// depending on whether the list is above or below the caret
 	switch (hit) {
 		case HTLEFT:

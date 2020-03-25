@@ -1533,7 +1533,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	// As I can not work out how to store data on the clipboard in multiple formats
 	// and need some way to mark the clipping as being stream or rectangular,
 	// the terminating \0 is included in the length for rectangular clippings.
-	// All other tested aplications behave benignly by ignoring the \0.
+	// All other tested applications behave benignly by ignoring the \0.
 	// The #if is here because on Windows cfColumnSelect clip entry is used
 	// instead as standard indicator of rectangularness (so no need to kludge)
 	const char *textData = text->Data();
@@ -1750,7 +1750,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		if (event->button == 1) {
 #if PLAT_GTK_MACOSX
 			const bool meta = ctrl;
-			// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
+			// GDK reports the Command modifier key as GDK_MOD2_MASK for button events,
 			// not GDK_META_MASK like in key events.
 			ctrl = (event->state & GDK_MOD2_MASK) != 0;
 #else
@@ -1779,7 +1779,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			} else {
 #if PLAT_GTK_MACOSX
 				const bool meta = ctrl;
-				// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
+				// GDK reports the Command modifier key as GDK_MOD2_MASK for button events,
 				// not GDK_META_MASK like in key events.
 				ctrl = (event->state & GDK_MOD2_MASK) != 0;
 #else

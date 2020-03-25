@@ -192,7 +192,7 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	if (!unicodeIdentifiers)
 		return false;
 
-	// Python uses the XID_Continue set from unicode data
+	// Python uses the XID_Continue set from Unicode data
 	return IsXidContinue(ch);
 }
 
@@ -203,7 +203,7 @@ inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
 	if (!unicodeIdentifiers)
 		return false;
 
-	// Python uses the XID_Start set from unicode data
+	// Python uses the XID_Start set from Unicode data
 	return IsXidStart(ch);
 }
 
@@ -300,7 +300,7 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 		DefineProperty("fold.compact", &OptionsPython::foldCompact);
 
 		DefineProperty("lexer.python.unicode.identifiers", &OptionsPython::unicodeIdentifiers,
-			       "Set to 0 to not recognise Python 3 unicode identifiers.");
+			       "Set to 0 to not recognise Python 3 Unicode identifiers.");
 
 		DefineWordListSets(pythonWordListDesc);
 	}

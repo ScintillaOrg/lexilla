@@ -306,7 +306,7 @@ bool SurfaceImpl::Initialised() {
 	if (inited && context) {
 		if (cairo_status(context) == CAIRO_STATUS_SUCCESS) {
 			// Even when status is success, the target surface may have been
-			// finished whch may cause an assertion to fail crashing the application.
+			// finished which may cause an assertion to fail crashing the application.
 			// The cairo_surface_has_show_text_glyphs call checks the finished flag
 			// and when set, sets the status to CAIRO_STATUS_SURFACE_FINISHED
 			// which leads to warning messages instead of crashes.
@@ -1392,13 +1392,13 @@ static gboolean ButtonRelease(GtkWidget *, GdkEventButton *ev, gpointer p) {
 	return FALSE;
 }
 
-/* Change the active color to the selected color so the listbox uses the color
+/* Change the active colour to the selected colour so the listbox uses the colour
 scheme that it would use if it had the focus. */
 static void StyleSet(GtkWidget *w, GtkStyle *, void *) {
 
 	g_return_if_fail(w != nullptr);
 
-	/* Copy the selected color to active.  Note that the modify calls will cause
+	/* Copy the selected colour to active.  Note that the modify calls will cause
 	recursive calls to this function after the value is updated and w->style to
 	be set to a new object */
 
