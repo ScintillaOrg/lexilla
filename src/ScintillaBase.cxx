@@ -575,7 +575,7 @@ public:
 	void PropSet(const char *key, const char *val);
 	const char *PropGet(const char *key) const;
 	int PropGetInt(const char *key, int defaultValue=0) const;
-	int PropGetExpanded(const char *key, char *result) const;
+	size_t PropGetExpanded(const char *key, char *result) const;
 
 	int LineEndTypesSupported() override;
 	int AllocateSubStyles(int styleBase, int numberStyles);
@@ -741,7 +741,7 @@ int LexState::PropGetInt(const char *key, int defaultValue) const {
 	return props.GetInt(key, defaultValue);
 }
 
-int LexState::PropGetExpanded(const char *key, char *result) const {
+size_t LexState::PropGetExpanded(const char *key, char *result) const {
 	return props.GetExpanded(key, result);
 }
 
