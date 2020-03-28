@@ -1004,7 +1004,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return ac.GetTypesep();
 
 	case SCI_CALLTIPSHOW:
-		CallTipShow(LocationFromPosition(static_cast<Sci::Position>(wParam)),
+		CallTipShow(LocationFromPosition(wParam),
 			ConstCharPtrFromSPtr(lParam));
 		break;
 
@@ -1019,11 +1019,11 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return ct.posStartCallTip;
 
 	case SCI_CALLTIPSETPOSSTART:
-		ct.posStartCallTip = static_cast<Sci::Position>(wParam);
+		ct.posStartCallTip = wParam;
 		break;
 
 	case SCI_CALLTIPSETHLT:
-		ct.SetHighlight(static_cast<int>(wParam), static_cast<int>(lParam));
+		ct.SetHighlight(wParam, lParam);
 		break;
 
 	case SCI_CALLTIPSETBACK:

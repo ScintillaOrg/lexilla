@@ -10,11 +10,19 @@
 
 namespace Scintilla {
 
+struct Chunk {
+	size_t start;
+	size_t end;
+	constexpr Chunk(size_t start_=0, size_t end_=0) noexcept : start(start_), end(end_) {
+		assert(start <= end);
+	}
+	size_t Length() const noexcept;
+};
+
 /**
  */
 class CallTip {
-	int startHighlight;    // character offset to start and...
-	int endHighlight;      // ...end of highlighted text
+	Chunk highlight;    // character offset to start and end of highlighted text
 	std::string val;
 	Font font;
 	PRectangle rectUp;      // rectangle of last up angle in the tip
@@ -25,9 +33,8 @@ class CallTip {
 	bool useStyleCallTip;   // if true, STYLE_CALLTIP should be used
 	bool above;		// if true, display calltip above text
 
-	void DrawChunk(Surface *surface, int &x, const char *s,
-		int posStart, int posEnd, int ytext, PRectangle rcClient,
-		bool highlight, bool draw);
+	int DrawChunk(Surface *surface, int x, std::string_view sv,
+		int ytext, PRectangle rcClient, bool asHighlight, bool draw);
 	int PaintContents(Surface *surfaceWindow, bool draw);
 	bool IsTabCharacter(char ch) const noexcept;
 	int NextTabPos(int x) const noexcept;
@@ -71,7 +78,7 @@ public:
 
 	/// Set a range of characters to be displayed in a highlight style.
 	/// Commonly used to highlight the current parameter.
-	void SetHighlight(int start, int end);
+	void SetHighlight(size_t start, size_t end);
 
 	/// Set the tab size in pixels for the call tip. 0 or -ve means no tab expand.
 	void SetTabSize(int tabSz) noexcept;
