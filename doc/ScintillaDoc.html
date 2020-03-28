@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 3 January 2020 NH</p>
+    <p>Last edited 29 March 2020 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4145,7 +4145,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_MARKERGET">SCI_MARKERGET(line line) &rarr; int</a><br />
      <a class="message" href="#SCI_MARKERNEXT">SCI_MARKERNEXT(line lineStart, int markerMask) &rarr; line</a><br />
      <a class="message" href="#SCI_MARKERPREVIOUS">SCI_MARKERPREVIOUS(line lineStart, int markerMask) &rarr; line</a><br />
-     <a class="message" href="#SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int markerHandle) &rarr; int</a><br />
+     <a class="message" href="#SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int markerHandle) &rarr; line</a><br />
      <a class="message" href="#SCI_MARKERDELETEHANDLE">SCI_MARKERDELETEHANDLE(int markerHandle)</a><br />
     </code>
 
@@ -4403,7 +4403,7 @@ struct Sci_TextToFind {
     message returns the line number of the first line that contains one of the markers in
     <code class="parameter">markerMask</code> or -1 if no marker is found.</p>
 
-    <p><b id="SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int markerHandle) &rarr; int</b><br />
+    <p><b id="SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int markerHandle) &rarr; line</b><br />
      The <code class="parameter">markerHandle</code> argument is an identifier for a marker returned by <a
     class="message" href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>. This function searches
     the document for the marker with this handle and returns the line number that contains it or -1
@@ -4481,8 +4481,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_INDICATORCLEARRANGE">SCI_INDICATORCLEARRANGE(position start, position lengthClear)</a><br />
      <a class="message" href="#SCI_INDICATORALLONFOR">SCI_INDICATORALLONFOR(position pos) &rarr; int</a><br />
      <a class="message" href="#SCI_INDICATORVALUEAT">SCI_INDICATORVALUEAT(int indicator, position pos) &rarr; int</a><br />
-     <a class="message" href="#SCI_INDICATORSTART">SCI_INDICATORSTART(int indicator, position pos) &rarr; int</a><br />
-     <a class="message" href="#SCI_INDICATOREND">SCI_INDICATOREND(int indicator, position pos) &rarr; int</a><br />
+     <a class="message" href="#SCI_INDICATORSTART">SCI_INDICATORSTART(int indicator, position pos) &rarr; position</a><br />
+     <a class="message" href="#SCI_INDICATOREND">SCI_INDICATOREND(int indicator, position pos) &rarr; position</a><br />
 
      <a class="message" href="#SCI_FINDINDICATORSHOW">SCI_FINDINDICATORSHOW(position start, position end)</a><br />
      <a class="message" href="#SCI_FINDINDICATORFLASH">SCI_FINDINDICATORFLASH(position start, position end)</a><br />
@@ -4804,8 +4804,8 @@ struct Sci_TextToFind {
     </p>
 
     <p>
-    <b id="SCI_INDICATORSTART">SCI_INDICATORSTART(int indicator, position pos) &rarr; int</b><br />
-    <b id="SCI_INDICATOREND">SCI_INDICATOREND(int indicator, position pos) &rarr; int</b><br />
+    <b id="SCI_INDICATORSTART">SCI_INDICATORSTART(int indicator, position pos) &rarr; position</b><br />
+    <b id="SCI_INDICATOREND">SCI_INDICATOREND(int indicator, position pos) &rarr; position</b><br />
     Find the start or end of a range with one value from a position within the range.
     Can be used to iterate through the document to discover all the indicator positions.
     </p>
@@ -5141,7 +5141,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_CALLTIPACTIVE">SCI_CALLTIPACTIVE &rarr; bool</a><br />
      <a class="message" href="#SCI_CALLTIPPOSSTART">SCI_CALLTIPPOSSTART &rarr; position</a><br />
      <a class="message" href="#SCI_CALLTIPSETPOSSTART">SCI_CALLTIPSETPOSSTART(position posStart)</a><br />
-     <a class="message" href="#SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(int highlightStart, int
+     <a class="message" href="#SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(position highlightStart, position
     highlightEnd)</a><br />
      <a class="message" href="#SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(colour back)</a><br />
      <a class="message" href="#SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(colour fore)</a><br />
@@ -5180,7 +5180,7 @@ struct Sci_TextToFind {
      This message returns or sets the value of the current position when <code>SCI_CALLTIPSHOW</code>
     started to display the tip.</p>
 
-    <p><b id="SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(int highlightStart, int highlightEnd)</b><br />
+    <p><b id="SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(position highlightStart, position highlightEnd)</b><br />
      This sets the region of the call tips text to display in a highlighted style.
     <code class="parameter">highlightStart</code> is the zero-based index into the string of the first character to
     highlight and <code class="parameter">highlightEnd</code> is the index of the first character after the highlight.
@@ -6904,7 +6904,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char
     *language)</a><br />
      <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language) &rarr; int</a><br />
-     <a class="message" href="#SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer lexer)</a><br />
+     <a class="message" href="#SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</a><br />
      <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(position start, position end)</a><br />
@@ -6955,11 +6955,11 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
     <code>LexerModule</code> constructor is the name to use.</p>
 
-     <p class="provisional"><b id="SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer lexer)</b><br />
+     <p class="provisional"><b id="SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</b><br />
      <code>SCI_SETILEXER</code> allows setting a lexer as an <code>ILexer5*</code>.
      The lexer may be implemented by an application or a shared library such as Lexilla.</p>
 
-    <p>To test if your lexer assignment worked, use <a class="message"
+    <p>To test if your lexer assignment worked, use <a class="seealso"
     href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to
     see if the lexer number changed.</p>
 
@@ -7238,12 +7238,12 @@ A set of common tags and conventions for combining them is <a  class="jump" href
 
 <p class="provisional"><code>GetName</code> and <code>GetIdentifier</code> may be called
 to discover the identity of a lexer and be used to implement
-<a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE</a> and
-<a class="message" href="#SCI_GETLEXER">SCI_GETLEXER</a>.</p>
+<a class="seealso" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE</a> and
+<a class="seealso" href="#SCI_GETLEXER">SCI_GETLEXER</a>.</p>
 
 <p class="provisional"><code>PropertyGet</code> may be called
 to discover the value of a property stored by a lexer and be used to implement
-<a class="message" href="#SCI_GETPROPERTY">SCI_GETPROPERTY</a>.</p>
+<a class="seealso" href="#SCI_GETPROPERTY">SCI_GETPROPERTY</a>.</p>
 
 <h4>IDocument</h4>
 
