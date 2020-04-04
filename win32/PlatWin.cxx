@@ -237,8 +237,6 @@ HFONT FormatAndMetrics::HFont() {
 #define CLEARTYPE_QUALITY 5
 #endif
 
-namespace {
-
 void *PointerFromWindow(HWND hWnd) noexcept {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
@@ -246,6 +244,8 @@ void *PointerFromWindow(HWND hWnd) noexcept {
 void SetWindowPointer(HWND hWnd, void *ptr) noexcept {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
+
+namespace {
 
 HINSTANCE hinstPlatformRes {};
 
@@ -2156,7 +2156,7 @@ static RECT RectFromMonitor(HMONITOR hMonitor) noexcept {
 }
 
 void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo) {
-	const LONG style = ::GetWindowLong(HwndFromWindowID(wid), GWL_STYLE);
+	const DWORD style = GetWindowStyle(HwndFromWindowID(wid));
 	if (style & WS_POPUP) {
 		POINT ptOther = {0, 0};
 		::ClientToScreen(HwndFromWindow(*relativeTo), &ptOther);
@@ -3075,7 +3075,7 @@ LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam
 
 	case WM_DESTROY:
 		lb = 0;
-		::SetWindowLong(hWnd, 0, 0);
+		SetWindowPointer(hWnd, nullptr);
 		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 
 	case WM_ERASEBKGND:
