@@ -573,6 +573,10 @@
 	Added Visual Studio project files for Lexilla and Scintilla with no lexers.
 	</li>
 	<li>
+	When a lexer has been set with SCI_SETILEXER, fix SCI_GETLEXER and avoid
+	sending SCN_STYLENEEDED notifications.
+	</li>
+	<li>
 	On Win32 fix handling Japanese IME input when both GCS_COMPSTR and
 	GCS_RESULTSTR set.
 	</li>
