@@ -679,6 +679,18 @@ void LexState::SetWordList(int n, const char *wl) {
 	}
 }
 
+int LexState::GetIdentifier() const {
+	if (lexCurrent) {
+		return lexCurrent->GetLanguage();
+	}
+	if (instance) {
+		if (instance->Version() >= lvRelease5) {
+			return instance->GetIdentifier();
+		}
+	}
+	return SCLEX_CONTAINER;
+}
+
 const char *LexState::GetName() const {
 	if (lexCurrent) {
 		return lexCurrent->languageName;
@@ -847,7 +859,7 @@ const char *LexState::DescriptionOfStyle(int style) {
 }
 
 void ScintillaBase::NotifyStyleToNeeded(Sci::Position endStyleNeeded) {
-	if (DocumentLexState()->lexLanguage != SCLEX_CONTAINER) {
+	if (DocumentLexState()->GetIdentifier() != SCLEX_CONTAINER) {
 		const Sci::Line lineEndStyled =
 			pdoc->SciLineFromPosition(pdoc->GetEndStyled());
 		const Sci::Position endStyled =
@@ -1062,7 +1074,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_GETLEXER:
-		return DocumentLexState()->lexLanguage;
+		return DocumentLexState()->GetIdentifier();
 
 	case SCI_SETILEXER:
 		DocumentLexState()->SetInstance(reinterpret_cast<ILexer5 *>(lParam));
