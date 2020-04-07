@@ -139,7 +139,6 @@ constVariable:scintilla/lexers/LexAVE.cxx
 constVariable:scintilla/lexers/LexAVS.cxx
 constVariable:scintilla/lexers/LexAsn1.cxx
 constVariable:scintilla/lexers/LexBibTeX.cxx
-constVariable:scintilla/lexers/LexBatch.cxx
 constVariable:scintilla/lexers/LexCLW.cxx
 constVariable:scintilla/lexers/LexCOBOL.cxx
 constVariable:scintilla/lexers/LexCSS.cxx
