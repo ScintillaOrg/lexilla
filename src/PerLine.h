@@ -41,6 +41,7 @@ public:
 	void RemoveHandle(int handle);
 	bool RemoveNumber(int markerNum, bool all);
 	void CombineWith(MarkerHandleSet *other);
+	MarkerHandleNumber const *GetMarkerHandleNumber(int which) const noexcept;
 };
 
 class LineMarkers : public PerLine {
@@ -67,6 +68,8 @@ public:
 	bool DeleteMark(Sci::Line line, int markerNum, bool all);
 	void DeleteMarkFromHandle(int markerHandle);
 	Sci::Line LineFromHandle(int markerHandle);
+	int HandleFromLine(Sci::Line line, int which) const;
+	int NumberFromLine(Sci::Line line, int which) const;
 };
 
 class LineLevels : public PerLine {

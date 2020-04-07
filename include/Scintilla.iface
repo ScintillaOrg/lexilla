@@ -156,6 +156,12 @@ fun line MarkerLineFromHandle=2017(int markerHandle,)
 # Delete a marker.
 fun void MarkerDeleteHandle=2018(int markerHandle,)
 
+# Retrieve marker handles of a line
+fun int MarkerHandleFromLine=2732(line line, int which)
+
+# Retrieve marker number of a marker handle
+fun int MarkerNumberFromLine=2733(line line, int which)
+
 # Is undo history being collected?
 get bool GetUndoCollection=2019(,)
 
@@ -1241,6 +1247,8 @@ set void SetTargetEndVirtualSpace=2730(position space,)
 
 # Get the virtual space of the target end
 get position GetTargetEndVirtualSpace=2731(,)
+
+
 
 # Sets both the start and end of the target in one call.
 fun void SetTargetRange=2686(position start, position end)

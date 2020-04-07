@@ -55,6 +55,15 @@ bool MarkerHandleSet::Contains(int handle) const noexcept {
 	return false;
 }
 
+MarkerHandleNumber const *MarkerHandleSet::GetMarkerHandleNumber(int which) const noexcept {
+	for (const MarkerHandleNumber &mhn : mhList) {
+		if (which == 0)
+			return &mhn;
+		which--;
+	}
+	return nullptr;
+}
+
 bool MarkerHandleSet::InsertHandle(int handle, int markerNum) {
 	mhList.push_front(MarkerHandleNumber(handle, markerNum));
 	return true;
@@ -112,6 +121,22 @@ Sci::Line LineMarkers::LineFromHandle(int markerHandle) {
 				}
 			}
 		}
+	}
+	return -1;
+}
+
+int LineMarkers::HandleFromLine(Sci::Line line, int which) const {
+	if (markers.Length() && (line >= 0) && (line < markers.Length()) && markers[line]) {
+		MarkerHandleNumber const *pnmh = markers[line]->GetMarkerHandleNumber(which);
+		return pnmh ? pnmh->handle : -1;
+	}
+	return -1;
+}
+
+int LineMarkers::NumberFromLine(Sci::Line line, int which) const {
+	if (markers.Length() && (line >= 0) && (line < markers.Length()) && markers[line]) {
+		MarkerHandleNumber const *pnmh = markers[line]->GetMarkerHandleNumber(which);
+		return pnmh ? pnmh->number : -1;
 	}
 	return -1;
 }

@@ -369,6 +369,14 @@ Sci::Line Document::LineFromHandle(int markerHandle) const {
 	return Markers()->LineFromHandle(markerHandle);
 }
 
+int Document::MarkerNumberFromLine(Sci::Line line, int which) const {
+	return Markers()->NumberFromLine(line, which);
+}
+
+int Document::MarkerHandleFromLine(Sci::Line line, int which) const {
+	return Markers()->HandleFromLine(line, which);
+}
+
 Sci_Position SCI_METHOD Document::LineStart(Sci_Position line) const {
 	return cb.LineStart(line);
 }

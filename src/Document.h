@@ -403,6 +403,8 @@ public:
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);
 	Sci::Line LineFromHandle(int markerHandle) const;
+	int MarkerNumberFromLine(Sci::Line line, int which) const;
+	int MarkerHandleFromLine(Sci::Line line, int which) const;
 	Sci_Position SCI_METHOD LineStart(Sci_Position line) const override;
 	bool IsLineStartPosition(Sci::Position position) const;
 	Sci_Position SCI_METHOD LineEnd(Sci_Position line) const override;

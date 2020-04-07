@@ -4147,6 +4147,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_MARKERPREVIOUS">SCI_MARKERPREVIOUS(line lineStart, int markerMask) &rarr; line</a><br />
      <a class="message" href="#SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int markerHandle) &rarr; line</a><br />
      <a class="message" href="#SCI_MARKERDELETEHANDLE">SCI_MARKERDELETEHANDLE(int markerHandle)</a><br />
+     <a class="message" href="#SCI_MARKERHANDLEFROMLINE">SCI_MARKERHANDLEFROMLINE(line line, int which) &rarr; int</a><br />
+     <a class="message" href="#SCI_MARKERNUMBERFROMLINE">SCI_MARKERNUMBERFROMLINE(line line, int which) &rarr; int</a><br />
     </code>
 
     <p><b id="SCI_MARKERDEFINE">SCI_MARKERDEFINE(int markerNumber, int markerSymbol)</b><br />
@@ -4413,6 +4415,12 @@ struct Sci_TextToFind {
      The <code class="parameter">markerHandle</code> argument is an identifier for a marker returned by <a
     class="message" href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>. This function searches
     the document for the marker with this handle and deletes the marker if it is found.</p>
+
+    <p><b id="SCI_MARKERHANDLEFROMLINE">SCI_MARKERHANDLEFROMLINE(line line, int which) &rarr; int</b><br />
+    <b id="SCI_MARKERNUMBERFROMLINE">SCI_MARKERNUMBERFROMLINE(line line, int which) &rarr; int</b><br />
+	 These messages returns the Nth marker handle or marker number in a given <code class="parameter">line</code>.
+	 Handles are returned by <a class="message" href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>.
+	 If <code class="parameter">which</code> is greater or equal to the number of markers on a line, this returns -1;</p>
 
     <h2 id="Indicators">Indicators</h2>
 
