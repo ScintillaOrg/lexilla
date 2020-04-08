@@ -396,15 +396,15 @@ public:
 		cb.GetStyleRange(buffer, position, lengthRetrieve);
 	}
 	int GetMark(Sci::Line line) const noexcept;
-	Sci::Line MarkerNext(Sci::Line lineStart, int mask) const;
+	Sci::Line MarkerNext(Sci::Line lineStart, int mask) const noexcept;
 	int AddMark(Sci::Line line, int markerNum);
 	void AddMarkSet(Sci::Line line, int valueSet);
 	void DeleteMark(Sci::Line line, int markerNum);
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);
-	Sci::Line LineFromHandle(int markerHandle) const;
-	int MarkerNumberFromLine(Sci::Line line, int which) const;
-	int MarkerHandleFromLine(Sci::Line line, int which) const;
+	Sci::Line LineFromHandle(int markerHandle) const noexcept;
+	int MarkerNumberFromLine(Sci::Line line, int which) const noexcept;
+	int MarkerHandleFromLine(Sci::Line line, int which) const noexcept;
 	Sci_Position SCI_METHOD LineStart(Sci_Position line) const override;
 	bool IsLineStartPosition(Sci::Position position) const;
 	Sci_Position SCI_METHOD LineEnd(Sci_Position line) const override;
@@ -466,20 +466,20 @@ public:
 
 	int SCI_METHOD SetLineState(Sci_Position line, int state) override;
 	int SCI_METHOD GetLineState(Sci_Position line) const override;
-	Sci::Line GetMaxLineState() const;
+	Sci::Line GetMaxLineState() const noexcept;
 	void SCI_METHOD ChangeLexerState(Sci_Position start, Sci_Position end) override;
 
-	StyledText MarginStyledText(Sci::Line line) const;
+	StyledText MarginStyledText(Sci::Line line) const noexcept;
 	void MarginSetStyle(Sci::Line line, int style);
 	void MarginSetStyles(Sci::Line line, const unsigned char *styles);
 	void MarginSetText(Sci::Line line, const char *text);
 	void MarginClearAll();
 
-	StyledText AnnotationStyledText(Sci::Line line) const;
+	StyledText AnnotationStyledText(Sci::Line line) const noexcept;
 	void AnnotationSetText(Sci::Line line, const char *text);
 	void AnnotationSetStyle(Sci::Line line, int style);
 	void AnnotationSetStyles(Sci::Line line, const unsigned char *styles);
-	int AnnotationLines(Sci::Line line) const;
+	int AnnotationLines(Sci::Line line) const noexcept;
 	void AnnotationClearAll();
 
 	bool AddWatcher(DocWatcher *watcher, void *userData);
