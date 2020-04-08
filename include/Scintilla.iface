@@ -1248,8 +1248,6 @@ set void SetTargetEndVirtualSpace=2730(position space,)
 # Get the virtual space of the target end
 get position GetTargetEndVirtualSpace=2731(,)
 
-
-
 # Sets both the start and end of the target in one call.
 fun void SetTargetRange=2686(position start, position end)
 
