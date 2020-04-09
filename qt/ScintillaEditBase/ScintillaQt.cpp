@@ -575,9 +575,11 @@ CaseFolder *ScintillaQt::CaseFolderForEncoding()
 					sCharacter[0] = i;
 					QString su = codec->toUnicode(sCharacter, 1);
 					QString suFolded = su.toCaseFolded();
-					QByteArray bytesFolded = codec->fromUnicode(suFolded);
-					if (bytesFolded.length() == 1) {
-						pcf->SetTranslation(sCharacter[0], bytesFolded[0]);
+					if (codec->canEncode(suFolded)) {
+						QByteArray bytesFolded = codec->fromUnicode(suFolded);
+						if (bytesFolded.length() == 1) {
+							pcf->SetTranslation(sCharacter[0], bytesFolded[0]);
+						}
 					}
 				}
 				return pcf;
