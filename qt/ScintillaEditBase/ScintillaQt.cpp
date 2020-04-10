@@ -190,7 +190,7 @@ static void AddRectangularToMime(QMimeData *mimeData, [[maybe_unused]] QString s
 #endif
 }
 
-static void AddLineCutCopyToMime(QMimeData *mimeData)
+static void AddLineCutCopyToMime([[maybe_unused]] QMimeData *mimeData)
 {
 #if defined(Q_OS_WIN)
 	// Add an empty marker
