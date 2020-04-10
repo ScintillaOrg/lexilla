@@ -82,19 +82,19 @@ void LineMarker::SetRGBAImage(Point sizeRGBAImage, float scale, const unsigned c
 
 static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, ColourDesired fore, ColourDesired back) {
 	const PRectangle rc = PRectangle::FromInts(
-		centreX - armSize,
-		centreY - armSize,
-		centreX + armSize + 1,
-		centreY + armSize + 1);
+				      centreX - armSize,
+				      centreY - armSize,
+				      centreX + armSize + 1,
+				      centreY + armSize + 1);
 	surface->RectangleDraw(rc, back, fore);
 }
 
 static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, ColourDesired fore, ColourDesired back) {
 	const PRectangle rcCircle = PRectangle::FromInts(
-		centreX - armSize,
-		centreY - armSize,
-		centreX + armSize + 1,
-		centreY + armSize + 1);
+					    centreX - armSize,
+					    centreY - armSize,
+					    centreX + armSize + 1,
+					    centreY + armSize + 1);
 	surface->Ellipse(rcCircle, back, fore);
 }
 
@@ -153,17 +153,18 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		surface->DrawRGBAImage(rcImage, image->GetWidth(), image->GetHeight(), image->Pixels());
 		return;
 	}
+
 	const IntegerRectangle ircWhole(rcWhole);
 	// Restrict most shapes a bit
 	const PRectangle rc(rcWhole.left, rcWhole.top + 1, rcWhole.right, rcWhole.bottom - 1);
 	// Ensure does not go beyond edge
-	const int minDim = std::min(ircWhole.Width(), ircWhole.Height()-2) - 1;
+	const int minDim = std::min(ircWhole.Width(), ircWhole.Height() - 2) - 1;
 	int centreX = (ircWhole.right + ircWhole.left) / 2;
 	const int centreY = (ircWhole.bottom + ircWhole.top) / 2;
 	const int dimOn2 = minDim / 2;
 	const int dimOn4 = minDim / 4;
-	const int blobSize = dimOn2-1;
-	const int armSize = dimOn2-2;
+	const int blobSize = dimOn2 - 1;
+	const int armSize = dimOn2 - 2;
 	if (marginStyle == SC_MARGIN_NUMBER || marginStyle == SC_MARGIN_TEXT || marginStyle == SC_MARGIN_RTEXT) {
 		// On textual margins move marker to the left to try to avoid overlapping the text
 		centreX = ircWhole.left + dimOn2 + 1;
