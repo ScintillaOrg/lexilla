@@ -121,20 +121,20 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	ColourDesired colourTail = back;
 
 	switch (tFold) {
-	case LineMarker::head :
-	case LineMarker::headWithTail :
+	case LineMarker::head:
+	case LineMarker::headWithTail:
 		colourHead = backSelected;
 		colourTail = backSelected;
 		break;
-	case LineMarker::body :
+	case LineMarker::body:
 		colourHead = backSelected;
 		colourBody = backSelected;
 		break;
-	case LineMarker::tail :
+	case LineMarker::tail:
 		colourBody = backSelected;
 		colourTail = backSelected;
 		break;
-	default :
+	default:
 		// LineMarker::undefined
 		break;
 	}
