@@ -17,4 +17,11 @@ int main() {
 	// JavaScript regular expression (14) tests
 	let a = /a/;
 	let b = /[a-z]+/gi;
+
+	// Escape sequence (27) tests
+	printf("\'\"\?\\\a\b\f\n\r\t\v \P");
+	printf("\0a \013a \019");
+	printf("\x013ac \xdz");
+	printf("\ua34df \uz");
+	printf("\Ua34df7833 \Uz");
 }

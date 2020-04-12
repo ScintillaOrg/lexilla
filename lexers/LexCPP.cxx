@@ -163,18 +163,14 @@ void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 	}
 }
 
-struct EscapeSequence {
-	int digitsLeft;
-	CharacterSet setHexDigits;
-	CharacterSet setOctDigits;
-	CharacterSet setNoneNumeric;
-	CharacterSet *escapeSetValid;
-	EscapeSequence() {
-		digitsLeft = 0;
-		escapeSetValid = nullptr;
-		setHexDigits = CharacterSet(CharacterSet::setDigits, "ABCDEFabcdef");
-		setOctDigits = CharacterSet(CharacterSet::setNone, "01234567");
-	}
+class EscapeSequence {
+	const CharacterSet setHexDigits = CharacterSet(CharacterSet::setDigits, "ABCDEFabcdef");
+	const CharacterSet setOctDigits = CharacterSet(CharacterSet::setNone, "01234567");
+	const CharacterSet setNoneNumeric;
+	const CharacterSet *escapeSetValid = nullptr;
+	int digitsLeft = 0;
+public:
+	EscapeSequence() = default;
 	void resetEscapeState(int nextChar) {
 		digitsLeft = 0;
 		escapeSetValid = &setNoneNumeric;
@@ -194,6 +190,9 @@ struct EscapeSequence {
 	}
 	bool atEscapeEnd(int currChar) const {
 		return (digitsLeft <= 0) || !escapeSetValid->Contains(currChar);
+	}
+	void consumeDigit() noexcept {
+		digitsLeft--;
 	}
 };
 
@@ -1107,7 +1106,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				}
 				break;
 			case SCE_C_ESCAPESEQUENCE:
-				escapeSeq.digitsLeft--;
+				escapeSeq.consumeDigit();
 				if (!escapeSeq.atEscapeEnd(sc.ch)) {
 					break;
 				}
