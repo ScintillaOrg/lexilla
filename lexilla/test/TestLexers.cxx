@@ -97,7 +97,7 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 		char ch = '\0';
 		pdoc->GetCharRange(&ch, pos, 1);
 		if (ch == '\n') {
-			if (styleNow == prevStyle) {
+			if (styleNow != prevStyle) {
 				std::cout << path.string() << ":" << line << ":" <<
 					" different styles between \\r and \\n at " <<
 					pos << ": " << prevStyle << ", " << styleNow << "\n";
