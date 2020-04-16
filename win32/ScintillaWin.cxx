@@ -1714,7 +1714,7 @@ sptr_t ScintillaWin::IdleMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 #endif
 					const DWORD dwCurrent = GetTickCount();
 					const DWORD dwStart = wParam ? static_cast<DWORD>(wParam) : dwCurrent;
-					const DWORD maxWorkTime = 50;
+					constexpr DWORD maxWorkTime = 50;
 
 					if (dwCurrent >= dwStart && dwCurrent > maxWorkTime &&dwCurrent - maxWorkTime < dwStart)
 						PostMessage(MainHWND(), SC_WIN_IDLE, dwStart, 0);
@@ -1991,10 +1991,11 @@ bool ScintillaWin::FineTickerRunning(TickReason reason) {
 
 void ScintillaWin::FineTickerStart(TickReason reason, int millis, int tolerance) {
 	FineTickerCancel(reason);
+	const UINT_PTR eventID = static_cast<UINT_PTR>(fineTimerStart) + reason;
 	if (SetCoalescableTimerFn && tolerance) {
-		timers[reason] = SetCoalescableTimerFn(MainHWND(), fineTimerStart + reason, millis, nullptr, tolerance);
+		timers[reason] = SetCoalescableTimerFn(MainHWND(), eventID, millis, nullptr, tolerance);
 	} else {
-		timers[reason] = ::SetTimer(MainHWND(), fineTimerStart + reason, millis, nullptr);
+		timers[reason] = ::SetTimer(MainHWND(), eventID, millis, nullptr);
 	}
 }
 
