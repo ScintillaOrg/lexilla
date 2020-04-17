@@ -71,7 +71,7 @@ clean:
 	$(DIR_BIN)\Scintilla.lib $(DIR_BIN)\SciLexer.lib $(LIBSCI)
 
 depend:
-	python DepGen.py
+	pyw DepGen.py
 
 # Required for base Scintilla
 SRC_OBJS=\

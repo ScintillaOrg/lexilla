@@ -52,6 +52,8 @@ endif
 # Take care of changing Unix style '/' directory separator to '\' on Windows
 normalize = $(if $(windir),$(subst /,\,$1),$1)
 
+PYTHON = $(if $(windir),pyw,python3)
+
 ifdef windir
 CC = gcc
 DEL = del /q
@@ -103,7 +105,7 @@ analyze:
 	clang --analyze $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(CXX_BASE_FLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(basedir)/src/*.cxx $(basedir)/lexlib/*.cxx $(basedir)/lexers/*.cxx
 
 depend deps.mak:
-	python DepGen.py
+	$(PYTHON) DepGen.py
 
 LEX_OBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(basedir)/lexers/Lex*.cxx)))))
 
