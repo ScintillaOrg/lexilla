@@ -154,9 +154,7 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 		if (sc.state == SCE_MMIXAL_OPCODE_POST ||		// OPCODE_POST
 			sc.state == SCE_MMIXAL_OPERANDS) {			// OPERANDS
 			if (sc.state == SCE_MMIXAL_OPERANDS && isspace(sc.ch)) {
-				if (!sc.atLineEnd) {
-					sc.SetState(SCE_MMIXAL_COMMENT);
-				}
+				sc.SetState(SCE_MMIXAL_COMMENT);
 			} else if (isdigit(sc.ch)) {
 				sc.SetState(SCE_MMIXAL_NUMBER);
 			} else if (IsAWordChar(sc.ch) || sc.Match('@')) {
