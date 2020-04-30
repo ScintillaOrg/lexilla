@@ -50,7 +50,7 @@ class ScintillaGTK : public ScintillaBase {
 	Window wPreedit;
 	Window wPreeditDraw;
 	GtkIMContext *im_context;
-	PangoScript lastNonCommonScript;
+	GUnicodeScript lastNonCommonScript;
 
 	// Wheel mouse support
 	unsigned int linesPerScroll;

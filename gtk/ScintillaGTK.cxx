@@ -157,7 +157,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	atomSought(nullptr),
 	preeditInitialized(false),
 	im_context(nullptr),
-	lastNonCommonScript(PANGO_SCRIPT_INVALID_CODE),
+	lastNonCommonScript(G_UNICODE_SCRIPT_INVALID_CODE),
 	lastWheelMouseTime(0),
 	lastWheelMouseDirection(0),
 	wheelMouseIntensity(0),
@@ -413,13 +413,13 @@ public:
 	gboolean validUTF8;
 	glong uniStrLen;
 	gunichar *uniStr;
-	PangoScript pscript;
+	GUnicodeScript pscript;
 
 	explicit PreEditString(GtkIMContext *im_context) noexcept {
 		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
 		validUTF8 = g_utf8_validate(str, strlen(str), nullptr);
 		uniStr = g_utf8_to_ucs4_fast(str, strlen(str), &uniStrLen);
-		pscript = pango_script_for_unichar(uniStr[0]);
+		pscript = g_unichar_get_script(uniStr[0]);
 	}
 	// Deleted so PreEditString objects can not be copied.
 	PreEditString(const PreEditString&) = delete;
@@ -2235,9 +2235,9 @@ gboolean ScintillaGTK::ExposePreedit(GtkWidget *widget, GdkEventExpose *ose, Sci
 
 bool ScintillaGTK::KoreanIME() {
 	PreEditString pes(im_context);
-	if (pes.pscript != PANGO_SCRIPT_COMMON)
+	if (pes.pscript != G_UNICODE_SCRIPT_COMMON)
 		lastNonCommonScript = pes.pscript;
-	return lastNonCommonScript == PANGO_SCRIPT_HANGUL;
+	return lastNonCommonScript == G_UNICODE_SCRIPT_HANGUL;
 }
 
 void ScintillaGTK::MoveImeCarets(int pos) {
