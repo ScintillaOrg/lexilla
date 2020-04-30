@@ -99,12 +99,11 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 			}
 		} else if (sc.state == SCE_MMIXAL_REF) {			// REF
 			if (!IsAWordChar(sc.ch) ) {
-				char s[100];
-				sc.GetCurrent(s, sizeof(s));
+				char s0[100];
+				sc.GetCurrent(s0, sizeof(s0));
+				const char *s = s0;
 				if (*s == ':') {	// ignore base prefix for match
-					for (size_t i = 0; i != sizeof(s); ++i) {
-						*(s+i) = *(s+i+1);
-					}
+					++s;
 				}
 				if (special_register.InList(s)) {
 					sc.ChangeState(SCE_MMIXAL_REGISTER);
