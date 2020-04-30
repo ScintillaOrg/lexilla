@@ -33,7 +33,7 @@ static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == ':' || ch == '_');
 }
 
-inline bool isMMIXALOperator(char ch) {
+static inline bool isMMIXALOperator(char ch) {
 	if (IsASCII(ch) && isalnum(ch))
 		return false;
 	if (ch == '+' || ch == '-' || ch == '|' || ch == '^' ||
@@ -85,8 +85,6 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 		} else if (sc.state == SCE_MMIXAL_NUMBER) {		// NUMBER
 			if (!isdigit(sc.ch)) {
 				if (IsAWordChar(sc.ch)) {
-					char s[100];
-					sc.GetCurrent(s, sizeof(s));
 					sc.ChangeState(SCE_MMIXAL_REF);
 					sc.SetState(SCE_MMIXAL_REF);
 				} else {
