@@ -149,7 +149,7 @@ Decoration<POS> *DecorationList<POS>::Create(int indicator, Sci::Position length
 
 	typename std::vector<std::unique_ptr<Decoration<POS>>>::iterator it = std::lower_bound(
 		decorationList.begin(), decorationList.end(), decoNew,
-		[](const std::unique_ptr<Decoration<POS>> &a, const std::unique_ptr<Decoration<POS>> &b) {
+		[](const std::unique_ptr<Decoration<POS>> &a, const std::unique_ptr<Decoration<POS>> &b) noexcept {
 		return a->Indicator() < b->Indicator();
 	});
 	typename std::vector<std::unique_ptr<Decoration<POS>>>::iterator itAdded =
@@ -163,7 +163,7 @@ Decoration<POS> *DecorationList<POS>::Create(int indicator, Sci::Position length
 template <typename POS>
 void DecorationList<POS>::Delete(int indicator) {
 	decorationList.erase(std::remove_if(decorationList.begin(), decorationList.end(),
-		[indicator](const std::unique_ptr<Decoration<POS>> &deco) {
+		[indicator](const std::unique_ptr<Decoration<POS>> &deco) noexcept {
 		return deco->Indicator() == indicator;
 	}), decorationList.end());
 	current = nullptr;
@@ -228,7 +228,7 @@ void DecorationList<POS>::DeleteRange(Sci::Position position, Sci::Position dele
 template <typename POS>
 void DecorationList<POS>::DeleteLexerDecorations() {
 	decorationList.erase(std::remove_if(decorationList.begin(), decorationList.end(),
-		[](const std::unique_ptr<Decoration<POS>> &deco) {
+		[](const std::unique_ptr<Decoration<POS>> &deco) noexcept {
 		return deco->Indicator() < INDICATOR_CONTAINER ;
 	}), decorationList.end());
 	current = nullptr;
@@ -241,7 +241,7 @@ void DecorationList<POS>::DeleteAnyEmpty() {
 		decorationList.clear();
 	} else {
 		decorationList.erase(std::remove_if(decorationList.begin(), decorationList.end(),
-			[](const std::unique_ptr<Decoration<POS>> &deco) {
+			[](const std::unique_ptr<Decoration<POS>> &deco) noexcept {
 			return deco->Empty();
 		}), decorationList.end());
 	}
