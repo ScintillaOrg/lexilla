@@ -86,6 +86,11 @@ GCC Include Path 22
 In file included from /usr/include/gtk-2.0/gtk/gtkobject.h:37,
 
 
+GCC Pointer 25
+  236 | void            gtk_type_init   (GTypeDebugFlags    debug_flags);
+      |                                                                ^
+
+
 Escape Sequence 23
 [K
 

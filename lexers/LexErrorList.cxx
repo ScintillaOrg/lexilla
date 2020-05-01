@@ -48,6 +48,19 @@ inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
+bool IsGccExcerpt(const char *s) noexcept {
+	while (*s) {
+		if (s[0] == ' ' && s[1] == '|' && (s[2] == ' ' || s[2] == '+')) {
+			return true;
+		}
+		if (!(s[0] == ' ' || s[0] == '+' || Is0To9(s[0]))) {
+			return false;
+		}
+		s++;
+	}
+	return true;
+}
+
 int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci_Position &startValue) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
@@ -132,6 +145,11 @@ int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci
 		// Microsoft linker warning:
 		// {<object> : } warning LNK9999
 		return SCE_ERR_MS;
+	} else if (IsGccExcerpt(lineBuffer)) {
+		// GCC code excerpt and pointer to issue
+		//    73 |   GTimeVal last_popdown;
+		//       |            ^~~~~~~~~~~~
+		return SCE_ERR_GCC_EXCERPT;
 	} else {
 		// Look for one of the following formats:
 		// GCC: <filename>:<line>:<message>
