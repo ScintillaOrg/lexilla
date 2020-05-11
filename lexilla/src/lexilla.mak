@@ -208,7 +208,7 @@ LEXILLA_OBJS=\
 	$(LEX_OBJS)
 
 $(LEXILLA): $(LEXILLA_OBJS) LexillaVersion.res
-	$(LD) $(LDFLAGS) -DLL -OUT:$@ $** $(LIBS)
+	$(LD) $(LDFLAGS) -DEF:Lexilla.def -DLL -OUT:$@ $** $(LIBS)
 
 $(LIBLEXILLA): $(LEXILLA_OBJS)
 	LIB -OUT:$@ $**
