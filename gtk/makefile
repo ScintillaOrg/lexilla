@@ -62,8 +62,10 @@ SHAREDEXTENSION = $(if $(windir),dll,so)
 ifdef windir
 CC = gcc
 DEL = del /q
+LEXILLA = lexilla.dll
 else
 DEL = rm -f
+LEXILLA = liblexilla.so
 endif
 COMPLIB=$(basedir)/bin/scintilla.a
 COMPONENT=$(basedir)/bin/libscintilla.$(SHAREDEXTENSION)
@@ -90,11 +92,14 @@ CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTK_VERSION))
 CONFIGLIB:=$(shell pkg-config --libs $(GTK_VERSION) gmodule-no-export-2.0)
 MARSHALLER=scintilla-marshal.o
 
-all: $(COMPLIB) $(COMPONENT)
+all: $(COMPLIB) $(COMPONENT) $(LEXILLA)
 
 static: $(COMPLIB)
 
 shared: $(COMPONENT)
+
+$(LEXILLA):
+	$(MAKE) --directory=../lexilla/src
 
 clean:
 	$(DEL) *.o $(call normalize,$(COMPLIB)) $(call normalize,$(COMPONENT)) *.plist
