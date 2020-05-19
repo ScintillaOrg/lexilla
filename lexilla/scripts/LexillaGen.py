@@ -8,38 +8,39 @@
 # Files are regenerated in place with templates stored in comments.
 # The format of generation comments is documented in FileGenerator.py.
 
-import os, sys
+import pathlib, sys
 
-sys.path.append(os.path.join("..", "..", "scripts"))
+sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent / "scripts"))
 
 from FileGenerator import Regenerate, UpdateLineInFile, \
     ReplaceREInFile, UpdateLineInPlistFile, ReadFileAsList, UpdateFileFromLines, \
     FindSectionInList
 import ScintillaData
 
-def RegenerateAll(root):
+def RegenerateAll(rootDirectory):
 
-    scintillaBase = os.path.abspath(root)
+    root = pathlib.Path(rootDirectory)
 
-    sci = ScintillaData.ScintillaData(root + os.sep)
+    scintillaBase = root.resolve()
 
-    lexillaDir = os.path.join(root, "lexilla")
-    srcDir = os.path.join(lexillaDir, "src")
+    sci = ScintillaData.ScintillaData(scintillaBase)
 
-    Regenerate(os.path.join(srcDir, "Lexilla.cxx"), "//", sci.lexerModules)
-    Regenerate(os.path.join(srcDir, "lexilla.mak"), "#", sci.lexFiles)
+    lexillaDir = scintillaBase / "lexilla"
+    srcDir = lexillaDir / "src"
+
+    Regenerate(srcDir / "Lexilla.cxx", "//", sci.lexerModules)
+    Regenerate(srcDir / "lexilla.mak", "#", sci.lexFiles)
 
     # Discover version information
-    with open(os.path.join(lexillaDir, "version.txt")) as f:
-        version = f.read().strip()
+    version = (lexillaDir / "version.txt").read_text().strip()
     versionDotted = version[0] + '.' + version[1] + '.' + version[2]
     versionCommad = versionDotted.replace(".", ", ") + ', 0'
 
-    rcPath = os.path.join(srcDir, "LexillaVersion.rc")
+    rcPath = srcDir / "LexillaVersion.rc"
     UpdateLineInFile(rcPath, "#define VERSION_LEXILLA",
         "#define VERSION_LEXILLA \"" + versionDotted + "\"")
     UpdateLineInFile(rcPath, "#define VERSION_WORDS",
         "#define VERSION_WORDS " + versionCommad)
 
 if __name__=="__main__":
-    RegenerateAll(os.path.join("..", ".."))
+    RegenerateAll(pathlib.Path(__file__).resolve().parent.parent.parent)
