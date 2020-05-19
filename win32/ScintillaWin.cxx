@@ -96,6 +96,10 @@
 #define WM_UNICHAR                      0x0109
 #endif
 
+#ifndef WM_DPICHANGED
+#define WM_DPICHANGED 0x02E0
+#endif
+
 #ifndef UNICODE_NOCHAR
 #define UNICODE_NOCHAR                  0xFFFF
 #endif
@@ -282,6 +286,8 @@ class ScintillaWin :
 	unsigned int linesPerScroll;	///< Intellimouse support
 	int wheelDelta; ///< Wheel delta from roll
 
+	UINT dpi = 72;
+
 	HRGN hRgnUpdate;
 
 	bool hasOKText;
@@ -336,6 +342,8 @@ class ScintillaWin :
 
 	Sci::Position TargetAsUTF8(char *text) const;
 	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
+
+	void CheckDpiChanged();
 
 	bool PaintDC(HDC hdc);
 	sptr_t WndPaint();
@@ -847,6 +855,14 @@ Sci::Position ScintillaWin::EncodedFromUTF8(const char *utf8, char *encoded) con
 	}
 }
 
+void ScintillaWin::CheckDpiChanged() {
+	const UINT dpiNow = DpiForWindow(wMain.GetID());
+	if (dpi != dpiNow) {
+		dpi = dpiNow;
+		InvalidateStyleData();
+	}
+}
+
 bool ScintillaWin::PaintDC(HDC hdc) {
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
 		AutoSurface surfaceWindow(hdc, this);
@@ -877,6 +893,7 @@ bool ScintillaWin::PaintDC(HDC hdc) {
 }
 
 sptr_t ScintillaWin::WndPaint() {
+	CheckDpiChanged();
 	//ElapsedPeriod ep;
 
 	// Redirect assertions to debug output and save current state
@@ -1895,6 +1912,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_SYSCOLORCHANGE:
 			//Platform::DebugPrintf("Setting Changed\n");
 			InvalidateStyleData();
+			break;
+
+		case WM_DPICHANGED:
+			InvalidateStyleRedraw();
 			break;
 
 		case WM_CONTEXTMENU:

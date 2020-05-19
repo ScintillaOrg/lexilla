@@ -52,6 +52,8 @@ T DLLFunction(HMODULE hModule, LPCSTR lpProcName) noexcept {
 	return fp;
 }
 
+UINT DpiForWindow(WindowID wid) noexcept;
+
 #if defined(USE_D2D)
 extern bool LoadD2D();
 extern ID2D1Factory *pD2DFactory;
