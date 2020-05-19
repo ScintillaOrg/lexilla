@@ -38,6 +38,20 @@ inline HWND HwndFromWindow(const Window &w) noexcept {
 void *PointerFromWindow(HWND hWnd) noexcept;
 void SetWindowPointer(HWND hWnd, void *ptr) noexcept;
 
+/// Find a function in a DLL and convert to a function pointer.
+/// This avoids undefined and conditionally defined behaviour.
+template<typename T>
+T DLLFunction(HMODULE hModule, LPCSTR lpProcName) noexcept {
+	if (!hModule) {
+		return nullptr;
+	}
+	FARPROC function = ::GetProcAddress(hModule, lpProcName);
+	static_assert(sizeof(T) == sizeof(function));
+	T fp;
+	memcpy(&fp, &function, sizeof(T));
+	return fp;
+}
+
 #if defined(USE_D2D)
 extern bool LoadD2D();
 extern ID2D1Factory *pD2DFactory;
