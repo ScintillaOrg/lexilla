@@ -643,7 +643,7 @@ void SurfaceGDI::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesi
 	BrushColour(back);
 	std::vector<POINT> outline;
 	for (size_t i=0; i<npts; i++) {
-		POINT pt = POINTFromPoint(pts[i]);
+		const POINT pt = POINTFromPoint(pts[i]);
 		outline.push_back(pt);
 	}
 	::Polygon(hdc, &outline[0], static_cast<int>(npts));
@@ -793,8 +793,8 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 		const BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0},
 			{{0, 0, 0, 0}}};
 		void *image = nullptr;
-		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
-			DIB_RGB_COLORS, &image, NULL, 0);
+		HBITMAP hbmMem = ::CreateDIBSection(hMemDC, &bpih,
+			DIB_RGB_COLORS, &image, {}, 0);
 		if (hbmMem) {
 			HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
 
@@ -1641,13 +1641,13 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 	for (size_t bytePosition = 0; bytePosition < screenLine->Length();) {
 		const unsigned char uch = screenLine->Text()[bytePosition];
 		const unsigned int byteCount = UTF8BytesOfLead[uch];
-		const UINT32 codeUnits = static_cast<UINT32>(UTF16LengthFromUTF8ByteCount(byteCount));
+		const UINT32 codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
 		const DWRITE_TEXT_RANGE textRange = { layoutPosition, codeUnits };
 
 		XYPOSITION representationWidth = screenLine->RepresentationWidth(bytePosition);
 		if ((representationWidth == 0.0f) && (screenLine->Text()[bytePosition] == '\t')) {
 			Point realPt;
-			DWRITE_HIT_TEST_METRICS realCaretMetrics;
+			DWRITE_HIT_TEST_METRICS realCaretMetrics {};
 			textLayout->HitTestTextPosition(
 				layoutPosition,
 				false, // trailing if false, else leading edge
@@ -1758,9 +1758,9 @@ size_t ScreenLineLayout::PositionFromX(XYPOSITION xDistance, bool charPosition) 
 	// If hitting the trailing side of a cluster, return the
 	// leading edge of the following text position.
 
-	BOOL isTrailingHit;
-	BOOL isInside;
-	DWRITE_HIT_TEST_METRICS caretMetrics;
+	BOOL isTrailingHit = FALSE;
+	BOOL isInside = FALSE;
+	DWRITE_HIT_TEST_METRICS caretMetrics {};
 
 	textLayout->HitTestPoint(
 		xDistance,
@@ -1770,7 +1770,7 @@ size_t ScreenLineLayout::PositionFromX(XYPOSITION xDistance, bool charPosition) 
 		&caretMetrics
 	);
 
-	DWRITE_HIT_TEST_METRICS hitTestMetrics = {};
+	DWRITE_HIT_TEST_METRICS hitTestMetrics {};
 	if (isTrailingHit) {
 		FLOAT caretX = 0.0f;
 		FLOAT caretY = 0.0f;
@@ -1810,7 +1810,7 @@ XYPOSITION ScreenLineLayout::XFromPosition(size_t caretPosition) {
 	const size_t position = GetPositionInLayout(text, caretPosition);
 
 	// Translate text character offset to point x,y.
-	DWRITE_HIT_TEST_METRICS caretMetrics;
+	DWRITE_HIT_TEST_METRICS caretMetrics {};
 	Point pt;
 
 	textLayout->HitTestTextPosition(
@@ -1905,7 +1905,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION yba
 		}
 
 		// Explicitly creating a text layout appears a little faster
-		IDWriteTextLayout *pTextLayout;
+		IDWriteTextLayout *pTextLayout = nullptr;
 		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
 				rc.Width(), rc.Height(), &pTextLayout);
 		if (SUCCEEDED(hr)) {
@@ -2222,8 +2222,7 @@ void Window::InvalidateRectangle(PRectangle rc) {
 }
 
 void Window::SetFont(Font &font) {
-	::SendMessage(HwndFromWindowID(wid), WM_SETFONT,
-		reinterpret_cast<WPARAM>(font.GetID()), 0);
+	SetWindowFont(HwndFromWindowID(wid), font.GetID(), 0);
 }
 
 namespace {
@@ -2476,7 +2475,7 @@ void ListBoxX::SetFont(Font &font) {
 		}
 		FormatAndMetrics *pfm = static_cast<FormatAndMetrics *>(font.GetID());
 		fontCopy = pfm->HFont();
-		::SendMessage(lb, WM_SETFONT, reinterpret_cast<WPARAM>(fontCopy), 0);
+		SetWindowFont(lb, fontCopy, 0);
 	}
 }
 
@@ -3307,7 +3306,7 @@ bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
 }
 
 void Platform::Assert(const char *c, const char *file, int line) {
-	char buffer[2000];
+	char buffer[2000] {};
 	sprintf(buffer, "Assertion [%s] failed at %s %d%s", c, file, line, assertionPopUps ? "" : "\r\n");
 	if (assertionPopUps) {
 		const int idButton = ::MessageBoxA(0, buffer, "Assertion failure",
