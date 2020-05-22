@@ -134,6 +134,7 @@ private:
 	void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;
 	bool OwnPrimarySelection();
 	void ClaimSelection() override;
+	static bool IsStringAtom(GdkAtom type);
 	void GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText);
 	void InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *selectionData);
 public:	// Public for SelectionReceiver

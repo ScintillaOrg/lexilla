@@ -1373,6 +1373,10 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
+bool ScintillaGTK::IsStringAtom(GdkAtom type) {
+	return (type == GDK_TARGET_STRING) || (type == atomUTF8) || (type == atomUTF8Mime);
+}
+
 static const guchar *DataOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_data(sd); }
 static gint LengthOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_length(sd); }
 static GdkAtom TypeOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_data_type(sd); }
@@ -1385,7 +1389,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	GdkAtom selectionTypeData = TypeOfGSD(selectionData);
 
 	// Return empty string if selection is not a string
-	if ((selectionTypeData != GDK_TARGET_STRING) && (selectionTypeData != atomUTF8) && (selectionTypeData != atomUTF8Mime)) {
+	if (!IsStringAtom(selectionTypeData)) {
 		selText.Clear();
 		return;
 	}
@@ -1479,8 +1483,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				atomSought = atomString;
 				gtk_selection_convert(GTK_WIDGET(PWidget(wMain)),
 						      SelectionOfGSD(selection_data), atomSought, GDK_CURRENT_TIME);
-			} else if ((LengthOfGSD(selection_data) > 0) &&
-					((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8) || (TypeOfGSD(selection_data) == atomUTF8Mime))) {
+			} else if ((LengthOfGSD(selection_data) > 0) && IsStringAtom(TypeOfGSD(selection_data))) {
 				GtkClipboard *clipBoard = gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), SelectionOfGSD(selection_data));
 				InsertSelection(clipBoard, selection_data);
 			}
@@ -1499,7 +1502,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		std::vector<char> drop(data, data + LengthOfGSD(selection_data));
 		drop.push_back('\0');
 		NotifyURIDropped(&drop[0]);
-	} else if ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8) || (TypeOfGSD(selection_data) == atomUTF8Mime)) {
+	} else if (IsStringAtom(TypeOfGSD(selection_data))) {
 		if (LengthOfGSD(selection_data) > 0) {
 			SelectionText selText;
 			GetGtkSelectionText(selection_data, selText);
