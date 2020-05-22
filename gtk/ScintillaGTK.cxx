@@ -1278,10 +1278,10 @@ public:
 		sci(sci_) {
 	}
 
-	static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
+	static void ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data, gpointer data) {
 		SelectionReceiver *self = static_cast<SelectionReceiver *>(data);
 		if (self->sci) {
-			self->sci->ReceivedClipboard(selection_data);
+			self->sci->ReceivedClipboard(clipboard, selection_data);
 		}
 		delete self;
 	}
@@ -1385,7 +1385,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	GdkAtom selectionTypeData = TypeOfGSD(selectionData);
 
 	// Return empty string if selection is not a string
-	if ((selectionTypeData != GDK_TARGET_STRING) && (selectionTypeData != atomUTF8)) {
+	if ((selectionTypeData != GDK_TARGET_STRING) && (selectionTypeData != atomUTF8) && (selectionTypeData != atomUTF8Mime)) {
 		selText.Clear();
 		return;
 	}
@@ -1431,7 +1431,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	}
 }
 
-void ScintillaGTK::InsertSelection(GtkSelectionData *selectionData) {
+void ScintillaGTK::InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *selectionData) {
 	const gint length = gtk_selection_data_get_length(selectionData);
 	if (length >= 0) {
 		GdkAtom selection = gtk_selection_data_get_selection(selectionData);
@@ -1446,6 +1446,15 @@ void ScintillaGTK::InsertSelection(GtkSelectionData *selectionData) {
 		InsertPasteShape(selText.Data(), selText.Length(),
 				 selText.rectangular ? pasteRectangular : pasteStream);
 		EnsureCaretVisible();
+	} else {
+		GdkAtom target = gtk_selection_data_get_target(selectionData);
+		if (target == atomUTF8) {
+			// In case data is actually only stored as text/plain;charset=utf-8 not UTF8_STRING
+			gtk_clipboard_request_contents(clipBoard, atomUTF8Mime,
+					 SelectionReceiver::ClipboardReceived,
+					 new SelectionReceiver(this)
+			);
+		}
 	}
 	Redraw();
 }
@@ -1454,9 +1463,9 @@ GObject *ScintillaGTK::MainObject() const noexcept {
 	return G_OBJECT(PWidget(wMain));
 }
 
-void ScintillaGTK::ReceivedClipboard(GtkSelectionData *selection_data) noexcept {
+void ScintillaGTK::ReceivedClipboard(GtkClipboard *clipBoard, GtkSelectionData *selection_data) noexcept {
 	try {
-		InsertSelection(selection_data);
+		InsertSelection(clipBoard, selection_data);
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
@@ -1471,8 +1480,9 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				gtk_selection_convert(GTK_WIDGET(PWidget(wMain)),
 						      SelectionOfGSD(selection_data), atomSought, GDK_CURRENT_TIME);
 			} else if ((LengthOfGSD(selection_data) > 0) &&
-					((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8))) {
-				InsertSelection(selection_data);
+					((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8) || (TypeOfGSD(selection_data) == atomUTF8Mime))) {
+				GtkClipboard *clipBoard = gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), SelectionOfGSD(selection_data));
+				InsertSelection(clipBoard, selection_data);
 			}
 		}
 //	else fprintf(stderr, "Target non string %d %d\n", (int)(selection_data->type),
@@ -1489,7 +1499,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		std::vector<char> drop(data, data + LengthOfGSD(selection_data));
 		drop.push_back('\0');
 		NotifyURIDropped(&drop[0]);
-	} else if ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8)) {
+	} else if ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8) || (TypeOfGSD(selection_data) == atomUTF8Mime)) {
 		if (LengthOfGSD(selection_data) > 0) {
 			SelectionText selText;
 			GetGtkSelectionText(selection_data, selText);
@@ -3041,6 +3051,7 @@ GType scintilla_object_get_type() {
 void ScintillaGTK::ClassInit(OBJECT_CLASS *object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class) {
 	Platform_Initialise();
 	atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
+	atomUTF8Mime = gdk_atom_intern("text/plain;charset=utf-8", FALSE);
 	atomString = GDK_SELECTION_TYPE_STRING;
 	atomUriList = gdk_atom_intern("text/uri-list", FALSE);
 	atomDROPFILES_DND = gdk_atom_intern("DROPFILES_DND", FALSE);

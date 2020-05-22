@@ -37,6 +37,7 @@ class ScintillaGTK : public ScintillaBase {
 	GtkWidgetClass *parentClass;
 
 	static inline GdkAtom atomUTF8 {};
+	static inline GdkAtom atomUTF8Mime {};
 	static inline GdkAtom atomString {};
 	static inline GdkAtom atomUriList {};
 	static inline GdkAtom atomDROPFILES_DND {};
@@ -134,10 +135,10 @@ private:
 	bool OwnPrimarySelection();
 	void ClaimSelection() override;
 	void GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText);
-	void InsertSelection(GtkSelectionData *selectionData);
+	void InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *selectionData);
 public:	// Public for SelectionReceiver
 	GObject *MainObject() const noexcept;
-	void ReceivedClipboard(GtkSelectionData *selection_data) noexcept;
+	void ReceivedClipboard(GtkClipboard *clipBoard, GtkSelectionData *selection_data) noexcept;
 private:
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
