@@ -7,6 +7,7 @@
 # Requires Python 3.6 or later
 # Files are regenerated in place with templates stored in comments.
 # The format of generation comments is documented in FileGenerator.py.
+# Also updates version numbers and modification dates.
 
 from FileGenerator import Regenerate, UpdateLineInFile, \
     ReplaceREInFile, UpdateLineInPlistFile, ReadFileAsList, UpdateFileFromLines, \
@@ -50,10 +51,19 @@ def UpdateVersionNumbers(sci, root):
     UpdateLineInFile(root / "doc/ScintillaHistory.html",
         '	Released ',
         '	Released ' + sci.dmyModified + '.')
-    UpdateLineInPlistFile(root / "cocoa/ScintillaFramework/Info.plist",
+
+    cocoa = root / "cocoa"
+
+    UpdateLineInPlistFile(cocoa / "ScintillaFramework/Info.plist",
         "CFBundleVersion", sci.versionDotted)
-    UpdateLineInPlistFile(root / "cocoa/ScintillaFramework/Info.plist",
+    UpdateLineInPlistFile(cocoa / "ScintillaFramework/Info.plist",
         "CFBundleShortVersionString", sci.versionDotted)
+
+    UpdateLineInPlistFile(cocoa / "Scintilla" / "Scintilla" / "Info.plist",
+        "CFBundleShortVersionString", sci.versionDotted)
+    ReplaceREInFile(cocoa / "Scintilla"/ "Scintilla.xcodeproj" / "project.pbxproj",
+        "CURRENT_PROJECT_VERSION = [0-9.]+;",
+        f'CURRENT_PROJECT_VERSION = {sci.versionDotted};')
 
 # Last 24 digits of UUID, used for item IDs in Xcode
 def uid24():
