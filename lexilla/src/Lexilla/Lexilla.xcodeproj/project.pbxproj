@@ -293,6 +293,7 @@
 		2802635C246DF84A000DF3B8 /* LexFortran.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexFortran.cxx; path = ../../../../lexers/LexFortran.cxx; sourceTree = "<group>"; };
 		2802635D246DF84A000DF3B8 /* LexYAML.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexYAML.cxx; path = ../../../../lexers/LexYAML.cxx; sourceTree = "<group>"; };
 		2802635E246DF84A000DF3B8 /* LexNim.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNim.cxx; path = ../../../../lexers/LexNim.cxx; sourceTree = "<group>"; };
+		282587352478D12500F78504 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Lexilla/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -309,6 +310,7 @@
 		2802629C246DF655000DF3B8 = {
 			isa = PBXGroup;
 			children = (
+				282587352478D12500F78504 /* Info.plist */,
 				280262B8246DF776000DF3B8 /* LexLib */,
 				280262B7246DF765000DF3B8 /* Lexers */,
 				280262A7246DF655000DF3B8 /* Lexilla */,
@@ -515,9 +517,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		280262A4246DF655000DF3B8 /* Lexilla */ = {
+		280262A4246DF655000DF3B8 /* lexilla */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 280262B0246DF655000DF3B8 /* Build configuration list for PBXNativeTarget "Lexilla" */;
+			buildConfigurationList = 280262B0246DF655000DF3B8 /* Build configuration list for PBXNativeTarget "lexilla" */;
 			buildPhases = (
 				280262A1246DF655000DF3B8 /* Headers */,
 				280262A2246DF655000DF3B8 /* Sources */,
@@ -559,7 +561,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				280262A4246DF655000DF3B8 /* Lexilla */,
+				280262A4246DF655000DF3B8 /* lexilla */,
 			);
 		};
 /* End PBXProject section */
@@ -814,6 +816,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4.3.3;
 				DEVELOPMENT_TEAM = 4F446KW87E;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -825,6 +828,8 @@
 					../../../include,
 					../../../lexlib,
 				);
+				INFOPLIST_FILE = "$(SRCROOT)/Lexilla/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = org.scintilla.Lexilla;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -835,6 +840,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4.3.3;
 				DEVELOPMENT_TEAM = 4F446KW87E;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -846,6 +852,8 @@
 					../../../include,
 					../../../lexlib,
 				);
+				INFOPLIST_FILE = "$(SRCROOT)/Lexilla/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = org.scintilla.Lexilla;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -863,7 +871,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		280262B0246DF655000DF3B8 /* Build configuration list for PBXNativeTarget "Lexilla" */ = {
+		280262B0246DF655000DF3B8 /* Build configuration list for PBXNativeTarget "lexilla" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				280262B1246DF655000DF3B8 /* Debug */,
