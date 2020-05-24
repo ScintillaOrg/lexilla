@@ -125,8 +125,10 @@ def RegenerateAll(rootDirectory):
 
     RegenerateXcodeProject(lexillaXcodeProject, sci.lexFiles, lexerReferences)
 
+    currentDirectory = pathlib.Path.cwd()
     os.chdir(srcDir)
     DepGen.Generate()
+    os.chdir(currentDirectory)
 
 if __name__=="__main__":
     RegenerateAll(pathlib.Path(__file__).resolve().parent.parent.parent)
