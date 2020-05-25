@@ -484,6 +484,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
 
+	dpi = DpiForWindow(hwnd);
+
 	hRgnUpdate = {};
 
 	hasOKText = false;
@@ -1915,6 +1917,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_DPICHANGED:
+			dpi = HIWORD(wParam);
 			InvalidateStyleRedraw();
 			break;
 
