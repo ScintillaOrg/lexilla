@@ -270,8 +270,6 @@ void LoadDpiForWindow() noexcept {
 
 HINSTANCE hinstPlatformRes {};
 
-HCURSOR reverseArrowCursor {};
-
 FormatAndMetrics *FamFromFontID(void *fid) noexcept {
 	return static_cast<FormatAndMetrics *>(fid);
 }
@@ -2261,8 +2259,24 @@ void FlipBitmap(HBITMAP bitmap, int width, int height) noexcept {
 	}
 }
 
-void LoadReverseArrowCursor() noexcept {
+}
+
+HCURSOR LoadReverseArrowCursor(UINT dpi) noexcept {
+	HCURSOR reverseArrowCursor {};
+
+	bool created = false;
 	HCURSOR cursor = ::LoadCursor({}, IDC_ARROW);
+
+	if (dpi != uSystemDPI) {
+		const int width = SystemMetricsForDpi(SM_CXCURSOR, dpi);
+		const int height = SystemMetricsForDpi(SM_CYCURSOR, dpi);
+		HCURSOR copy = static_cast<HCURSOR>(::CopyImage(cursor, IMAGE_CURSOR, width, height, LR_COPYFROMRESOURCE | LR_COPYRETURNORG));
+		if (copy) {
+			created = copy != cursor;
+			cursor = copy;
+		}
+	}
+
 	ICONINFO info;
 	if (::GetIconInfo(cursor, &info)) {
 		BITMAP bmp;
@@ -2279,8 +2293,11 @@ void LoadReverseArrowCursor() noexcept {
 		if (info.hbmColor)
 			::DeleteObject(info.hbmColor);
 	}
-}
 
+	if (created) {
+		::DestroyCursor(cursor);
+	}
+	return reverseArrowCursor;
 }
 
 void Window::SetCursor(Cursor curs) {
@@ -2304,8 +2321,6 @@ void Window::SetCursor(Cursor curs) {
 		::SetCursor(::LoadCursor(NULL,IDC_HAND));
 		break;
 	case cursorReverseArrow:
-		::SetCursor(reverseArrowCursor);
-		break;
 	case cursorArrow:
 	case cursorInvalid:	// Should not occur, but just in case.
 		::SetCursor(::LoadCursor(NULL,IDC_ARROW));
@@ -3354,7 +3369,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
 void Platform_Initialise(void *hInstance) {
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
 	LoadDpiForWindow();
-	LoadReverseArrowCursor();
 	ListBoxX_Register();
 }
 
@@ -3387,8 +3401,6 @@ void Platform_Finalise(bool fromDllMain) {
 		}
 	}
 #endif
-	if (reverseArrowCursor)
-		::DestroyCursor(reverseArrowCursor);
 	ListBoxX_Unregister();
 }
 

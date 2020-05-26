@@ -269,6 +269,37 @@ public:
 
 class GlobalMemory;
 
+class ReverseArrowCursor {
+	UINT dpi = USER_DEFAULT_SCREEN_DPI;
+	HCURSOR cursor {};
+
+public:
+	ReverseArrowCursor() noexcept {}
+	// Deleted so ReverseArrowCursor objects can not be copied.
+	ReverseArrowCursor(const ReverseArrowCursor &) = delete;
+	ReverseArrowCursor(ReverseArrowCursor &&) = delete;
+	ReverseArrowCursor &operator=(const ReverseArrowCursor &) = delete;
+	ReverseArrowCursor &operator=(ReverseArrowCursor &&) = delete;
+	~ReverseArrowCursor() {
+		if (cursor) {
+			::DestroyCursor(cursor);
+		}
+	}
+
+	HCURSOR Load(UINT dpi_) noexcept {
+		if (cursor)	 {
+			if (dpi == dpi_) {
+				return cursor;
+			}
+			::DestroyCursor(cursor);
+		}
+
+		dpi = dpi_;
+		cursor = LoadReverseArrowCursor(dpi_);
+		return cursor ? cursor : ::LoadCursor({}, IDC_ARROW);
+	}
+};
+
 }
 
 /**
@@ -287,6 +318,7 @@ class ScintillaWin :
 	int wheelDelta; ///< Wheel delta from roll
 
 	UINT dpi = USER_DEFAULT_SCREEN_DPI;
+	ReverseArrowCursor reverseArrowCursor;
 
 	HRGN hRgnUpdate;
 
@@ -336,6 +368,7 @@ class ScintillaWin :
 
 	enum : UINT_PTR { invalidTimerID, standardTimerID, idleTimerID, fineTimerStart };
 
+	void DisplayCursor(Window::Cursor c) override;
 	bool DragThreshold(Point ptStart, Point ptNow) override;
 	void StartDrag() override;
 	static int MouseModifiers(uptr_t wParam) noexcept;
@@ -652,6 +685,17 @@ void ScintillaWin::DropRenderTarget() {
 
 HWND ScintillaWin::MainHWND() const noexcept {
 	return HwndFromWindow(wMain);
+}
+
+void ScintillaWin::DisplayCursor(Window::Cursor c) {
+	if (cursorMode != SC_CURSORNORMAL) {
+		c = static_cast<Window::Cursor>(cursorMode);
+	}
+	if (c == Window::cursorReverseArrow) {
+		::SetCursor(reverseArrowCursor.Load(dpi));
+	} else {
+		wMain.SetCursor(c);
+	}
 }
 
 bool ScintillaWin::DragThreshold(Point ptStart, Point ptNow) {

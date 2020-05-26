@@ -60,6 +60,8 @@ UINT DpiForWindow(WindowID wid) noexcept;
 
 int SystemMetricsForDpi(int nIndex, UINT dpi) noexcept;
 
+HCURSOR LoadReverseArrowCursor(UINT dpi) noexcept;
+
 #if defined(USE_D2D)
 extern bool LoadD2D();
 extern ID2D1Factory *pD2DFactory;
