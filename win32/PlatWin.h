@@ -10,6 +10,10 @@
 
 namespace Scintilla {
 
+#ifndef USER_DEFAULT_SCREEN_DPI
+#define USER_DEFAULT_SCREEN_DPI		96
+#endif
+
 extern void Platform_Initialise(void *hInstance);
 extern void Platform_Finalise(bool fromDllMain);
 
@@ -53,6 +57,8 @@ T DLLFunction(HMODULE hModule, LPCSTR lpProcName) noexcept {
 }
 
 UINT DpiForWindow(WindowID wid) noexcept;
+
+int SystemMetricsForDpi(int nIndex, UINT dpi) noexcept;
 
 #if defined(USE_D2D)
 extern bool LoadD2D();
