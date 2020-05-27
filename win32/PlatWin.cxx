@@ -252,10 +252,14 @@ GetDpiForWindowSig fnGetDpiForWindow = nullptr;
 using GetSystemMetricsForDpiSig = int(WINAPI *)(int nIndex, UINT dpi);
 GetSystemMetricsForDpiSig fnGetSystemMetricsForDpi = nullptr;
 
+using AdjustWindowRectExForDpiSig = BOOL(WINAPI *)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+AdjustWindowRectExForDpiSig fnAdjustWindowRectExForDpi = nullptr;
+
 void LoadDpiForWindow() noexcept {
 	HMODULE user32 = ::GetModuleHandleW(L"user32.dll");
 	fnGetDpiForWindow = DLLFunction<GetDpiForWindowSig>(user32, "GetDpiForWindow");
 	fnGetSystemMetricsForDpi = DLLFunction<GetSystemMetricsForDpiSig>(user32, "GetSystemMetricsForDpi");
+	fnAdjustWindowRectExForDpi = DLLFunction<AdjustWindowRectExForDpiSig>(user32, "AdjustWindowRectExForDpi");
 
 	using GetDpiForSystemSig = UINT(WINAPI *)(void);
 	GetDpiForSystemSig fnGetDpiForSystem = DLLFunction<GetDpiForSystemSig>(user32, "GetDpiForSystem");
@@ -2421,7 +2425,7 @@ class ListBoxX : public ListBox {
 
 	HWND GetHWND() const;
 	void AppendListItem(const char *text, const char *numword);
-	static void AdjustWindowRect(PRectangle *rc);
+	static void AdjustWindowRect(PRectangle *rc, UINT dpi);
 	int ItemHeight() const;
 	int MinClientWidth() const;
 	int TextOffset() const;
@@ -2502,7 +2506,7 @@ void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHei
 		hinstanceParent,
 		this);
 
-	dpi = DpiForWindow(wid);
+	dpi = DpiForWindow(hwndParent);
 	POINT locationw = POINTFromPoint(location);
 	::MapWindowPoints(hwndParent, NULL, &locationw, 1);
 	location = PointFromPOINT(locationw);
@@ -2572,7 +2576,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 	if (Length() > rows)
 		rcDesired.right += SystemMetricsForDpi(SM_CXVSCROLL, dpi);
 
-	AdjustWindowRect(&rcDesired);
+	AdjustWindowRect(&rcDesired, dpi);
 	return rcDesired;
 }
 
@@ -2583,7 +2587,7 @@ int ListBoxX::TextOffset() const {
 
 int ListBoxX::CaretFromEdge() {
 	PRectangle rc;
-	AdjustWindowRect(&rc);
+	AdjustWindowRect(&rc, dpi);
 	return TextOffset() + static_cast<int>(TextInset.x + (0 - rc.left) - 1);
 }
 
@@ -2781,9 +2785,13 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 	SetRedraw(true);
 }
 
-void ListBoxX::AdjustWindowRect(PRectangle *rc) {
+void ListBoxX::AdjustWindowRect(PRectangle *rc, UINT dpi) {
 	RECT rcw = RectFromPRectangle(*rc);
-	::AdjustWindowRectEx(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE);
+	if (fnAdjustWindowRectExForDpi) {
+		fnAdjustWindowRectExForDpi(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE, dpi);
+	} else {
+		::AdjustWindowRectEx(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE);
+	}
 	*rc = PRectangle::FromInts(rcw.left, rcw.top, rcw.right, rcw.bottom);
 }
 
@@ -2802,7 +2810,7 @@ int ListBoxX::MinClientWidth() const {
 
 POINT ListBoxX::MinTrackSize() const {
 	PRectangle rc = PRectangle::FromInts(0, 0, MinClientWidth(), ItemHeight());
-	AdjustWindowRect(&rc);
+	AdjustWindowRect(&rc, dpi);
 	POINT ret = {static_cast<LONG>(rc.Width()), static_cast<LONG>(rc.Height())};
 	return ret;
 }
@@ -2813,7 +2821,7 @@ POINT ListBoxX::MaxTrackSize() const {
 		maxCharWidth * maxItemCharacters + static_cast<int>(TextInset.x) * 2 +
 		 TextOffset() + SystemMetricsForDpi(SM_CXVSCROLL, dpi)),
 		ItemHeight() * lti.Count());
-	AdjustWindowRect(&rc);
+	AdjustWindowRect(&rc, dpi);
 	POINT ret = {static_cast<LONG>(rc.Width()), static_cast<LONG>(rc.Height())};
 	return ret;
 }
