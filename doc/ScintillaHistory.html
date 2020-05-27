@@ -624,6 +624,9 @@
 	Fixed bug in SciTE with Lua stack balance.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2176/">Bug #2176</a>.
 	</li>
+	<li>
+	For macOS, SciTE reverts to running python (2) due to python3 not being available in the sandbox.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scite433.zip">Release 4.3.3</a>
@@ -678,9 +681,8 @@
 	<a href="https://sourceforge.net/p/scintilla/bugs/2149/">Bug #2149</a>.
 	</li>
 	<li>
-	For Python programs, SciTE defaults to running python3 on GTK and pyw on Windows which will run
+	For Python programs, SciTE defaults to running python3 on Unix and pyw on Windows which will run
 	the most recently installed Python in many cases.
-	This is not changed on macOS due to python3 not being available in the sandbox.
 	Set the "python.command" property to override this.
 	Scripts distributed with Scintilla and SciTE are checked with Python 3 and may not work with Python 2.
 	</li>
