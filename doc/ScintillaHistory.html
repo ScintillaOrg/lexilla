@@ -678,8 +678,9 @@
 	<a href="https://sourceforge.net/p/scintilla/bugs/2149/">Bug #2149</a>.
 	</li>
 	<li>
-	For Python programs, SciTE defaults to running python3 on Unix and pyw on Windows which will run
+	For Python programs, SciTE defaults to running python3 on GTK and pyw on Windows which will run
 	the most recently installed Python in many cases.
+	This is not changed on macOS due to python3 not being available in the sandbox.
 	Set the "python.command" property to override this.
 	Scripts distributed with Scintilla and SciTE are checked with Python 3 and may not work with Python 2.
 	</li>
