@@ -829,6 +829,7 @@
 					../../../lexlib,
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Lexilla/Info.plist";
+				INSTALL_PATH = "@rpath";
 				PRODUCT_BUNDLE_IDENTIFIER = org.scintilla.Lexilla;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -853,6 +854,7 @@
 					../../../lexlib,
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Lexilla/Info.plist";
+				INSTALL_PATH = "@rpath";
 				PRODUCT_BUNDLE_IDENTIFIER = org.scintilla.Lexilla;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
