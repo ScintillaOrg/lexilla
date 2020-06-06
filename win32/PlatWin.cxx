@@ -827,6 +827,33 @@ void DIBSection::SetSymmetric(LONG x, LONG y, DWORD value) noexcept {
 	SetPixel(xSymmetric, ySymmetric, value);
 }
 
+constexpr unsigned int Proportional(unsigned char a, unsigned char b, float t) noexcept {
+	return static_cast<unsigned int>(a + t * (b - a));
+}
+
+ColourAlpha Proportional(ColourAlpha a, ColourAlpha b, float t) noexcept {
+	return ColourAlpha(
+		Proportional(a.GetRed(), b.GetRed(), t),
+		Proportional(a.GetGreen(), b.GetGreen(), t),
+		Proportional(a.GetBlue(), b.GetBlue(), t),
+		Proportional(a.GetAlpha(), b.GetAlpha(), t));
+}
+
+ColourAlpha GradientValue(const std::vector<ColourStop> &stops, float proportion) noexcept {
+	for (size_t stop = 0; stop < stops.size() - 1; stop++) {
+		// Loop through each pair of stops
+		const float positionStart = stops[stop].position;
+		const float positionEnd = stops[stop + 1].position;
+		if ((proportion >= positionStart) && (proportion <= positionEnd)) {
+			const float proportionInPair = (proportion - positionStart) /
+				(positionEnd - positionStart);
+			return Proportional(stops[stop].colour, stops[stop + 1].colour, proportionInPair);
+		}
+	}
+	// Loop should always find a value
+	return ColourAlpha();
+}
+
 constexpr SIZE SizeOfRect(RECT rc) noexcept {
 	return { rc.right - rc.left, rc.bottom - rc.top };
 }
@@ -884,11 +911,39 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 	}
 }
 
-void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions) {
-	// Would be better to average start and end.
-	const ColourAlpha colourAverage = stops[0].colour.MixedWith(stops[1].colour);
-	AlphaRectangle(rc, 0, colourAverage.GetColour(), colourAverage.GetAlpha(),
-		colourAverage.GetColour(), colourAverage.GetAlpha(), 0);
+void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
+
+	const RECT rcw = RectFromPRectangle(rc);
+	const SIZE size = SizeOfRect(rcw);
+
+	DIBSection section(hdc, size);
+
+	if (section) {
+
+		if (options == GradientOptions::topToBottom) {
+			for (LONG y = 0; y < size.cy; y++) {
+				// Find y/height proportional colour
+				const float proportion = y / (rc.Height() - 1.0f);
+				const ColourAlpha mixed = GradientValue(stops, proportion);
+				const DWORD valFill = dwordMultiplied(mixed, mixed.GetAlpha());
+				for (LONG x = 0; x < size.cx; x++) {
+					section.SetPixel(x, y, valFill);
+				}
+			}
+		} else {
+			for (LONG x = 0; x < size.cx; x++) {
+				// Find x/width proportional colour
+				const float proportion = x / (rc.Width() - 1.0f);
+				const ColourAlpha mixed = GradientValue(stops, proportion);
+				const DWORD valFill = dwordMultiplied(mixed, mixed.GetAlpha());
+				for (LONG y = 0; y < size.cy; y++) {
+					section.SetPixel(x, y, valFill);
+				}
+			}
+		}
+
+		AlphaBlend(hdc, rcw.left, rcw.top, size.cx, size.cy, section.DC(), 0, 0, size.cx, size.cy, mergeAlpha);
+	}
 }
 
 void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
