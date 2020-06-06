@@ -687,11 +687,8 @@ void SurfaceGDI::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesi
 	PenColour(fore);
 	BrushColour(back);
 	std::vector<POINT> outline;
-	for (size_t i=0; i<npts; i++) {
-		const POINT pt = POINTFromPoint(pts[i]);
-		outline.push_back(pt);
-	}
-	::Polygon(hdc, &outline[0], static_cast<int>(npts));
+	std::transform(pts, pts + npts, std::back_inserter(outline), POINTFromPoint);
+	::Polygon(hdc, outline.data(), static_cast<int>(npts));
 }
 
 void SurfaceGDI::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
@@ -915,8 +912,8 @@ void SurfaceGDI::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, s
 void SurfaceGDI::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
-	for (size_t i=0; i<text.length(); i++) {
-		if (text[i] != ' ') {
+	for (const char ch : text) {
+		if (ch != ' ') {
 			::SetTextColor(hdc, fore.AsInteger());
 			::SetBkMode(hdc, TRANSPARENT);
 			DrawTextCommon(rc, font_, ybase, text, 0);
@@ -1500,7 +1497,7 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 		const D2D1_SIZE_U size = D2D1::SizeU(width, height);
 		D2D1_BITMAP_PROPERTIES props = {{DXGI_FORMAT_B8G8R8A8_UNORM,
 		    D2D1_ALPHA_MODE_PREMULTIPLIED}, 72.0, 72.0};
-		const HRESULT hr = pRenderTarget->CreateBitmap(size, &image[0],
+		const HRESULT hr = pRenderTarget->CreateBitmap(size, image.data(),
                   width * 4, &props, &bitmap);
 		if (SUCCEEDED(hr)) {
 			D2D1_RECT_F rcDestination = {rc.left, rc.top, rc.right, rc.bottom};
@@ -1980,8 +1977,8 @@ void SurfaceD2D::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, s
 void SurfaceD2D::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
-	for (size_t i=0; i<text.length(); i++) {
-		if (text[i] != ' ') {
+	for (const char ch : text) {
+		if (ch != ' ') {
 			if (pRenderTarget) {
 				D2DPenColour(fore);
 				DrawTextCommon(rc, font_, ybase, text, 0);
