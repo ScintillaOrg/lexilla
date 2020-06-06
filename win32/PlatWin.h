@@ -14,7 +14,8 @@ namespace Scintilla {
 #define USER_DEFAULT_SCREEN_DPI		96
 #endif
 
-extern void Platform_Initialise(void *hInstance);
+extern void Platform_Initialise(void *hInstance) noexcept;
+
 extern void Platform_Finalise(bool fromDllMain);
 
 constexpr RECT RectFromPRectangle(PRectangle prc) noexcept {

@@ -3243,8 +3243,10 @@ bool ListBoxX_Register() noexcept {
 	return ::RegisterClassEx(&wndclassc) != 0;
 }
 
-bool ListBoxX_Unregister() noexcept {
-	return ::UnregisterClass(ListBoxX_ClassName, hinstPlatformRes) != 0;
+void ListBoxX_Unregister() noexcept {
+	if (hinstPlatformRes) {
+		::UnregisterClass(ListBoxX_ClassName, hinstPlatformRes);
+	}
 }
 
 }
@@ -3374,7 +3376,7 @@ void Platform::Assert(const char *c, const char *file, int line) {
 	}
 }
 
-void Platform_Initialise(void *hInstance) {
+void Platform_Initialise(void *hInstance) noexcept {
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
 	LoadDpiForWindow();
 	ListBoxX_Register();
