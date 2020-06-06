@@ -730,14 +730,6 @@ void SurfaceGDI::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesir
 
 namespace {
 
-// Plot a point into a DWORD buffer symmetrically to all 4 quadrants
-void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD val) noexcept {
-	pixels[y*width+x] = val;
-	pixels[y*width+width-1-x] = val;
-	pixels[(height-1-y)*width+x] = val;
-	pixels[(height-1-y)*width+width-1-x] = val;
-}
-
 constexpr DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) noexcept {
 	return (a << 24) | (r << 16) | (g << 8) | b;
 }
@@ -754,57 +746,138 @@ DWORD dwordMultiplied(ColourDesired colour, unsigned int alpha) noexcept {
 		static_cast<byte>(alpha));
 }
 
+class DIBSection {
+	HDC hMemDC {};
+	HBITMAP hbmMem {};
+	HBITMAP hbmOld {};
+	SIZE size {};
+	DWORD *pixels = nullptr;
+public:
+	DIBSection(HDC hdc, SIZE size_) noexcept;
+	// Deleted so DIBSection objects can not be copied.
+	DIBSection(const DIBSection&) = delete;
+	DIBSection(DIBSection&&) = delete;
+	DIBSection &operator=(const DIBSection&) = delete;
+	DIBSection &operator=(DIBSection&&) = delete;
+	~DIBSection() noexcept;
+	operator bool() const noexcept {
+		return hMemDC && hbmMem && pixels;
+	}
+	DWORD *Pixels() const noexcept {
+		return pixels;
+	}
+	unsigned char *Bytes() const noexcept {
+		return reinterpret_cast<unsigned char *>(pixels);
+	}
+	HDC DC() const noexcept {
+		return hMemDC;
+	}
+	void SetPixel(LONG x, LONG y, DWORD value) noexcept {
+		PLATFORM_ASSERT(x >= 0);
+		PLATFORM_ASSERT(y >= 0);
+		PLATFORM_ASSERT(x < size.cx);
+		PLATFORM_ASSERT(y < size.cy);
+		pixels[y * size.cx + x] = value;
+	}
+	void SetSymmetric(LONG x, LONG y, DWORD value) noexcept;
+};
+
+DIBSection::DIBSection(HDC hdc, SIZE size_) noexcept {
+	hMemDC = ::CreateCompatibleDC(hdc);
+	if (!hMemDC) {
+		return;
+	}
+
+	size = size_;
+
+	// -size.y makes bitmap start from top
+	const BITMAPINFO bpih = { {sizeof(BITMAPINFOHEADER), size.cx, -size.cy, 1, 32, BI_RGB, 0, 0, 0, 0, 0},
+		{{0, 0, 0, 0}} };
+	void *image = nullptr;
+	hbmMem = CreateDIBSection(hMemDC, &bpih, DIB_RGB_COLORS, &image, {}, 0);
+	if (!hbmMem || !image) {
+		return;
+	}
+	pixels = static_cast<DWORD *>(image);
+	hbmOld = SelectBitmap(hMemDC, hbmMem);
+}
+
+DIBSection::~DIBSection() noexcept {
+	if (hbmOld) {
+		SelectBitmap(hMemDC, hbmOld);
+		hbmOld = {};
+	}
+	if (hbmMem) {
+		::DeleteObject(hbmMem);
+		hbmMem = {};
+	}
+	if (hMemDC) {
+		::DeleteDC(hMemDC);
+		hMemDC = {};
+	}
+}
+
+void DIBSection::SetSymmetric(LONG x, LONG y, DWORD value) noexcept {
+	// Plot a point symmetrically to all 4 quadrants
+	const LONG xSymmetric = size.cx - 1 - x;
+	const LONG ySymmetric = size.cy - 1 - y;
+	SetPixel(x, y, value);
+	SetPixel(xSymmetric, y, value);
+	SetPixel(x, ySymmetric, value);
+	SetPixel(xSymmetric, ySymmetric, value);
+}
+
+constexpr SIZE SizeOfRect(RECT rc) noexcept {
+	return { rc.right - rc.left, rc.bottom - rc.top };
+}
+
+constexpr BLENDFUNCTION mergeAlpha = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
+
 }
 
 void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
 	const RECT rcw = RectFromPRectangle(rc);
-	if (rc.Width() > 0) {
-		HDC hMemDC = ::CreateCompatibleDC(hdc);
-		const int width = rcw.right - rcw.left;
-		const int height = rcw.bottom - rcw.top;
-		// Ensure not distorted too much by corners when small
-		cornerSize = std::min(cornerSize, (std::min(width, height) / 2) - 2);
-		const BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0},
-			{{0, 0, 0, 0}}};
-		void *image = nullptr;
-		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
-			DIB_RGB_COLORS, &image, NULL, 0);
+	const SIZE size = SizeOfRect(rcw);
 
-		if (hbmMem) {
-			HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
+	if (size.cx > 0) {
 
-			const DWORD valEmpty = dwordFromBGRA(0,0,0,0);
+		DIBSection section(hdc, size);
+
+		if (section) {
+
+			// Ensure not distorted too much by corners when small
+			const LONG corner = std::min<LONG>(cornerSize, (std::min(size.cx, size.cy) / 2) - 2);
+
+			constexpr DWORD valEmpty = dwordFromBGRA(0,0,0,0);
 			const DWORD valFill = dwordMultiplied(fill, alphaFill);
 			const DWORD valOutline = dwordMultiplied(outline, alphaOutline);
 
-			DWORD *pixels = static_cast<DWORD *>(image);
-			for (int y=0; y<height; y++) {
-				for (int x=0; x<width; x++) {
-					if ((x==0) || (x==width-1) || (y == 0) || (y == height-1)) {
-						pixels[y*width+x] = valOutline;
+			// Draw a framed rectangle
+			for (int y=0; y<size.cy; y++) {
+				for (int x=0; x<size.cx; x++) {
+					if ((x==0) || (x==size.cx-1) || (y == 0) || (y == size.cy -1)) {
+						section.SetPixel(x, y, valOutline);
 					} else {
-						pixels[y*width+x] = valFill;
+						section.SetPixel(x, y, valFill);
 					}
 				}
 			}
-			for (int c=0; c<cornerSize; c++) {
-				for (int x=0; x<c+1; x++) {
-					AllFour(pixels, width, height, x, c-x, valEmpty);
+
+			// Make the corners transparent
+			for (LONG c=0; c<corner; c++) {
+				for (LONG x=0; x<c+1; x++) {
+					section.SetSymmetric(x, c - x, valEmpty);
 				}
 			}
-			for (int x=1; x<cornerSize; x++) {
-				AllFour(pixels, width, height, x, cornerSize-x, valOutline);
+
+			// Draw the corner frame pieces
+			for (LONG x=1; x<corner; x++) {
+				section.SetSymmetric(x, corner - x, valOutline);
 			}
 
-			const BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-
-			AlphaBlend(hdc, rcw.left, rcw.top, width, height, hMemDC, 0, 0, width, height, merge);
-
-			SelectBitmap(hMemDC, hbmOld);
-			::DeleteObject(hbmMem);
+			AlphaBlend(hdc, rcw.left, rcw.top, size.cx, size.cy, section.DC(), 0, 0, size.cx, size.cy, mergeAlpha);
 		}
-		::DeleteDC(hMemDC);
 	} else {
 		BrushColour(outline);
 		FrameRect(hdc, &rcw, brush);
@@ -820,7 +893,6 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 
 void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	if (rc.Width() > 0) {
-		HDC hMemDC = ::CreateCompatibleDC(hdc);
 		if (rc.Width() > width)
 			rc.left += std::floor((rc.Width() - width) / 2);
 		rc.right = rc.left + width;
@@ -828,31 +900,14 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 			rc.top += std::floor((rc.Height() - height) / 2);
 		rc.bottom = rc.top + height;
 
-		const BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0},
-			{{0, 0, 0, 0}}};
-		void *image = nullptr;
-		HBITMAP hbmMem = ::CreateDIBSection(hMemDC, &bpih,
-			DIB_RGB_COLORS, &image, {}, 0);
-		if (hbmMem) {
-			HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
-
-			for (int y=height-1; y>=0; y--) {
-				// Bits flipped vertically
-				unsigned char *pixel = static_cast<unsigned char *>(image) + RGBAImage::bytesPerPixel * y * width;
-				RGBAImage::BGRAFromRGBA(pixel, pixelsImage, width);
-				pixelsImage += RGBAImage::bytesPerPixel * width;
-			}
-
-			const BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-
+		const SIZE size { width, height };
+		DIBSection section(hdc, size);
+		if (section) {
+			RGBAImage::BGRAFromRGBA(section.Bytes(), pixelsImage, width * height);
 			AlphaBlend(hdc, static_cast<int>(rc.left), static_cast<int>(rc.top),
-				static_cast<int>(rc.Width()), static_cast<int>(rc.Height()), hMemDC, 0, 0, width, height, merge);
-
-			SelectBitmap(hMemDC, hbmOld);
-			::DeleteObject(hbmMem);
+				static_cast<int>(rc.Width()), static_cast<int>(rc.Height()), section.DC(),
+				0, 0, width, height, mergeAlpha);
 		}
-		::DeleteDC(hMemDC);
-
 	}
 }
 
