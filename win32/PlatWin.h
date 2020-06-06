@@ -57,6 +57,23 @@ T DLLFunction(HMODULE hModule, LPCSTR lpProcName) noexcept {
 	return fp;
 }
 
+// Release an IUnknown* and set to nullptr.
+// While IUnknown::Release must be noexcept, it isn't marked as such so produces
+// warnings which are avoided by the catch.
+template <class T>
+void ReleaseUnknown(T *&ppUnknown) noexcept {
+	if (ppUnknown) {
+		try {
+			ppUnknown->Release();
+		}
+		catch (...) {
+			// Never occurs
+		}
+		ppUnknown = nullptr;
+	}
+}
+
+
 UINT DpiForWindow(WindowID wid) noexcept;
 
 int SystemMetricsForDpi(int nIndex, UINT dpi) noexcept;

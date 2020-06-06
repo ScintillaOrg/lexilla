@@ -678,10 +678,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 }
 
 void ScintillaWin::DropRenderTarget() {
-	if (pRenderTarget) {
-		pRenderTarget->Release();
-		pRenderTarget = nullptr;
-	}
+	ReleaseUnknown(pRenderTarget);
 }
 
 #endif
@@ -3469,8 +3466,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 #endif
 				surfaceWindow->Release();
 #if defined(USE_D2D)
-				if (pCTRenderTarget)
-					pCTRenderTarget->Release();
+				ReleaseUnknown(pCTRenderTarget);
 #endif
 				::EndPaint(hWnd, &ps);
 				return 0;
