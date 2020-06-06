@@ -66,7 +66,7 @@
 
 namespace Scintilla {
 
-UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
+UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) noexcept;
 
 #if defined(USE_D2D)
 IDWriteFactory *pIDWriteFactory = nullptr;
@@ -202,10 +202,10 @@ struct FormatAndMetrics {
 		yDescent = 1;
 		yInternalLeading = 0;
 	}
-	HFONT HFont();
+	HFONT HFont() noexcept;
 };
 
-HFONT FormatAndMetrics::HFont() {
+HFONT FormatAndMetrics::HFont() noexcept {
 	LOGFONTW lf = {};
 #if defined(USE_D2D)
 	if (technology == SCWIN_TECH_GDI) {
@@ -1060,7 +1060,7 @@ class SurfaceD2D : public Surface {
 	int logPixelsY;
 
 	void Clear() noexcept;
-	void SetFont(const Font &font_);
+	void SetFont(const Font &font_) noexcept;
 
 public:
 	SurfaceD2D() noexcept;
@@ -1071,7 +1071,7 @@ public:
 	SurfaceD2D &operator=(SurfaceD2D &&) = delete;
 	~SurfaceD2D() override;
 
-	void SetScale(WindowID wid);
+	void SetScale(WindowID wid) noexcept;
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
@@ -1169,7 +1169,7 @@ void SurfaceD2D::Release() {
 	Clear();
 }
 
-void SurfaceD2D::SetScale(WindowID wid) {
+void SurfaceD2D::SetScale(WindowID wid) noexcept {
 	logPixelsY = DpiForWindow(wid);
 }
 
@@ -1240,7 +1240,7 @@ void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 	}
 }
 
-void SurfaceD2D::SetFont(const Font &font_) {
+void SurfaceD2D::SetFont(const Font &font_) noexcept {
 	const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
 	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_DIRECTWRITE);
 	pTextFormat = pfm->pTextFormat;
@@ -2379,7 +2379,7 @@ public:
 		data.clear();
 	}
 
-	ListItemData Get(size_t index) const {
+	ListItemData Get(size_t index) const noexcept {
 		if (index < data.size()) {
 			return data[index];
 		} else {
@@ -2433,23 +2433,23 @@ class ListBoxX : public ListBox {
 	Point location;	// Caret location at which the list is opened
 	int wheelDelta; // mouse wheel residue
 
-	HWND GetHWND() const;
+	HWND GetHWND() const noexcept;
 	void AppendListItem(const char *text, const char *numword);
-	static void AdjustWindowRect(PRectangle *rc, UINT dpi);
+	static void AdjustWindowRect(PRectangle *rc, UINT dpi) noexcept;
 	int ItemHeight() const;
-	int MinClientWidth() const;
+	int MinClientWidth() const noexcept;
 	int TextOffset() const;
-	POINT GetClientExtent() const;
+	POINT GetClientExtent() const noexcept;
 	POINT MinTrackSize() const;
 	POINT MaxTrackSize() const;
-	void SetRedraw(bool on);
+	void SetRedraw(bool on) noexcept;
 	void OnDoubleClick();
 	void OnSelChange();
 	void ResizeToCursor();
 	void StartResize(WPARAM);
 	LRESULT NcHitTest(WPARAM, LPARAM) const;
 	void CentreItem(int n);
-	void Paint(HDC);
+	void Paint(HDC) noexcept;
 	static LRESULT PASCAL ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	static constexpr Point ItemInset {0, 0};	// Padding around whole item
@@ -2546,7 +2546,7 @@ int ListBoxX::GetVisibleRows() const {
 	return desiredVisibleRows;
 }
 
-HWND ListBoxX::GetHWND() const {
+HWND ListBoxX::GetHWND() const noexcept {
 	return HwndFromWindowID(GetID());
 }
 
@@ -2795,7 +2795,7 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 	SetRedraw(true);
 }
 
-void ListBoxX::AdjustWindowRect(PRectangle *rc, UINT dpi) {
+void ListBoxX::AdjustWindowRect(PRectangle *rc, UINT dpi) noexcept {
 	RECT rcw = RectFromPRectangle(*rc);
 	if (fnAdjustWindowRectExForDpi) {
 		fnAdjustWindowRectExForDpi(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE, dpi);
@@ -2814,7 +2814,7 @@ int ListBoxX::ItemHeight() const {
 	return itemHeight;
 }
 
-int ListBoxX::MinClientWidth() const {
+int ListBoxX::MinClientWidth() const noexcept {
 	return 12 * (aveCharWidth+aveCharWidth/3);
 }
 
@@ -2836,7 +2836,7 @@ POINT ListBoxX::MaxTrackSize() const {
 	return ret;
 }
 
-void ListBoxX::SetRedraw(bool on) {
+void ListBoxX::SetRedraw(bool on) noexcept {
 	::SendMessage(lb, WM_SETREDRAW, on, 0);
 	if (on)
 		::InvalidateRect(lb, nullptr, TRUE);
@@ -2988,7 +2988,7 @@ void ListBoxX::OnSelChange() {
 	}
 }
 
-POINT ListBoxX::GetClientExtent() const {
+POINT ListBoxX::GetClientExtent() const noexcept {
 	RECT rc;
 	::GetWindowRect(HwndFromWindowID(wid), &rc);
 	POINT ret { rc.right - rc.left, rc.bottom - rc.top };
@@ -3010,7 +3010,7 @@ void ListBoxX::CentreItem(int n) {
 }
 
 // Performs a double-buffered paint operation to avoid flicker
-void ListBoxX::Paint(HDC hDC) {
+void ListBoxX::Paint(HDC hDC) noexcept {
 	const POINT extent = GetClientExtent();
 	HBITMAP hBitmap = ::CreateCompatibleBitmap(hDC, extent.x, extent.y);
 	HDC bitmapDC = ::CreateCompatibleDC(hDC);
