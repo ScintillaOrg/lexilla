@@ -19,6 +19,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <mutex>
 
 // Want to use std::min and std::max so don't want Windows.h version of min and max
 #if !defined(NOMINMAX)
@@ -77,75 +78,76 @@ D2D1_DRAW_TEXT_OPTIONS d2dDrawTextOptions = D2D1_DRAW_TEXT_OPTIONS_NONE;
 static HMODULE hDLLD2D {};
 static HMODULE hDLLDWrite {};
 
-bool LoadD2D() {
-	static bool triedLoadingD2D = false;
-	if (!triedLoadingD2D) {
-		DWORD loadLibraryFlags = 0;
-		HMODULE kernel32 = ::GetModuleHandleW(L"kernel32.dll");
-		if (kernel32) {
-			if (::GetProcAddress(kernel32, "SetDefaultDllDirectories")) {
-				// Availability of SetDefaultDllDirectories implies Windows 8+ or
-				// that KB2533623 has been installed so LoadLibraryEx can be called
-				// with LOAD_LIBRARY_SEARCH_SYSTEM32.
-				loadLibraryFlags = LOAD_LIBRARY_SEARCH_SYSTEM32;
-			}
+void LoadD2DOnce() noexcept {
+	DWORD loadLibraryFlags = 0;
+	HMODULE kernel32 = ::GetModuleHandleW(L"kernel32.dll");
+	if (kernel32) {
+		if (::GetProcAddress(kernel32, "SetDefaultDllDirectories")) {
+			// Availability of SetDefaultDllDirectories implies Windows 8+ or
+			// that KB2533623 has been installed so LoadLibraryEx can be called
+			// with LOAD_LIBRARY_SEARCH_SYSTEM32.
+			loadLibraryFlags = LOAD_LIBRARY_SEARCH_SYSTEM32;
 		}
-
-		typedef HRESULT (WINAPI *D2D1CFSig)(D2D1_FACTORY_TYPE factoryType, REFIID riid,
-			CONST D2D1_FACTORY_OPTIONS *pFactoryOptions, IUnknown **factory);
-		typedef HRESULT (WINAPI *DWriteCFSig)(DWRITE_FACTORY_TYPE factoryType, REFIID iid,
-			IUnknown **factory);
-
-		hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, loadLibraryFlags);
-		D2D1CFSig fnD2DCF = DLLFunction<D2D1CFSig>(hDLLD2D, "D2D1CreateFactory");
-		if (fnD2DCF) {
-			// A single threaded factory as Scintilla always draw on the GUI thread
-			fnD2DCF(D2D1_FACTORY_TYPE_SINGLE_THREADED,
-				__uuidof(ID2D1Factory),
-				nullptr,
-				reinterpret_cast<IUnknown**>(&pD2DFactory));
-		}
-		hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, loadLibraryFlags);
-		DWriteCFSig fnDWCF = DLLFunction<DWriteCFSig>(hDLLDWrite, "DWriteCreateFactory");
-		if (fnDWCF) {
-			const GUID IID_IDWriteFactory2 = // 0439fc60-ca44-4994-8dee-3a9af7b732ec
-			{ 0x0439fc60, 0xca44, 0x4994, { 0x8d, 0xee, 0x3a, 0x9a, 0xf7, 0xb7, 0x32, 0xec } };
-
-			const HRESULT hr = fnDWCF(DWRITE_FACTORY_TYPE_SHARED,
-				IID_IDWriteFactory2,
-				reinterpret_cast<IUnknown**>(&pIDWriteFactory));
-			if (SUCCEEDED(hr)) {
-				// D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT
-				d2dDrawTextOptions = static_cast<D2D1_DRAW_TEXT_OPTIONS>(0x00000004);
-			} else {
-				fnDWCF(DWRITE_FACTORY_TYPE_SHARED,
-					__uuidof(IDWriteFactory),
-					reinterpret_cast<IUnknown**>(&pIDWriteFactory));
-			}
-		}
-
-		if (pIDWriteFactory) {
-			const HRESULT hr = pIDWriteFactory->CreateRenderingParams(&defaultRenderingParams);
-			if (SUCCEEDED(hr)) {
-				unsigned int clearTypeContrast;
-				if (::SystemParametersInfo(SPI_GETFONTSMOOTHINGCONTRAST, 0, &clearTypeContrast, 0)) {
-
-					FLOAT gamma;
-					if (clearTypeContrast >= 1000 && clearTypeContrast <= 2200)
-						gamma = static_cast<FLOAT>(clearTypeContrast) / 1000.0f;
-					else
-						gamma = defaultRenderingParams->GetGamma();
-
-					pIDWriteFactory->CreateCustomRenderingParams(gamma, defaultRenderingParams->GetEnhancedContrast(), defaultRenderingParams->GetClearTypeLevel(),
-						defaultRenderingParams->GetPixelGeometry(), defaultRenderingParams->GetRenderingMode(), &customClearTypeRenderingParams);
-				}
-			}
-		}
-
 	}
-	triedLoadingD2D = true;
+
+	typedef HRESULT (WINAPI *D2D1CFSig)(D2D1_FACTORY_TYPE factoryType, REFIID riid,
+		CONST D2D1_FACTORY_OPTIONS *pFactoryOptions, IUnknown **factory);
+	typedef HRESULT (WINAPI *DWriteCFSig)(DWRITE_FACTORY_TYPE factoryType, REFIID iid,
+		IUnknown **factory);
+
+	hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, loadLibraryFlags);
+	D2D1CFSig fnD2DCF = DLLFunction<D2D1CFSig>(hDLLD2D, "D2D1CreateFactory");
+	if (fnD2DCF) {
+		// A single threaded factory as Scintilla always draw on the GUI thread
+		fnD2DCF(D2D1_FACTORY_TYPE_SINGLE_THREADED,
+			__uuidof(ID2D1Factory),
+			nullptr,
+			reinterpret_cast<IUnknown**>(&pD2DFactory));
+	}
+	hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, loadLibraryFlags);
+	DWriteCFSig fnDWCF = DLLFunction<DWriteCFSig>(hDLLDWrite, "DWriteCreateFactory");
+	if (fnDWCF) {
+		const GUID IID_IDWriteFactory2 = // 0439fc60-ca44-4994-8dee-3a9af7b732ec
+		{ 0x0439fc60, 0xca44, 0x4994, { 0x8d, 0xee, 0x3a, 0x9a, 0xf7, 0xb7, 0x32, 0xec } };
+
+		const HRESULT hr = fnDWCF(DWRITE_FACTORY_TYPE_SHARED,
+			IID_IDWriteFactory2,
+			reinterpret_cast<IUnknown**>(&pIDWriteFactory));
+		if (SUCCEEDED(hr)) {
+			// D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT
+			d2dDrawTextOptions = static_cast<D2D1_DRAW_TEXT_OPTIONS>(0x00000004);
+		} else {
+			fnDWCF(DWRITE_FACTORY_TYPE_SHARED,
+				__uuidof(IDWriteFactory),
+				reinterpret_cast<IUnknown**>(&pIDWriteFactory));
+		}
+	}
+
+	if (pIDWriteFactory) {
+		const HRESULT hr = pIDWriteFactory->CreateRenderingParams(&defaultRenderingParams);
+		if (SUCCEEDED(hr)) {
+			unsigned int clearTypeContrast;
+			if (::SystemParametersInfo(SPI_GETFONTSMOOTHINGCONTRAST, 0, &clearTypeContrast, 0)) {
+
+				FLOAT gamma;
+				if (clearTypeContrast >= 1000 && clearTypeContrast <= 2200)
+					gamma = static_cast<FLOAT>(clearTypeContrast) / 1000.0f;
+				else
+					gamma = defaultRenderingParams->GetGamma();
+
+				pIDWriteFactory->CreateCustomRenderingParams(gamma, defaultRenderingParams->GetEnhancedContrast(), defaultRenderingParams->GetClearTypeLevel(),
+					defaultRenderingParams->GetPixelGeometry(), defaultRenderingParams->GetRenderingMode(), &customClearTypeRenderingParams);
+			}
+		}
+	}
+}
+
+bool LoadD2D() {
+	static std::once_flag once;
+	std::call_once(once, LoadD2DOnce);
 	return pIDWriteFactory && pD2DFactory;
 }
+
 #endif
 
 struct FormatAndMetrics {
