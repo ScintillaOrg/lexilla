@@ -738,23 +738,19 @@ void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD val) noex
 	pixels[(height-1-y)*width+width-1-x] = val;
 }
 
-DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) noexcept {
-	union {
-		byte pixVal[4];
-		DWORD val;
-	} converter;
-	converter.pixVal[0] = b;
-	converter.pixVal[1] = g;
-	converter.pixVal[2] = r;
-	converter.pixVal[3] = a;
-	return converter.val;
+constexpr DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) noexcept {
+	return (a << 24) | (r << 16) | (g << 8) | b;
+}
+
+constexpr byte AlphaScaled(unsigned char component, unsigned int alpha) noexcept {
+	return static_cast<byte>(component * alpha / 255);
 }
 
 DWORD dwordMultiplied(ColourDesired colour, unsigned int alpha) noexcept {
 	return dwordFromBGRA(
-		static_cast<byte>(colour.GetBlue() * alpha / 255),
-		static_cast<byte>(colour.GetGreen() * alpha / 255),
-		static_cast<byte>(colour.GetRed() * alpha / 255),
+		AlphaScaled(colour.GetBlue(), alpha),
+		AlphaScaled(colour.GetGreen(), alpha),
+		AlphaScaled(colour.GetRed(), alpha),
 		static_cast<byte>(alpha));
 }
 
