@@ -29,12 +29,12 @@ static PRectangle PixelGridAlign(const PRectangle &rc) noexcept {
 		std::round(rc.right), std::floor(rc.bottom));
 }
 
-void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, const PRectangle &rcCharacter, DrawState drawState, int value) const {
+void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, const PRectangle &rcCharacter, State state, int value) const {
 	StyleAndColour sacDraw = sacNormal;
 	if (Flags() & SC_INDICFLAG_VALUEFORE) {
 		sacDraw.fore = ColourDesired(value & SC_INDICVALUEMASK);
 	}
-	if (drawState == drawHover) {
+	if (state == State::hover) {
 		sacDraw = sacHover;
 	}
 	const IntegerRectangle irc(rc);
@@ -194,7 +194,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			PRectangle rcBox = PixelGridAlign(rc);
 			rcBox.top = rcLine.top + 1;
 			rcBox.bottom = rcLine.bottom;
-			IntegerRectangle ircBox(rcBox);
+			const IntegerRectangle ircBox(rcBox);
 			// Cap width at 4000 to avoid large allocations when mistakes made
 			const int width = std::min(ircBox.Width(), 4000);
 			RGBAImage image(width, ircBox.Height(), 1.0, nullptr);
@@ -269,6 +269,6 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	}
 }
 
-void Indicator::SetFlags(int attributes_) {
+void Indicator::SetFlags(int attributes_) noexcept {
 	attributes = attributes_;
 }
