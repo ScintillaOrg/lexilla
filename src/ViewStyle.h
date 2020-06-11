@@ -145,6 +145,8 @@ public:
 	int marginStyleOffset;
 	int annotationVisible;
 	int annotationStyleOffset;
+	int eolAnnotationVisible;
+	int eolAnnotationStyleOffset;
 	bool braceHighlightIndicatorSet;
 	int braceHighlightIndicator;
 	bool braceBadLightIndicatorSet;
