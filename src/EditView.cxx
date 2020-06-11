@@ -213,14 +213,14 @@ void EditView::ClearAllTabstops() noexcept {
 	ldTabstops.reset();
 }
 
-XYPOSITION EditView::NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tabWidth) const {
+XYPOSITION EditView::NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tabWidth) const noexcept {
 	const int next = GetNextTabstop(line, static_cast<int>(x + tabWidthMinimumPixels));
 	if (next > 0)
 		return static_cast<XYPOSITION>(next);
 	return (static_cast<int>((x + tabWidthMinimumPixels) / tabWidth) + 1) * tabWidth;
 }
 
-bool EditView::ClearTabstops(Sci::Line line) {
+bool EditView::ClearTabstops(Sci::Line line) noexcept {
 	return ldTabstops && ldTabstops->ClearTabstops(line);
 }
 
@@ -231,7 +231,7 @@ bool EditView::AddTabstop(Sci::Line line, int x) {
 	return ldTabstops && ldTabstops->AddTabstop(line, x);
 }
 
-int EditView::GetNextTabstop(Sci::Line line, int x) const {
+int EditView::GetNextTabstop(Sci::Line line, int x) const noexcept {
 	if (ldTabstops) {
 		return ldTabstops->GetNextTabstop(line, x);
 	} else {

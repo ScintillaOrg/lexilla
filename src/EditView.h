@@ -102,10 +102,10 @@ public:
 	bool LinesOverlap() const noexcept;
 
 	void ClearAllTabstops() noexcept;
-	XYPOSITION NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tabWidth) const;
-	bool ClearTabstops(Sci::Line line);
+	XYPOSITION NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tabWidth) const noexcept;
+	bool ClearTabstops(Sci::Line line) noexcept;
 	bool AddTabstop(Sci::Line line, int x);
-	int GetNextTabstop(Sci::Line line, int x) const;
+	int GetNextTabstop(Sci::Line line, int x) const noexcept;
 	void LinesAddedOrRemoved(Sci::Line lineOfPos, Sci::Line linesAdded);
 
 	void DropGraphics(bool freeObjects);

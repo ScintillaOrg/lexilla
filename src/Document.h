@@ -366,7 +366,7 @@ public:
 	bool TentativeActive() const noexcept { return cb.TentativeActive(); }
 
 	const char * SCI_METHOD BufferPointer() override { return cb.BufferPointer(); }
-	const char *RangePointer(Sci::Position position, Sci::Position rangeLength) { return cb.RangePointer(position, rangeLength); }
+	const char *RangePointer(Sci::Position position, Sci::Position rangeLength) noexcept { return cb.RangePointer(position, rangeLength); }
 	Sci::Position GapPosition() const noexcept { return cb.GapPosition(); }
 
 	int SCI_METHOD GetLineIndentation(Sci_Position line) override;

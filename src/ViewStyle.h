@@ -170,7 +170,7 @@ public:
 	ViewStyle &operator=(const ViewStyle &) = delete;
 	ViewStyle &operator=(ViewStyle &&) = delete;
 	~ViewStyle();
-	void CalculateMarginWidthAndMask();
+	void CalculateMarginWidthAndMask() noexcept;
 	void Init(size_t stylesSize_=256);
 	void Refresh(Surface &surface, int tabInChars);
 	void ReleaseAllExtendedStyles() noexcept;
@@ -181,15 +181,15 @@ public:
 	void SetStyleFontName(int styleIndex, const char *name);
 	bool ProtectionActive() const noexcept;
 	int ExternalMarginWidth() const noexcept;
-	int MarginFromLocation(Point pt) const;
+	int MarginFromLocation(Point pt) const noexcept;
 	bool ValidStyle(size_t styleIndex) const noexcept;
-	void CalcLargestMarkerHeight();
+	void CalcLargestMarkerHeight() noexcept;
 	int GetFrameWidth() const noexcept;
 	bool IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const noexcept;
-	ColourOptional Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
+	ColourOptional Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const noexcept;
 	bool SelectionBackgroundDrawn() const noexcept;
 	bool WhitespaceBackgroundDrawn() const noexcept;
-	ColourDesired WrapColour() const;
+	ColourDesired WrapColour() const noexcept;
 
 	bool SetWrapState(int wrapState_) noexcept;
 	bool SetWrapVisualFlags(int wrapVisualFlags_) noexcept;
