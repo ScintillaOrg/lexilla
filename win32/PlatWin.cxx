@@ -1341,9 +1341,8 @@ void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 			pBrush->SetColor(col);
 		} else {
 			const HRESULT hr = pRenderTarget->CreateSolidColorBrush(col, &pBrush);
-			if (!SUCCEEDED(hr) && pBrush) {
-				pBrush->Release();
-				pBrush = nullptr;
+			if (!SUCCEEDED(hr)) {
+				ReleaseUnknown(pBrush);
 			}
 		}
 	}
@@ -3501,32 +3500,20 @@ void Platform_Initialise(void *hInstance) noexcept {
 	ListBoxX_Register();
 }
 
-void Platform_Finalise(bool fromDllMain) {
+void Platform_Finalise(bool fromDllMain) noexcept {
 #if defined(USE_D2D)
 	if (!fromDllMain) {
-		if (defaultRenderingParams) {
-			defaultRenderingParams->Release();
-			defaultRenderingParams = nullptr;
-		}
-		if (customClearTypeRenderingParams) {
-			customClearTypeRenderingParams->Release();
-			customClearTypeRenderingParams = nullptr;
-		}
-		if (pIDWriteFactory) {
-			pIDWriteFactory->Release();
-			pIDWriteFactory = nullptr;
-		}
-		if (pD2DFactory) {
-			pD2DFactory->Release();
-			pD2DFactory = nullptr;
-		}
+		ReleaseUnknown(defaultRenderingParams);
+		ReleaseUnknown(customClearTypeRenderingParams);
+		ReleaseUnknown(pIDWriteFactory);
+		ReleaseUnknown(pD2DFactory);
 		if (hDLLDWrite) {
 			FreeLibrary(hDLLDWrite);
-			hDLLDWrite = NULL;
+			hDLLDWrite = {};
 		}
 		if (hDLLD2D) {
 			FreeLibrary(hDLLD2D);
-			hDLLD2D = NULL;
+			hDLLD2D = {};
 		}
 	}
 #endif

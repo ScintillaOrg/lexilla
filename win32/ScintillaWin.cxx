@@ -3557,7 +3557,7 @@ int Scintilla_RegisterClasses(void *hInstance) {
 
 namespace Scintilla {
 
-int ResourcesRelease(bool fromDllMain) {
+int ResourcesRelease(bool fromDllMain) noexcept {
 	const bool result = ScintillaWin::Unregister();
 	Platform_Finalise(fromDllMain);
 	return result;
