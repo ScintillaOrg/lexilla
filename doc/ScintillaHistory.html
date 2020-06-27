@@ -556,6 +556,8 @@
 	<td>Chris Graham</td>
 	<td>Hugues Larrive</td>
 	<td>Prakash Sahni</td>
+      </tr><tr>
+	<td>Michel Sauvard</td>
     </tr>
     </table>
     <p>
@@ -596,12 +598,21 @@
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1361/">Feature #1361</a>.
 	</li>
 	<li>
+	SciTE on Windows adds create.hidden.console option to stop console window flashing
+	when Lua script calls os.execute or io.popen.
+	</li>
+	<li>
 	Fix printing on Windows to use correct text size.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2185/">Bug #2185</a>.
 	</li>
 	<li>
 	Fix bug on Win32 where calling WM_GETTEXT for more text than in document could return
 	less text than in document.
+	</li>
+	<li>
+	Fixed a bug in SciTE with Lua stack balance causing failure to find
+	functions after reloading script.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2176/">Bug #2176</a>.
 	</li>
     </ul>
     <h3>
