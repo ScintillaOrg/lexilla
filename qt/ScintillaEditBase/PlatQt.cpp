@@ -17,6 +17,9 @@
 #include "FontQuality.h"
 
 #include <QApplication>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QScreen>
+#endif
 #include <QFont>
 #include <QColor>
 #include <QRect>
@@ -618,10 +621,23 @@ Surface *Surface::Allocate(int)
 //----------------------------------------------------------------------
 
 namespace {
+
 QWidget *window(WindowID wid) noexcept
 {
 	return static_cast<QWidget *>(wid);
 }
+
+QRect ScreenRectangleForPoint(QPoint posGlobal)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+	const QScreen *screen = QGuiApplication::screenAt(posGlobal);
+	return screen->availableGeometry();
+#else
+	const QDesktopWidget *desktop = QApplication::desktop();
+	return desktop->availableGeometry(posGlobal);
+#endif
+}
+
 }
 
 Window::~Window() {}
@@ -652,8 +668,7 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 	ox += rc.left;
 	oy += rc.top;
 
-	QDesktopWidget *desktop = QApplication::desktop();
-	QRect rectDesk = desktop->availableGeometry(QPoint(ox, oy));
+	const QRect rectDesk = ScreenRectangleForPoint(QPoint(ox, oy));
 	/* do some corrections to fit into screen */
 	int sizex = rc.right - rc.left;
 	int sizey = rc.bottom - rc.top;
@@ -731,13 +746,11 @@ void Window::SetCursor(Cursor curs)
    window coordinates */
 PRectangle Window::GetMonitorRect(Point pt)
 {
-	QPoint originGlobal = window(wid)->mapToGlobal(QPoint(0, 0));
-	QPoint posGlobal = window(wid)->mapToGlobal(QPoint(pt.x, pt.y));
-	QDesktopWidget *desktop = QApplication::desktop();
-	QRect rectScreen = desktop->availableGeometry(posGlobal);
+	const QPoint posGlobal = window(wid)->mapToGlobal(QPoint(pt.x, pt.y));
+	const QPoint originGlobal = window(wid)->mapToGlobal(QPoint(0, 0));
+	QRect rectScreen = ScreenRectangleForPoint(posGlobal);
 	rectScreen.translate(-originGlobal.x(), -originGlobal.y());
-	return PRectangle(rectScreen.left(), rectScreen.top(),
-	        rectScreen.right(), rectScreen.bottom());
+	return PRectFromQRect(rectScreen);
 }
 
 //----------------------------------------------------------------------
