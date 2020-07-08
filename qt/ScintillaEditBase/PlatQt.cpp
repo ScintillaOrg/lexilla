@@ -353,18 +353,34 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc,
                                  int alphaOutline,
                                  int /*flags*/)
 {
-	QColor qOutline = QColorFromCA(outline);
-	qOutline.setAlpha(alphaOutline);
-	GetPainter()->setPen(QPen(qOutline));
+	const QColor qFill = QColorFromColourAlpha(ColourAlpha(fill, alphaFill));
+	const QBrush brushFill(qFill);
+	GetPainter()->setBrush(brushFill);
 
-	QColor qFill = QColorFromCA(fill);
-	qFill.setAlpha(alphaFill);
-	GetPainter()->setBrush(QBrush(qFill));
+	if ((fill == outline) && (alphaFill == alphaOutline)) {
+		painter->setPen(Qt::NoPen);
+		const QRectF rect = QRectFFromPRect(rc);
+		if (cornerSize > 0.0f) {
+			// A radius of 1 shows no curve so add 1
+			qreal radius = cornerSize+1;
+			GetPainter()->drawRoundedRect(rect, radius, radius);
+		} else {
+			GetPainter()->fillRect(rect, brushFill);
+		}
+	} else {
+		const QColor qOutline = QColorFromColourAlpha(ColourAlpha(outline, alphaOutline));
+		const QPen penOutline(qOutline);
+		GetPainter()->setPen(penOutline);
 
-	// A radius of 1 shows no curve so add 1
-	qreal radius = cornerSize+1;
-	QRectF rect(rc.left, rc.top, rc.Width() - 1, rc.Height() - 1);
-	GetPainter()->drawRoundedRect(rect, radius, radius);
+		const QRectF rect(rc.left, rc.top, rc.Width() - 1.5, rc.Height() - 1.5);
+		if (cornerSize > 0.0f) {
+			// A radius of 1 shows no curve so add 1
+			qreal radius = cornerSize+1;
+			GetPainter()->drawRoundedRect(rect, radius, radius);
+		} else {
+			GetPainter()->drawRect(rect);
+		}
+	}
 }
 
 void SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {

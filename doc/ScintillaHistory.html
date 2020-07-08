@@ -602,6 +602,12 @@
 	when Lua script calls os.execute or io.popen.
 	</li>
 	<li>
+	Fix translucent rectangle drawing on Qt. When drawing a translucent selection, there were edge
+	artifacts as the calls used were drawing outlines over fill areas. Make bottom and right borders on
+	INDIC_ROUNDBOX be same intensity as top and left.
+	Replaced some deprecated Qt calls with currently supported calls.
+	</li>
+	<li>
 	Fix printing on Windows to use correct text size.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2185/">Bug #2185</a>.
 	</li>
