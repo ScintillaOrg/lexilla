@@ -760,10 +760,11 @@ public:
 	virtual ~ListWidget();
 
 	void setDelegate(IListBoxDelegate *lbDelegate);
-	void selectionChanged();
+
+	int currentSelection();
 
 protected:
-	void mouseReleaseEvent(QMouseEvent * event) override;
+	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
 	QStyleOptionViewItem viewOptions() const override;
 
@@ -799,7 +800,7 @@ public:
 	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *list, char separator, char typesep) override;
 
-	ListWidget *GetWidget() const;
+	ListWidget *GetWidget() const noexcept;
 private:
 	bool unicodeMode;
 	int visibleRows;
@@ -943,12 +944,11 @@ void ListBoxImpl::Select(int n)
 		}
 	}
 	list->setCurrentRow(n);
-	list->selectionChanged();
 }
 int ListBoxImpl::GetSelection()
 {
 	ListWidget *list = GetWidget();
-	return list->currentRow();
+	return list->currentSelection();
 }
 int ListBoxImpl::Find(const char *prefix)
 {
@@ -1038,7 +1038,7 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 		Append(startword, numword?atoi(numword + 1):-1);
 	}
 }
-ListWidget *ListBoxImpl::GetWidget() const
+ListWidget *ListBoxImpl::GetWidget() const noexcept
 {
 	return static_cast<ListWidget *>(wid);
 }
@@ -1060,11 +1060,23 @@ void ListWidget::setDelegate(IListBoxDelegate *lbDelegate)
 	delegate = lbDelegate;
 }
 
-void ListWidget::selectionChanged() {
+void ListWidget::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) {
+	QListWidget::selectionChanged(selected, deselected);
 	if (delegate) {
-		ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
-		delegate->ListNotify(&event);
+		const int selection = currentSelection();
+		if (selection >= 0) {
+			ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+			delegate->ListNotify(&event);
+		}
 	}
+}
+
+int ListWidget::currentSelection() {
+	const QModelIndexList indices = selectionModel()->selectedRows();
+	foreach (const QModelIndex ind, indices) {
+		return ind.row();
+	}
+	return -1;
 }
 
 void ListWidget::mouseDoubleClickEvent(QMouseEvent * /* event */)
@@ -1073,11 +1085,6 @@ void ListWidget::mouseDoubleClickEvent(QMouseEvent * /* event */)
 		ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
 		delegate->ListNotify(&event);
 	}
-}
-
-void ListWidget::mouseReleaseEvent(QMouseEvent * /* event */)
-{
-	selectionChanged();
 }
 
 QStyleOptionViewItem ListWidget::viewOptions() const
