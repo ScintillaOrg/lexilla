@@ -59,11 +59,6 @@
 
 using namespace Scintilla;
 
-static constexpr bool IsControlCharacter(int ch) noexcept {
-	// iscntrl returns true for lots of chars > 127 which are displayable
-	return ch >= 0 && ch < ' ';
-}
-
 PrintParameters::PrintParameters() noexcept {
 	magnification = 0;
 	colourMode = SC_PRINT_NORMAL;
@@ -367,6 +362,12 @@ inline char CaseForce(Style::ecaseForced caseForce, char chDoc, char chPrevious)
 			return MakeLowerCase(chDoc);
 		}
 	}
+}
+
+constexpr bool IsControlCharacter(int ch) noexcept {
+	// iscntrl returns true for lots of chars > 127 which are displayable,
+	// currently only check C0 control characters.
+	return (ch >= 0 && ch < ' ') || (ch == 127);
 }
 
 }
