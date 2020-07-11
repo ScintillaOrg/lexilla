@@ -654,9 +654,7 @@ void SurfaceGDI::BrushColour(ColourDesired back) noexcept {
 		brush = {};
 		brushOld = {};
 	}
-	// Only ever want pure, non-dithered brushes
-	const ColourDesired colourNearest = ColourDesired(::GetNearestColor(hdc, back.AsInteger()));
-	brush = ::CreateSolidBrush(colourNearest.AsInteger());
+	brush = ::CreateSolidBrush(back.AsInteger());
 	brushOld = SelectBrush(hdc, brush);
 }
 
