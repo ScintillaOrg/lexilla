@@ -214,7 +214,7 @@ void SurfaceImpl::InitPixMap(int width,
 	if (height < 1) height = 1;
 	deviceOwned = true;
 	device = new QPixmap(width, height);
-	SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface);
+	SurfaceImpl *psurfOther = dynamic_cast<SurfaceImpl *>(surface);
 	SetUnicodeMode(psurfOther->unicodeMode);
 	SetDBCSMode(psurfOther->codePage);
 }
@@ -320,7 +320,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
 {
 	// Tile pattern over rectangle
-	SurfaceImpl *surface = static_cast<SurfaceImpl *>(&surfacePattern);
+	SurfaceImpl *surface = dynamic_cast<SurfaceImpl *>(&surfacePattern);
 	// Currently assumes 8x8 pattern
 	int widthPat = 8;
 	int heightPat = 8;
@@ -432,7 +432,7 @@ void SurfaceImpl::Ellipse(PRectangle rc,
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource)
 {
-	SurfaceImpl *source = static_cast<SurfaceImpl *>(&surfaceSource);
+	SurfaceImpl *source = dynamic_cast<SurfaceImpl *>(&surfaceSource);
 	QPixmap *pixmap = static_cast<QPixmap *>(source->GetPaintDevice());
 
 	GetPainter()->drawPixmap(rc.left, rc.top, *pixmap, from.x, from.y, -1, -1);
