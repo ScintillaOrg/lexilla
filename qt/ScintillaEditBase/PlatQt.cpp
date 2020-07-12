@@ -155,7 +155,7 @@ void Font::Create(const FontParameters &fp)
 	QFont *font = new QFont;
 	font->setStyleStrategy(ChooseStrategy(fp.extraFontFlag));
 	font->setFamily(QString::fromUtf8(fp.faceName));
-	font->setPointSize(fp.size);
+	font->setPointSizeF(fp.size);
 	font->setBold(fp.weight > 500);
 	font->setItalic(fp.italic);
 
