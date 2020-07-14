@@ -1688,6 +1688,8 @@ public:
 
 /// Implement IUnknown
 STDMETHODIMP BlobInline::QueryInterface(REFIID riid, PVOID *ppv) {
+	if (!ppv)
+		return E_POINTER;
 	// Never called so not checked.
 	*ppv = nullptr;
 	if (riid == IID_IUnknown)
@@ -1727,6 +1729,8 @@ COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE BlobInline::Draw(
 COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE BlobInline::GetMetrics(
 	DWRITE_INLINE_OBJECT_METRICS *metrics
 ) {
+	if (!metrics)
+		return E_POINTER;
 	metrics->width = width;
 	metrics->height = 2;
 	metrics->baseline = 1;
@@ -1737,6 +1741,8 @@ COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE BlobInline::GetMetrics(
 COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE BlobInline::GetOverhangMetrics(
 	DWRITE_OVERHANG_METRICS *overhangs
 ) {
+	if (!overhangs)
+		return E_POINTER;
 	overhangs->left = 0;
 	overhangs->top = 0;
 	overhangs->right = 0;
@@ -1748,6 +1754,8 @@ COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE BlobInline::GetBreakConditions(
 	DWRITE_BREAK_CONDITION *breakConditionBefore,
 	DWRITE_BREAK_CONDITION *breakConditionAfter
 ) {
+	if (!breakConditionBefore || !breakConditionAfter)
+		return E_POINTER;
 	// Since not performing 2D layout, not necessary to implement
 	*breakConditionBefore = DWRITE_BREAK_CONDITION_NEUTRAL;
 	*breakConditionAfter = DWRITE_BREAK_CONDITION_NEUTRAL;
@@ -1863,7 +1871,7 @@ size_t ScreenLineLayout::GetPositionInLayout(std::string_view text, size_t posit
 
 ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 	// If the text is empty, then no need to go through this function
-	if (!screenLine->Length())
+	if (!screenLine || !screenLine->Length())
 		return;
 
 	text = screenLine->Text();
