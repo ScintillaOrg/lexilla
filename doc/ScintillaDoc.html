@@ -4006,6 +4006,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_BRACEHIGHLIGHTINDICATOR">SCI_BRACEHIGHLIGHTINDICATOR(bool useSetting, int indicator)</a><br />
      <a class="message" href="#SCI_BRACEBADLIGHTINDICATOR">SCI_BRACEBADLIGHTINDICATOR(bool useSetting, int indicator)</a><br />
      <a class="message" href="#SCI_BRACEMATCH">SCI_BRACEMATCH(position pos, int maxReStyle) &rarr; position</a><br />
+     <a class="message" href="#SCI_BRACEMATCHNEXT">SCI_BRACEMATCHNEXT(position pos, position startPos) &rarr; position</a><br />
     </code>
 
     <p><b id="SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(position posA, position posB)</b><br />
@@ -4040,6 +4041,10 @@ struct Sci_TextToFind {
     the matching brace is beyond the end of styling. Nested braces are handled correctly. The
     <code class="parameter">maxReStyle</code> parameter must currently be 0 - it may be used in the future to limit
     the length of brace searches.</p>
+
+    <p><b id="SCI_BRACEMATCHNEXT">SCI_BRACEMATCHNEXT(position pos, position startPos) &rarr; position</b><br />
+     Similar to <code>SCI_BRACEMATCH</code>, but matching starts at the explicit start position <code>startPos</code>
+     instead of the implicitly next position <code>pos &plusmn; 1</code>.</p>
 
     <h2 id="TabsAndIndentationGuides">Tabs and Indentation Guides</h2>
 

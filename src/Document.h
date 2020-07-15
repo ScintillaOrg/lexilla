@@ -501,7 +501,7 @@ public:
 	Sci::Position ParaUp(Sci::Position pos) const;
 	Sci::Position ParaDown(Sci::Position pos) const;
 	int IndentSize() const noexcept { return actualIndentInChars; }
-	Sci::Position BraceMatch(Sci::Position position, Sci::Position maxReStyle) noexcept;
+	Sci::Position BraceMatch(Sci::Position position, Sci::Position maxReStyle, Sci::Position startPos, bool useStartPos) noexcept;
 
 private:
 	void NotifyModifyAttempt();
