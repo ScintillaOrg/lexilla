@@ -60,7 +60,7 @@ LineLayout::LineLayout(int maxLineLength_) :
 	maxLineLength(-1),
 	numCharsInLine(0),
 	numCharsBeforeEOL(0),
-	validity(llInvalid),
+	validity(ValidLevel::invalid),
 	xHighlightGuide(0),
 	highlightColumn(false),
 	containsCaret(false),
@@ -108,7 +108,7 @@ void LineLayout::Free() noexcept {
 	bidiData.reset();
 }
 
-void LineLayout::Invalidate(validLevel validity_) noexcept {
+void LineLayout::Invalidate(ValidLevel validity_) noexcept {
 	if (validity > validity_)
 		validity = validity_;
 }
@@ -397,14 +397,14 @@ void LineLayoutCache::Deallocate() noexcept {
 	cache.clear();
 }
 
-void LineLayoutCache::Invalidate(LineLayout::validLevel validity_) noexcept {
+void LineLayoutCache::Invalidate(LineLayout::ValidLevel validity_) noexcept {
 	if (!cache.empty() && !allInvalidated) {
 		for (const std::unique_ptr<LineLayout> &ll : cache) {
 			if (ll) {
 				ll->Invalidate(validity_);
 			}
 		}
-		if (validity_ == LineLayout::llInvalid) {
+		if (validity_ == LineLayout::ValidLevel::invalid) {
 			allInvalidated = true;
 		}
 	}
@@ -422,7 +422,7 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
                                       Sci::Line linesOnScreen, Sci::Line linesInDoc) {
 	AllocateForLevel(linesOnScreen, linesInDoc);
 	if (styleClock != styleClock_) {
-		Invalidate(LineLayout::llCheckTextAndStyle);
+		Invalidate(LineLayout::ValidLevel::checkTextAndStyle);
 		styleClock = styleClock_;
 	}
 	allInvalidated = false;

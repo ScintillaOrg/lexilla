@@ -387,7 +387,7 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 	if (posLineEnd >(posLineStart + ll->maxLineLength)) {
 		posLineEnd = posLineStart + ll->maxLineLength;
 	}
-	if (ll->validity == LineLayout::llCheckTextAndStyle) {
+	if (ll->validity == LineLayout::ValidLevel::checkTextAndStyle) {
 		Sci::Position lineLength = posLineEnd - posLineStart;
 		if (!vstyle.viewEOL) {
 			lineLength = model.pdoc->LineEnd(line) - posLineStart;
@@ -412,15 +412,15 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 			}
 			allSame = allSame && (ll->styles[numCharsInLine] == styleByte);	// For eolFilled
 			if (allSame) {
-				ll->validity = LineLayout::llPositions;
+				ll->validity = LineLayout::ValidLevel::positions;
 			} else {
-				ll->validity = LineLayout::llInvalid;
+				ll->validity = LineLayout::ValidLevel::invalid;
 			}
 		} else {
-			ll->validity = LineLayout::llInvalid;
+			ll->validity = LineLayout::ValidLevel::invalid;
 		}
 	}
-	if (ll->validity == LineLayout::llInvalid) {
+	if (ll->validity == LineLayout::ValidLevel::invalid) {
 		ll->widthLine = LineLayout::wrapWidthInfinite;
 		ll->lines = 1;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
@@ -504,13 +504,13 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 		}
 		ll->numCharsInLine = numCharsInLine;
 		ll->numCharsBeforeEOL = numCharsBeforeEOL;
-		ll->validity = LineLayout::llPositions;
+		ll->validity = LineLayout::ValidLevel::positions;
 	}
 	// Hard to cope when too narrow, so just assume there is space
 	if (width < 20) {
 		width = 20;
 	}
-	if ((ll->validity == LineLayout::llPositions) || (ll->widthLine != width)) {
+	if ((ll->validity == LineLayout::ValidLevel::positions) || (ll->widthLine != width)) {
 		ll->widthLine = width;
 		if (width == LineLayout::wrapWidthInfinite) {
 			ll->lines = 1;
@@ -593,7 +593,7 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 			}
 			ll->lines++;
 		}
-		ll->validity = LineLayout::llLines;
+		ll->validity = LineLayout::ValidLevel::lines;
 	}
 }
 
