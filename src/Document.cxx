@@ -2399,7 +2399,7 @@ StyledText Document::EOLAnnotationStyledText(Sci::Line line) const noexcept {
 void Document::EOLAnnotationSetText(Sci::Line line, const char *text) {
 	if (line >= 0 && line < LinesTotal()) {
 		EOLAnnotations()->SetText(line, text);
-		DocModification mh(SC_MOD_CHANGEEOLANNOTATION, LineStart(line),
+		const DocModification mh(SC_MOD_CHANGEEOLANNOTATION, LineStart(line),
 			0, 0, 0, line);
 		NotifyModified(mh);
 	}

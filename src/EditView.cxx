@@ -1049,7 +1049,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		rcSegment.left = rcLine.left;
 	rcSegment.right = rcLine.right;
 
-	bool drawEOLAnnotationStyledText = (vsDraw.eolAnnotationVisible != EOLANNOTATION_HIDDEN) && model.pdoc->EOLAnnotationStyledText(line).text;
+	const bool drawEOLAnnotationStyledText = (vsDraw.eolAnnotationVisible != EOLANNOTATION_HIDDEN) && model.pdoc->EOLAnnotationStyledText(line).text;
 	const bool fillRemainder = (!lastSubLine || (!model.GetFoldDisplayText(line) && !drawEOLAnnotationStyledText));
 	if (fillRemainder) {
 		// Fill the remainder of the line
