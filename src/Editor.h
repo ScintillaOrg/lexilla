@@ -210,7 +210,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int dwellDelay;
 	int ticksToDwell;
 	bool dwelling;
-	enum { selChar, selWord, selSubLine, selWholeLine } selectionType;
+	enum class TextUnit { character, word, subLine, wholeLine } selectionUnit;
 	Point ptMouseLast;
 	enum { ddNone, ddInitial, ddDragging } inDragDrop;
 	bool dropWentOutside;
