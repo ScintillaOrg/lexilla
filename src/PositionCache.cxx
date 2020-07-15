@@ -613,10 +613,10 @@ TextSegment BreakFinder::Next() {
 		const int prev = nextBreak;
 		while (nextBreak < lineRange.end) {
 			int charWidth = 1;
-			if (encodingFamily == efUnicode)
+			if (encodingFamily == EncodingFamily::unicode)
 				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(&ll->chars[nextBreak]),
 					static_cast<int>(lineRange.end - nextBreak));
-			else if (encodingFamily == efDBCS)
+			else if (encodingFamily == EncodingFamily::dbcs)
 				charWidth = pdoc->DBCSDrawBytes(
 					std::string_view(&ll->chars[nextBreak], lineRange.end - nextBreak));
 			const Representation *repr = preprs->RepresentationFromCharacter(&ll->chars[nextBreak], charWidth);

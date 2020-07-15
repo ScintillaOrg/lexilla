@@ -18,7 +18,7 @@ class LineLevels;
 class LineState;
 class LineAnnotation;
 
-enum EncodingFamily { efEightBit, efUnicode, efDBCS };
+enum class EncodingFamily { eightBit, unicode, dbcs };
 
 /**
  * The range class represents a range of text in a document.

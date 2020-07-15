@@ -1175,11 +1175,11 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) const
 
 EncodingFamily Document::CodePageFamily() const noexcept {
 	if (SC_CP_UTF8 == dbcsCodePage)
-		return efUnicode;
+		return EncodingFamily::unicode;
 	else if (dbcsCodePage)
-		return efDBCS;
+		return EncodingFamily::dbcs;
 	else
-		return efEightBit;
+		return EncodingFamily::eightBit;
 }
 
 void Document::ModifiedAt(Sci::Position pos) noexcept {
