@@ -48,7 +48,7 @@ enum TabDrawMode {tdLongArrow=0, tdStrikeOut=1};
 
 typedef std::map<FontSpecification, std::unique_ptr<FontRealised>> FontMap;
 
-enum WrapMode { eWrapNone, eWrapWord, eWrapChar, eWrapWhitespace };
+enum class WrapMode { none, word, character, whitespace };
 
 class ColourOptional : public ColourDesired {
 public:
