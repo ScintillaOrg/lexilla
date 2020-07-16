@@ -100,7 +100,7 @@ public:
 		styler.ColourTo(currentPos - ((currentPos > lengthDocument) ? 2 : 1), state);
 		styler.Flush();
 	}
-	bool More() const {
+	bool More() const noexcept {
 		return currentPos < endPos;
 	}
 	void Forward() {
@@ -139,7 +139,7 @@ public:
 			}
 		}
 	}
-	void ChangeState(int state_) {
+	void ChangeState(int state_) noexcept {
 		state = state_;
 	}
 	void SetState(int state_) {

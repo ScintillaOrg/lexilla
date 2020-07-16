@@ -77,7 +77,7 @@ public:
 		}
 		return buf[position - startPos];
 	}
-	IDocument *MultiByteAccess() const {
+	IDocument *MultiByteAccess() const noexcept {
 		return pAccess;
 	}
 	/** Safe version of operator[], returning a defined value for invalid position. */
