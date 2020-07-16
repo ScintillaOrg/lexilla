@@ -72,7 +72,7 @@ public:
 		width(0),
 		chNext(0),
 		widthNext(1) {
-		if (styler.Encoding() != enc8bit) {
+		if (styler.Encoding() != EncodingType::eightBit) {
 			multiByteAccess = styler.MultiByteAccess();
 		}
 		styler.StartAt(startPos /*, chMask*/);
