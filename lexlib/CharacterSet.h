@@ -46,7 +46,27 @@ public:
 			bset[i] = other.bset[i];
 		}
 	}
-	CharacterSet &operator=(CharacterSet &&other) {
+	CharacterSet(CharacterSet &&other) noexcept {
+		size = other.size;
+		valueAfter = other.valueAfter;
+		bset = other.bset;
+		other.size = 0;
+		other.bset = nullptr;
+	}
+	CharacterSet &operator=(const CharacterSet &other) {
+		if (this != &other) {
+			bool *bsetNew = new bool[other.size];
+			for (int i = 0; i < other.size; i++) {
+				bsetNew[i] = other.bset[i];
+			}
+			delete[]bset;
+			size = other.size;
+			valueAfter = other.valueAfter;
+			bset = bsetNew;
+		}
+		return *this;
+	}
+	CharacterSet &operator=(CharacterSet &&other) noexcept {
 		if (this != &other) {
 			delete []bset;
 			size = other.size;
@@ -61,19 +81,6 @@ public:
 		delete []bset;
 		bset = nullptr;
 		size = 0;
-	}
-	CharacterSet &operator=(const CharacterSet &other) {
-		if (this != &other) {
-			bool *bsetNew = new bool[other.size];
-			for (int i=0; i < other.size; i++) {
-				bsetNew[i] = other.bset[i];
-			}
-			delete []bset;
-			size = other.size;
-			valueAfter = other.valueAfter;
-			bset = bsetNew;
-		}
-		return *this;
 	}
 	void Add(int val) {
 		assert(val >= 0);
