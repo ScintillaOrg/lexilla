@@ -1845,8 +1845,10 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 		const unsigned int localNameSize = pfm->pTextFormat->GetLocaleNameLength();
 		std::vector<WCHAR> localName(localNameSize + 1);
 
-		pfm->pTextFormat->GetLocaleName(localName.data(), localNameSize);
-		textLayout->SetLocaleName(localName.data(), textRange);
+		const HRESULT hrLocale = pfm->pTextFormat->GetLocaleName(localName.data(), localNameSize + 1);
+		if (SUCCEEDED(hrLocale)) {
+			textLayout->SetLocaleName(localName.data(), textRange);
+		}
 
 		textLayout->SetFontStretch(pfm->pTextFormat->GetFontStretch(), textRange);
 
