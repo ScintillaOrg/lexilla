@@ -1833,21 +1833,21 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 			static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(bytePosition)->GetID());
 
 		const unsigned int fontFamilyNameSize = pfm->pTextFormat->GetFontFamilyNameLength();
-		std::vector<WCHAR> fontFamilyName(fontFamilyNameSize + 1);
-
-		pfm->pTextFormat->GetFontFamilyName(fontFamilyName.data(), fontFamilyNameSize + 1);
-		textLayout->SetFontFamilyName(fontFamilyName.data(), textRange);
+		std::wstring fontFamilyName(fontFamilyNameSize, 0);
+		const HRESULT hrFamily = pfm->pTextFormat->GetFontFamilyName(fontFamilyName.data(), fontFamilyNameSize + 1);
+		if (SUCCEEDED(hrFamily)) {
+			textLayout->SetFontFamilyName(fontFamilyName.c_str(), textRange);
+		}
 
 		textLayout->SetFontSize(pfm->pTextFormat->GetFontSize(), textRange);
 		textLayout->SetFontWeight(pfm->pTextFormat->GetFontWeight(), textRange);
 		textLayout->SetFontStyle(pfm->pTextFormat->GetFontStyle(), textRange);
 
-		const unsigned int localNameSize = pfm->pTextFormat->GetLocaleNameLength();
-		std::vector<WCHAR> localName(localNameSize + 1);
-
-		const HRESULT hrLocale = pfm->pTextFormat->GetLocaleName(localName.data(), localNameSize + 1);
+		const unsigned int localeNameSize = pfm->pTextFormat->GetLocaleNameLength();
+		std::wstring localeName(localeNameSize, 0);
+		const HRESULT hrLocale = pfm->pTextFormat->GetLocaleName(localeName.data(), localeNameSize + 1);
 		if (SUCCEEDED(hrLocale)) {
-			textLayout->SetLocaleName(localName.data(), textRange);
+			textLayout->SetLocaleName(localeName.c_str(), textRange);
 		}
 
 		textLayout->SetFontStretch(pfm->pTextFormat->GetFontStretch(), textRange);
