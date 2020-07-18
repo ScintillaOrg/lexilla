@@ -273,7 +273,7 @@ class ColourStop {
 public:
 	float position;
 	ColourAlpha colour;
-	constexpr ColourStop(float position_, ColourAlpha colour_) noexcept :
+	ColourStop(float position_, ColourAlpha colour_) noexcept :
 		position(position_), colour(colour_) {
 	}
 };
@@ -291,7 +291,7 @@ struct FontParameters {
 	int technology;
 	int characterSet;
 
-	constexpr FontParameters(
+	FontParameters(
 		const char *faceName_,
 		float size_=10,
 		int weight_=400,
