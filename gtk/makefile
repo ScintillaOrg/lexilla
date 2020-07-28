@@ -39,6 +39,7 @@ BASE_FLAGS += -fsanitize=$(SANITIZE)
 endif
 ARFLAGS = rc
 RANLIB ?= ranlib
+PKG_CONFIG ?= pkg-config
 
 GTK_VERSION = $(if $(GTK3),gtk+-3.0,gtk+-2.0)
 
@@ -88,8 +89,8 @@ BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 CXX_BASE_FLAGS =--std=c++17 $(BASE_FLAGS)
 CXX_ALL_FLAGS =$(DEFINES) $(INCLUDES) $(CXX_BASE_FLAGS) $(CONFIG_FLAGS)
 
-CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTK_VERSION))
-CONFIGLIB:=$(shell pkg-config --libs $(GTK_VERSION) gmodule-no-export-2.0)
+CONFIG_FLAGS:=$(shell $(PKG_CONFIG) --cflags $(GTK_VERSION))
+CONFIGLIB:=$(shell $(PKG_CONFIG) --libs $(GTK_VERSION) gmodule-no-export-2.0)
 MARSHALLER=scintilla-marshal.o
 
 all: $(COMPLIB) $(COMPONENT) $(LEXILLA)
