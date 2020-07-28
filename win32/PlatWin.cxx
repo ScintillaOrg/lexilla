@@ -1440,11 +1440,8 @@ void SurfaceD2D::LineTo(int x_, int y_) {
 void SurfaceD2D::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
 	PLATFORM_ASSERT(pRenderTarget && (npts > 2));
 	if (pRenderTarget) {
-		ID2D1Factory *pFactory = nullptr;
-		pRenderTarget->GetFactory(&pFactory);
-		PLATFORM_ASSERT(pFactory);
 		ID2D1PathGeometry *geometry = nullptr;
-		HRESULT hr = pFactory->CreatePathGeometry(&geometry);
+		HRESULT hr = pD2DFactory->CreatePathGeometry(&geometry);
 		PLATFORM_ASSERT(geometry);
 		if (SUCCEEDED(hr) && geometry) {
 			ID2D1GeometrySink *sink = nullptr;
