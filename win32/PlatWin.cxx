@@ -978,7 +978,7 @@ void SurfaceGDI::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	::BitBlt(hdc,
 		static_cast<int>(rc.left), static_cast<int>(rc.top),
 		static_cast<int>(rc.Width()), static_cast<int>(rc.Height()),
-		static_cast<SurfaceGDI &>(surfaceSource).hdc,
+		dynamic_cast<SurfaceGDI &>(surfaceSource).hdc,
 		static_cast<int>(from.x), static_cast<int>(from.y), SRCCOPY);
 }
 
