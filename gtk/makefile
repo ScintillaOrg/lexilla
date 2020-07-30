@@ -106,9 +106,9 @@ clean:
 	$(DEL) *.o $(call normalize,$(COMPLIB)) $(call normalize,$(COMPONENT)) *.plist
 
 %.o: %.cxx
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
 %.o: %.c
-	$(CC) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
+	$(CC) $(CPPFLAGS) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
 
 GLIB_GENMARSHAL = glib-genmarshal
 GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
