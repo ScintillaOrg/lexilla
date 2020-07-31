@@ -483,28 +483,13 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
-	SurfaceImpl &surfi = static_cast<SurfaceImpl &>(surfacePattern);
-	const bool canDraw = surfi.psurf != nullptr;
-	if (canDraw) {
-		PLATFORM_ASSERT(context);
+	SurfaceImpl &surfi = dynamic_cast<SurfaceImpl &>(surfacePattern);
+	if (context && surfi.psurf) {
 		// Tile pattern over rectangle
-		// Currently assumes 8x8 pattern
-		constexpr int widthPat = 8;
-		constexpr int heightPat = 8;
-		const IntegerRectangle irc(rc);
-		for (int xTile = irc.left; xTile < irc.right; xTile += widthPat) {
-			const int widthx = (xTile + widthPat > irc.right) ? irc.right - xTile : widthPat;
-			for (int yTile = irc.top; yTile < irc.bottom; yTile += heightPat) {
-				const int heighty = (yTile + heightPat > irc.bottom) ? irc.bottom - yTile : heightPat;
-				cairo_set_source_surface(context, surfi.psurf, xTile, yTile);
-				cairo_rectangle(context, xTile, yTile, widthx, heighty);
-				cairo_fill(context);
-			}
-		}
-	} else {
-		// Something is wrong so try to show anyway
-		// Shows up black because colour not allocated
-		FillRectangle(rc, ColourDesired(0));
+		cairo_set_source_surface(context, surfi.psurf, rc.left, rc.top);
+		cairo_pattern_set_extend(cairo_get_source(context), CAIRO_EXTEND_REPEAT);
+		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
+		cairo_fill(context);
 	}
 }
 
