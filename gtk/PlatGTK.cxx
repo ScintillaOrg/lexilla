@@ -463,7 +463,7 @@ void SurfaceImpl::Polygon(Point *pts, size_t npts, ColourDesired fore,
 void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (context) {
 		cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5,
-				rc.right - rc.left - 1, rc.bottom - rc.top - 1);
+				rc.Width() - 1, rc.Height() - 1);
 		PenColour(back);
 		cairo_fill_preserve(context);
 		PenColour(fore);
@@ -476,8 +476,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 	if (context && (rc.left < maxCoordinate)) {	// Protect against out of range
 		rc.left = std::round(rc.left);
 		rc.right = std::round(rc.right);
-		cairo_rectangle(context, rc.left, rc.top,
-				rc.right - rc.left, rc.bottom - rc.top);
+		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 		cairo_fill(context);
 	}
 }
@@ -512,7 +511,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 	}
 }
 
-static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) noexcept {
+static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, double radius) noexcept {
 	constexpr double degrees = kPi / 180.0;
 
 	cairo_new_sub_path(context);
@@ -533,9 +532,9 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fi
 				      cdFill.GetBlue() / 255.0,
 				      alphaFill / 255.0);
 		if (cornerSize > 0)
-			PathRoundRectangle(context, rc.left + 1.0, rc.top + 1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0, cornerSize);
+			PathRoundRectangle(context, rc.left + 1.0, rc.top + 1.0, rc.Width() - 2.0, rc.Height() - 2.0, cornerSize);
 		else
-			cairo_rectangle(context, rc.left + 1.0, rc.top + 1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0);
+			cairo_rectangle(context, rc.left + 1.0, rc.top + 1.0, rc.Width() - 2.0, rc.Height() - 2.0);
 		cairo_fill(context);
 
 		const ColourDesired cdOutline(outline.AsInteger());
@@ -545,9 +544,9 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fi
 				      cdOutline.GetBlue() / 255.0,
 				      alphaOutline / 255.0);
 		if (cornerSize > 0)
-			PathRoundRectangle(context, rc.left + 0.5, rc.top + 0.5, rc.right - rc.left - 1, rc.bottom - rc.top - 1, cornerSize);
+			PathRoundRectangle(context, rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1, cornerSize);
 		else
-			cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5, rc.right - rc.left - 1, rc.bottom - rc.top - 1);
+			cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1);
 		cairo_stroke(context);
 	}
 }
@@ -598,7 +597,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 
 	cairo_surface_t *psurfImage = cairo_image_surface_create_for_data(&image[0], CAIRO_FORMAT_ARGB32, width, height, stride);
 	cairo_set_source_surface(context, psurfImage, rc.left, rc.top);
-	cairo_rectangle(context, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top);
+	cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 	cairo_fill(context);
 
 	cairo_surface_destroy(psurfImage);
@@ -621,7 +620,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		PLATFORM_ASSERT(context);
 		cairo_set_source_surface(context, surfi.psurf,
 					 rc.left - from.x, rc.top - from.y);
-		cairo_rectangle(context, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top);
+		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 		cairo_fill(context);
 	}
 }
@@ -954,7 +953,7 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 
 void SurfaceImpl::SetClip(PRectangle rc) {
 	PLATFORM_ASSERT(context);
-	cairo_rectangle(context, rc.left, rc.top, rc.right, rc.bottom);
+	cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 	cairo_clip(context);
 }
 
