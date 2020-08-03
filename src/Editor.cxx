@@ -4506,6 +4506,7 @@ void Editor::DwellEnd(bool mouseMoved) {
 
 void Editor::MouseLeave() {
 	SetHotSpotRange(nullptr);
+	SetHoverIndicatorPosition(Sci::invalidPosition);
 	if (!HaveMouseCapture()) {
 		ptMouseLast = Point(-1, -1);
 		DwellEnd(true);
@@ -4874,6 +4875,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 			if (PointInSelMargin(pt)) {
 				DisplayCursor(GetMarginCursor(pt));
 				SetHotSpotRange(nullptr);
+				SetHoverIndicatorPosition(Sci::invalidPosition);
 				return; 	// No need to test for selection
 			}
 		}
