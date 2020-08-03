@@ -1375,7 +1375,10 @@ Window::Cursor ScintillaWin::ContextCursor(Point pt) {
 		} else if (PointIsHotspot(pt)) {
 			return Window::cursorHand;
 		} else if (hoverIndicatorPos != Sci::invalidPosition) {
-			return Window::cursorHand;
+			const Sci::Position pos = PositionFromLocation(pt, true, true);
+			if (pos != Sci::invalidPosition) {
+				return Window::cursorHand;
+			}
 		}
 	}
 	return Window::cursorText;
