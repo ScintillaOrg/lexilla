@@ -410,7 +410,8 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 				chPrevious = chDoc;
 				numCharsInLine++;
 			}
-			allSame = allSame && (ll->styles[numCharsInLine] == styleByte);	// For eolFilled
+			const int styleByteLast = (posLineEnd > posLineStart) ? model.pdoc->StyleIndexAt(posLineEnd - 1) : 0;
+			allSame = allSame && (ll->styles[numCharsInLine] == styleByteLast);	// For eolFilled
 			if (allSame) {
 				ll->validity = LineLayout::ValidLevel::positions;
 			} else {
