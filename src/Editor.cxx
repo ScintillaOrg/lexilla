@@ -7704,18 +7704,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 
-	case SCI_MULTIEDGEADDLINE: {
-			// Insert new edge in sorted order.
-			const int column = static_cast<int>(wParam);
-			vs.theMultiEdge.insert(
-				std::upper_bound(vs.theMultiEdge.begin(), vs.theMultiEdge.end(), column,
-					[](const EdgeProperties &a, const EdgeProperties &b) {
-						return a.column < b.column;
-					}),
-				EdgeProperties(wParam, lParam));
-			InvalidateStyleRedraw();
-			break;
-		}
+	case SCI_MULTIEDGEADDLINE:
+		vs.AddMultiEdge(wParam, lParam);
+		InvalidateStyleRedraw();
+		break;
 
 	case SCI_MULTIEDGECLEARALL:
 		std::vector<EdgeProperties>().swap(vs.theMultiEdge); // Free vector and memory, C++03 compatible
