@@ -12,12 +12,12 @@ import os, pathlib, sys, uuid
 
 thisPath = pathlib.Path(__file__).resolve()
 
-sys.path.append(str(thisPath.parent.parent.parent / "scripts"))
+sys.path.append(str(thisPath.parent.parent.parent / "scintilla" / "scripts"))
 
 from FileGenerator import Regenerate, UpdateLineInFile, \
     ReplaceREInFile, UpdateLineInPlistFile, ReadFileAsList, UpdateFileFromLines, \
     FindSectionInList
-import ScintillaData
+import LexillaData
 
 sys.path.append(str(thisPath.parent.parent / "src"))
 import DepGen
@@ -91,11 +91,11 @@ def RegenerateAll(rootDirectory):
 
     root = pathlib.Path(rootDirectory)
 
-    scintillaBase = root.resolve()
+    lexillaBase = root.resolve()
 
-    sci = ScintillaData.ScintillaData(scintillaBase)
+    sci = LexillaData.LexillaData(lexillaBase)
 
-    lexillaDir = scintillaBase / "lexilla"
+    lexillaDir = lexillaBase
     srcDir = lexillaDir / "src"
 
     Regenerate(srcDir / "Lexilla.cxx", "//", sci.lexerModules)
@@ -131,4 +131,4 @@ def RegenerateAll(rootDirectory):
     os.chdir(currentDirectory)
 
 if __name__=="__main__":
-    RegenerateAll(pathlib.Path(__file__).resolve().parent.parent.parent)
+    RegenerateAll(pathlib.Path(__file__).resolve().parent.parent)

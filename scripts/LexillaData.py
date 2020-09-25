@@ -183,30 +183,13 @@ def ciKey(a):
 def SortListInsensitive(l):
     l.sort(key=ciKey)
 
-class ScintillaData:
+class LexillaData:
     def __init__(self, scintillaRoot):
         # Discover version information
         self.version = (scintillaRoot / "version.txt").read_text().strip()
         self.versionDotted = self.version[0] + '.' + self.version[1] + '.' + \
             self.version[2]
         self.versionCommad = self.versionDotted.replace(".", ", ") + ', 0'
-
-        with (scintillaRoot / "doc" / "index.html").open() as f:
-            self.dateModified = [l for l in f.readlines() if "Date.Modified" in l]\
-                [0].split('\"')[3]
-            # 20130602
-            # index.html, SciTE.html
-            dtModified = datetime.datetime.strptime(self.dateModified, "%Y%m%d")
-            self.yearModified = self.dateModified[0:4]
-            monthModified = dtModified.strftime("%B")
-            dayModified = "%d" % dtModified.day
-            self.mdyModified = monthModified + " " + dayModified + " " + self.yearModified
-            # May 22 2013
-            # index.html, SciTE.html
-            self.dmyModified = dayModified + " " + monthModified + " " + self.yearModified
-            # 22 May 2013
-            # ScintillaHistory.html -- only first should change
-            self.myModified = monthModified + " " + self.yearModified
 
         # Find all the lexer source code files
         lexFilePaths = list((scintillaRoot / "lexers").glob("Lex*.cxx"))
