@@ -14,7 +14,7 @@
 
 .SUFFIXES: .cxx
 
-DIR_BIN=../../bin
+DIR_BIN=../bin
 
 WARNINGS = -Wpedantic -Wall -Wextra
 
@@ -67,13 +67,13 @@ endif
 
 RANLIB ?= ranlib
 
-vpath %.h ../../src ../../include ../../lexlib
-vpath %.cxx ../../src ../../lexlib ../../lexers
+vpath %.h ../src ../include ../../scintilla/include ../lexlib
+vpath %.cxx ../src ../lexlib ../lexers
 
 DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
 BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
-INCLUDES = -I ../../include -I ../../src -I ../../lexlib
+INCLUDES = -I ../include -I ../../scintilla/include -I ../src -I ../lexlib
 LDFLAGS += -shared
 
 BASE_FLAGS += $(WARNINGS)
@@ -90,12 +90,12 @@ clean:
 	$(WINDRES) $< $@
 
 analyze:
-	$(CXX) --analyze $(DEFINES) $(INCLUDES) $(BASE_FLAGS) $(CXXFLAGS) *.cxx ../../lexlib/*.cxx ../../lexers/*.cxx
+	$(CXX) --analyze $(DEFINES) $(INCLUDES) $(BASE_FLAGS) $(CXXFLAGS) *.cxx ../lexlib/*.cxx ../lexers/*.cxx
 
 depend deps.mak:
 	$(PYTHON) DepGen.py
 
-LEXERS:=$(sort $(notdir $(wildcard ../../lexers/Lex*.cxx)))
+LEXERS:=$(sort $(notdir $(wildcard ../lexers/Lex*.cxx)))
 
 OBJS = Lexilla.o
 

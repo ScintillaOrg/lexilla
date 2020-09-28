@@ -11,7 +11,7 @@
 .SUFFIXES: .cxx
 
 DIR_O=.
-DIR_BIN=..\..\bin
+DIR_BIN=..\bin
 
 LEXILLA=$(DIR_BIN)\lexilla.dll
 LIBLEXILLA=$(DIR_BIN)\liblexilla.lib
@@ -55,7 +55,7 @@ LDFLAGS=$(LDDEBUG) $(LDFLAGS)
 CXXFLAGS=$(CXXFLAGS) $(CXXNDEBUG)
 !ENDIF
 
-INCLUDEDIRS=-I../../include -I../../src -I../../lexlib
+INCLUDEDIRS=-I../include -I../../scintilla/include -I../src -I../lexlib
 CXXFLAGS=$(CXXFLAGS) $(INCLUDEDIRS)
 
 all:	$(LEXILLA) $(LIBLEXILLA)
@@ -215,11 +215,9 @@ $(LIBLEXILLA): $(LEXILLA_OBJS)
 
 # Define how to build all the objects and what they depend on
 
-{..\..\src}.cxx{$(DIR_O)}.obj::
+{..\lexlib}.cxx{$(DIR_O)}.obj::
 	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
-{..\..\lexlib}.cxx{$(DIR_O)}.obj::
-	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
-{..\..\lexers}.cxx{$(DIR_O)}.obj::
+{..\lexers}.cxx{$(DIR_O)}.obj::
 	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 {.}.cxx{$(DIR_O)}.obj::
 	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
