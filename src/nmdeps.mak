@@ -1,1519 +1,1518 @@
 # Created by DepGen.py. To recreate, run DepGen.py.
 $(DIR_O)/Lexilla.obj: \
-	../../lexilla/src/Lexilla.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/CatalogueModules.h
+	../src/Lexilla.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../lexlib/LexerModule.h \
+	../lexlib/CatalogueModules.h
 $(DIR_O)/Accessor.obj: \
-	../../lexlib/Accessor.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h
+	../lexlib/Accessor.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h
 $(DIR_O)/CharacterCategory.obj: \
-	../../lexlib/CharacterCategory.cxx \
-	../../lexlib/CharacterCategory.h
+	../lexlib/CharacterCategory.cxx \
+	../lexlib/CharacterCategory.h
 $(DIR_O)/CharacterSet.obj: \
-	../../lexlib/CharacterSet.cxx \
-	../../lexlib/CharacterSet.h
+	../lexlib/CharacterSet.cxx \
+	../lexlib/CharacterSet.h
 $(DIR_O)/DefaultLexer.obj: \
-	../../lexlib/DefaultLexer.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/DefaultLexer.h
+	../lexlib/DefaultLexer.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexerBase.obj: \
-	../../lexlib/LexerBase.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/LexerBase.h
+	../lexlib/LexerBase.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/LexerBase.h
 $(DIR_O)/LexerModule.obj: \
-	../../lexlib/LexerModule.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/LexerBase.h \
-	../../lexlib/LexerSimple.h
+	../lexlib/LexerModule.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/LexerBase.h \
+	../lexlib/LexerSimple.h
 $(DIR_O)/LexerNoExceptions.obj: \
-	../../lexlib/LexerNoExceptions.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/LexerBase.h \
-	../../lexlib/LexerNoExceptions.h
+	../lexlib/LexerNoExceptions.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/LexerBase.h \
+	../lexlib/LexerNoExceptions.h
 $(DIR_O)/LexerSimple.obj: \
-	../../lexlib/LexerSimple.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/LexerBase.h \
-	../../lexlib/LexerSimple.h
+	../lexlib/LexerSimple.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/LexerBase.h \
+	../lexlib/LexerSimple.h
 $(DIR_O)/PropSetSimple.obj: \
-	../../lexlib/PropSetSimple.cxx \
-	../../lexlib/PropSetSimple.h
+	../lexlib/PropSetSimple.cxx \
+	../lexlib/PropSetSimple.h
 $(DIR_O)/StyleContext.obj: \
-	../../lexlib/StyleContext.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h
+	../lexlib/StyleContext.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h
 $(DIR_O)/WordList.obj: \
-	../../lexlib/WordList.cxx \
-	../../lexlib/WordList.h
+	../lexlib/WordList.cxx \
+	../lexlib/WordList.h
 $(DIR_O)/LexA68k.obj: \
-	../../lexers/LexA68k.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexA68k.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAbaqus.obj: \
-	../../lexers/LexAbaqus.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAbaqus.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAda.obj: \
-	../../lexers/LexAda.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAda.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAPDL.obj: \
-	../../lexers/LexAPDL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAPDL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAsm.obj: \
-	../../lexers/LexAsm.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexAsm.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexAsn1.obj: \
-	../../lexers/LexAsn1.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAsn1.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexASY.obj: \
-	../../lexers/LexASY.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexASY.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAU3.obj: \
-	../../lexers/LexAU3.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAU3.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAVE.obj: \
-	../../lexers/LexAVE.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAVE.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexAVS.obj: \
-	../../lexers/LexAVS.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexAVS.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexBaan.obj: \
-	../../lexers/LexBaan.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexBaan.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexBash.obj: \
-	../../lexers/LexBash.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/StringCopy.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/SubStyles.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexBash.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SubStyles.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexBasic.obj: \
-	../../lexers/LexBasic.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexBasic.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexBatch.obj: \
-	../../lexers/LexBatch.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexBatch.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexBibTeX.obj: \
-	../../lexers/LexBibTeX.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexBibTeX.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexBullant.obj: \
-	../../lexers/LexBullant.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexBullant.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCaml.obj: \
-	../../lexers/LexCaml.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../src/ExternalLexer.h
+	../lexers/LexCaml.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCIL.obj: \
-	../../lexers/LexCIL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/StringCopy.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexCIL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexCLW.obj: \
-	../../lexers/LexCLW.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCLW.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCmake.obj: \
-	../../lexers/LexCmake.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCmake.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCOBOL.obj: \
-	../../lexers/LexCOBOL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCOBOL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCoffeeScript.obj: \
-	../../lexers/LexCoffeeScript.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCoffeeScript.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexConf.obj: \
-	../../lexers/LexConf.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexConf.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCPP.obj: \
-	../../lexers/LexCPP.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/StringCopy.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/SparseState.h \
-	../../lexlib/SubStyles.h
+	../lexers/LexCPP.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SparseState.h \
+	../lexlib/SubStyles.h
 $(DIR_O)/LexCrontab.obj: \
-	../../lexers/LexCrontab.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCrontab.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCsound.obj: \
-	../../lexers/LexCsound.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCsound.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexCSS.obj: \
-	../../lexers/LexCSS.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexCSS.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexD.obj: \
-	../../lexers/LexD.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexD.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexDataflex.obj: \
-	../../lexers/LexDataflex.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexDataflex.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexDiff.obj: \
-	../../lexers/LexDiff.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexDiff.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexDMAP.obj: \
-	../../lexers/LexDMAP.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexDMAP.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexDMIS.obj: \
-	../../lexers/LexDMIS.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexDMIS.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexECL.obj: \
-	../../lexers/LexECL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h
+	../lexers/LexECL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h
 $(DIR_O)/LexEDIFACT.obj: \
-	../../lexers/LexEDIFACT.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexEDIFACT.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexEiffel.obj: \
-	../../lexers/LexEiffel.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexEiffel.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexErlang.obj: \
-	../../lexers/LexErlang.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexErlang.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexErrorList.obj: \
-	../../lexers/LexErrorList.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexErrorList.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexEScript.obj: \
-	../../lexers/LexEScript.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexEScript.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexFlagship.obj: \
-	../../lexers/LexFlagship.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexFlagship.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexForth.obj: \
-	../../lexers/LexForth.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexForth.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexFortran.obj: \
-	../../lexers/LexFortran.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexFortran.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexGAP.obj: \
-	../../lexers/LexGAP.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexGAP.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexGui4Cli.obj: \
-	../../lexers/LexGui4Cli.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexGui4Cli.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexHaskell.obj: \
-	../../lexers/LexHaskell.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/CharacterCategory.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexHaskell.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexHex.obj: \
-	../../lexers/LexHex.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexHex.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexHollywood.obj: \
-	../../lexers/LexHollywood.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexHollywood.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexHTML.obj: \
-	../../lexers/LexHTML.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexHTML.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexIndent.obj: \
-	../../lexers/LexIndent.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexIndent.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexInno.obj: \
-	../../lexers/LexInno.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexInno.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexJSON.obj: \
-	../../lexers/LexJSON.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexJSON.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexKix.obj: \
-	../../lexers/LexKix.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexKix.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexKVIrc.obj: \
-	../../lexers/LexKVIrc.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexKVIrc.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexLaTeX.obj: \
-	../../lexers/LexLaTeX.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/DefaultLexer.h \
-	../../lexlib/LexerBase.h
+	../lexers/LexLaTeX.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h \
+	../lexlib/LexerBase.h
 $(DIR_O)/LexLisp.obj: \
-	../../lexers/LexLisp.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexLisp.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexLout.obj: \
-	../../lexers/LexLout.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexLout.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexLua.obj: \
-	../../lexers/LexLua.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/StringCopy.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexLua.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMagik.obj: \
-	../../lexers/LexMagik.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMagik.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMake.obj: \
-	../../lexers/LexMake.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMake.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMarkdown.obj: \
-	../../lexers/LexMarkdown.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMarkdown.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMatlab.obj: \
-	../../lexers/LexMatlab.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMatlab.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMaxima.obj: \
-	../../lexers/LexMaxima.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMaxima.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMetapost.obj: \
-	../../lexers/LexMetapost.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMetapost.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMMIXAL.obj: \
-	../../lexers/LexMMIXAL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMMIXAL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexModula.obj: \
-	../../lexers/LexModula.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexModula.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMPT.obj: \
-	../../lexers/LexMPT.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMPT.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMSSQL.obj: \
-	../../lexers/LexMSSQL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMSSQL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexMySQL.obj: \
-	../../lexers/LexMySQL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexMySQL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexNim.obj: \
-	../../lexers/LexNim.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/StringCopy.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexNim.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexNimrod.obj: \
-	../../lexers/LexNimrod.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexNimrod.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexNsis.obj: \
-	../../lexers/LexNsis.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexNsis.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexNull.obj: \
-	../../lexers/LexNull.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexNull.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexOpal.obj: \
-	../../lexers/LexOpal.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexOpal.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexOScript.obj: \
-	../../lexers/LexOScript.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexOScript.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPascal.obj: \
-	../../lexers/LexPascal.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPascal.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPB.obj: \
-	../../lexers/LexPB.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPB.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPerl.obj: \
-	../../lexers/LexPerl.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexPerl.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexPLM.obj: \
-	../../lexers/LexPLM.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPLM.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPO.obj: \
-	../../lexers/LexPO.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPO.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPOV.obj: \
-	../../lexers/LexPOV.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPOV.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPowerPro.obj: \
-	../../lexers/LexPowerPro.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPowerPro.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPowerShell.obj: \
-	../../lexers/LexPowerShell.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPowerShell.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexProgress.obj: \
-	../../lexers/LexProgress.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/SparseState.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexProgress.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SparseState.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexProps.obj: \
-	../../lexers/LexProps.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexProps.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPS.obj: \
-	../../lexers/LexPS.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexPS.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexPython.obj: \
-	../../lexers/LexPython.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/StringCopy.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/CharacterCategory.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/SubStyles.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexPython.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SubStyles.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexR.obj: \
-	../../lexers/LexR.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexR.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexRaku.obj: \
-	../../lexers/LexRaku.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/CharacterCategory.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexRaku.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexRebol.obj: \
-	../../lexers/LexRebol.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexRebol.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexRegistry.obj: \
-	../../lexers/LexRegistry.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexRegistry.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexRuby.obj: \
-	../../lexers/LexRuby.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexRuby.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexRust.obj: \
-	../../lexers/LexRust.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/PropSetSimple.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexRust.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexSAS.obj: \
-	../../lexers/LexSAS.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSAS.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexScriptol.obj: \
-	../../lexers/LexScriptol.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexScriptol.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSmalltalk.obj: \
-	../../lexers/LexSmalltalk.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSmalltalk.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSML.obj: \
-	../../lexers/LexSML.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSML.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSorcus.obj: \
-	../../lexers/LexSorcus.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSorcus.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSpecman.obj: \
-	../../lexers/LexSpecman.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSpecman.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSpice.obj: \
-	../../lexers/LexSpice.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSpice.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSQL.obj: \
-	../../lexers/LexSQL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/SparseState.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexSQL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SparseState.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexStata.obj: \
-	../../lexers/LexStata.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexStata.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexSTTXT.obj: \
-	../../lexers/LexSTTXT.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexSTTXT.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTACL.obj: \
-	../../lexers/LexTACL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTACL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTADS3.obj: \
-	../../lexers/LexTADS3.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTADS3.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTAL.obj: \
-	../../lexers/LexTAL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTAL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTCL.obj: \
-	../../lexers/LexTCL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTCL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTCMD.obj: \
-	../../lexers/LexTCMD.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTCMD.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTeX.obj: \
-	../../lexers/LexTeX.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTeX.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexTxt2tags.obj: \
-	../../lexers/LexTxt2tags.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexTxt2tags.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexVB.obj: \
-	../../lexers/LexVB.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexVB.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexVerilog.obj: \
-	../../lexers/LexVerilog.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/SubStyles.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexVerilog.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SubStyles.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexVHDL.obj: \
-	../../lexers/LexVHDL.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexVHDL.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h
 $(DIR_O)/LexVisualProlog.obj: \
-	../../lexers/LexVisualProlog.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/CharacterCategory.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/OptionSet.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexVisualProlog.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexX12.obj: \
-	../../lexers/LexX12.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/LexerModule.h \
-	../../lexlib/DefaultLexer.h
+	../lexers/LexX12.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexYAML.obj: \
-	../../lexers/LexYAML.cxx \
-	../../include/ILexer.h \
-	../../include/Sci_Position.h \
-	../../include/Scintilla.h \
-	../../include/SciLexer.h \
-	../../lexlib/WordList.h \
-	../../lexlib/LexAccessor.h \
-	../../lexlib/Accessor.h \
-	../../lexlib/StyleContext.h \
-	../../lexlib/CharacterSet.h \
-	../../lexlib/LexerModule.h
+	../lexers/LexYAML.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/LexerModule.h

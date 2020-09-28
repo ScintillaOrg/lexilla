@@ -6,23 +6,23 @@
 
 import os, sys
 
-sys.path.append(os.path.join("..", ".."))
+scintilla = os.path.join("..", "..", "scintilla")
+sys.path.append(scintilla)
 
 from scripts import Dependencies
 
 topComment = "# Created by DepGen.py. To recreate, run DepGen.py.\n"
 
 def Generate():
-	scintilla = os.path.join("..", "..")
-	lexilla = os.path.join(scintilla, "lexilla")
+	lexilla = os.path.join("..")
 	sources = [
 		os.path.join(lexilla, "src", "Lexilla.cxx"),
-		os.path.join(scintilla, "lexlib", "*.cxx"),
-		os.path.join(scintilla, "lexers", "*.cxx")]
+		os.path.join(lexilla, "lexlib", "*.cxx"),
+		os.path.join(lexilla, "lexers", "*.cxx")]
 	includes = [
+		os.path.join(lexilla, "include"),
 		os.path.join(scintilla, "include"),
-		os.path.join(scintilla, "src"),
-		os.path.join(scintilla, "lexlib")]
+		os.path.join(lexilla, "lexlib")]
 
 	# Create the dependencies file for g++
 	deps = Dependencies.FindDependencies(sources,  includes, ".o", "../lexilla/")
