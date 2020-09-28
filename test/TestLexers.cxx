@@ -207,14 +207,14 @@ bool AccessLexilla(std::filesystem::path basePath) {
 	return success;
 }
 
-std::filesystem::path FindScintillaDirectory(std::filesystem::path startDirectory) {
+std::filesystem::path FindLexillaDirectory(std::filesystem::path startDirectory) {
 	std::filesystem::path directory = startDirectory;
 	while (!directory.empty()) {
-		const std::filesystem::path localScintilla = directory / "scintilla";
-		const std::filesystem::directory_entry entry(localScintilla);
+		const std::filesystem::path localLexilla = directory / "lexilla";
+		const std::filesystem::directory_entry entry(localLexilla);
 		if (entry.is_directory()) {
-			std::cout << "Found Scintilla at " << entry.path().string() << "\n";
-			return localScintilla;
+			std::cout << "Found Lexilla at " << entry.path().string() << "\n";
+			return localLexilla;
 		}
 		const std::filesystem::path parent = directory.parent_path();
 		if (parent == directory) {
@@ -232,10 +232,10 @@ std::filesystem::path FindScintillaDirectory(std::filesystem::path startDirector
 
 int main() {
 	// TODO: Allow specifying the base directory through a command line argument
-	const std::filesystem::path baseDirectory = FindScintillaDirectory(std::filesystem::current_path());
+	const std::filesystem::path baseDirectory = FindLexillaDirectory(std::filesystem::current_path());
 	if (!baseDirectory.empty()) {
 		if (LoadLexilla(baseDirectory)) {
-			AccessLexilla(baseDirectory / "lexilla" / "test" / "examples");
+			AccessLexilla(baseDirectory / "test" / "examples");
 		}
 	}
 }
