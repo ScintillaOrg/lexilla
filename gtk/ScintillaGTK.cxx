@@ -42,7 +42,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
-#include "StringCopy.h"
 #include "CharacterCategory.h"
 #include "Position.h"
 #include "UniqueString.h"
@@ -126,14 +125,14 @@ static const GtkTargetEntry clipboardCopyTargets[] = {
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-static constexpr gint nClipboardCopyTargets = ELEMENTS(clipboardCopyTargets);
+static constexpr gint nClipboardCopyTargets = std::size(clipboardCopyTargets);
 
 static const GtkTargetEntry clipboardPasteTargets[] = {
 	{ (gchar *) "text/uri-list", 0, TARGET_URI },
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-static constexpr gint nClipboardPasteTargets = ELEMENTS(clipboardPasteTargets);
+static constexpr gint nClipboardPasteTargets = std::size(clipboardPasteTargets);
 
 static const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
 

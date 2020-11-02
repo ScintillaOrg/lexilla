@@ -27,7 +27,6 @@
 
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
-#include "StringCopy.h"
 #include "IntegerRectangle.h"
 #include "XPM.h"
 #include "UniConversion.h"
