@@ -40,7 +40,7 @@ DEL = rm -f
 EXE = unitTest
 endif
 
-INCLUDEDIRS = -I ../../include -I ../../src -I../../lexlib
+INCLUDEDIRS = -I ../../include -I ../../src -I../../lexlib -I../../../scintilla/include
 
 CPPFLAGS += $(INCLUDEDIRS)
 CXXFLAGS += -Wall -Wextra
@@ -49,15 +49,7 @@ CXXFLAGS += -Wall -Wextra
 TESTSRC=test*.cxx
 # Files being tested from scintilla/src directory
 TESTEDSRC=\
- ../../lexlib/WordList.cxx \
- ../../src/CellBuffer.cxx \
- ../../src/CharClassify.cxx \
- ../../src/ContractionState.cxx \
- ../../src/Decoration.cxx \
- ../../src/PerLine.cxx \
- ../../src/RunStyles.cxx \
- ../../src/UniConversion.cxx \
- ../../src/UniqueString.cxx
+ ../../lexlib/WordList.cxx
 
 TESTS=$(EXE)
 
