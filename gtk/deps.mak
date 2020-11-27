@@ -5,7 +5,6 @@ PlatGTK.o: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../include/ScintillaWidget.h \
-	../lexlib/StringCopy.h \
 	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
@@ -18,7 +17,6 @@ ScintillaGTK.o: \
 	../include/ILexer.h \
 	../include/Scintilla.h \
 	../include/ScintillaWidget.h \
-	../lexlib/StringCopy.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -59,7 +57,6 @@ ScintillaGTKAccessible.o: \
 	../include/ILexer.h \
 	../include/Scintilla.h \
 	../include/ScintillaWidget.h \
-	../lexlib/StringCopy.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/UniqueString.h \
