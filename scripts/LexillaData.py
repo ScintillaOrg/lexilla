@@ -35,6 +35,10 @@
 
 import datetime, pathlib, sys, textwrap
 
+thisPath = pathlib.Path(__file__).resolve()
+
+sys.path.append(str(thisPath.parent.parent.parent / "scintilla" / "scripts"))
+
 import FileGenerator
 
 def FindModules(lexFile):
@@ -191,6 +195,23 @@ class LexillaData:
             self.version[2]
         self.versionCommad = self.versionDotted.replace(".", ", ") + ', 0'
 
+        with (scintillaRoot / "doc" / "Lexilla.html").open() as f:
+            self.dateModified = [l for l in f.readlines() if "Date.Modified" in l]\
+                [0].split('\"')[3]
+            # 20130602
+            # Lexilla.html
+            dtModified = datetime.datetime.strptime(self.dateModified, "%Y%m%d")
+            self.yearModified = self.dateModified[0:4]
+            monthModified = dtModified.strftime("%B")
+            dayModified = "%d" % dtModified.day
+            self.mdyModified = monthModified + " " + dayModified + " " + self.yearModified
+            # May 22 2013
+            # Lexilla.html, SciTE.html
+            self.dmyModified = dayModified + " " + monthModified + " " + self.yearModified
+            # 22 May 2013
+            # LexillaHistory.html -- only first should change
+            self.myModified = monthModified + " " + self.yearModified
+
         # Find all the lexer source code files
         lexFilePaths = list((scintillaRoot / "lexers").glob("Lex*.cxx"))
         SortListInsensitive(lexFilePaths)
@@ -217,14 +238,14 @@ class LexillaData:
         SortListInsensitive(self.lexerProperties)
 
         self.lexersXcode = FindLexersInXcode(scintillaRoot /
-            "cocoa/ScintillaFramework/ScintillaFramework.xcodeproj/project.pbxproj")
-        self.credits = FindCredits(scintillaRoot / "doc" / "ScintillaHistory.html")
+            "src/Lexilla/Lexilla.xcodeproj/project.pbxproj")
+        self.credits = FindCredits(scintillaRoot / "doc" / "LexillaHistory.html")
 
 def printWrapped(text):
     print(textwrap.fill(text, subsequent_indent="    "))
 
 if __name__=="__main__":
-    sci = ScintillaData(pathlib.Path(__file__).resolve().parent.parent)
+    sci = LexillaData(pathlib.Path(__file__).resolve().parent.parent)
     print("Version   %s   %s   %s" % (sci.version, sci.versionDotted, sci.versionCommad))
     print("Date last modified    %s   %s   %s   %s   %s" % (
         sci.dateModified, sci.yearModified, sci.mdyModified, sci.dmyModified, sci.myModified))
