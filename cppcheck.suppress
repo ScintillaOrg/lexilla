@@ -63,6 +63,7 @@ variableScope:lexilla/lexers/LexNimrod.cxx
 variableScope:lexilla/lexers/LexNsis.cxx
 knownConditionTrueFalse:lexilla/lexers/LexNsis.cxx
 variableScope:lexilla/lexers/LexOpal.cxx
+knownConditionTrueFalse:lexilla/lexers/LexOpal.cxx
 constParameter:lexilla/lexers/LexOScript.cxx
 variableScope:lexilla/lexers/LexPB.cxx
 constParameter:lexilla/lexers/LexPerl.cxx
@@ -86,13 +87,23 @@ constParameter:lexilla/lexers/LexTADS3.cxx
 invalidscanf:lexilla/lexers/LexTCMD.cxx
 constParameter:lexilla/lexers/LexTeX.cxx
 variableScope:lexilla/lexers/LexTeX.cxx
+knownConditionTrueFalse:lexilla/lexers/LexTxt2tags.cxx
 constParameter:lexilla/lexers/LexVerilog.cxx
+knownConditionTrueFalse:lexilla/lexers/LexVerilog.cxx
 constParameter:lexilla/lexers/LexVHDL.cxx
 shadowVariable:lexilla/lexers/LexVHDL.cxx
 unreadVariable:lexilla/lexers/LexVHDL.cxx
 variableScope:lexilla/lexers/LexVHDL.cxx
 unreadVariable:lexilla/lexers/LexVisualProlog.cxx
 constParameter:lexilla/lexers/LexYAML.cxx
+
+// These are due to Accessor::IndentAmount not declaring the callback as taking a const.
+// Changing this could cause problems for downstream projects.
+constParameterCallback:lexilla/lexers/LexAsn1.cxx
+constParameterCallback:lexilla/lexers/LexEiffel.cxx
+constParameterCallback:lexilla/lexers/LexPython.cxx
+constParameterCallback:lexilla/lexers/LexScriptol.cxx
+constParameterCallback:lexilla/lexers/LexVB.cxx
 
 constVariable:lexilla/lexers/LexA68k.cxx
 constVariable:lexilla/lexers/LexAsn1.cxx
