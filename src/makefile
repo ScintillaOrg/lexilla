@@ -29,6 +29,8 @@ else
         CLANG := 1
         LDFLAGS += -dynamiclib
         SHAREDEXTENSION = dylib
+        BASE_FLAGS += -arch arm64 -arch x86_64
+        LDFLAGS += -arch arm64 -arch x86_64
     else
         SHAREDEXTENSION = so
     endif
