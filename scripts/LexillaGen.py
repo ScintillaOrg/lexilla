@@ -18,6 +18,7 @@ from FileGenerator import Regenerate, UpdateLineInFile, \
     ReplaceREInFile, UpdateLineInPlistFile, ReadFileAsList, UpdateFileFromLines, \
     FindSectionInList
 import LexillaData
+import LexFacer
 
 sys.path.append(str(thisPath.parent.parent / "src"))
 import DepGen
@@ -124,6 +125,8 @@ def RegenerateAll(rootDirectory):
         f'CURRENT_PROJECT_VERSION = {versionDotted};')
 
     RegenerateXcodeProject(lexillaXcodeProject, sci.lexFiles, lexerReferences)
+
+    LexFacer.RegenerateAll(root, False)
 
     currentDirectory = pathlib.Path.cwd()
     os.chdir(srcDir)
