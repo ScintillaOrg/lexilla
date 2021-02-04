@@ -1,0 +1,263 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="generator"
+    content="HTML Tidy for Windows (vers 1st August 2002), see www.w3.org" />
+    <meta name="generator" content="SciTE" />
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+    <title>Lexilla Documentation</title>
+
+    <style type="text/css">
+<!--
+/*<![CDATA[*/
+	CODE { font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
+	A:visited { color: blue; }
+	A:hover { text-decoration: underline ! important; }
+	A.message { text-decoration: none; font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
+	A.seealso { text-decoration: none; font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
+	A.toc { text-decoration: none; }
+	A.jump { text-decoration: none; }
+	LI.message { text-decoration: none; font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
+	H2 { background: #E0EAFF; }
+
+	table {
+		border: 0px;
+		border-collapse: collapse;
+	}
+
+	table.categories {
+		border: 0px;
+		border-collapse: collapse;
+	}
+	table.categories td {
+		padding: 4px 12px;
+	}
+
+	table.standard {
+		border-collapse: collapse;
+	}
+	table.standard th {
+		background: #404040;
+		color: #FFFFFF;
+		padding: 1px 5px 1px 5px;
+	}
+	table.standard tr:nth-child(odd) {background: #D7D7D7}
+	table.standard tr:nth-child(even) {background: #F0F0F0}
+	table.standard td {
+		padding: 1px 5px 1px 5px;
+	}
+
+	.S0 {
+		color: #808080;
+	}
+	.S2 {
+		font-family: Georgia, 'DejaVu Serif';
+		color: #007F00;
+		font-size: 9pt;
+	}
+	.S3 {
+		font-family: Georgia, 'DejaVu Serif';
+		color: #3F703F;
+		font-size: 9pt;
+	}
+	.S4 {
+		color: #007F7F;
+	}
+	.S5 {
+		font-weight: bold;
+		color: #00007F;
+	}
+	.S9 {
+		color: #7F7F00;
+	}
+	.S10 {
+		font-weight: bold;
+		color: #000000;
+	}
+	.S17 {
+		font-family: Georgia, 'DejaVu Serif';
+		color: #3060A0;
+		font-size: 9pt;
+	}
+	DIV.highlighted {
+		background: #F7FCF7;
+		border: 1px solid #C0D7C0;
+		margin: 0.3em 3em;
+		padding: 0.3em 0.6em;
+		font-family: 'Verdana';
+		color: #000000;
+		font-size: 10pt;
+	}
+        .name {
+		color: #B08000;
+        }
+	.provisional {
+		background: #FFB000;
+        }
+	.deprecated {
+		text-decoration: line-through red;
+        }
+	.parameter {
+		font-style:italic;
+        }
+/*]]>*/
+-->
+    </style>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000">
+    <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0"
+    summary="Banner">
+      <tr>
+        <td><img src="SciTEIco.png" border="3" height="64" width="64" alt="Lexilla icon" /></td>
+
+        <td><a href="index.html"
+        style="color:white;text-decoration:none;font-size:200%">Lexilla</a></td>
+      </tr>
+    </table>
+
+    <h1>Lexilla Documentation</h1>
+
+    <p>Last edited 5 February 2021 NH</p>
+
+    <h2>Introduction</h2>
+
+    <p>Lexilla is a library containing lexers for use with Scintilla. It can be either a static library
+    that is linked into an application or a shared library that is loaded at runtime.</p>
+
+    <p>Lexilla does not interact with the display so there is no need to compile it for a
+    particular GUI toolkit. Therefore there can be a common library shared by applications using
+    different GUI toolkits. In some circumstances there may need to be both 32-bit and 64-bit versions
+    on one system to match different applications.</p>
+
+    <p>Different extensions are commonly used for shared libraries: .so on Linux, .dylib on macOS, and .DLL on Windows.
+     </p>
+
+    <h2>The Lexilla protocol</h2>
+
+    <p>A set of functions is defined by Lexilla for use by applications. Libraries that provide these functions
+    can be used as a replacement for Lexilla or to add new lexers beyond those provided by Lexilla.</p>
+
+    <p>The Lexilla protocol is a superset of the external lexer protocol and defines these functions that may be exported from a shared library:<br />
+    <code>int <span class="name">GetLexerCount</span>()</code><br />
+    <code>void <span class="name">GetLexerName</span>(unsigned int index, char *name, int buflength)</code><br />
+    <code>LexerFactoryFunction <span class="name">GetLexerFactory</span>(unsigned int index)</code><br />
+    <code>ILexer5 *<span class="name">CreateLexer</span>(const char *name)</code><br />
+    <code>void <span class="name">SetLibraryProperty</span>(const char *key, const char *value)</code><br />
+    <code>const char *<span class="name">GetLibraryPropertyNames</span>()</code>
+    </p>
+  
+    <p><span class="name">ILexer5</span> is defined by Scintilla in include/ILexer.h as the interface provided by lexers which is called by Scintilla.
+    Many clients do not actually need to call methods on ILexer5 - they just take the return from CreateLexer and plug it
+    straight into Scintilla so it can be treated as a machine pointer (void *).
+    </p>
+
+    <p><span class="name">LexerFactoryFunction</span> is defined as a function that takes no arguments and returns an ILexer5 *:
+    <code>ILexer5 *(*LexerFactoryFunction)()</code> but this can be ignored by most client code.
+    </p>
+
+    <p>The Lexilla protocol is a superset of the earlier external lexer protocol that defined the first 3 functions 
+    (GetLexerCount, GetLexerName, GetLexerFactory) so Lexilla be loaded by applications that support that protocol.
+    GetLexerFactory will rarely be used now as it is easier to call CreateLexer.
+    </p>
+  
+    <p>CreateLexer is the main call that will create a lexer for a particular language. The returned lexer can then be
+    set as the current lexer in Scintilla by calling
+    <a class="seealso" href="ScintillaDoc.html#SCI_SETILEXER">SCI_SETILEXER</a>.</p>
+  
+    <p>SetLibraryProperty and GetLibraryPropertyNames are optional functions that can be
+    defined if a library requires initialisation before calling other methods.
+    For example, a lexer library that reads language definitions from XML files may require that the
+    directory containing these files be set before a call to CreateLexer.
+    <code>SetLibraryProperty("definitions.directory", "/home/neil/.languages")</code>
+    If a library implements SetLibraryProperty then it may also provide a set of valid property names with
+    GetLibraryPropertyNames that can then be used by the application to define configuration file property
+    names or user interface elements for options dialogs.</p>
+  
+    <h2>Building Lexilla</h2>
+
+    <p>Before using Lexilla it must be built or downloaded.</p>
+
+    <p>To build Lexilla, in the lexilla/src directory, run make (for gcc or clang)<br />
+    <code>make</code><br />
+    or nmake for MSVC<br />
+    <code>nmake -f lexilla.mak</code><br />
+    </p>
+
+    <p>After building Lexilla, its test suite can be run with make/nmake in the lexilla/test directory. For gcc or clang<br />
+    <code>make test</code><br />
+    or for MSVC<br />
+    <code>nmake -f testlexers.mak test</code><br />
+    Each test case should show "Lexing ..." and errors will display a diagnostic, commonly showing
+    a difference between the actual and expected result:<br>
+    <code>C:\u\hg\lexilla\test\examples\python\x.py:1: is different</code>
+    </p>
+    
+    <p>There are also RunTest.sh / RunTest.bat scripts in the scripts directory to build Lexilla and then build and run the tests.
+    These both use gcc/clang, not MSVC.</p>
+
+    <p>There are Microsoft Visual C++ and Xcode projects that can be used to build Lexilla.
+    For Visual C++: src/Lexilla.vcxproj. For Xcode: src/Lexilla/Lexilla.xcodeproj.
+    There is also test/TestLexers.vcxproj to build the tests with Visual C++.</p>
+
+    <h2>Using Lexilla</h2>
+    
+    <p>For many applications the main Lexilla operations are loading the Lexilla library, creating a
+    lexer and using that lexer in Scintilla.
+    Applications need to define the location (or locations) they expect
+    to find Lexilla or libraries that support the Lexilla protocol.
+    They also need to define how they request particular lexers, perhaps with a mapping from
+    file extensions to lexer names.</p>
+
+    <p>From C.</p>
+
+    <p>For Qt using QLibrary with 'Call' defined to call Scintilla APIs.<br />
+    <code>
+#if _WIN32<br />
+&nbsp;&nbsp;&nbsp;&nbsp;typedef void *(__stdcall *CreateLexerFn)(const char *name);<br />
+#else<br />
+&nbsp;&nbsp;&nbsp;&nbsp;typedef void *(*CreateLexerFn)(const char *name);<br />
+#endif<br />
+&nbsp;&nbsp;&nbsp;&nbsp;QFunctionPointer fn = QLibrary::resolve("lexilla", "CreateLexer");<br />
+&nbsp;&nbsp;&nbsp;&nbsp;void *lexCpp = ((CreateLexerFn)fn)("cpp");<br />
+&nbsp;&nbsp;&nbsp;&nbsp;Call(SCI_SETILEXER, 0, (sptr_t)(void *)lexCpp);<br />
+    </code></p>
+
+    <p>Applications may discover the set of lexers provided by a library by first calling
+    GetLexerCount to find the number of lexers implemented in the library then looping over calling
+    GetLexerName with integers 0 to GetLexerCount()-1.</p>
+
+    <p>Applications may set properties on a library by calling SetLibraryProperty if provided.
+    This may be needed for initialisation so should before calling GetLexerCount or CreateLexer.
+    A set of property names may be available from GetLibraryPropertyNames if provided.
+    It returns a string pointer where the string contains a list of property names separated by '\n'.
+    It is up to applications to define how properties are defined and persisted in its user interface
+    and configuration files.</p>
+
+    <h2>Modifying or adding lexers</h2>
+ 
+    <p>Lexilla can be modified or a new library created that can be used to replace or augment Lexilla.</p>
+
+    <p>Lexer libraries that provide the same functions as Lexilla may provide lexers for use by Scintilla,
+    augmenting or replacing those provided by Lexilla.
+    To allow initialisation of lexer libraries, a <code>SetLibraryProperty(const char *key, const char *value)</code>
+    may optionally be implemented. For example, a lexer library that uses XML based lexer definitions may
+    be provided with a directory to search for such definitions.
+    Lexer libraries should ignore any properties that they do not understand.
+    The set of properties supported by a lexer library is specified as a '\n' separated list of property names by
+    an optional <code>const char *GetLibraryPropertyNames()</code> function.
+    </p>
+
+    <p>A lexer created by Lexilla may be used in Scintilla by calling
+    <a class="seealso" href="ScintillaDoc.html#SCI_SETILEXER">SCI_SETILEXER</a>.</p>
+
+    <p>Lexilla and its contained lexers can be tested with the TestLexers program in lexilla/test.
+    Read lexilla/test/README for information on building and using TestLexers.</p>
+
+  </body>
+</html>
+
