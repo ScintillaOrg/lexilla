@@ -151,6 +151,7 @@
 		28BA73AA24E34D9700272C2D /* LexRust.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28BA733824E34D9700272C2D /* LexRust.cxx */; };
 		28BA73AD24E34DBC00272C2D /* Lexilla.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BA73AB24E34DBC00272C2D /* Lexilla.h */; };
 		28BA73AE24E34DBC00272C2D /* Lexilla.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28BA73AC24E34DBC00272C2D /* Lexilla.cxx */; };
+		B32D4A2A9CEC222A5140E99F /* LexFSharp.cxx in Sources */ = {isa = PBXBuildFile; fileRef = F8E54626B22BD9493090F40B /* LexFSharp.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -300,6 +301,7 @@
 		28BA73AB24E34DBC00272C2D /* Lexilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lexilla.h; path = ../Lexilla.h; sourceTree = "<group>"; };
 		28BA73AC24E34DBC00272C2D /* Lexilla.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lexilla.cxx; path = ../Lexilla.cxx; sourceTree = "<group>"; };
 		28BA73B024E3510900272C2D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F8E54626B22BD9493090F40B /* LexFSharp.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexFSharp.cxx; path = ../../lexers/LexFSharp.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -385,6 +387,7 @@
 				28BA72EC24E34D9300272C2D /* LexFlagship.cxx */,
 				28BA72CB24E34D9100272C2D /* LexForth.cxx */,
 				28BA72FB24E34D9400272C2D /* LexFortran.cxx */,
+				F8E54626B22BD9493090F40B /* LexFSharp.cxx */,
 				28BA72F224E34D9300272C2D /* LexGAP.cxx */,
 				28BA72CF24E34D9100272C2D /* LexGui4Cli.cxx */,
 				28BA731B24E34D9500272C2D /* LexHaskell.cxx */,
@@ -708,6 +711,7 @@
 				28BA738324E34D9700272C2D /* LexKix.cxx in Sources */,
 				28BA72B424E34D5B00272C2D /* PropSetSimple.cxx in Sources */,
 				28BA737C24E34D9700272C2D /* LexX12.cxx in Sources */,
+				B32D4A2A9CEC222A5140E99F /* LexFSharp.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

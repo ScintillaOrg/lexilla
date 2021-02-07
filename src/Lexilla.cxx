@@ -73,6 +73,7 @@ extern LexerModule lmFlagShip;
 extern LexerModule lmForth;
 extern LexerModule lmFortran;
 extern LexerModule lmFreeBasic;
+extern LexerModule lmFSharp;
 extern LexerModule lmGAP;
 extern LexerModule lmGui4Cli;
 extern LexerModule lmHaskell;
@@ -216,6 +217,7 @@ void AddEachLexer() {
 	catalogueLexilla.AddLexerModule(&lmForth);
 	catalogueLexilla.AddLexerModule(&lmFortran);
 	catalogueLexilla.AddLexerModule(&lmFreeBasic);
+	catalogueLexilla.AddLexerModule(&lmFSharp);
 	catalogueLexilla.AddLexerModule(&lmGAP);
 	catalogueLexilla.AddLexerModule(&lmGui4Cli);
 	catalogueLexilla.AddLexerModule(&lmHaskell);
