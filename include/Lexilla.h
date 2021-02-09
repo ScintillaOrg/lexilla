@@ -11,7 +11,7 @@
 #define LEXILLA_LIB "lexilla"
 #define LEXILLA_EXTENSION ".dll"
 #else
-#define LEXILLA_LIB "liblexilla";
+#define LEXILLA_LIB "liblexilla"
 #if defined(__APPLE__)
 #define LEXILLA_EXTENSION ".dylib"
 #else
