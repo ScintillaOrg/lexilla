@@ -8,7 +8,7 @@ INCLUDEDIRS = -I ../../scintilla/include -I ../src
 
 !IFDEF LEXILLA_STATIC
 STATIC_FLAG = -D LEXILLA_STATIC
-LIBS = ../../bin/liblexilla.lib
+LIBS = ../bin/liblexilla.lib
 !ENDIF
 
 !IFDEF DEBUG

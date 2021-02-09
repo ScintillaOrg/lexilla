@@ -32,7 +32,7 @@ endif
 
 ifdef LEXILLA_STATIC
     DEFINES += -D LEXILLA_STATIC
-    LIBS += ../../bin/liblexilla.a
+    LIBS += ../bin/liblexilla.a
 endif
 
 ifdef windir
