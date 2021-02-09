@@ -208,15 +208,23 @@ bool AccessLexilla(std::filesystem::path basePath) {
 }
 
 std::filesystem::path FindLexillaDirectory(std::filesystem::path startDirectory) {
+	// Search up from startDirectory for a directory named "lexilla" or containing a "bin" subdirectory 
 	std::filesystem::path directory = startDirectory;
 	while (!directory.empty()) {
+		//std::cout << "Searching " << directory.string() << "\n";
+		const std::filesystem::path parent = directory.parent_path();
 		const std::filesystem::path localLexilla = directory / "lexilla";
 		const std::filesystem::directory_entry entry(localLexilla);
 		if (entry.is_directory()) {
 			std::cout << "Found Lexilla at " << entry.path().string() << "\n";
 			return localLexilla;
 		}
-		const std::filesystem::path parent = directory.parent_path();
+		const std::filesystem::path localBin = directory / "bin";
+		const std::filesystem::directory_entry entryBin(localBin);
+		if (entryBin.is_directory()) {
+			std::cout << "Found Lexilla at " << directory.string() << "\n";
+			return directory;
+		}
 		if (parent == directory) {
 			std::cout << "Reached root at " << directory.string() << "\n";
 			return std::filesystem::path();
