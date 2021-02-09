@@ -117,7 +117,7 @@ bool TestFile(std::filesystem::path path,
 	for (auto const &[key, val] : properties) {
 		if (key.starts_with("lexer.*")) {
 			language = val;
-			plex = CreateLexer(language);
+			plex = MakeLexer(language);
 			break;
 		}
 	}
@@ -166,7 +166,7 @@ bool TestFile(std::filesystem::path path,
 	}
 	plex->Release();
 
-	TestCRLF(path, text, CreateLexer(language));
+	TestCRLF(path, text, MakeLexer(language));
 
 	return true;
 }

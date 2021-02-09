@@ -5,5 +5,5 @@
 // Copyright 2019 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-Scintilla::ILexer5 *CreateLexer(std::string languageName);
+Scintilla::ILexer5 *MakeLexer(std::string languageName);
 bool LoadLexilla(std::filesystem::path path);

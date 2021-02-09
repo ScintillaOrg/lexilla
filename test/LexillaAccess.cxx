@@ -58,7 +58,7 @@ Function FindSymbol(const char *symbol) noexcept {
 #endif
 }
 
-Scintilla::ILexer5 *CreateLexer(std::string languageName) {
+Scintilla::ILexer5 *MakeLexer(std::string languageName) {
 #ifdef LEXILLA_STATIC
 	return CreateLexer(languageName.c_str());
 #else
