@@ -25,16 +25,12 @@
 #include "LexillaAccess.h"
 
 #if _WIN32
-#define EXT_LEXER_DECL __stdcall
 typedef FARPROC Function;
 typedef HMODULE Module;
 #else
-#define EXT_LEXER_DECL
 typedef void *Function;
 typedef void *Module;
 #endif
-
-typedef Scintilla::ILexer5 *(EXT_LEXER_DECL *CreateLexerFn)(const char *name);
 
 Module lexillaDL {};
 
@@ -72,20 +68,15 @@ bool LoadLexilla([[maybe_unused]] std::filesystem::path path) {
 #else
 	std::filesystem::path sharedLibrary = path;
 	sharedLibrary.append("bin");
+	sharedLibrary.append(LEXILLA_LIB LEXILLA_EXTENSION);
 #if _WIN32
-	sharedLibrary.append("lexilla.dll");
 	lexillaDL = ::LoadLibraryW(sharedLibrary.c_str());
 #else
-#if defined(__APPLE__)
-	sharedLibrary.append("liblexilla.dylib");
-#else
-	sharedLibrary.append("liblexilla.so");
-#endif
 	lexillaDL = dlopen(sharedLibrary.c_str(), RTLD_LAZY);
 #endif
 
 	if (lexillaDL) {
-		fnCL = FunctionPointer<CreateLexerFn>(FindSymbol("CreateLexer"));
+		fnCL = FunctionPointer<CreateLexerFn>(FindSymbol(LEXILLA_CREATELEXER));
 	} else {
 		std::cout << "Cannot load " << sharedLibrary.string() << "\n";
 	}

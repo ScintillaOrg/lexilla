@@ -4,7 +4,7 @@
 DEL = del /q
 EXE = TestLexers.exe
 
-INCLUDEDIRS = -I ../../scintilla/include -I ../src
+INCLUDEDIRS = -I ../../scintilla/include -I ../include -I ../src
 
 !IFDEF LEXILLA_STATIC
 STATIC_FLAG = -D LEXILLA_STATIC

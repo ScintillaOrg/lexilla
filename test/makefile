@@ -44,7 +44,7 @@ endif
 DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
 BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
-INCLUDES = -I ../../scintilla/include -I ../src
+INCLUDES = -I ../../scintilla/include -I ../include -I ../src
 BASE_FLAGS += $(WARNINGS)
 
 all: $(EXE)
