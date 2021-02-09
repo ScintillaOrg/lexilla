@@ -3,3 +3,5 @@ EXPORTS
 	GetLexerName
 	GetLexerFactory
 	CreateLexer
+	GetLibraryPropertyNames
+	SetLibraryProperty

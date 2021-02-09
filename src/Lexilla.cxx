@@ -339,4 +339,12 @@ EXPORT_FUNCTION ILexer5 * CALLING_CONVENTION CreateLexer(const char *name) {
 	return nullptr;
 }
 
+EXPORT_FUNCTION const char * CALLING_CONVENTION GetLibraryPropertyNames() {
+	return "";
+}
+
+EXPORT_FUNCTION void CALLING_CONVENTION SetLibraryProperty(const char *, const char *) {
+	// Null implementation
+}
+
 }
