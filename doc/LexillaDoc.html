@@ -50,6 +50,15 @@
 	table.standard td {
 		padding: 1px 5px 1px 5px;
 	}
+        div.console {
+            font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace;
+            color: #008000;
+            font-weight: bold;
+            background: #F7FCF7;
+            border: 1px solid #C0D7C0;
+            margin: 0.3em 3em;
+            padding: 0.3em 0.6em;
+        }
 
 	.S0 {
 		color: #808080;
@@ -122,7 +131,7 @@
 
     <h1>Lexilla Documentation</h1>
 
-    <p>Last edited 5 February 2021 NH</p>
+    <p>Last edited 10 February 2021 NH</p>
 
     <h2>Introduction</h2>
 
@@ -152,28 +161,30 @@
     </p>
   
     <p><span class="name">ILexer5</span> is defined by Scintilla in include/ILexer.h as the interface provided by lexers which is called by Scintilla.
-    Many clients do not actually need to call methods on ILexer5 - they just take the return from CreateLexer and plug it
+    Many clients do not actually need to call methods on <span class="name">ILexer5</span> - they just take the return from CreateLexer and plug it
     straight into Scintilla so it can be treated as a machine pointer (void *).
     </p>
 
-    <p><span class="name">LexerFactoryFunction</span> is defined as a function that takes no arguments and returns an ILexer5 *:
+    <p><span class="name">LexerFactoryFunction</span> is defined as a function that takes no arguments and returns an <span class="name">ILexer5</span> *:
     <code>ILexer5 *(*LexerFactoryFunction)()</code> but this can be ignored by most client code.
     </p>
 
     <p>The Lexilla protocol is a superset of the earlier external lexer protocol that defined the first 3 functions 
-    (GetLexerCount, GetLexerName, GetLexerFactory) so Lexilla be loaded by applications that support that protocol.
-    GetLexerFactory will rarely be used now as it is easier to call CreateLexer.
+    (<span class="name">GetLexerCount</span>, <span class="name">GetLexerName</span>, <span class="name">GetLexerFactory</span>)
+    so Lexilla be loaded by applications that support that protocol.
+    <span class="name">GetLexerFactory</span> will rarely be used now as it is easier to call <span class="name">CreateLexer</span>.
     </p>
   
-    <p>CreateLexer is the main call that will create a lexer for a particular language. The returned lexer can then be
+    <p><span class="name">CreateLexer</span> is the main call that will create a lexer for a particular language. The returned lexer can then be
     set as the current lexer in Scintilla by calling
     <a class="seealso" href="ScintillaDoc.html#SCI_SETILEXER">SCI_SETILEXER</a>.</p>
   
-    <p>SetLibraryProperty and GetLibraryPropertyNames are optional functions that can be
+    <p><span class="name">SetLibraryProperty</span> and <span class="name">GetLibraryPropertyNames</span>
+    are optional functions that can be
     defined if a library requires initialisation before calling other methods.
     For example, a lexer library that reads language definitions from XML files may require that the
     directory containing these files be set before a call to CreateLexer.
-    <code>SetLibraryProperty("definitions.directory", "/home/neil/.languages")</code>
+    <code>SetLibraryProperty("definitions.directory", "/usr/share/xeditor/language-definitions")</code>
     If a library implements SetLibraryProperty then it may also provide a set of valid property names with
     GetLibraryPropertyNames that can then be used by the application to define configuration file property
     names or user interface elements for options dialogs.</p>
@@ -182,20 +193,20 @@
 
     <p>Before using Lexilla it must be built or downloaded.</p>
 
-    <p>To build Lexilla, in the lexilla/src directory, run make (for gcc or clang)<br />
-    <code>make</code><br />
-    or nmake for MSVC<br />
-    <code>nmake -f lexilla.mak</code><br />
-    </p>
+    <div>To build Lexilla, in the lexilla/src directory, run make (for gcc or clang)</div>
+    <div class="console">make</div>
+    <div>or nmake for MSVC</div>
+    <div class="console">nmake -f lexilla.mak</div>
+    <br />
 
-    <p>After building Lexilla, its test suite can be run with make/nmake in the lexilla/test directory. For gcc or clang<br />
-    <code>make test</code><br />
+    <div>After building Lexilla, its test suite can be run with make/nmake in the lexilla/test directory. For gcc or clang</div>
+    <div class="console">make test</div>
     or for MSVC<br />
-    <code>nmake -f testlexers.mak test</code><br />
-    Each test case should show "Lexing ..." and errors will display a diagnostic, commonly showing
+    <div class="console">nmake -f testlexers.mak test</div>
+    <div>Each test case should show "<code>Lexing ...</code>" and errors will display a diagnostic, commonly showing
     a difference between the actual and expected result:<br>
     <code>C:\u\hg\lexilla\test\examples\python\x.py:1: is different</code>
-    </p>
+    </div>
     
     <p>There are also RunTest.sh / RunTest.bat scripts in the scripts directory to build Lexilla and then build and run the tests.
     These both use gcc/clang, not MSVC.</p>
@@ -228,12 +239,12 @@
     </code></p>
 
     <p>Applications may discover the set of lexers provided by a library by first calling
-    GetLexerCount to find the number of lexers implemented in the library then looping over calling
-    GetLexerName with integers 0 to GetLexerCount()-1.</p>
+    <span class="name">GetLexerCount</span> to find the number of lexers implemented in the library then looping over calling
+    <span class="name">GetLexerName</span> with integers 0 to <code>GetLexerCount()-1</code>.</p>
 
-    <p>Applications may set properties on a library by calling SetLibraryProperty if provided.
-    This may be needed for initialisation so should before calling GetLexerCount or CreateLexer.
-    A set of property names may be available from GetLibraryPropertyNames if provided.
+    <p>Applications may set properties on a library by calling <span class="name">SetLibraryProperty</span> if provided.
+    This may be needed for initialisation so should before calling <span class="name">GetLexerCount</span> or <span class="name">CreateLexer</span>.
+    A set of property names may be available from <span class="name">GetLibraryPropertyNames</span> if provided.
     It returns a string pointer where the string contains a list of property names separated by '\n'.
     It is up to applications to define how properties are defined and persisted in its user interface
     and configuration files.</p>
