@@ -44,7 +44,7 @@ constexpr const char *pathSeparator = "/";
 template<typename T>
 T FunctionPointer(Function function) noexcept {
 	static_assert(sizeof(T) == sizeof(function));
-	T fp;
+	T fp {};
 	memcpy(&fp, &function, sizeof(T));
 	return fp;
 }
