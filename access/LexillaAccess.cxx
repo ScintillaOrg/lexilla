@@ -65,6 +65,7 @@ std::string directoryLoadDefault;
 std::string lastLoaded;
 std::vector<Lexilla::CreateLexerFn> fnCLs;
 std::vector<Lexilla::GetLibraryPropertyNamesFn> fnGLPNs;
+std::vector<std::string> lexers;
 std::vector<std::string> libraryProperties;
 std::vector<Lexilla::SetLibraryPropertyFn> fnSLPs;
 
@@ -105,6 +106,7 @@ bool Lexilla::Load(std::string_view sharedLibraryPaths) {
 	}
 
 	std::string_view paths = sharedLibraryPaths;
+	lexers.clear();
 
 	fnCLs.clear();
 	fnGLPNs.clear();
@@ -138,6 +140,18 @@ bool Lexilla::Load(std::string_view sharedLibraryPaths) {
 		Module lexillaDL = dlopen(path.c_str(), RTLD_LAZY);
 #endif
 		if (lexillaDL) {
+			GetLexerCountFn fnLexerCount = FunctionPointer<GetLexerCountFn>(
+				FindSymbol(lexillaDL, LEXILLA_GETLEXERCOUNT));
+			GetLexerNameFn fnLexerName = FunctionPointer<GetLexerNameFn>(
+				FindSymbol(lexillaDL, LEXILLA_GETLEXERNAME));
+			if (fnLexerCount && fnLexerName) {
+				const int nLexers = fnLexerCount();
+				for (int i = 0; i < nLexers; i++) {
+					char name[100] = "";
+					fnLexerName(i, name, sizeof(name));
+					lexers.push_back(name);
+				}
+			}
 			CreateLexerFn fnCL = FunctionPointer<CreateLexerFn>(
 				FindSymbol(lexillaDL, LEXILLA_CREATELEXER));
 			if (fnCL) {
@@ -198,6 +212,10 @@ Scintilla::ILexer5 *Lexilla::MakeLexer(std::string_view languageName) {
 	}
 #endif
 	return nullptr;
+}
+
+std::vector<std::string> Lexers() {
+	return lexers;
 }
 
 std::vector<std::string> Lexilla::LibraryProperties() {
