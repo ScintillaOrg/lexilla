@@ -30,6 +30,7 @@ unreadVariable:lexilla/lexers/LexBaan.cxx
 constParameter:lexilla/lexers/LexBash.cxx
 uninitMemberVar:lexilla/lexers/LexBash.cxx
 variableScope:lexilla/lexers/LexBash.cxx
+variableScope:lexilla/lexers/LexBatch.cxx
 variableScope:lexilla/lexers/LexCmake.cxx
 knownConditionTrueFalse:lexilla/lexers/LexCmake.cxx
 constParameter:lexilla/lexers/LexCLW.cxx
@@ -75,6 +76,7 @@ shadowVariable:lexilla/lexers/LexPowerPro.cxx
 knownConditionTrueFalse:lexilla/lexers/LexPowerPro.cxx
 variableScope:lexilla/lexers/LexProgress.cxx
 constParameter:lexilla/lexers/LexRaku.cxx
+variableScope:lexilla/lexers/LexRaku.cxx
 redundantInitialization:lexilla/lexers/LexRegistry.cxx
 constParameter:lexilla/lexers/LexRuby.cxx
 variableScope:lexilla/lexers/LexRuby.cxx
