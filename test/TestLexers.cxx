@@ -15,8 +15,10 @@
 
 #include "ILexer.h"
 
-#include "TestDocument.h"
+#include "Lexilla.h"
 #include "LexillaAccess.h"
+
+#include "TestDocument.h"
 
 namespace {
 
@@ -117,7 +119,7 @@ bool TestFile(std::filesystem::path path,
 	for (auto const &[key, val] : properties) {
 		if (key.starts_with("lexer.*")) {
 			language = val;
-			plex = MakeLexer(language);
+			plex = Lexilla::MakeLexer(language);
 			break;
 		}
 	}
@@ -166,7 +168,7 @@ bool TestFile(std::filesystem::path path,
 	}
 	plex->Release();
 
-	TestCRLF(path, text, MakeLexer(language));
+	TestCRLF(path, text, Lexilla::MakeLexer(language));
 
 	return true;
 }
@@ -242,8 +244,14 @@ int main() {
 	// TODO: Allow specifying the base directory through a command line argument
 	const std::filesystem::path baseDirectory = FindLexillaDirectory(std::filesystem::current_path());
 	if (!baseDirectory.empty()) {
-		if (LoadLexilla(baseDirectory)) {
-			AccessLexilla(baseDirectory / "test" / "examples");
+		const std::filesystem::path examplesDirectory = baseDirectory / "test" / "examples";
+#ifdef LEXILLA_STATIC
+		AccessLexilla(examplesDirectory);
+#else
+		const std::filesystem::path sharedLibrary = baseDirectory / "bin" / LEXILLA_LIB;
+		if (Lexilla::Load(sharedLibrary.string())) {
+			AccessLexilla(examplesDirectory);
 		}
+#endif
 	}
 }

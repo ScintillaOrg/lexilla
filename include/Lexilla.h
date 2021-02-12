@@ -1,7 +1,7 @@
 // Lexilla lexer library
 /** @file Lexilla.h
  ** Lexilla definitions for dynamic and static linking.
- ** For C++, more features and type safety are available with the LexillaLibrary module.
+ ** For C++, more features and type safety are available with the LexillaAccess module.
  **/
 // Copyright 2020 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -35,12 +35,20 @@ typedef void ILexer5;
 
 typedef ILexer5 *(*LexerFactoryFunction)();
 
+#ifdef __cplusplus
+namespace Lexilla {
+#endif
+
 typedef int (LEXILLA_CALL *GetLexerCountFn)();
 typedef void (LEXILLA_CALL *GetLexerNameFn)(unsigned int Index, char *name, int buflength);
 typedef LexerFactoryFunction(LEXILLA_CALL *GetLexerFactoryFn)(unsigned int Index);
 typedef ILexer5*(LEXILLA_CALL *CreateLexerFn)(const char *name);
 typedef const char *(LEXILLA_CALL *GetLibraryPropertyNamesFn)();
 typedef void(LEXILLA_CALL *SetLibraryPropertyFn)(const char *key, const char *value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #define LEXILLA_GETLEXERCOUNT "GetLexerCount"
 #define LEXILLA_GETLEXERNAME "GetLexerName"

@@ -12,6 +12,7 @@
 //source:src/*.cxx
 //source:lexlib/*.cxx
 //source:lexers/*.cxx
+//source:access/*.cxx
 //source:test/*.cxx
 //source:test/unit/*.cxx
 
@@ -61,13 +62,20 @@
 
 // Non-platform-specific headers
 
-// include
+// Scintilla include
 
 #include "Sci_Position.h"
 #include "ILexer.h"
 #include "Scintilla.h"
 
+// Lexilla include
+
 #include "SciLexer.h"
+#include "Lexilla.h"
+
+// access
+
+#include "LexillaAccess.h"
 
 // lexlib
 #include "StringCopy.h"
@@ -90,9 +98,7 @@
 
 // src
 
-#include "Lexilla.h"
 #include "TestDocument.h"
-#include "LexillaAccess.h"
 
 // Catch testing framework
 #include "catch.hpp"

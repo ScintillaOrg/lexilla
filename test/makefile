@@ -41,10 +41,12 @@ else
     DEL = rm -f
 endif
 
+vpath %.cxx ../access
+
 DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
 BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
-INCLUDES = -I ../../scintilla/include -I ../include -I ../src
+INCLUDES = -I ../../scintilla/include -I ../include -I ../access
 BASE_FLAGS += $(WARNINGS)
 
 all: $(EXE)
@@ -63,6 +65,5 @@ OBJS = TestLexers.o TestDocument.o LexillaAccess.o
 $(EXE): $(OBJS)
 	$(CXX) $(BASE_FLAGS) $(CPPFLAGS) $(CXXFLAGS) $^ $(LIBS) $(LDLIBS) -o $@
 
-TestLexers.o: TestLexers.cxx TestDocument.h LexillaAccess.h
+TestLexers.o: TestLexers.cxx TestDocument.h
 TestDocument.o: TestDocument.cxx TestDocument.h
-LexillaAccess.o: LexillaAccess.cxx LexillaAccess.h

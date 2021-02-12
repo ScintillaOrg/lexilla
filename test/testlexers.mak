@@ -4,7 +4,7 @@
 DEL = del /q
 EXE = TestLexers.exe
 
-INCLUDEDIRS = -I ../../scintilla/include -I ../include -I ../src
+INCLUDEDIRS = -I ../../scintilla/include -I ../include -I ../access
 
 !IFDEF LEXILLA_STATIC
 STATIC_FLAG = -D LEXILLA_STATIC
@@ -34,7 +34,11 @@ $(EXE): $(OBJS) $(LIBS)
 
 .cxx.obj::
 	$(CXX) $(CXXFLAGS) -c $<
+{..\access}.cxx.obj::
+	$(CXX) $(CXXFLAGS) -c $(NAME) $<
 
-TestLexers.obj: $*.cxx TestDocument.h LexillaAccess.h
+.cxx.obj::
+	$(CXX) $(CXXFLAGS) -c $<
+
+TestLexers.obj: $*.cxx TestDocument.h
 TestDocument.obj: $*.cxx $*.h
-LexillaAccess.obj: $*.cxx $*.h
