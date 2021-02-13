@@ -214,7 +214,7 @@ Scintilla::ILexer5 *Lexilla::MakeLexer(std::string_view languageName) {
 	return nullptr;
 }
 
-std::vector<std::string> Lexers() {
+std::vector<std::string> Lexilla::Lexers() {
 	return lexers;
 }
 
