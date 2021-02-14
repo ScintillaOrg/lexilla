@@ -47,7 +47,7 @@ class LexerSimple : public LexerBase {
 public:
         LexerSimple() {
         }
-        void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+        void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override {
                 try {
 			Accessor astyler(pAccess, &props);
 			if (length > 0) {
@@ -63,7 +63,7 @@ public:
                         pAccess->SetErrorStatus(SC_STATUS_FAILURE);
                 }
         }
-        void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+        void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override {
         }
 
         static ILexer5 *LexerFactorySimple() {
