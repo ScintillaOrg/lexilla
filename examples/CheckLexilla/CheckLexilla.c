@@ -1,9 +1,30 @@
-// Lexilla lexer library
+// Lexilla lexer library use example
 /** @file CheckLexilla.c
  ** Check that Lexilla.h works.
  **/
-// Copyright 2020 by Neil Hodgson <neilh@scintilla.org>
-// The License.txt file describes the conditions under which this software may be distributed.
+// Copyright 2021 by Neil Hodgson <neilh@scintilla.org>
+// This file is in the public domain.
+// If the public domain is not possible in your location then it can also be used under the same
+// license as Scintilla. https://www.scintilla.org/License.txt
+
+/* Build and run
+
+    Win32
+gcc CheckLexilla.c -I ../../include -o CheckLexilla
+CheckLexilla
+CheckLexilla ../SimpleLexer/SimpleLexer.dll
+
+    macOS
+clang CheckLexilla.c -I ../../include -o CheckLexilla
+./CheckLexilla
+./CheckLexilla ../SimpleLexer/SimpleLexer.dylib
+
+    Linux
+gcc CheckLexilla.c -I ../../include -ldl -o CheckLexilla
+./CheckLexilla
+./CheckLexilla ../SimpleLexer/SimpleLexer.so
+
+*/
 
 #include <stdio.h>
 
@@ -31,15 +52,19 @@ static Function FindSymbol(Module m, const char *symbol) {
 #endif
 }
 
-int main() {
-	char szLexillaPath[] = "../bin/" LEXILLA_LIB LEXILLA_EXTENSION;
+int main(int argc, char *argv[]) {
+	char szLexillaPath[] = "../../bin/" LEXILLA_LIB LEXILLA_EXTENSION;
+	const char *libPath = szLexillaPath;
+	if (argc > 1) {
+		libPath = argv[1];
+	}
 #if _WIN32
-	Module lexillaLibrary = LoadLibraryA(szLexillaPath);
+	Module lexillaLibrary = LoadLibraryA(libPath);
 #else
-	Module lexillaLibrary = dlopen(szLexillaPath, RTLD_LAZY);
+	Module lexillaLibrary = dlopen(libPath, RTLD_LAZY);
 #endif
 
-	printf("Opened %s -> %p.\n", szLexillaPath, lexillaLibrary);
+	printf("Opened %s -> %p.\n", libPath, lexillaLibrary);
 	if (lexillaLibrary) {
 		GetLexerCountFn lexerCount = (GetLexerCountFn)FindSymbol(lexillaLibrary, LEXILLA_GETLEXERCOUNT);
 		if (lexerCount) {
