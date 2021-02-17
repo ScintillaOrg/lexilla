@@ -76,37 +76,37 @@ public:
         }
 };
 
-#ifdef _WIN32
-#define EXT_LEXER_DECL __declspec( dllexport ) __stdcall
+#if _WIN32
+#define EXPORT_FUNCTION __declspec(dllexport)
+#define CALLING_CONVENTION __stdcall
 #else
-#define EXT_LEXER_DECL
+#define EXPORT_FUNCTION __attribute__((visibility("default")))
+#define CALLING_CONVENTION
 #endif
 
 static const char *lexerName = "simple";
 
 extern "C" {
 
-int EXT_LEXER_DECL GetLexerCount() {
+EXPORT_FUNCTION int CALLING_CONVENTION GetLexerCount() {
         return 1;
 }
 
-void EXT_LEXER_DECL GetLexerName(unsigned int index, char *name, int buflength) {
+EXPORT_FUNCTION void CALLING_CONVENTION GetLexerName(unsigned int index, char *name, int buflength) {
         *name = 0;
         if ((index == 0) && (buflength > static_cast<int>(strlen(lexerName)))) {
                 strcpy(name, lexerName);
         }
 }
 
-LexerFactoryFunction EXT_LEXER_DECL GetLexerFactory(unsigned int index) {
+EXPORT_FUNCTION LexerFactoryFunction CALLING_CONVENTION GetLexerFactory(unsigned int index) {
         if (index == 0)
                 return LexerSimple::LexerFactorySimple;
         else
                 return 0;
 }
 
-using LexStar = Scintilla::ILexer5*; // Defined due to ordering of __declspec and __stdcall
-
-LexStar EXT_LEXER_DECL CreateLexer(const char *name) {
+EXPORT_FUNCTION Scintilla::ILexer5* CALLING_CONVENTION CreateLexer(const char *name) {
 	if (0 == strcmp(name, lexerName)) {
 		return LexerSimple::LexerFactorySimple();
 	}
