@@ -98,6 +98,7 @@ def RegenerateAll(rootDirectory):
 
     lexillaDir = lexillaBase
     srcDir = lexillaDir / "src"
+    docDir = lexillaDir / "doc"
 
     Regenerate(srcDir / "Lexilla.cxx", "//", sci.lexerModules)
     Regenerate(srcDir / "lexilla.mak", "#", sci.lexFiles)
@@ -112,6 +113,9 @@ def RegenerateAll(rootDirectory):
         "#define VERSION_LEXILLA \"" + versionDotted + "\"")
     UpdateLineInFile(rcPath, "#define VERSION_WORDS",
         "#define VERSION_WORDS " + versionCommad)
+    ReplaceREInFile(docDir / "LexillaDownload.html",
+        r"/www.scintilla.org/([a-zA-Z]+)\d\d\d",
+        r"/www.scintilla.org/\g<1>" +  version)
 
     lexillaXcode = lexillaDir / "src" / "Lexilla"
     lexillaXcodeProject = lexillaXcode / "Lexilla.xcodeproj" / "project.pbxproj"
