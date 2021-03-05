@@ -94,14 +94,14 @@ def RegenerateAll(rootDirectory):
 
     lexillaBase = root.resolve()
 
-    sci = LexillaData.LexillaData(lexillaBase)
+    lex = LexillaData.LexillaData(lexillaBase)
 
     lexillaDir = lexillaBase
     srcDir = lexillaDir / "src"
     docDir = lexillaDir / "doc"
 
-    Regenerate(srcDir / "Lexilla.cxx", "//", sci.lexerModules)
-    Regenerate(srcDir / "lexilla.mak", "#", sci.lexFiles)
+    Regenerate(srcDir / "Lexilla.cxx", "//", lex.lexerModules)
+    Regenerate(srcDir / "lexilla.mak", "#", lex.lexFiles)
 
     # Discover version information
     version = (lexillaDir / "version.txt").read_text().strip()
@@ -117,6 +117,18 @@ def RegenerateAll(rootDirectory):
         r"/www.scintilla.org/([a-zA-Z]+)\d\d\d",
         r"/www.scintilla.org/\g<1>" +  version)
 
+    pathMain = lexillaDir / "doc" / "Lexilla.html"
+    UpdateLineInFile(pathMain,
+        '          <font color="#FFCC99" size="3"> Release version',
+        '          <font color="#FFCC99" size="3"> Release version ' + \
+        versionDotted + '<br />')
+    UpdateLineInFile(pathMain,
+        '           Site last modified',
+        '           Site last modified ' + lex.mdyModified + '</font>')
+    UpdateLineInFile(pathMain,
+        '    <meta name="Date.Modified"',
+        '    <meta name="Date.Modified" content="' + lex.dateModified + '" />')
+
     lexillaXcode = lexillaDir / "src" / "Lexilla"
     lexillaXcodeProject = lexillaXcode / "Lexilla.xcodeproj" / "project.pbxproj"
 
@@ -128,7 +140,7 @@ def RegenerateAll(rootDirectory):
     ReplaceREInFile(lexillaXcodeProject, "CURRENT_PROJECT_VERSION = [0-9.]+;",
         f'CURRENT_PROJECT_VERSION = {versionDotted};')
 
-    RegenerateXcodeProject(lexillaXcodeProject, sci.lexFiles, lexerReferences)
+    RegenerateXcodeProject(lexillaXcodeProject, lex.lexFiles, lexerReferences)
 
     LexFacer.RegenerateAll(root, False)
 
