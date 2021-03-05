@@ -68,4 +68,8 @@ def drawLogo():
 
 	imageOut.save("../doc/LexillaLogo.png", "png")
 
+	imageDoubled = imageOut.resize((width*2, height * 2), Image.NEAREST)
+
+	imageDoubled.save("../doc/LexillaLogo2x.png", "png")
+
 drawLogo()
