@@ -29,27 +29,6 @@
 		border-collapse: collapse;
 	}
 
-	table.categories {
-		border: 0px;
-		border-collapse: collapse;
-	}
-	table.categories td {
-		padding: 4px 12px;
-	}
-
-	table.standard {
-		border-collapse: collapse;
-	}
-	table.standard th {
-		background: #404040;
-		color: #FFFFFF;
-		padding: 1px 5px 1px 5px;
-	}
-	table.standard tr:nth-child(odd) {background: #D7D7D7}
-	table.standard tr:nth-child(even) {background: #F0F0F0}
-	table.standard td {
-		padding: 1px 5px 1px 5px;
-	}
         div.console {
             font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace;
             color: #008000;
@@ -59,59 +38,18 @@
             margin: 0.3em 3em;
             padding: 0.3em 0.6em;
         }
+        span.console {
+            font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace;
+            color: #008000;
+            font-weight: bold;
+            background: #F7FCF7;
+            border: 1px solid #C0D7C0;
+            margin: 0.1em 0em;
+            padding: 0.1em 0.3em;
+        }
 
-	.S0 {
-		color: #808080;
-	}
-	.S2 {
-		font-family: Georgia, 'DejaVu Serif';
-		color: #007F00;
-		font-size: 9pt;
-	}
-	.S3 {
-		font-family: Georgia, 'DejaVu Serif';
-		color: #3F703F;
-		font-size: 9pt;
-	}
-	.S4 {
-		color: #007F7F;
-	}
-	.S5 {
-		font-weight: bold;
-		color: #00007F;
-	}
-	.S9 {
-		color: #7F7F00;
-	}
-	.S10 {
-		font-weight: bold;
-		color: #000000;
-	}
-	.S17 {
-		font-family: Georgia, 'DejaVu Serif';
-		color: #3060A0;
-		font-size: 9pt;
-	}
-	DIV.highlighted {
-		background: #F7FCF7;
-		border: 1px solid #C0D7C0;
-		margin: 0.3em 3em;
-		padding: 0.3em 0.6em;
-		font-family: 'Verdana';
-		color: #000000;
-		font-size: 10pt;
-	}
         .name {
 		color: #B08000;
-        }
-	.provisional {
-		background: #FFB000;
-        }
-	.deprecated {
-		text-decoration: line-through red;
-        }
-	.parameter {
-		font-style:italic;
         }
 /*]]>*/
 -->
@@ -131,7 +69,7 @@
 
     <h1>Lexilla Documentation</h1>
 
-    <p>Last edited 10 February 2021 NH</p>
+    <p>Last edited 5 March 2021 NH</p>
 
     <h2>Introduction</h2>
 
@@ -217,6 +155,13 @@
 
     <h2>Using Lexilla</h2>
     
+    <p>Definitions for using Lexilla from C and C++ are included in lexilla/include/Lexilla.h.
+    For C++, scintilla/include/ILexer.h should be included before Lexilla.h as the
+    <code>ILexer5</code> type is used.
+    For C, ILexer.h should not be included as C does not understand it and from C,
+    <code>void*</code> is used instead of <code>ILexer5*</code>.
+    </p>
+
     <p>For many applications the main Lexilla operations are loading the Lexilla library, creating a
     lexer and using that lexer in Scintilla.
     Applications need to define the location (or locations) they expect
@@ -224,9 +169,25 @@
     They also need to define how they request particular lexers, perhaps with a mapping from
     file extensions to lexer names.</p>
 
-    <p>From C.</p>
+    <h3 id="CheckLexilla">From C - CheckLexilla</h3>
 
-    <p>For Qt using QLibrary with 'Call' defined to call Scintilla APIs.<br />
+    <p>An example C program for accessing Lexilla is provided in lexilla/examples/CheckLexilla.
+    Build with <span class="console">make</span> and run with <span class="console">make check</span>.
+    </p>
+
+    <h3>From C++ - LexillaAccess</h3>
+
+    <p>A C++ module, LexillaAccess.cxx / LexillaAccess.h is provided in lexilla/access.
+    This can either be compiled into the application when it is sufficient
+    or the source code can be copied into the application and customized when the application has additional requirements
+    (such as checking code signatures).
+    SciTE uses LexillaAccess.</p>
+
+    <p>LexillaAccess supports loading multiple shared libraries implementing the Lexilla protocol at one time.</p>
+
+    <h3>From Qt</h3>
+
+    <p>For Qt, use either LexillaAccess from above or Qt's QLibrary class. With 'Call' defined to call Scintilla APIs.<br />
     <code>
 #if _WIN32<br />
 &nbsp;&nbsp;&nbsp;&nbsp;typedef void *(__stdcall *CreateLexerFn)(const char *name);<br />
@@ -263,11 +224,14 @@
     an optional <code>const char *GetLibraryPropertyNames()</code> function.
     </p>
 
-    <p>A lexer created by Lexilla may be used in Scintilla by calling
-    <a class="seealso" href="ScintillaDoc.html#SCI_SETILEXER">SCI_SETILEXER</a>.</p>
-
     <p>Lexilla and its contained lexers can be tested with the TestLexers program in lexilla/test.
     Read lexilla/test/README for information on building and using TestLexers.</p>
+
+    <p>An example of a simple lexer housed in a shared library that is compatible with the
+    Lexilla protocol can be found in lexilla/examples/SimpleLexer. It is implemented in C++.
+    Build with <span class="console">make</span> and check by running <a href="#CheckLexilla">CheckLexilla</a> against it with
+    <span class="console">make check</span>.
+    </p>
 
   </body>
 </html>
