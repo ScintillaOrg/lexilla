@@ -578,7 +578,7 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 		const bool atEOL = currentPos == (lineStartNext - 1);
 		const int stylePrev = style;
 		const char ch = chNext;
-		bool inLineComment = (style == SCE_FSHARP_COMMENTLINE);
+		const bool inLineComment = (style == SCE_FSHARP_COMMENTLINE);
 		style = styleNext;
 		styleNext = styler.StyleAt(currentPos + 1);
 		chNext = styler.SafeGetCharAt(currentPos + 1);
@@ -649,7 +649,6 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 			}
 
 			visibleChars = 0;
-			inLineComment = false;
 			lineCurrent++;
 			lineNext = lineCurrent + 1;
 			lineStartNext = styler.LineStart(lineNext);
