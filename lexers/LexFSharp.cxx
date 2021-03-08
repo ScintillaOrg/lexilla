@@ -118,7 +118,7 @@ class UnicodeChar {
 
 public:
 	UnicodeChar() noexcept = default;
-	UnicodeChar(const int prefix) {
+	explicit UnicodeChar(const int prefix) {
 		if (IsADigit(prefix)) {
 			*asciiDigits = prefix;
 			if (*asciiDigits >= '0' && *asciiDigits <= '2') {
@@ -186,11 +186,11 @@ inline bool MatchStreamCommentStart(StyleContext &cxt) {
 	return (cxt.Match('(', '*') && cxt.GetRelative(2) != ')');
 }
 
-inline bool MatchStreamCommentEnd(StyleContext &cxt) {
+inline bool MatchStreamCommentEnd(const StyleContext &cxt) {
 	return (cxt.ch == ')' && cxt.chPrev == '*');
 }
 
-inline bool MatchLineComment(StyleContext &cxt) {
+inline bool MatchLineComment(const StyleContext &cxt) {
 	// style shebang lines as comments in F# scripts:
 	// https://fsharp.org/specs/language-spec/4.1/FSharpSpec-4.1-latest.pdf#page=30&zoom=auto,-98,537
 	return cxt.Match('/', '/') || cxt.Match('#', '!');
@@ -201,27 +201,27 @@ inline bool MatchLineNumberStart(StyleContext &cxt) {
 		(cxt.ch == '#' && (IsADigit(cxt.chNext) || IsADigit(cxt.GetRelative(2)))));
 }
 
-inline bool MatchPPDirectiveStart(StyleContext &cxt) {
+inline bool MatchPPDirectiveStart(const StyleContext &cxt) {
 	return (cxt.atLineStart && cxt.ch == '#' && iswordstart(cxt.chNext));
 }
 
-inline bool MatchTypeAttributeStart(StyleContext &cxt) {
+inline bool MatchTypeAttributeStart(const StyleContext &cxt) {
 	return cxt.Match('[', '<');
 }
 
-inline bool MatchTypeAttributeEnd(StyleContext &cxt) {
+inline bool MatchTypeAttributeEnd(const StyleContext &cxt) {
 	return (cxt.ch == ']' && cxt.chPrev == '>');
 }
 
-inline bool MatchQuotedExpressionStart(StyleContext &cxt) {
+inline bool MatchQuotedExpressionStart(const StyleContext &cxt) {
 	return cxt.Match('<', '@');
 }
 
-inline bool MatchQuotedExpressionEnd(StyleContext &cxt) {
+inline bool MatchQuotedExpressionEnd(const StyleContext &cxt) {
 	return (cxt.ch == '>' && cxt.chPrev == '@');
 }
 
-inline bool MatchStringStart(StyleContext &cxt) {
+inline bool MatchStringStart(const StyleContext &cxt) {
 	return (cxt.ch == '"' || cxt.Match('@', '"') || cxt.Match('$', '"') || cxt.Match('`', '`'));
 }
 
@@ -263,7 +263,7 @@ inline bool IsNumber(StyleContext &cxt, const int base = 10) {
 		(IsADigit(cxt.GetRelative(-2), base) && numericMetaChars2.Contains(cxt.ch));
 }
 
-inline bool IsFloat(StyleContext &cxt) {
+inline bool IsFloat(const StyleContext &cxt) {
 	return (cxt.ch == '.' && IsADigit(cxt.chPrev)) ||
 		((cxt.ch == '+' || cxt.ch == '-' ) && IsADigit(cxt.chNext));
 }
