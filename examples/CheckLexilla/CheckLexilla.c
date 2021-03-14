@@ -14,6 +14,11 @@ gcc CheckLexilla.c -I ../../include -o CheckLexilla
 CheckLexilla
 CheckLexilla ../SimpleLexer/SimpleLexer.dll
 
+   Win32 Visual C++
+cl CheckLexilla.c -I ../../include -Fe: CheckLexilla
+CheckLexilla
+CheckLexilla ../SimpleLexer/SimpleLexer.dll
+
     macOS
 clang CheckLexilla.c -I ../../include -o CheckLexilla
 ./CheckLexilla
@@ -23,6 +28,12 @@ clang CheckLexilla.c -I ../../include -o CheckLexilla
 gcc CheckLexilla.c -I ../../include -ldl -o CheckLexilla
 ./CheckLexilla
 ./CheckLexilla ../SimpleLexer/SimpleLexer.so
+
+While principally meant for compilation as C to act as an example of using Lexilla
+from C it can also be built as C++.
+
+Warnings are intentionally shown for the deprecated typedef LexerNameFromIDFn when compiled with
+GCC or Clang or as C++.
 
 */
 
@@ -34,7 +45,15 @@ gcc CheckLexilla.c -I ../../include -ldl -o CheckLexilla
 #include <dlfcn.h>
 #endif
 
+#ifdef __cplusplus
+#include "ILexer.h"
+#endif
+
 #include "Lexilla.h"
+
+#ifdef __cplusplus
+using namespace Lexilla;
+#endif
 
 #if _WIN32
 typedef FARPROC Function;
