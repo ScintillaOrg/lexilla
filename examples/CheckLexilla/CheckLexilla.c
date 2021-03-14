@@ -86,6 +86,18 @@ int main(int argc, char *argv[]) {
 			ILexer5 *lexerCpp = lexerCreate("cpp");
 			printf("Created cpp lexer -> %p.\n", lexerCpp);
 
+			LexerNameFromIDFn lexerNameFromID = (LexerNameFromIDFn)FindSymbol(lexillaLibrary, LEXILLA_LEXERNAMEFROMID);
+			if (lexerNameFromID) {
+				const char *lexerNameCpp = lexerNameFromID(3);	// SCLEX_CPP=3
+				if (lexerNameCpp) {
+					printf("Lexer name 3 -> %s.\n", lexerNameCpp);
+				} else {
+					printf("Lexer name 3 not available.\n");
+				}
+			} else {
+				printf("Lexer name from ID not supported.\n");
+			}
+
 			GetLibraryPropertyNamesFn libraryProperties = (GetLibraryPropertyNamesFn)FindSymbol(lexillaLibrary, LEXILLA_GETLIBRARYPROPERTYNAMES);
 			if (libraryProperties) {
 				const char *names = libraryProperties();

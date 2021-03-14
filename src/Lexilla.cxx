@@ -339,6 +339,15 @@ EXPORT_FUNCTION ILexer5 * CALLING_CONVENTION CreateLexer(const char *name) {
 	return nullptr;
 }
 
+EXPORT_FUNCTION const char * CALLING_CONVENTION LexerNameFromID(int identifier) {
+	const LexerModule *pModule = catalogueLexilla.Find(identifier);
+	if (pModule) {
+		return pModule->languageName;
+	} else {
+		return nullptr;
+	}
+}
+
 EXPORT_FUNCTION const char * CALLING_CONVENTION GetLibraryPropertyNames() {
 	return "";
 }
