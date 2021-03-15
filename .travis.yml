@@ -1,6 +1,6 @@
 language: cpp
 
-install: cd .. && hg clone http://hg.code.sf.net/p/scintilla/code scintilla
+install: (cd .. && hg clone http://hg.code.sf.net/p/scintilla/code scintilla)
 
 compiler:
  - gcc
