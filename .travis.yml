@@ -1,3 +1,5 @@
+dist: bionic
+
 language: cpp
 
 install: (cd .. && hg clone http://hg.code.sf.net/p/scintilla/code scintilla)
