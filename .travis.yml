@@ -9,6 +9,14 @@ osx_image: xcode12.3
 
 language: cpp
 
+before_install:
+ - |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        choco install hg
+        ;;
+    esac
+
 install:
  - cd ..
  - hg clone http://hg.code.sf.net/p/scintilla/code scintilla
@@ -17,6 +25,10 @@ install:
 compiler:
  - gcc
  - clang
+
 script:
  - cd src
  - make
+ - cd ..
+ - cd test
+ - make test
