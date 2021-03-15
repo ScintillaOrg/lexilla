@@ -21,7 +21,7 @@ compiler:
 
 script:
  - cd src
- - make
+ - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mingw32-make ; else make ; fi
  - cd ..
  - cd test
- - make test
+ - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mingw32-make test ; else make test ; fi
