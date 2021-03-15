@@ -12,7 +12,7 @@ language: cpp
 install:
  - cd ..
  - wget https://www.scintilla.org/scintilla500.zip
- - if [ "$TRAVIS_OS_NAME" = "windows" ]; then 7z x scintilla.zip ; else unzip scintilla.zip ; fi
+ - if [ "$TRAVIS_OS_NAME" = "windows" ]; then 7z x scintilla500.zip ; else unzip scintilla500.zip ; fi
  - cd lexilla
 
 compiler:
