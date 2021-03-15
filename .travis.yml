@@ -1,5 +1,7 @@
 language: cpp
 
+install: hg clone http://hg.code.sf.net/p/scintilla/code scintilla
+
 compiler:
  - gcc
  - clang
