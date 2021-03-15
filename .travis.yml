@@ -1,3 +1,8 @@
+# Build Lexilla with gcc and clang on Linux, macOS, and Windows
+# Test Lexilla with gcc and clang on Linux and macOS 
+# Windows has older versions of libraries so can't compile std::filesystem
+# with gcc or std::string::starts_with with clang.
+# On macOS, gcc is a synonym for clang so not much point in running gcc but omitting it is work.
 os:
  - linux
  - osx
@@ -11,7 +16,7 @@ language: cpp
 
 install:
  - cd ..
- - wget https://www.scintilla.org/scintilla500.zip
+ - wget --no-verbose https://www.scintilla.org/scintilla500.zip
  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then 7z x scintilla500.zip ; else unzip scintilla500.zip ; fi
  - cd lexilla
 
@@ -21,7 +26,7 @@ compiler:
 
 script:
  - cd src
- - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mingw32-make ; else make ; fi
+ - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mingw32-make windir=1 ; else make ; fi
  - cd ..
  - cd test
- - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mingw32-make test ; else make test ; fi
+ - if [ "$TRAVIS_OS_NAME" != "windows" ]; then make test ; fi
