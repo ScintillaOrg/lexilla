@@ -4,6 +4,8 @@ os:
 
 dist: bionic
 
+osx_image: xcode12.2
+
 language: cpp
 
 install: (cd .. && hg clone http://hg.code.sf.net/p/scintilla/code scintilla)
