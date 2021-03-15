@@ -29,7 +29,7 @@ script:
  - (cd src && $MAKER)
  - cd test
  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then make test ; fi
- - (cd unit && $MAKER)
+ - (cd unit && $MAKER test)
  - cd ..
  - cd examples
  - (cd CheckLexilla && $MAKER check)
