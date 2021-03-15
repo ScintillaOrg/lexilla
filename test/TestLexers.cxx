@@ -241,17 +241,19 @@ std::filesystem::path FindLexillaDirectory(std::filesystem::path startDirectory)
 
 
 int main() {
+	bool success = false;
 	// TODO: Allow specifying the base directory through a command line argument
 	const std::filesystem::path baseDirectory = FindLexillaDirectory(std::filesystem::current_path());
 	if (!baseDirectory.empty()) {
 		const std::filesystem::path examplesDirectory = baseDirectory / "test" / "examples";
 #ifdef LEXILLA_STATIC
-		AccessLexilla(examplesDirectory);
+		success = AccessLexilla(examplesDirectory);
 #else
 		const std::filesystem::path sharedLibrary = baseDirectory / "bin" / LEXILLA_LIB;
 		if (Lexilla::Load(sharedLibrary.string())) {
-			AccessLexilla(examplesDirectory);
+			success = AccessLexilla(examplesDirectory);
 		}
 #endif
 	}
+	return success ? 0 : 1;
 }
