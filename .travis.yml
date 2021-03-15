@@ -1,6 +1,7 @@
 os:
  - linux
  - osx
+ - windows
 
 dist: bionic
 
@@ -8,10 +9,14 @@ osx_image: xcode12.3
 
 language: cpp
 
-install: (cd .. && hg clone http://hg.code.sf.net/p/scintilla/code scintilla)
+install:
+ - cd ..
+ - hg clone http://hg.code.sf.net/p/scintilla/code scintilla
+ - cd lexilla
 
 compiler:
  - gcc
  - clang
 script:
- - cd src && make
+ - cd src
+ - make
