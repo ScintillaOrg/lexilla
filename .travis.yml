@@ -9,12 +9,10 @@ osx_image: xcode12.3
 
 language: cpp
 
-before_install:
- - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install hg ; fi
-
 install:
  - cd ..
- - hg clone http://hg.code.sf.net/p/scintilla/code scintilla
+ - wget https://www.scintilla.org/scintilla500.zip
+ - if [ "$TRAVIS_OS_NAME" = "windows" ]; then 7z x scintilla.zip ; else unzip scintilla.zip ; fi
  - cd lexilla
 
 compiler:
