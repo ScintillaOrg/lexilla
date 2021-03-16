@@ -26,7 +26,10 @@
 #define LEXILLA_CALL
 #endif
 
-#ifdef __cplusplus
+#if defined(__OBJC2__)
+// Objective C(++) treats '[' as a message expression.
+#define DEPRECATE_DEFINITION
+#elif defined(__cplusplus)
 #define DEPRECATE_DEFINITION [[deprecated]]
 #elif defined(__GNUC__) || defined(__clang__)
 #define DEPRECATE_DEFINITION __attribute__((deprecated))
