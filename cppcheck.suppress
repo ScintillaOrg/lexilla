@@ -142,6 +142,3 @@ redundantAssignment:lexilla/lexers/LexCPP.cxx
 
 // Suppress everything in catch.hpp as won't be changing
 *:lexilla/test/unit/catch.hpp
-// For now, suppress all test source files as, since Catch 2, cppcheck shows many warnings showing
-// it doesn't understand the REQUIRE macro
-*:lexilla/test/unit/*.cxx
