@@ -1,4 +1,4 @@
-// Scintilla source code edit control
+﻿// Scintilla source code edit control
 /** @file LexCPP.cxx
  ** Lexer for C++, C, Java, and JavaScript.
  ** Further folding features and configuration properties added by "Udo Lechner" <dlchnr(at)gmx(dot)net>
@@ -378,13 +378,13 @@ struct OptionsCPP {
 };
 
 const char *const cppWordLists[] = {
-            "Primary keywords and identifiers",
-            "Secondary keywords and identifiers",
-            "Documentation comment keywords",
-            "Global classes and typedefs",
-            "Preprocessor definitions",
-            "Task marker and error marker keywords",
-            nullptr,
+			"Primary keywords and identifiers",
+			"Secondary keywords and identifiers",
+			"Documentation comment keywords",
+			"Global classes and typedefs",
+			"Preprocessor definitions",
+			"Task marker and error marker keywords",
+			nullptr,
 };
 
 struct OptionSetCPP : public OptionSet<OptionsCPP> {
@@ -799,8 +799,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	if ((MaskActive(initStyle) == SCE_C_PREPROCESSOR) ||
-      (MaskActive(initStyle) == SCE_C_COMMENTLINE) ||
-      (MaskActive(initStyle) == SCE_C_COMMENTLINEDOC)) {
+	  (MaskActive(initStyle) == SCE_C_COMMENTLINE) ||
+	  (MaskActive(initStyle) == SCE_C_COMMENTLINEDOC)) {
 		// Set continuationLine if last character of previous line is '\'
 		if (lineCurrent > 0) {
 			const Sci_Position endLinePrevious = styler.LineEnd(lineCurrent - 1);
@@ -923,7 +923,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				} else if (!(setWord.Contains(sc.ch)
 				   || (sc.ch == '\'')
 				   || ((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E' ||
-				                                          sc.chPrev == 'p' || sc.chPrev == 'P')))) {
+														  sc.chPrev == 'p' || sc.chPrev == 'P')))) {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
 				}
 				break;
@@ -1032,6 +1032,10 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						styleBeforeDCKeyword = SCE_C_COMMENTDOC;
 						sc.SetState(SCE_C_COMMENTDOCKEYWORD|activitySet);
 					}
+				} else if ((sc.ch == '<' && sc.chNext != '/')
+							|| (sc.ch == '/' && sc.chPrev == '<')) { // XML comment style
+					styleBeforeDCKeyword = SCE_C_COMMENTDOC;
+					sc.SetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
 				}
 				break;
 			case SCE_C_COMMENTLINE:
@@ -1051,6 +1055,10 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						styleBeforeDCKeyword = SCE_C_COMMENTLINEDOC;
 						sc.SetState(SCE_C_COMMENTDOCKEYWORD|activitySet);
 					}
+				} else if ((sc.ch == '<' && sc.chNext != '/')
+							|| (sc.ch == '/' && sc.chPrev == '<')) { // XML comment style
+					styleBeforeDCKeyword = SCE_C_COMMENTLINEDOC;
+					sc.SetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
 				}
 				break;
 			case SCE_C_COMMENTDOCKEYWORD:
@@ -1062,7 +1070,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				} else if (sc.ch == '[' || sc.ch == '{') {
 					seenDocKeyBrace = true;
 				} else if (!setDoxygen.Contains(sc.ch)
-				           && !(seenDocKeyBrace && (sc.ch == ',' || sc.ch == '.'))) {
+						   && !(seenDocKeyBrace && (sc.ch == ',' || sc.ch == '.'))) {
 					char s[100];
 					if (caseSensitive) {
 						sc.GetCurrent(s, sizeof(s));
@@ -1080,6 +1088,23 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						}
 					}
 					sc.SetState(styleBeforeDCKeyword|activitySet);
+					seenDocKeyBrace = false;
+				} else if (sc.ch == '>') {
+					char s[100];
+					if (caseSensitive) {
+						sc.GetCurrent(s, sizeof(s));
+					} else {
+						sc.GetCurrentLowered(s, sizeof(s));
+					}
+					if (!keywords3.InList(s + 1)) {
+						int subStyleCDKW = classifierDocKeyWords.ValueFor(s + 1);
+						if (subStyleCDKW >= 0) {
+							sc.ChangeState(subStyleCDKW | activitySet);
+						} else {
+							sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR | activitySet);
+						}
+					}
+					sc.SetState(styleBeforeDCKeyword | activitySet);
 					seenDocKeyBrace = false;
 				}
 				break;
@@ -1258,9 +1283,9 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					sc.SetState(SCE_C_COMMENTLINE|activitySet);
 			} else if (sc.ch == '/'
 				   && (setOKBeforeRE.Contains(chPrevNonWhite)
-				       || followsReturnKeyword(sc, styler))
+					   || followsReturnKeyword(sc, styler))
 				   && (!setCouldBePostOp.Contains(chPrevNonWhite)
-				       || !FollowsPostfixOperator(sc, styler))) {
+					   || !FollowsPostfixOperator(sc, styler))) {
 				sc.SetState(SCE_C_REGEX|activitySet);	// JavaScript's RegEx
 				inRERange = false;
 			} else if (sc.ch == '\"') {
