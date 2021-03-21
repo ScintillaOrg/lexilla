@@ -1,4 +1,4 @@
-// Scintilla source code edit control
+﻿// Scintilla source code edit control
 /** @file LexCPP.cxx
  ** Lexer for C++, C, Java, and JavaScript.
  ** Further folding features and configuration properties added by "Udo Lechner" <dlchnr(at)gmx(dot)net>
@@ -1035,7 +1035,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				} else if ((sc.ch == '<' && sc.chNext != '/')
 							|| (sc.ch == '/' && sc.chPrev == '<')) { // XML comment style
 					styleBeforeDCKeyword = SCE_C_COMMENTDOC;
-					sc.SetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
+					sc.ForwardSetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
 				}
 				break;
 			case SCE_C_COMMENTLINE:
@@ -1058,7 +1058,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				} else if ((sc.ch == '<' && sc.chNext != '/')
 							|| (sc.ch == '/' && sc.chPrev == '<')) { // XML comment style
 					styleBeforeDCKeyword = SCE_C_COMMENTLINEDOC;
-					sc.SetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
+					sc.ForwardSetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
 				}
 				break;
 			case SCE_C_COMMENTDOCKEYWORD:
