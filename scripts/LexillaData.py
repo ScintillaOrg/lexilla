@@ -41,10 +41,12 @@ sys.path.append(str(thisPath.parent.parent.parent / "scintilla" / "scripts"))
 
 import FileGenerator
 
+neutralEncoding = "latin_1"
+
 def FindModules(lexFile):
     modules = []
     partLine = ""
-    with lexFile.open() as f:
+    with lexFile.open(encoding=neutralEncoding) as f:
         for l in f.readlines():
             l = l.rstrip()
             if partLine or l.startswith("LexerModule"):
@@ -102,7 +104,7 @@ knownIrregularProperties = [
 
 def FindProperties(lexFile):
     properties = {}
-    with open(lexFile) as f:
+    with open(lexFile, encoding=neutralEncoding) as f:
         for l in f.readlines():
             if ("GetProperty" in l or "DefineProperty" in l) and "\"" in l:
                 l = l.strip()
@@ -118,7 +120,7 @@ def FindProperties(lexFile):
 
 def FindPropertyDocumentation(lexFile):
     documents = {}
-    with lexFile.open() as f:
+    with lexFile.open(encoding=neutralEncoding) as f:
         name = ""
         for l in f.readlines():
             l = l.strip()
