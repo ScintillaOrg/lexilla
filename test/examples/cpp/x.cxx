@@ -7,8 +7,7 @@
 
 /** @file LexCPP.cxx
  <file>
- <file />
- <file/>
+ <file >filename</file>
  LexCPP.cxx.
  </file>
  **/
