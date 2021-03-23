@@ -12,6 +12,11 @@
  </file>
  **/
 
+/** Unknown doc keywords so in SCE_C_COMMENTDOCKEYWORDERROR:
+ @wrong LexCPP.cxx
+ <wrong>filename</wrong>
+**/
+
 #define M\
 
 \
