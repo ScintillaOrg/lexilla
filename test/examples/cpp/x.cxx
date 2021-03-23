@@ -5,6 +5,13 @@
 	if (1);
 #endif
 
+/** @file LexCPP.cxx
+ <file>
+ <file >filename</file>
+ LexCPP.cxx.
+ </file>
+ **/
+
 #define M\
 
 \

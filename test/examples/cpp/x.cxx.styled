@@ -5,6 +5,13 @@
 	if (1);
 {9}#endif
 {0}
+{3}/** {17}@file{3} LexCPP.cxx
+ <{17}file{3}>
+ <{17}file{3} >filename</{17}file{3}>
+ LexCPP.cxx.
+ </{17}file{3}>
+ **/{0}
+
 {9}#define M\
 
 {0}\
