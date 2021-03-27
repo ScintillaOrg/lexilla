@@ -13,6 +13,10 @@ Gcc Error 2, Find In Files Match 21
 Microsoft Error 3
 {3}LexErrorList.cxx(15): fatal error C1083: Cannot open include file: 'ILexer.h': No such file or directory
 {0}
+{3}PlatQt.obj : error LNK2019: unresolved external symbol "class Scintilla::PRectangle __cdecl Scintilla::PixelAlign(class Scintilla::PRectangle const &,int)" (?PixelAlign@Scintilla@@YA?AVPRectangle@1@AEBV21@H@Z) referenced in function "public: virtual void __cdecl Scintilla::SurfaceImpl::FillRectangleAligned(class Scintilla::PRectangle,class Scintilla::Fill)" (?FillRectangleAligned@SurfaceImpl@Scintilla@@UEAAXVPRectangle@2@VFill@2@@Z)
+{0}
+{3}NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX64\x64\link.EXE"' : return code '0x460'
+{0}
 
 Command 4
 {4}>pwd
