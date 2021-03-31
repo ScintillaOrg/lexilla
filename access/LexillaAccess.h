@@ -6,8 +6,8 @@
 // Copyright 2019 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#ifndef LEXILLACOLLECTION_H
-#define LEXILLACOLLECTION_H
+#ifndef LEXILLAACCESS_H
+#define LEXILLAACCESS_H
 
 namespace Lexilla {
  

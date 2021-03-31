@@ -1,4 +1,4 @@
-// Scintilla source code edit control
+// Lexilla lexer library
 /** @file TestDocument.cxx
  ** Lexer testing.
  **/

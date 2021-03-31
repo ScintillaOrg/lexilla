@@ -1,5 +1,9 @@
-// TestLexers.cxx : Test lexers through Lexilla
-//
+// Lexilla lexer library
+/** @file TestLexers.cxx
+ ** Test lexers through Lexilla.
+ **/
+ // Copyright 2019 by Neil Hodgson <neilh@scintilla.org>
+ // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <cassert>
 

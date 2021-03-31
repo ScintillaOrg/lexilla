@@ -6,6 +6,9 @@
 // Copyright 2020 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#ifndef LEXILLA_H
+#define LEXILLA_H
+
 // Define the default Lexilla shared library name for each platform
 #if _WIN32
 #define LEXILLA_LIB "lexilla"
@@ -87,4 +90,6 @@ void LEXILLA_CALL SetLibraryProperty(const char *key, const char *value);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

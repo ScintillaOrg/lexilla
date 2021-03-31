@@ -1,9 +1,12 @@
-// Scintilla source code edit control
+// Lexilla lexer library
 /** @file TestDocument.h
  ** Lexer testing.
  **/
 // Copyright 2019 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
+
+#ifndef TESTDOCUMENT_H
+#define TESTDOCUMENT_H
 
 class TestDocument : public Scintilla::IDocument {
 	std::string text;
@@ -41,3 +44,4 @@ public:
 	int SCI_METHOD GetCharacterAndWidth(Sci_Position position, Sci_Position *pWidth) const override;
 };
 
+#endif
