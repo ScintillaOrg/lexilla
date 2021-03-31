@@ -128,6 +128,7 @@ bool TestFile(std::filesystem::path path,
 		}
 	}
 	if (!plex) {
+		std::cout << "\n" << path.string() << ":1: has no lexer\n\n";
 		return false;
 	}
 
