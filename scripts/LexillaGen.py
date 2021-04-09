@@ -115,7 +115,8 @@ def RegenerateAll(rootDirectory):
         "#define VERSION_WORDS " + versionCommad)
     ReplaceREInFile(docDir / "LexillaDownload.html",
         r"/www.scintilla.org/([a-zA-Z]+)\d\d\d",
-        r"/www.scintilla.org/\g<1>" +  version)
+        r"/www.scintilla.org/\g<1>" +  version,
+        0)
 
     pathMain = lexillaDir / "doc" / "Lexilla.html"
     UpdateLineInFile(pathMain,
