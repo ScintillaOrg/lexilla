@@ -129,6 +129,9 @@ def RegenerateAll(rootDirectory):
     UpdateLineInFile(pathMain,
         '    <meta name="Date.Modified"',
         '    <meta name="Date.Modified" content="' + lex.dateModified + '" />')
+    UpdateLineInFile(lexillaDir / "doc" / "LexillaHistory.html",
+        '	Released ',
+        '	Released ' + lex.dmyModified + '.')
 
     lexillaXcode = lexillaDir / "src" / "Lexilla"
     lexillaXcodeProject = lexillaXcode / "Lexilla.xcodeproj" / "project.pbxproj"
