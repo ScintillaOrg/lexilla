@@ -164,7 +164,8 @@ bool TestFile(std::filesystem::path path,
 	std::filesystem::path pathStyled = path;
 	pathStyled += ".styled";
 	const std::string styledText = ReadFile(pathStyled);
-	if (styledTextNew != styledText) {
+	bool success = styledTextNew == styledText;
+	if (!success) {
 		std::cout << "\n" << path.string() << ":1: is different\n\n";
 		std::filesystem::path pathNew = path;
 		pathNew += ".new";
@@ -175,7 +176,7 @@ bool TestFile(std::filesystem::path path,
 
 	TestCRLF(path, text, Lexilla::MakeLexer(language));
 
-	return true;
+	return success;
 }
 
 bool TestDirectory(std::filesystem::path directory, std::filesystem::path basePath) {
