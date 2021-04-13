@@ -2,7 +2,7 @@
 # Test Lexilla with gcc and clang on Linux and macOS 
 # Windows has older versions of libraries so can't compile std::filesystem
 # with gcc or std::string::starts_with with clang.
-# On macOS, gcc is a synonym for clang so not much point in running gcc but omitting it is work.
+# On macOS, gcc is a synonym for clang so exclude gcc.
 os:
  - linux
  - osx
@@ -31,12 +31,12 @@ compiler:
 
 script:
  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then MAKER="mingw32-make windir=1" ; else MAKER="make" ; fi
- - (cd src && $MAKER)
+ - (cd src && $MAKER DEBUG=1)
  - cd test
- - if [ "$TRAVIS_OS_NAME" != "windows" ]; then make test ; fi
- - (cd unit && $MAKER test)
+ - if [ "$TRAVIS_OS_NAME" != "windows" ]; then make DEBUG=1 test ; fi
+ - (cd unit && $MAKER DEBUG=1 test)
  - cd ..
  - cd examples
- - (cd CheckLexilla && $MAKER check)
- - (cd SimpleLexer && $MAKER check)
+ - (cd CheckLexilla && $MAKER DEBUG=1 check)
+ - (cd SimpleLexer && $MAKER DEBUG=1 check)
  - cd ..
