@@ -1321,12 +1321,10 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				do {
 					sc.Forward();
 				} while ((sc.ch == ' ' || sc.ch == '\t') && sc.More());
-				if (sc.atLineEnd) {
-					sc.SetState(SCE_C_DEFAULT|activitySet);
-				} else if (sc.Match("include")) {
+				if (sc.Match("include")) {
 					isIncludePreprocessor = true;
 				} else {
-					if (options.trackPreprocessor) {
+					if (options.trackPreprocessor && IsAlphaNumeric(sc.ch)) {
 						// If #if is nested too deeply (>31 levels) the active/inactive appearance
 						// will stop reflecting the code.
 						if (sc.Match("ifdef") || sc.Match("ifndef")) {

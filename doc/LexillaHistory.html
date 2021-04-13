@@ -576,6 +576,9 @@
 	Fix assertion in cpp lexer handling of preprocessor.
 	Empty preprocessor statement '#' caused preprocessor history to be stored on incorrect line number.
 	Dangling #else or #elif without corresponding #if led to inconsistent state.
+	Change treatment of empty preprocessor statement to set subsequent line end characters in
+	preprocessor style as this is more consistent with other preprocessor directives and avoids
+	differences between \n and \r\n line ends.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2245/">Bug #2245</a>.
 	</li>
     </ul>
