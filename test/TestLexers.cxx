@@ -49,6 +49,41 @@ std::string MarkedDocument(const Scintilla::IDocument *pdoc) {
 	return os.str();
 }
 
+void PrintLevel(std::ostringstream &os, int level) {
+	const int levelNow = level & 0xFFF;
+	const int levelNext = level >> 16;
+	const int levelFlags = (level >> 12) & 0xF;
+	char foldSymbol = ' ';
+	if (level & 0x2000)
+		foldSymbol = '+';
+	else if (levelNow > 0x400)
+		foldSymbol = '|';
+	os << std::hex << " " << levelFlags << " "
+		<< std::setw(3) << levelNow << " "
+		<< std::setw(3) << levelNext << " "
+		<< foldSymbol << " ";
+}
+
+std::string FoldedDocument(const Scintilla::IDocument *pdoc) {
+	std::ostringstream os(std::ios::binary);
+	Sci_Position linePrev = -1;
+	char ch = '\0';
+	for (Sci_Position pos = 0; pos < pdoc->Length(); pos++) {
+		Sci_Position lineNow = pdoc->LineFromPosition(pos);
+		if (linePrev < lineNow) {
+			PrintLevel(os, pdoc->GetLevel(lineNow));
+			linePrev = lineNow;
+		}
+		pdoc->GetCharRange(&ch, pos, 1);
+		os << ch;
+	}
+	if (ch == '\n') {
+		// Extra empty line
+		PrintLevel(os, pdoc->GetLevel(linePrev + 1));
+	}
+	return os.str();
+}
+
 std::map<std::string, std::string> PropertiesFromFile(std::filesystem::path path) {
 	std::map<std::string, std::string> m;
 	std::ifstream ifs(path);
@@ -160,6 +195,7 @@ bool TestFile(std::filesystem::path path,
 	doc.Set(text);
 	Scintilla::IDocument *pdoc = &doc;
 	plex->Lex(0, pdoc->Length(), 0, pdoc);
+	plex->Fold(0, pdoc->Length(), 0, pdoc);
 	const std::string styledTextNew = MarkedDocument(pdoc);
 	std::filesystem::path pathStyled = path;
 	pathStyled += ".styled";
@@ -168,11 +204,25 @@ bool TestFile(std::filesystem::path path,
 	if (!success) {
 		std::cout << "\n" << path.string() << ":1: is different\n\n";
 		std::filesystem::path pathNew = path;
-		pathNew += ".new";
+		pathNew += ".styled.new";
 		std::ofstream ofs(pathNew, std::ios::binary);
 		ofs << styledTextNew;
 	}
 	plex->Release();
+
+	
+	const std::string foldedTextNew = FoldedDocument(pdoc);
+	std::filesystem::path pathFolded = path;
+	pathFolded += ".folded";
+	const std::string foldedText = ReadFile(pathFolded);
+	if (foldedTextNew != foldedText) {
+		success = false;
+		std::cout << "\n" << path.string() << ":1: has different folds\n\n";
+		std::filesystem::path pathNew = path;
+		pathNew += ".folded.new";
+		std::ofstream ofs(pathNew, std::ios::binary);
+		ofs << foldedTextNew;
+	}
 
 	TestCRLF(path, text, Lexilla::MakeLexer(language));
 
@@ -185,7 +235,8 @@ bool TestDirectory(std::filesystem::path directory, std::filesystem::path basePa
 	for (auto &p : std::filesystem::directory_iterator(directory)) {
 		if (!p.is_directory()) {
 			const std::string extension = p.path().extension().string();
-			if (extension != ".properties" && extension != ".styled" && extension != ".new") {
+			if (extension != ".properties" && extension != ".styled" && extension != ".new" &&
+				extension != ".folded") {
 				const std::filesystem::path relativePath = p.path().lexically_relative(basePath);
 				std::cout << "Lexing " << relativePath.string() << '\n';
 				if (!TestFile(p, properties)) {
