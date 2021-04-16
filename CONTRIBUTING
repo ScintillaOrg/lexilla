@@ -15,7 +15,7 @@ start as markup:
 For folding, there are 4 columns of folding results preceding the example text:
  2 400   0 + --[[ coding:UTF-8
  0 402   0 | comment ]]
-See the README file for more explanation of the folding results.
+See the test/README file for more explanation of the folding results.
 
 To build lexilla and the tests with gcc there are Windows batch
 and Unix shell files scripts/RunTest.bat scripts/RunTest.sh.
