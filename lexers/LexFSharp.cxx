@@ -546,6 +546,7 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 }
 
 bool LineContains(LexAccessor &styler, const char *word, const Sci_Position start, const Sci_Position end = 1);
+bool MatchPPDirectiveBranch(LexAccessor &styler, const Sci_Position line);
 
 void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int initStyle, IDocument *pAccess) {
 	if (!options.fold) {
@@ -584,17 +585,29 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 		chNext = styler.SafeGetCharAt(currentPos + 1);
 
 		if (options.foldComment) {
-			if (options.foldCommentMultiLine && style == SCE_FSHARP_COMMENTLINE &&
-			    stylePrev != SCE_FSHARP_COMMENTLINE) {
+			if (options.foldCommentMultiLine && inLineComment &&
+			    (lineCurrent > 0 || styler.StyleAt(lineStartNext) == SCE_FSHARP_COMMENTLINE)) {
 				const bool haveCommentList = LineContains(styler, "//", lineStartNext, lineNext);
 				if (haveCommentList) {
-					commentLinesInFold++;
-					if (commentLinesInFold < 1) {
+					// begin fold region
+					if (commentLinesInFold == ZERO_LENGTH) {
 						levelNext++;
 					}
+					// start line count at 0
+					commentLinesInFold++;
 				} else {
-					const int8_t offset = commentLinesInFold > 0 ? commentLinesInFold : 1;
-					levelNext -= offset;
+					Sci_Position lineFold = lineCurrent;
+					while (lineFold > 0) {
+						commentLinesInFold--;
+						lineFold--;
+						if (!LineContains(styler, "//", lineFold)) {
+							break;
+						}
+					}
+					// line count should be reduced to 0, and no less
+					if (commentLinesInFold > ZERO_LENGTH) {
+						levelNext--;
+					}
 					commentLinesInFold = ZERO_LENGTH;
 				}
 			}
@@ -613,19 +626,37 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 				levelNext++;
 			} else if (styler.Match(currentPos, "#endif")) {
 				levelNext--;
+				// compensate for #else branches and import lists
+				Sci_Position lineFold = lineCurrent;
+				while (lineFold > 0) {
+					lineFold--;
+					if (MatchPPDirectiveBranch(styler, lineFold)) {
+						levelNext--;
+						break;
+					}
+				}
 			}
 		}
 
 		if (options.foldImports && style == SCE_FSHARP_KEYWORD && LineContains(styler, "open", lineCurrent)) {
 			const bool haveImportList = LineContains(styler, "open", lineStartNext, lineNext);
 			if (haveImportList) {
-				importsInFold++;
-				if (importsInFold < 1) {
+				if (importsInFold == ZERO_LENGTH) {
 					levelNext++;
 				}
+				importsInFold++;
 			} else {
-				const int8_t offset = importsInFold > 0 ? importsInFold : 1;
-				levelNext -= offset;
+				Sci_Position lineFold = lineCurrent;
+				while (lineFold > 0) {
+					importsInFold--;
+					lineFold--;
+					if (!LineContains(styler, "open", lineFold)) {
+						break;
+					}
+				}
+				if (importsInFold > ZERO_LENGTH) {
+					levelNext--;
+				}
 				importsInFold = ZERO_LENGTH;
 			}
 		}
@@ -671,6 +702,14 @@ bool LineContains(LexAccessor &styler, const char *word, const Sci_Position star
 		}
 	}
 	return found;
+}
+
+bool MatchPPDirectiveBranch(LexAccessor &styler, const Sci_Position line) {
+	const Sci_Position linePrev = line - 1;
+	const Sci_Position lineStart = styler.LineStart(line);
+	const Sci_Position lineStartPrev = styler.LineStart(linePrev);
+	return (styler.StyleAt(lineStart) == SCE_FSHARP_PREPROCESSOR && !styler.Match(lineStart, "#if")) ||
+		(LineContains(styler, "open", lineStartPrev, linePrev) && LineContains(styler, "open", lineStart, line));
 }
 } // namespace
 
