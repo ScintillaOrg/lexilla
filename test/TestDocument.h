@@ -13,6 +13,7 @@ class TestDocument : public Scintilla::IDocument {
 	std::string textStyles;
 	std::vector<Sci_Position> lineStarts;
 	std::vector<int> lineStates;
+	std::vector<int> lineLevels;
 	Sci_Position endStyled=0;
 public:
 	void Set(std::string_view sv);

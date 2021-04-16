@@ -60,7 +60,7 @@ namespace {
 
 void TestDocument::Set(std::string_view sv) {
 	text = sv;
-	textStyles.resize(text.size());
+	textStyles.resize(text.size() + 1);
 	lineStarts.clear();
 	endStyled = 0;
 	lineStarts.push_back(0);
@@ -71,6 +71,7 @@ void TestDocument::Set(std::string_view sv) {
 	}
 	lineStarts.push_back(text.length());
 	lineStates.resize(lineStarts.size());
+	lineLevels.resize(lineStarts.size(), 0x400);
 }
 
 int SCI_METHOD TestDocument::Version() const {
@@ -89,6 +90,9 @@ void SCI_METHOD TestDocument::GetCharRange(char *buffer, Sci_Position position, 
 }
 
 char SCI_METHOD TestDocument::StyleAt(Sci_Position position) const {
+	if (position < 0) {
+		return 0;
+	}
 	return textStyles.at(position);
 }
 
@@ -105,20 +109,21 @@ Sci_Position SCI_METHOD TestDocument::LineFromPosition(Sci_Position position) co
 }
 
 Sci_Position SCI_METHOD TestDocument::LineStart(Sci_Position line) const {
+	if (line < 0) {
+		return 0;
+	}
 	if (line >= static_cast<Sci_Position>(lineStarts.size())) {
 		return text.length();
 	}
 	return lineStarts.at(line);
 }
 
-int SCI_METHOD TestDocument::GetLevel(Sci_Position) const {
-	// Only for folding so not implemented yet
-	return 0;
+int SCI_METHOD TestDocument::GetLevel(Sci_Position line) const {
+	return lineLevels.at(line);
 }
 
-int SCI_METHOD TestDocument::SetLevel(Sci_Position, int) {
-	// Only for folding so not implemented yet
-	return 0;
+int SCI_METHOD TestDocument::SetLevel(Sci_Position line, int level) {
+	return lineLevels.at(line) = level;
 }
 
 int SCI_METHOD TestDocument::GetLineState(Sci_Position line) const {
