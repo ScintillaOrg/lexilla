@@ -359,4 +359,8 @@ EXPORT_FUNCTION void CALLING_CONVENTION SetLibraryProperty(const char *, const c
 	// Null implementation
 }
 
+EXPORT_FUNCTION const char * CALLING_CONVENTION GetNameSpace() {
+	return "lexilla";
+}
+
 }

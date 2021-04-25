@@ -113,4 +113,8 @@ EXPORT_FUNCTION Scintilla::ILexer5* CALLING_CONVENTION CreateLexer(const char *n
 	return nullptr;
 }
 
+EXPORT_FUNCTION const char * CALLING_CONVENTION GetNameSpace() {
+	return "example";
+}
+
 }
