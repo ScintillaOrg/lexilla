@@ -2033,10 +2033,6 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '\"') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_DOUBLESTRING, inScriptType));
 				state = SCE_HJ_DEFAULT;
-			} else if ((inScriptType == eNonHtmlScript) && (ch == '-') && (chNext == '-') && (chNext2 == '>')) {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-				i += 2;
 			} else if (isLineEnd(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HJ_STRINGEOL;
