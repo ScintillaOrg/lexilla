@@ -97,4 +97,12 @@ const char *LEXILLA_CALL GetNameSpace();
 }
 #endif
 
+#ifdef __cplusplus
+namespace Lexilla {
+	class LexerModule;
+}
+// Add a static lexer (in the same binary) to Lexilla's list
+void AddStaticLexerModule(Lexilla::LexerModule *plm);
+#endif
+
 #endif
