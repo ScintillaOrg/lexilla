@@ -12,7 +12,7 @@
 
 #include "catch.hpp"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // Test SparseState.
 

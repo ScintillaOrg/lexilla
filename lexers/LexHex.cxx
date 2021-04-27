@@ -118,7 +118,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // prototypes for general helper functions
 static inline bool IsNewline(const int ch);

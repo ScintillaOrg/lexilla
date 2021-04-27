@@ -26,7 +26,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // -----------------------------------------
 // Functions classifying a single character.

@@ -22,7 +22,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 inline static void getRange( Sci_PositionU start, Sci_PositionU end, Accessor & styler, char * s, Sci_PositionU len )
 {

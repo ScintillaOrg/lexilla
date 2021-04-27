@@ -23,7 +23,7 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool isMaximaoperator(char ch) {
   return (ch == '\'' || ch == '`' || ch == '(' ||

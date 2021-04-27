@@ -23,7 +23,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool IsAWordStart(int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');

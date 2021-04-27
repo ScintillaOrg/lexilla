@@ -25,7 +25,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 
 //each character a..z and A..Z + '_' can be part of a keyword

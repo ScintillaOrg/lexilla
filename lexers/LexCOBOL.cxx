@@ -26,7 +26,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 #define IN_DIVISION 0x01
 #define IN_DECLARATIVES 0x02

@@ -24,7 +24,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool IsGAPOperator(char ch) {
 	if (IsASCII(ch) && isalnum(ch)) return false;

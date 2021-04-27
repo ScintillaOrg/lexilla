@@ -49,7 +49,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static const int T3_SINGLE_QUOTE = 1;
 static const int T3_INT_EXPRESSION = 2;

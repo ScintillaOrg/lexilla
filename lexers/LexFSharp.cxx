@@ -27,6 +27,7 @@
 // clang-format on
 
 using namespace Scintilla;
+using namespace Lexilla;
 
 static const char *const lexerName = "fsharp";
 static constexpr int WORDLIST_SIZE = 5;

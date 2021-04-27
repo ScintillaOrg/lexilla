@@ -32,6 +32,7 @@
 #include "DefaultLexer.h"
 
 using namespace Scintilla;
+using namespace Lexilla;
 
 /* Bits:
  * 1  - whitespace

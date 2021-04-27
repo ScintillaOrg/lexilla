@@ -30,7 +30,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static void ColouriseStataDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
     Accessor &styler) {

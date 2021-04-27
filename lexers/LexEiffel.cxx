@@ -23,7 +23,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool isEiffelOperator(unsigned int ch) {
 	// '.' left out as it is used to make up numbers

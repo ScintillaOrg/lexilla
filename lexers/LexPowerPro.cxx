@@ -43,7 +43,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool IsStreamCommentStyle(int style) {
 	return style == SCE_POWERPRO_COMMENTBLOCK;

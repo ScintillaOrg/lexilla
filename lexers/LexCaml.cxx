@@ -50,7 +50,7 @@ static const int baseT[24] = {
 	0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0,16	/* M - X */
 };
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 #ifdef BUILD_AS_EXTERNAL_LEXER
 /*

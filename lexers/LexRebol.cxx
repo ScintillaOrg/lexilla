@@ -29,7 +29,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool IsAWordChar(const int ch) {
 	return (isalnum(ch) || ch == '?' || ch == '!' || ch == '.' || ch == '\'' || ch == '+' || ch == '-' || ch == '*' || ch == '&' || ch == '|' || ch == '=' || ch == '_' || ch == '~');

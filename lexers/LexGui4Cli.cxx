@@ -40,7 +40,7 @@ val SCE_GC_OPERATOR=9
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 #define debug Platform::DebugPrintf
 

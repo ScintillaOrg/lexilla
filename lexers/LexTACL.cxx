@@ -26,7 +26,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 inline bool isTACLoperator(char ch)
 	{

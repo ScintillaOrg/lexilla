@@ -34,7 +34,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // val SCE_TEX_DEFAULT = 0
 // val SCE_TEX_SPECIAL = 1

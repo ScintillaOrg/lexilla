@@ -30,7 +30,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // val SCE_METAPOST_DEFAULT = 0
 // val SCE_METAPOST_SPECIAL = 1

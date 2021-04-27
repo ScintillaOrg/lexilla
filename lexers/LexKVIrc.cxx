@@ -26,7 +26,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 
 /* KVIrc Script syntactic rules: http://www.kvirc.net/doc/doc_syntactic_rules.html */

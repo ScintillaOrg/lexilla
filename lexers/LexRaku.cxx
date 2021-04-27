@@ -60,6 +60,7 @@
 #include "DefaultLexer.h"
 
 using namespace Scintilla;
+using namespace Lexilla;
 
 namespace { // anonymous namespace to isolate any name clashes
 /*----------------------------------------------------------------------------*

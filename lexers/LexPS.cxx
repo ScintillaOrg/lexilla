@@ -30,7 +30,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 static inline bool IsASelfDelimitingChar(const int ch) {
     return (ch == '[' || ch == ']' || ch == '{' || ch == '}' ||

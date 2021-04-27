@@ -23,7 +23,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // Some char test functions
 static bool isAsn1Number(int ch)

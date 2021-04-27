@@ -28,7 +28,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 #ifdef DEBUG_LEX_MODULA
 #define DEBUG_STATE( p, c )\

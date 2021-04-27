@@ -24,7 +24,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-using namespace Scintilla;
+using namespace Lexilla;
 
 // Is an end of line character
 inline bool IsEOL(const int ch) {
