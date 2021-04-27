@@ -42,6 +42,7 @@ style.simple.1=fore:#FF0000
 #include "LexerBase.h"
 
 using namespace Scintilla;
+using namespace Lexilla;
 
 class LexerSimple : public LexerBase {
 public:
