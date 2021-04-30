@@ -368,11 +368,10 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
             // Links and Images
             if (sc.Match("![")) {
               sc.SetState(SCE_MARKDOWN_LINK);
-              sc.Forward(2);
+              sc.Forward(1);
             }
             else if (sc.ch == '[' && sc.GetRelative(-1) != '\\') {
               sc.SetState(SCE_MARKDOWN_LINK);
-              sc.Forward();
             }
             // Code - also a special case for alternate inside spacing
             else if (sc.Match("``") && sc.GetRelative(3) != ' ' && AtTermStart(sc)) {
