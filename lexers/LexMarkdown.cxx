@@ -103,9 +103,10 @@ static bool HasPrevLineContent(StyleContext &sc) {
     while ((--i + (Sci_Position)sc.currentPos) >= 0 && !IsNewline(sc.GetRelative(i)))
         ;
     while ((--i + (Sci_Position)sc.currentPos) >= 0) {
-        if (IsNewline(sc.GetRelative(i)))
+        const int ch = sc.GetRelative(i);
+        if (ch == '\n')
             break;
-        if (!IsASpaceOrTab(sc.GetRelative(i)))
+        if (!((ch == '\r' || IsASpaceOrTab(ch))))
             return true;
     }
     return false;

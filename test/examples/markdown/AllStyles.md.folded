@@ -15,11 +15,13 @@
  0 400   0   1. Ordered list item=14
  0 400   0   >Block Quote=15
  0 400   0   ~~Strike-out=16~~
- 0 400   0   Next line is horizontal rule=17
+ 0 400   0   
  0 400   0   ***
+ 0 400   0   Previous line was horizontal rule=17
  0 400   0   [Link=18](https://18.com)
  0 400   0   `Inline Code=19`
  0 400   0   ``Inline Code=20``
+ 0 400   0   
  0 400   0   ~~~
  0 400   0   Block code=21
  0 400   0   ~~~

@@ -15,11 +15,13 @@
 {14}1.{0} Ordered list item=14{1}
 {15}>{0}Block Quote=15{1}
 {16}~~Strike-out=16~~{1}
-{0}Next line is horizontal rule=17{1}
+
 {17}***{1}
+{0}Previous line was horizontal rule=17{1}
 {18}[Link=18](https://18.com){1}
 {19}`Inline Code=19`{1}
 {20}``Inline Code=20``{1}
+
 {21}~~~
 Block code=21
 ~~~{1}

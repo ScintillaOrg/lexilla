@@ -15,11 +15,13 @@ _Emphasis (italic) 2=5_
 1. Ordered list item=14
 >Block Quote=15
 ~~Strike-out=16~~
-Next line is horizontal rule=17
+
 ***
+Previous line was horizontal rule=17
 [Link=18](https://18.com)
 `Inline Code=19`
 ``Inline Code=20``
+
 ~~~
 Block code=21
 ~~~
