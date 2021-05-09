@@ -1,4 +1,6 @@
-// Unit Tests for Scintilla internal data structures
+/** @file testSparseState.cxx
+ ** Unit Tests for Lexilla internal data structures
+ **/
 
 #include <string>
 #include <string_view>

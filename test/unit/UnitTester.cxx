@@ -1,5 +1,6 @@
-// UnitTester.cpp : Defines the entry point for the console application.
-//
+/** @file UnitTester.cxx
+ ** UnitTester.cpp : Defines the entry point for the console application.
+ **/
 
 // Catch uses std::uncaught_exception which is deprecated in C++17.
 // This define silences a warning from Visual C++.
