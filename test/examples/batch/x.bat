@@ -36,4 +36,10 @@ echo word ^
 1
 command
 
+:: Bug argument and variable expansion
+echo %~dp0123
+echo %%-~012
+echo %%~%%~-abcd
+FOR /F %%I in ("C:\Test\temp.txt") do echo %%~dI
+
 :END
