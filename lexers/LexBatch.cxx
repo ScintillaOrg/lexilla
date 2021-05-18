@@ -433,7 +433,9 @@ static void ColouriseBatchDoc(
 							wbo = 3;
 							// Search to end of word for another % (can be a long path)
 							while ((wbo < wbl) &&
-								(wordBuffer[wbo] != '%')) {
+								(wordBuffer[wbo] != '%') &&
+								(!IsBOperator(wordBuffer[wbo])) &&
+								(!IsBSeparator(wordBuffer[wbo]))) {
 								wbo++;
 							}
 							if (wbo > 3) {

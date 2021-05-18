@@ -42,4 +42,11 @@ echo %%-~012
 echo %%~%%~-abcd
 FOR /F %%I in ("C:\Test\temp.txt") do echo %%~dI
 
+:: Bug ending of argument and variable expansion
+echo %~dp0\123
+echo "%~dp0123"
+echo "%%-~012"
+echo "%%~%%~-abcd"
+FOR /F %%I in ("C:\Test\temp.txt") do echo "%%~dI"
+
 :END

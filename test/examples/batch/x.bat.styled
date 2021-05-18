@@ -42,4 +42,11 @@ rem 'echo' is word=2, 'a' is default=0
 {2}echo{0} %%~{6}%%~-abcd{0}
 {2}FOR{0} /F {6}%%I{2} in{0} ("C:\Test\temp.txt"){2} do echo{0} {6}%%~dI{0}
 
+{1}:: Bug ending of argument and variable expansion
+{2}echo{0} {6}%~dp0{0}\123
+{2}echo{0} "{6}%~dp0{0}123"
+{2}echo{0} "{6}%%-{0}~012"
+{2}echo{0} "%%~{6}%%~-abcd{0}"
+{2}FOR{0} /F {6}%%I{2} in{0} ("C:\Test\temp.txt"){2} do echo{0} "{6}%%~dI{0}"
+
 {3}:END
