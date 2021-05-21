@@ -84,6 +84,7 @@ extern LexerModule lmIHex;
 extern LexerModule lmIndent;
 extern LexerModule lmInno;
 extern LexerModule lmJSON;
+extern LexerModule lmJulia;
 extern LexerModule lmKix;
 extern LexerModule lmKVIrc;
 extern LexerModule lmLatex;
@@ -229,6 +230,7 @@ void AddEachLexer() {
 		&lmIndent,
 		&lmInno,
 		&lmJSON,
+		&lmJulia,
 		&lmKix,
 		&lmKVIrc,
 		&lmLatex,

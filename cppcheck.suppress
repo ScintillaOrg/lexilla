@@ -54,6 +54,9 @@ constParameter:lexilla/lexers/LexHaskell.cxx
 constParameter:lexilla/lexers/LexHex.cxx
 constParameter:lexilla/lexers/LexHTML.cxx
 variableScope:lexilla/lexers/LexInno.cxx
+variableScope:lexilla/lexers/LexJulia.cxx
+constParameter:lexilla/lexers/LexJulia.cxx
+unreadVariable:lexilla/lexers/LexJulia.cxx
 variableScope:lexilla/lexers/LexLaTeX.cxx
 constParameter:lexilla/lexers/LexLaTeX.cxx
 constParameter:lexilla/lexers/LexLisp.cxx
