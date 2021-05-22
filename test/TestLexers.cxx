@@ -90,6 +90,10 @@ std::map<std::string, std::string> PropertiesFromFile(std::filesystem::path path
 	std::string line;
 	std::string logicalLine;
 	while (std::getline(ifs, line)) {
+		if (line.ends_with("\r")) {
+			// Accidentally have \r\n line ends on Unix system
+			line.pop_back();
+		}
 		logicalLine += line;
 		if (logicalLine.ends_with("\\")) {
 			logicalLine.pop_back();
