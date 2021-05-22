@@ -49,4 +49,9 @@ rem 'echo' is word=2, 'a' is default=0
 {2}echo{0} "%%~{6}%%~-abcd{0}"
 {2}FOR{0} /F {6}%%I{2} in{0} ("C:\Test\temp.txt"){2} do echo{0} "{6}%%~dI{0}"
 
+{1}:: Bug escaped %
+{2}echo{0} {6}%%0{0}
+{2}echo{0} %%{6}%0{0}
+{2}echo{0} %%{6}%%~-abcd{0}
+
 {3}:END
