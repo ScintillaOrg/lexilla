@@ -978,13 +978,14 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
         // check start of a new state
         if (sc.state == SCE_JULIA_DEFAULT) {
             if (sc.ch == '#') {
+                sc.SetState(SCE_JULIA_COMMENT);
                 // increment depth if we are a block comment
                 if(sc.chNext == '=') {
                     commentDepth ++;
+                    sc.Forward();
                 }
                 curLine = styler.GetLine(sc.currentPos);
                 styler.SetLineState(curLine, commentDepth);
-                sc.SetState(SCE_JULIA_COMMENT);
             } else if (sc.ch == '!') {
                 sc.SetState(SCE_JULIA_OPERATOR);
             } else if (sc.ch == '\'') {
