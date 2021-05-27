@@ -52,6 +52,9 @@ endif
 
 ifdef windir
     LDFLAGS += -mwindows
+	ifndef CLANG
+	    LDFLAGS += -Wl,--kill-at
+	endif
 else
     BASE_FLAGS += -fPIC
 endif
