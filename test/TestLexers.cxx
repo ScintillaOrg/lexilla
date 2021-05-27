@@ -313,6 +313,8 @@ int main() {
 		const std::filesystem::path sharedLibrary = baseDirectory / "bin" / LEXILLA_LIB;
 		if (Lexilla::Load(sharedLibrary.string())) {
 			success = AccessLexilla(examplesDirectory);
+		} else {
+			std::cout << "Failed to load " << sharedLibrary << "\n";
 		}
 #endif
 	}
