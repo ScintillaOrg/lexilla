@@ -49,6 +49,7 @@ struct OptionsJulia {
     bool foldComment;
     bool foldCompact;
     bool foldDocstring;
+    bool foldSyntaxBased;
     bool highlightTypeannotation;
     bool highlightLexerror;
     bool stringInterpolation;
@@ -57,6 +58,7 @@ struct OptionsJulia {
         foldComment = true;
         foldCompact = false;
         foldDocstring = true;
+        foldSyntaxBased = true;
         highlightTypeannotation = false;
         highlightLexerror = false;
         stringInterpolation = true;
@@ -79,8 +81,11 @@ struct OptionSetJulia : public OptionSet<OptionsJulia> {
 
 		DefineProperty("fold.comment", &OptionsJulia::foldComment);
 
-		DefineProperty("fold.docstring", &OptionsJulia::foldDocstring,
+		DefineProperty("fold.julia.docstring", &OptionsJulia::foldDocstring,
             "Fold multiline triple-doublequote strings, usually used to document a function or type above the definition.");
+
+		DefineProperty("fold.julia.syntax.based", &OptionsJulia::foldSyntaxBased,
+			"Set this property to 0 to disable syntax based folding.");
 
 		DefineProperty("lexer.julia.highlight.typeannotation", &OptionsJulia::highlightTypeannotation,
 			"This option enables highlighting of type after :: as type annotation instead of parsing from the keyword lists.");
@@ -1143,47 +1148,49 @@ void SCI_METHOD LexerJulia::Fold(Sci_PositionU startPos, Sci_Position length, in
             }
         }
 
-        // list comprehension allow `for`/`if` without `end`
-        if (style == SCE_JULIA_BRACKET) {
-            if (ch == '[') {
-                list_comprehension ++;
-                indexing_level ++;
-                levelNext ++;
-            } else if (ch == ']') {
-                list_comprehension --;
-                indexing_level --;
-                levelNext --;
-            } else if (ch == '(') {
-                list_comprehension ++;
-                levelNext ++;
-            } else if (ch == ')') {
-                list_comprehension --;
-                levelNext --;
-            }
-            // check non-negative
-            if (indexing_level < 0) {
-                indexing_level = 0;
-            }
-            if (list_comprehension < 0) {
-                list_comprehension = 0;
-            }
-        }
-
-        // keyword
-        if (style == SCE_JULIA_KEYWORD1) {
-            word[wordlen++] = static_cast<char>(ch);
-            if (wordlen == 100) {  // prevent overflow
-                word[0] = '\0';
-                wordlen = 1;
-            }
-            if (styleNext !=  SCE_JULIA_KEYWORD1) {
-                word[wordlen] = '\0';
-                wordlen = 0;
-                if (list_comprehension <= 0 && indexing_level <= 0) {
-                    levelNext += CheckKeywordFoldPoint(word);
+        // Syntax based folding, accounts for list comprehension
+        if (options.foldSyntaxBased) {
+            // list comprehension allow `for`, `if` and `begin` without `end`
+            if (style == SCE_JULIA_BRACKET) {
+                if (ch == '[') {
+                    list_comprehension ++;
+                    indexing_level ++;
+                    levelNext ++;
+                } else if (ch == ']') {
+                    list_comprehension --;
+                    indexing_level --;
+                    levelNext --;
+                } else if (ch == '(') {
+                    list_comprehension ++;
+                    levelNext ++;
+                } else if (ch == ')') {
+                    list_comprehension --;
+                    levelNext --;
+                }
+                // check non-negative
+                if (indexing_level < 0) {
+                    indexing_level = 0;
+                }
+                if (list_comprehension < 0) {
+                    list_comprehension = 0;
                 }
             }
 
+            // keyword
+            if (style == SCE_JULIA_KEYWORD1) {
+                word[wordlen++] = static_cast<char>(ch);
+                if (wordlen == 100) {  // prevent overflow
+                    word[0] = '\0';
+                    wordlen = 1;
+                }
+                if (styleNext !=  SCE_JULIA_KEYWORD1) {
+                    word[wordlen] = '\0';
+                    wordlen = 0;
+                    if (list_comprehension <= 0 && indexing_level <= 0) {
+                        levelNext += CheckKeywordFoldPoint(word);
+                    }
+                }
+            }
         }
 
         // Docstring
