@@ -151,6 +151,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lexlib\WordList.cxx" />
+    <ClCompile Include="..\..\lexlib\CharacterSet.cxx" />
     <ClCompile Include="test*.cxx" />
     <ClCompile Include="UnitTester.cxx" />
   </ItemGroup>
