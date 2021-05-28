@@ -1029,9 +1029,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	const bool allowScripts = options.allowScripts;
 	const bool isMako = options.isMako;
 	const bool isDjango = options.isDjango;
-	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", 0x80, true);
-	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", 0x80, true);
-	const CharacterSet setAttributeContinue(CharacterSet::setAlphaNum, ".-_:!#/", 0x80, true);
+	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", true);
+	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", true);
+	const CharacterSet setAttributeContinue(CharacterSet::setAlphaNum, ".-_:!#/", true);
 	// TODO: also handle + and - (except if they're part of ++ or --) and return keywords
 	const CharacterSet setOKBeforeJSRE(CharacterSet::setNone, "([{=,:;!%^&*|?~");
 

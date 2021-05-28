@@ -59,8 +59,8 @@ static void ColouriseLuaDoc(
 	const WordList &keywords8 = *keywordlists[7];
 
 	// Accepts accented characters
-	CharacterSet setWordStart(CharacterSet::setAlpha, "_", 0x80, true);
-	CharacterSet setWord(CharacterSet::setAlphaNum, "_", 0x80, true);
+	CharacterSet setWordStart(CharacterSet::setAlpha, "_", true);
+	CharacterSet setWord(CharacterSet::setAlphaNum, "_", true);
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases. [pP] is for hex floats.
 	CharacterSet setNumber(CharacterSet::setDigits, ".-+abcdefpABCDEFP");
