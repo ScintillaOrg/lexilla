@@ -627,7 +627,7 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 				levelNext++;
 			} else if (styler.Match(currentPos, "#endif")) {
 				levelNext--;
-				// compensate for #else branches and import lists
+				// compensate for #else branches
 				Sci_Position lineFold = lineCurrent;
 				while (lineFold > 0) {
 					lineFold--;
@@ -706,11 +706,8 @@ bool LineContains(LexAccessor &styler, const char *word, const Sci_Position star
 }
 
 bool MatchPPDirectiveBranch(LexAccessor &styler, const Sci_Position line) {
-	const Sci_Position linePrev = line - 1;
 	const Sci_Position lineStart = styler.LineStart(line);
-	const Sci_Position lineStartPrev = styler.LineStart(linePrev);
-	return (styler.StyleAt(lineStart) == SCE_FSHARP_PREPROCESSOR && !styler.Match(lineStart, "#if")) ||
-		(LineContains(styler, "open", lineStartPrev, linePrev) && LineContains(styler, "open", lineStart, line));
+	return (styler.StyleAt(lineStart) == SCE_FSHARP_PREPROCESSOR && !styler.Match(lineStart, "#if"));
 }
 } // namespace
 

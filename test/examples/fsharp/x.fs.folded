@@ -9,38 +9,38 @@
  2 401 402 +   open System
  0 402 402 |   open System.IO
  0 402 401 |   open System.Diagnostics
- 0 401 3ff | #endif
- 1 3ff 3ff   
- 0 3ff 3ff   # 14 @"See: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/strings#remarks"
- 0 3ff 3ff   // verbatim string
- 0 3ff 3ff   let xmlFragment1 = @"<book author=""Milton, John"" title=""Paradise Lost"">"
- 1 3ff 3ff   
- 0 3ff 3ff   // triple-quoted string
- 0 3ff 3ff   let xmlFragment2 = """<book author="Milton, John" title="Paradise Lost">"""
- 1 3ff 3ff   
- 2 3ff 400 + (* you need .NET 5.0 to compile this:
- 0 400 400     https://docs.microsoft.com/en-us/dotnet/fsharp/whats-new/fsharp-50#string-interpolation
- 0 400 3ff   *)
- 0 3ff 3ff   let interpolated = $"I think {3.0 + 0.14} is close to {System.Math.PI}!"
- 1 3ff 3ff   
- 0 3ff 3ff   let ``a byte literal`` = '\209'B
- 1 3ff 3ff   
- 0 3ff 3ff   // quoted expression
- 0 3ff 3ff   let expr =
- 0 3ff 3ff       <@@
- 0 3ff 3ff           let foo () = "bar"
- 0 3ff 3ff           foo ()
- 0 3ff 3ff       @@>
- 1 3ff 3ff   
- 0 3ff 3ff   let bigNum (unused: 'a): float option =
- 0 3ff 3ff       Seq.init 10_000 (float >> (fun i -> i + 11.))
- 0 3ff 3ff       |> (List.ofSeq
- 0 3ff 3ff           >> List.take 5
- 0 3ff 3ff           >> List.fold (*) 1.0)
- 0 3ff 3ff       |> Some
- 1 3ff 3ff   
- 0 3ff 3ff   match bigNum () with
- 0 3ff 3ff   | Some num -> sprintf "%.2f > %u" num ``a byte literal``
- 0 3ff 3ff   | None -> sprintf "%A" "Have a byte string!"B
- 0 3ff 3ff   |> printfn "%s"
- 1 3ff 3ff   
+ 0 401 400 | #endif
+ 1 400 400   
+ 0 400 400   # 14 @"See: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/strings#remarks"
+ 0 400 400   // verbatim string
+ 0 400 400   let xmlFragment1 = @"<book author=""Milton, John"" title=""Paradise Lost"">"
+ 1 400 400   
+ 0 400 400   // triple-quoted string
+ 0 400 400   let xmlFragment2 = """<book author="Milton, John" title="Paradise Lost">"""
+ 1 400 400   
+ 2 400 401 + (* you need .NET 5.0 to compile this:
+ 0 401 401 |   https://docs.microsoft.com/en-us/dotnet/fsharp/whats-new/fsharp-50#string-interpolation
+ 0 401 400 | *)
+ 0 400 400   let interpolated = $"I think {3.0 + 0.14} is close to {System.Math.PI}!"
+ 1 400 400   
+ 0 400 400   let ``a byte literal`` = '\209'B
+ 1 400 400   
+ 0 400 400   // quoted expression
+ 0 400 400   let expr =
+ 0 400 400       <@@
+ 0 400 400           let foo () = "bar"
+ 0 400 400           foo ()
+ 0 400 400       @@>
+ 1 400 400   
+ 0 400 400   let bigNum (unused: 'a): float option =
+ 0 400 400       Seq.init 10_000 (float >> (fun i -> i + 11.))
+ 0 400 400       |> (List.ofSeq
+ 0 400 400           >> List.take 5
+ 0 400 400           >> List.fold (*) 1.0)
+ 0 400 400       |> Some
+ 1 400 400   
+ 0 400 400   match bigNum () with
+ 0 400 400   | Some num -> sprintf "%.2f > %u" num ``a byte literal``
+ 0 400 400   | None -> sprintf "%A" "Have a byte string!"B
+ 0 400 400   |> printfn "%s"
+ 1 400 400   
