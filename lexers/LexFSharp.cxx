@@ -91,8 +91,10 @@ struct OptionSetFSharp : public OptionSet<OptionsFSharp> {
 
 const CharacterSet setOperators = CharacterSet(CharacterSet::setNone, "~^'-+*/%=@|&<>()[]{};,:!?");
 const CharacterSet setClosingTokens = CharacterSet(CharacterSet::setNone, ")}]");
+const CharacterSet setFormatSpecs = CharacterSet(CharacterSet::setNone, ".%aAbcdeEfFgGiMoOstuxX0123456789");
+const CharacterSet setFormatFlags = CharacterSet(CharacterSet::setNone, ".-+0 ");
 const CharacterSet numericMetaChars1 = CharacterSet(CharacterSet::setNone, "_IbeEflmnosuxy");
-const CharacterSet numericMetaChars2 = CharacterSet(CharacterSet::setNone,"lnsy");
+const CharacterSet numericMetaChars2 = CharacterSet(CharacterSet::setNone, "lnsy");
 std::map<int, int> numericPrefixes = { { 'b', 2 }, { 'o', 8 }, { 'x', 16 } };
 constexpr Sci_Position ZERO_LENGTH = -1;
 
@@ -487,6 +489,9 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 							break;
 						}
 					}
+				} else if (sc.ch == '%' && !(fsStr.startChar == '`' || fsStr.startChar == '$') &&
+					   (setFormatSpecs.Contains(sc.chNext) || setFormatFlags.Contains(sc.chNext))) {
+					state = SCE_FSHARP_FORMAT_SPEC;
 				}
 				break;
 			case SCE_FSHARP_IDENTIFIER:
@@ -530,6 +535,14 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 					// change style even when operators aren't spaced
 					: setOperators.Contains(sc.ch) ? SCE_FSHARP_OPERATOR : SCE_FSHARP_DEFAULT;
 				currentBase = (state == SCE_FSHARP_NUMBER) ? currentBase : 10;
+				break;
+			case SCE_FSHARP_FORMAT_SPEC:
+				if (!setFormatSpecs.Contains(sc.chNext) ||
+				    !(setFormatFlags.Contains(sc.ch) || IsADigit(sc.ch)) ||
+				    (setFormatFlags.Contains(sc.ch) && sc.ch == sc.chNext)) {
+					colorSpan++;
+					state = (fsStr.startChar == '@') ? SCE_FSHARP_VERBATIM : SCE_FSHARP_STRING;
+				}
 				break;
 		}
 
