@@ -7,6 +7,10 @@ jobs:
 
         runs-on: ubuntu-latest
 
+        strategy:    
+            matrix:
+                cpp_compiler: [g++, clang++]
+
         steps:
         - uses: actions/checkout@v2
         - name: Install Scintilla source
