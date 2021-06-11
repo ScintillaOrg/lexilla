@@ -18,7 +18,7 @@ jobs:
               (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
               (cd .. && unzip scintilla500.zip)
         env:
-            CXX: ${{ matrix.cpp_compiler }}
+          CXX: ${{ matrix.cpp_compiler }}
         - name: Build
           run: |
               cd src
