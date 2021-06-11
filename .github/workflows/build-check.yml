@@ -9,6 +9,10 @@ jobs:
 
         steps:
         - uses: actions/checkout@v2
+        - name: Install Scintilla source
+          run: |
+              (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
+              (cd .. && unzip scintilla500.zip)
         - name: Build
           run: |
               cd src
