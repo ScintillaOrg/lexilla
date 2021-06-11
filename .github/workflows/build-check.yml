@@ -1,0 +1,27 @@
+name: "Build and check Lexilla"
+
+on: [push]
+
+jobs:
+    build:
+
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v2
+        - name: Build
+            run: |
+                cd src
+                make DEBUG=1
+                cd ..
+        - name: Test
+            run: |
+                cd test
+                make DEBUG=1 test
+                cd ..
+        - name: Examples
+            run: |
+                cd examples
+                (cd CheckLexilla && make DEBUG=1 check)
+                (cd SimpleLexer && make DEBUG=1 check)
+                cd ..
