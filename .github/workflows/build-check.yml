@@ -17,21 +17,13 @@ jobs:
           run: |
               (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
               (cd .. && unzip scintilla500.zip)
-        - name: Build
-          run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}})
         - name: Unit Test
-          run: (cd test/unit && make DEBUG=1 test)
-          env:
-              CXX: ${{ matrix.cpp_compiler }}
-        - name: Test
-          run: (cd test && make DEBUG=1 test)
-          env:
-              CXX: ${{ matrix.cpp_compiler }}
-        - name: Examples
-          run: |
-              cd examples
-              (cd CheckLexilla && make DEBUG=1 check)
-              (cd SimpleLexer && make DEBUG=1 check)
-              cd ..
-          env:
-              CXX: ${{ matrix.cpp_compiler }}
+          run: (cd test/unit && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
+        - name: Build Lexilla
+          run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}})
+        - name: Test lexing and folding
+          run: (cd test && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
+        - name: CheckLexilla C Example
+          run: (cd examples/CheckLexilla && make DEBUG=1 check)
+        - name: SimpleLexer Example
+          run: (cd examples.SimpleLexer && make DEBUG=1 CXX=${{matrix.cpp_compiler}} check)
