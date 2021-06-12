@@ -1,0 +1,17 @@
+name: "Build and check Lexilla on Win32 with Visual C++"
+
+on: [push]
+
+jobs:
+    build:
+
+        runs-on: windows-latest
+
+        steps:
+        - uses: actions/checkout@v2
+        - name: Install Scintilla source
+          run: |
+              (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
+              (cd .. && 7z scintilla500.zip)
+        - name: Unit Test
+          run: (cd test/unit && nmake -f test.mak DEBUG=1 test)
