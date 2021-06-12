@@ -40,7 +40,7 @@ jobs:
           run: |
               cd examples/CheckLexilla
               cl CheckLexilla.c -I ../../include -Fe: CheckLexilla
-              CheckLexilla
+              .\CheckLexilla.exe
               cd ../..
         - name: SimpleLexer Example
           run: |
