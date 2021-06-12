@@ -26,4 +26,4 @@ jobs:
         - name: CheckLexilla C Example
           run: (cd examples/CheckLexilla && make DEBUG=1 check)
         - name: SimpleLexer Example
-          run: (cd examples.SimpleLexer && make DEBUG=1 CXX=${{matrix.cpp_compiler}} check)
+          run: (cd examples/SimpleLexer && make DEBUG=1 CXX=${{matrix.cpp_compiler}} check)
