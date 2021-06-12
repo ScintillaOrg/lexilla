@@ -12,6 +12,6 @@ jobs:
         - name: Install Scintilla source
           run: |
               (cd .. && curl -O https://www.scintilla.org/scintilla500.zip)
-              (cd .. && 7z scintilla500.zip)
+              (cd .. && 7z x scintilla500.zip)
         - name: Unit Test
           run: (cd test/unit && nmake -f test.mak DEBUG=1 test)
