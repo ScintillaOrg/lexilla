@@ -1,0 +1,10 @@
+# comment
+
+key: value # comment
+
+hanging_value:
+  value
+
+1: 1
+
+true: true
