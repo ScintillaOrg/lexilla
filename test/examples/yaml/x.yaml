@@ -2,6 +2,8 @@
 
 key: value # comment
 
+colon:in:key: value
+
 hanging_value:
   value
 
