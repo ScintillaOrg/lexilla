@@ -227,6 +227,7 @@ next:
 				sc.ForwardSetState(SCE_TCL_DEFAULT);
 			prevSlash = false;
 			previousLevel = currentLevel;
+			visibleChars = false;
 			goto next;
 		}
 
