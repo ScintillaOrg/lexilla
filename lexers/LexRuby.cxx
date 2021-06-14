@@ -1860,7 +1860,6 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
     }
     // Fill in the real level of the next line, keeping the current flags as they will be filled in later
     if (!buffer_ends_with_eol) {
-        lineCurrent++;
         int new_lev = levelCurrent;
         if (visibleChars == 0 && foldCompact)
             new_lev |= SC_FOLDLEVELWHITEFLAG;
