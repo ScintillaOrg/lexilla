@@ -84,8 +84,6 @@ constParameter:lexilla/lexers/LexRaku.cxx
 variableScope:lexilla/lexers/LexRaku.cxx
 redundantInitialization:lexilla/lexers/LexRegistry.cxx
 constParameter:lexilla/lexers/LexRuby.cxx
-variableScope:lexilla/lexers/LexRuby.cxx
-uninitMemberVar:lexilla/lexers/LexRuby.cxx
 constParameter:lexilla/lexers/LexRust.cxx
 constParameter:lexilla/lexers/LexScriptol.cxx
 variableScope:lexilla/lexers/LexSpecman.cxx
