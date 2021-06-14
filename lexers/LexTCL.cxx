@@ -146,8 +146,8 @@ next:
 		} else if (!IsAWordChar(sc.ch)) {
 			if ((sc.state == SCE_TCL_IDENTIFIER && expected) ||  sc.state == SCE_TCL_MODIFIER) {
 				char w[100];
-				char *s=w;
 				sc.GetCurrent(w, sizeof(w));
+				char *s=w;
 				if (w[strlen(w)-1]=='\r')
 					w[strlen(w)-1]=0;
 				while (*s == ':') // ignore leading : like in ::set a 10
@@ -162,7 +162,7 @@ next:
 						sc.ChangeState(quote ? SCE_TCL_WORD_IN_QUOTE : SCE_TCL_WORD3);
 					} else if (keywords4.InList(s)) {
 						sc.ChangeState(quote ? SCE_TCL_WORD_IN_QUOTE : SCE_TCL_WORD4);
-					} else if (sc.GetRelative(-static_cast<int>(strlen(s))-1) == '{' &&
+					} else if (sc.GetRelative(-static_cast<Sci_Position>(strlen(s))-1) == '{' &&
 					           keywords5.InList(s) && sc.ch == '}') { // {keyword} exactly no spaces
 						sc.ChangeState(SCE_TCL_EXPAND);
 					}
@@ -316,7 +316,7 @@ next:
 					break;
 				case '[':
 					expected = true;
-					// Falls through.
+					[[fallthrough]];
 				case ']':
 				case '(':
 				case ')':
