@@ -98,3 +98,8 @@ It is often necessary to set 'fold' in SciTE.properties to cause folding.
 
 If there is a need to test additional configurations of keywords or properties then
 create another subdirectory with the different settings in a new SciTE.properties.
+
+There is some support for running benchmarks on lexers and folders. The properties
+testlexers.repeat.lex and testlexers.repeat.fold specify the number of times example
+documents are lexed or folded. Set to a large number like testlexers.repeat.lex=10000
+then run with a profiler.

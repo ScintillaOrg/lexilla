@@ -84,31 +84,56 @@ std::string FoldedDocument(const Scintilla::IDocument *pdoc) {
 	return os.str();
 }
 
-std::map<std::string, std::string> PropertiesFromFile(std::filesystem::path path) {
-	std::map<std::string, std::string> m;
-	std::ifstream ifs(path);
-	std::string line;
-	std::string logicalLine;
-	while (std::getline(ifs, line)) {
-		if (line.ends_with("\r")) {
-			// Accidentally have \r\n line ends on Unix system
-			line.pop_back();
-		}
-		logicalLine += line;
-		if (logicalLine.ends_with("\\")) {
-			logicalLine.pop_back();
-		} else {
-			const size_t positionEquals = logicalLine.find("=");
-			if (positionEquals != std::string::npos) {
-				const std::string key = logicalLine.substr(0, positionEquals);
-				const std::string value = logicalLine.substr(positionEquals+1);
-				m[key] = value;
+class PropertyMap {
+public:
+	using PropMap = std::map<std::string, std::string>;
+	PropMap properties;
+
+	void ReadFromFile(std::filesystem::path path) {
+		std::ifstream ifs(path);
+		std::string line;
+		std::string logicalLine;
+		while (std::getline(ifs, line)) {
+			if (line.ends_with("\r")) {
+				// Accidentally have \r\n line ends on Unix system
+				line.pop_back();
 			}
-			logicalLine.clear();
+			logicalLine += line;
+			if (logicalLine.ends_with("\\")) {
+				logicalLine.pop_back();
+			} else {
+				const size_t positionEquals = logicalLine.find("=");
+				if (positionEquals != std::string::npos) {
+					const std::string key = logicalLine.substr(0, positionEquals);
+					const std::string value = logicalLine.substr(positionEquals + 1);
+					properties[key] = value;
+				}
+				logicalLine.clear();
+			}
 		}
 	}
-	return m;
-}
+
+	std::optional<std::string> GetProperty(std::string_view key) const {
+		const PropMap::const_iterator prop = properties.find(std::string(key));
+		if (prop == properties.end())
+			return std::nullopt;
+		else
+			return prop->second;
+	}
+
+	std::optional<int> GetPropertyValue(std::string_view key) const {
+		std::optional<std::string> value = GetProperty(key);
+		try {
+			if (value)
+				return std::stoi(value->c_str());
+		}
+		catch (std::invalid_argument &) {
+			// Just return empty
+		}
+		return {};
+	}
+
+};
 
 int Substitute(std::string &s, const std::string &sFind, const std::string &sReplace) {
 	int c = 0;
@@ -154,12 +179,11 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	plex->Release();
 }
 
-bool TestFile(const std::filesystem::path &path,
-	const std::map<std::string, std::string> &properties) {
+bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
 	// Find and create correct lexer
 	std::string language;
 	Scintilla::ILexer5 *plex = nullptr;
-	for (auto const &[key, val] : properties) {
+	for (auto const &[key, val] : propertyMap.properties) {
 		if (key.starts_with("lexer.*")) {
 			language = val;
 			plex = Lexilla::MakeLexer(language);
@@ -173,7 +197,7 @@ bool TestFile(const std::filesystem::path &path,
 
 	// Set parameters of lexer
 	const std::string keywords = "keywords";
-	for (auto const &[key, val] : properties) {
+	for (auto const &[key, val] : propertyMap.properties) {
 		if (key.starts_with("#")) {
 			// Ignore comments
 		} else if (key.starts_with("lexer.*")) {
@@ -203,11 +227,18 @@ bool TestFile(const std::filesystem::path &path,
 	pathFolded += ".folded";
 	const std::string foldedText = ReadFile(pathFolded);
 
+	const int repeatLex = propertyMap.GetPropertyValue("testlexers.repeat.lex").value_or(1);
+	const int repeatFold = propertyMap.GetPropertyValue("testlexers.repeat.fold").value_or(1);
+
 	TestDocument doc;
 	doc.Set(text);
 	Scintilla::IDocument *pdoc = &doc;
-	plex->Lex(0, pdoc->Length(), 0, pdoc);
-	plex->Fold(0, pdoc->Length(), 0, pdoc);
+	for (int i = 0; i < repeatLex; i++) {
+		plex->Lex(0, pdoc->Length(), 0, pdoc);
+	}
+	for (int i = 0; i < repeatFold; i++) {
+		plex->Fold(0, pdoc->Length(), 0, pdoc);
+	}
 
 	bool success = true;
 
@@ -231,7 +262,8 @@ bool TestFile(const std::filesystem::path &path,
 		ofs << foldedTextNew;
 	}
 
-	const bool disablePerLineTests = properties.count("testlexers.per.line.disable") != 0;
+	const std::optional<int> perLineDisable = propertyMap.GetPropertyValue("testlexers.per.line.disable");
+	const bool disablePerLineTests = perLineDisable.value_or(false);
 
 	if (success && !disablePerLineTests) {
 		// Test line by line lexing/folding
@@ -277,7 +309,8 @@ bool TestFile(const std::filesystem::path &path,
 }
 
 bool TestDirectory(std::filesystem::path directory, std::filesystem::path basePath) {
-	const std::map<std::string, std::string> properties = PropertiesFromFile(directory / "SciTE.properties");
+	PropertyMap properties;
+	properties.ReadFromFile(directory / "SciTE.properties");
 	bool success = true;
 	for (auto &p : std::filesystem::directory_iterator(directory)) {
 		if (!p.is_directory()) {
