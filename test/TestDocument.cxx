@@ -74,6 +74,11 @@ void TestDocument::Set(std::string_view sv) {
 	lineLevels.resize(lineStarts.size(), 0x400);
 }
 
+#if _MSC_VER
+// IDocument interface does not specify noexcept so best to not add it to implementation
+#pragma warning(disable: 26440)
+#endif
+
 int SCI_METHOD TestDocument::Version() const {
 	return Scintilla::dvRelease4;
 }
@@ -101,7 +106,7 @@ Sci_Position SCI_METHOD TestDocument::LineFromPosition(Sci_Position position) co
 		return lineStarts.size() - 1 - 1;
 	}
 
-	std::vector<Sci_Position>::const_iterator it = std::lower_bound(lineStarts.begin(), lineStarts.end(), position);
+	const std::vector<Sci_Position>::const_iterator it = std::lower_bound(lineStarts.begin(), lineStarts.end(), position);
 	Sci_Position line = it - lineStarts.begin();
 	if (*it > position)
 		line--;
@@ -239,6 +244,12 @@ int SCI_METHOD TestDocument::GetCharacterAndWidth(Sci_Position position, Sci_Pos
 		return '\0';
 	}
 	const unsigned char leadByte = text.at(position);
+	if (leadByte < 0x80) {
+		if (pWidth) {
+			*pWidth = 1;
+		}
+		return leadByte;
+	}
 	const int widthCharBytes = UTF8BytesOfLead[leadByte];
 	unsigned char charBytes[] = { leadByte,0,0,0 };
 	for (int b = 1; b < widthCharBytes; b++)

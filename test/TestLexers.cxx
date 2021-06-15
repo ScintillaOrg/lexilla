@@ -69,7 +69,7 @@ std::string FoldedDocument(const Scintilla::IDocument *pdoc) {
 	Sci_Position linePrev = -1;
 	char ch = '\0';
 	for (Sci_Position pos = 0; pos < pdoc->Length(); pos++) {
-		Sci_Position lineNow = pdoc->LineFromPosition(pos);
+		const Sci_Position lineNow = pdoc->LineFromPosition(pos);
 		if (linePrev < lineNow) {
 			PrintLevel(os, pdoc->GetLevel(lineNow));
 			linePrev = lineNow;
