@@ -43,6 +43,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <optional>
 #include <initializer_list>
 #include <algorithm>
 #include <iterator>

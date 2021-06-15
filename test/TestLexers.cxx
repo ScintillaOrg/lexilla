@@ -11,6 +11,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <optional>
 
 #include <iostream>
 #include <sstream>
