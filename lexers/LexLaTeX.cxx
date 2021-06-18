@@ -13,6 +13,8 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <ctype.h>
+
+#include <string_view>
 #include <vector>
 
 #include "ILexer.h"

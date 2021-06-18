@@ -11,6 +11,7 @@
 #include <cstring>
 
 #include <string>
+#include <string_view>
 #include <map>
 
 #include "PropSetSimple.h"
