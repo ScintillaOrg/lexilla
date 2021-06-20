@@ -20,9 +20,10 @@ public:
 	PropSetSimple &operator=(const PropSetSimple&) = delete;
 	PropSetSimple &operator=(PropSetSimple&&) = delete;
 	virtual ~PropSetSimple();
+
 	void Set(std::string_view key, std::string_view val);
-	const char *Get(const char *key) const;
-	int GetInt(const char *key, int defaultValue=0) const;
+	const char *Get(std::string_view key) const;
+	int GetInt(std::string_view key, int defaultValue=0) const;
 };
 
 }
