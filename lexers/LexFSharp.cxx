@@ -560,7 +560,8 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 bool LineContains(LexAccessor &styler, const char *word, const Sci_Position start, const Sci_Position end = 1,
 		  const int chAttr = SCE_FSHARP_DEFAULT);
 
-void FoldLexicalGroup(LexAccessor &styler, int &levelNext, const int lineCurrent, const char *word, const int chAttr);
+void FoldLexicalGroup(LexAccessor &styler, int &levelNext, const Sci_Position lineCurrent, const char *word,
+		      const int chAttr);
 
 void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int initStyle, IDocument *pAccess) {
 	if (!options.fold) {
@@ -671,7 +672,8 @@ bool LineContains(LexAccessor &styler, const char *word, const Sci_Position star
 	return found;
 }
 
-void FoldLexicalGroup(LexAccessor &styler, int &levelNext, const int lineCurrent, const char *word, const int chAttr) {
+void FoldLexicalGroup(LexAccessor &styler, int &levelNext, const Sci_Position lineCurrent, const char *word,
+		      const int chAttr) {
 	const Sci_Position linePrev = lineCurrent - 1;
 	const Sci_Position lineNext = lineCurrent + 1;
 	const Sci_Position lineStartPrev = styler.LineStart(linePrev);
