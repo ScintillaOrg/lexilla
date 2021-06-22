@@ -82,7 +82,7 @@ struct OptionSetJulia : public OptionSet<OptionsJulia> {
 		DefineProperty("fold.comment", &OptionsJulia::foldComment);
 
 		DefineProperty("fold.julia.docstring", &OptionsJulia::foldDocstring,
-            "Fold multiline triple-doublequote strings, usually used to document a function or type above the definition.");
+			"Fold multiline triple-doublequote strings, usually used to document a function or type above the definition.");
 
 		DefineProperty("fold.julia.syntax.based", &OptionsJulia::foldSyntaxBased,
 			"Set this property to 0 to disable syntax based folding.");
@@ -682,6 +682,32 @@ static void ScanParenInterpolation(StyleContext &sc) {
         }
     }
 }
+/*
+ * Start parsing a number, parse the base.
+ */
+static void initNumber (StyleContext &sc, int &base, bool &with_dot) {
+    base = 10;
+    with_dot = false;
+    sc.SetState(SCE_JULIA_NUMBER);
+    if (sc.ch == '0') {
+        if (sc.chNext == 'x') {
+            sc.Forward();
+            base = 16;
+            if (sc.chNext == '.') {
+                sc.Forward();
+                with_dot = true;
+            }
+        } else if (sc.chNext == 'o') {
+            sc.Forward();
+            base = 8;
+        } else if (sc.chNext == 'b') {
+            sc.Forward();
+            base = 2;
+        }
+    } else if (sc.ch == '.') {
+        with_dot = true;
+    }
+}
 
 /*
  * Resume parsing a String or Command, bounded by the `quote` character (\" or \`)
@@ -806,50 +832,32 @@ static void resumeOperator (StyleContext &sc) {
 void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	PropSetSimple props;
 	Accessor styler(pAccess, &props);
-	Sci_Position pos = startPos;
 
+	Sci_Position pos = startPos;
 	styler.StartAt(pos);
 	styler.StartSegment(pos);
 
-    // boolean for when the ' is allowed to be transpose vs the start/end
-    // of a string
-    bool transpose = false;
+    // use the line state of each line to store block/multiline states
+    Sci_Position curLine = styler.GetLine(startPos);
+    // Default is false for everything and 0 counters.
+	int lineState = (curLine > 0) ? styler.GetLineState(curLine-1) : 0;
 
-    // boolean for when the docstring has triple quotes
-    bool istripledocstring = false;
-
-    // boolean for if the string is a raw string, no interpolation
-    bool israwstring = false;
-
-    // count of brackets as boolean for when end could be an operator not a keyword
-    int indexing_level = 0;
-
-    // level of nested list comprehension
-    int list_comprehension = 0;
-
-    // boolean for triple backtick
-    bool triple_backtick = false;
+    bool transpose = (lineState >> 0) & 0x01;                // 1 bit to know if ' is allowed to mean transpose
+    bool istripledocstring = (lineState >> 1) & 0x01;        // 1 bit to know if we are in a triple doublequotes string
+	bool triple_backtick = (lineState >> 2) & 0x01;          // 1 bit to know if we are in a triple backtick command
+	bool israwstring = (lineState >> 3) & 0x01;              // 1 bit to know if we are in a raw string
+    int indexing_level = (int)((lineState >> 4) & 0x0F);     // 4 bits of bracket nesting counter
+    int list_comprehension = (int)((lineState >> 8) & 0x0F); // 4 bits of parenthesis nesting counter
+    int commentDepth = (int)((lineState >> 12) & 0x0F);      // 4 bits of nested comment counter
 
     // base for parsing number
     int base = 10;
-
     // number has a float dot ?
     bool with_dot = false;
-
-    // use the line state of each line to store the block comment depth
-    Sci_Position curLine = styler.GetLine(startPos);
-    int commentDepth = curLine > 0 ? styler.GetLineState(curLine-1) : 0;
-
 
     StyleContext sc(startPos, length, initStyle, styler);
 
     for (; sc.More(); sc.Forward()) {
-
-        if (sc.atLineStart) {
-            // set the line state to the current commentDepth
-            curLine = styler.GetLine(sc.currentPos);
-            styler.SetLineState(curLine, commentDepth);
-        }
 
         //// check for end of states
         switch (sc.state) {
@@ -957,8 +965,6 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                     // end or start of a nested a block comment
                     if ( sc.ch == '=' && sc.chNext == '#') {
                         commentDepth --;
-                        curLine = styler.GetLine(sc.currentPos);
-                        styler.SetLineState(curLine, commentDepth);
                         sc.Forward();
 
                         if (commentDepth == 0) {
@@ -966,8 +972,6 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                         }
                     } else if( sc.ch == '#' && sc.chNext == '=') {
                         commentDepth ++;
-                        curLine = styler.GetLine(sc.currentPos);
-                        styler.SetLineState(curLine, commentDepth);
                         sc.Forward();
                     }
                 } else {
@@ -989,8 +993,6 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                     commentDepth ++;
                     sc.Forward();
                 }
-                curLine = styler.GetLine(sc.currentPos);
-                styler.SetLineState(curLine, commentDepth);
             } else if (sc.ch == '!') {
                 sc.SetState(SCE_JULIA_OPERATOR);
             } else if (sc.ch == '\'') {
@@ -1022,28 +1024,7 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                     }
                 }
             } else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
-                base = 10;
-                with_dot = false;
-                transpose = true;
-                sc.SetState(SCE_JULIA_NUMBER);
-                if (sc.ch == '0') {
-                    if (sc.chNext == 'x') {
-                        sc.Forward();
-                        base = 16;
-                        if (sc.chNext == '.') {
-                            sc.Forward();
-                            with_dot = true;
-                        }
-                    } else if (sc.chNext == 'o') {
-                        sc.Forward();
-                        base = 8;
-                    } else if (sc.chNext == 'b') {
-                        sc.Forward();
-                        base = 2;
-                    }
-                } else if (sc.ch == '.') {
-                    with_dot = true;
-                }
+                initNumber(sc, base, with_dot);
             } else if (IsIdentifierFirstCharacter(sc.ch)) {
                 sc.SetState(SCE_JULIA_IDENTIFIER);
                 transpose = true;
@@ -1098,6 +1079,21 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                 transpose = false;
             }
         }
+
+        // update the line information (used for line-by-line lexing and folding)
+        if (sc.atLineEnd) {
+            // set the line state to the current state
+            curLine = styler.GetLine(sc.currentPos);
+
+            lineState = ((transpose ? 1 : 0) << 0) |
+                        ((istripledocstring ? 1 : 0) << 1) |
+                        ((triple_backtick ? 1 : 0) << 2) |
+                        ((israwstring ? 1 : 0) << 3) |
+                        ((indexing_level & 0x0F) << 4) |
+                        ((list_comprehension & 0x0F) << 8) |
+                        ((commentDepth & 0x0F) << 12);
+            styler.SetLineState(curLine, lineState);
+        }
     }
     sc.Complete();
 }
@@ -1109,22 +1105,26 @@ void SCI_METHOD LexerJulia::Fold(Sci_PositionU startPos, Sci_Position length, in
 
 	LexAccessor styler(pAccess);
 
-    // level of nested brackets
-    int indexing_level = 0;
-    // level of nested parenthesis or brackets
-    int list_comprehension = 0;
-    // isdocstring
-    bool isdocstring = false;
-
 	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
-	if (lineCurrent > 0)
+    int lineState = 0;
+	if (lineCurrent > 0) {
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
+        lineState = styler.GetLineState(lineCurrent-1);
+    }
+
+    // level of nested brackets
+    int indexing_level = (int)((lineState >> 4) & 0x0F);     // 4 bits of bracket nesting counter
+    // level of nested parenthesis or brackets
+    int list_comprehension = (int)((lineState >> 8) & 0x0F); // 4 bits of parenthesis nesting counter
+    //int commentDepth = (int)((lineState >> 12) & 0x0F);      // 4 bits of nested comment counter
+    
 	Sci_PositionU lineStartNext = styler.LineStart(lineCurrent+1);
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];
+	int stylePrev = styler.StyleAt(startPos - 1);
 	int styleNext = styler.StyleAt(startPos);
 	int style = initStyle;
     char word[100];
@@ -1183,7 +1183,7 @@ void SCI_METHOD LexerJulia::Fold(Sci_PositionU startPos, Sci_Position length, in
                     word[0] = '\0';
                     wordlen = 1;
                 }
-                if (styleNext !=  SCE_JULIA_KEYWORD1) {
+                if (styleNext != SCE_JULIA_KEYWORD1) {
                     word[wordlen] = '\0';
                     wordlen = 0;
                     if (list_comprehension <= 0 && indexing_level <= 0) {
@@ -1194,12 +1194,10 @@ void SCI_METHOD LexerJulia::Fold(Sci_PositionU startPos, Sci_Position length, in
         }
 
         // Docstring
-        if (options.foldDocstring && style == SCE_JULIA_DOCSTRING) {
-            if (visibleChars==0 && IsTripleStringState(styler, i) && styler.StyleAt(i + 3) == SCE_JULIA_DOCSTRING ) {
+        if (options.foldDocstring) {
+            if (stylePrev != SCE_JULIA_DOCSTRING && style == SCE_JULIA_DOCSTRING) {
                 levelNext ++;
-                isdocstring = true;
-            } else if (isdocstring && styleNext != SCE_JULIA_DOCSTRING && levelNext > 0) {
-                isdocstring = false;
+            } else if (style == SCE_JULIA_DOCSTRING && styleNext != SCE_JULIA_DOCSTRING) {
                 levelNext --;
             }
         }
@@ -1209,20 +1207,25 @@ void SCI_METHOD LexerJulia::Fold(Sci_PositionU startPos, Sci_Position length, in
             levelNext = 0;
         }
 
-        if (!IsASpace(ch))
+        if (!IsASpace(ch)) {
             visibleChars++;
+        }
+        stylePrev = style;
+
         if (atEOL || (i == endPos-1)) {
             int levelUse = levelCurrent;
             int lev = levelUse | levelNext << 16;
-            if (visibleChars == 0 && options.foldCompact)
+            if (visibleChars == 0 && options.foldCompact) {
                 lev |= SC_FOLDLEVELWHITEFLAG;
-            if (levelUse < levelNext)
+            }
+            if (levelUse < levelNext) {
                 lev |= SC_FOLDLEVELHEADERFLAG;
+            }
             if (lev != styler.LevelAt(lineCurrent)) {
                 styler.SetLevel(lineCurrent, lev);
             }
             lineCurrent++;
-			lineStartNext = styler.LineStart(lineCurrent+1);
+            lineStartNext = styler.LineStart(lineCurrent+1);
             levelCurrent = levelNext;
             if (atEOL && (i == static_cast<Sci_PositionU>(styler.Length() - 1))) {
                 // There is an empty line at end of file so give it same level and empty
