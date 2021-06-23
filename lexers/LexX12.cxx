@@ -13,6 +13,9 @@
 #include <cstring>
 #include <cctype>
 
+#include <string>
+#include <string_view>
+
 #include <vector>
 #include <algorithm>
 

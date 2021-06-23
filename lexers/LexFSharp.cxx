@@ -11,6 +11,7 @@
 #include <cassert>
 
 #include <string>
+#include <string_view>
 #include <map>
 
 #include "ILexer.h"
