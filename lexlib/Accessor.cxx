@@ -25,7 +25,7 @@ using namespace Lexilla;
 Accessor::Accessor(Scintilla::IDocument *pAccess_, PropSetSimple *pprops_) : LexAccessor(pAccess_), pprops(pprops_) {
 }
 
-int Accessor::GetPropertyInt(const char *key, int defaultValue) const {
+int Accessor::GetPropertyInt(std::string_view key, int defaultValue) const {
 	return pprops->GetInt(key, defaultValue);
 }
 
