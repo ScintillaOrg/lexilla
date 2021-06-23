@@ -106,7 +106,6 @@ constParameter:lexilla/lexers/LexYAML.cxx
 
 // These are due to Accessor::IndentAmount not declaring the callback as taking a const.
 // Changing this could cause problems for downstream projects.
-constParameterCallback:lexilla/lexers/LexAsn1.cxx
 constParameterCallback:lexilla/lexers/LexEiffel.cxx
 constParameterCallback:lexilla/lexers/LexPython.cxx
 constParameterCallback:lexilla/lexers/LexScriptol.cxx
