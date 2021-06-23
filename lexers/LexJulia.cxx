@@ -512,18 +512,6 @@ static int CheckKeywordFoldPoint(char *str) {
     return 0;
 }
 
-
-static bool IsTripleStringState(LexAccessor &styler, Sci_Position i) {
-    char ch = styler.SafeGetCharAt(i, 0);
-    char chNext = styler.SafeGetCharAt(i + 1, 0);
-    char chNextNext = styler.SafeGetCharAt(i + 2, 0);
-
-    if (ch == '\"' && chNext == '\"' && chNextNext == '\"') {
-        return true;
-    }
-    return false;
-}
-
 static bool IsNumberExpon(int ch, int base) {
     if ((base == 10 && (ch == 'e' || ch == 'E' || ch == 'f')) ||
         (base == 16 && (ch == 'p' || ch == 'P'))) {
