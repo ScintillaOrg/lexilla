@@ -13,10 +13,10 @@
 
 {11}# 14 @"See: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/strings#remarks"{0}
 {9}// verbatim string{0}
-{1}let{0} {6}xmlFragment1{0} {12}={0} {16}@"<book author=""Milton, John"" title=""Paradise Lost"">"{0}
+{1}let{0} {6}xmlFragment1{0} {12}={0} {16}@"<book href=""https://www.worldcat.org/title/paradise-lost/oclc/1083714070"" title=""Paradise Lost"">"{0}
 
 {9}// triple-quoted string{0}
-{1}let{0} {6}xmlFragment2{0} {12}={0} {15}"""<book author="Milton, John" title="Paradise Lost">"""{0}
+{1}let{0} {6}xmlFragment2{0} {12}={0} {15}"""<book href="https://www.worldcat.org/title/paradise-lost/oclc/1083714070" title="Paradise Lost">"""{0}
 
 {8}(* you need .NET 5.0 to compile this:
   https://docs.microsoft.com/en-us/dotnet/fsharp/whats-new/fsharp-50#string-interpolation
@@ -40,6 +40,6 @@
     {12}|>{0} {3}Some{0}
 
 {1}match{0} {6}bigNum{0} {1}(){0} {1}with{0}
-{12}|{0} {3}Some{0} {6}num{0} {12}->{0} {2}sprintf{0} {15}"%.2f > %u"{0} {6}num{0} {7}``a byte literal``{0}
-{12}|{0} {3}None{0} {12}->{0} {2}sprintf{0} {15}"%A"{0} {15}"Have a byte string!"B{0}
-{12}|>{0} {2}printfn{0} {15}"%s"{0}
+{12}|{0} {3}Some{0} {6}num{0} {12}->{0} {2}sprintf{0} {15}"{19}%.2f{15} > {19}%u{15}"{0} {6}num{0} {7}``a byte literal``{0}
+{12}|{0} {3}None{0} {12}->{0} {2}sprintf{0} {15}"{19}%A{15}"{0} {15}"Have a byte string!"B{0}
+{12}|>{0} {2}printfn{0} {15}"{19}%s{15}"{0}

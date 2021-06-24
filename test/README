@@ -73,6 +73,15 @@ picture: gives a rough idea of the fold structure: '|' for level greater than 0x
 After checking that the .folded.new file is correct, it can be promoted to .folded and
 committed to the repository.
 
+Styling and folding tests are first performed on the file as a whole, then the file is lexed
+and folded line-by-line. If there are differences between the whole file and line-by-line
+then a message with 'per-line is different' for styling or 'per-line has different folds' will be
+printed. Problems with line-by-line processing are often caused by local variables in the
+lexer or folder that are incorrectly initialised. Sometimes extra state can be inferred, but it
+may have to be stored between runs (possibly with SetLineState) or the code may have to
+backtrack to a previous safe line - often something like a line that starts with a character
+in the default style.
+
 The SciTE.properties file is similar to properties files used for SciTE but are simpler.
 The lexer to be run is defined with a lexer.{filepattern} statement like:
 	lexer.*.d=d
@@ -89,3 +98,8 @@ It is often necessary to set 'fold' in SciTE.properties to cause folding.
 
 If there is a need to test additional configurations of keywords or properties then
 create another subdirectory with the different settings in a new SciTE.properties.
+
+There is some support for running benchmarks on lexers and folders. The properties
+testlexers.repeat.lex and testlexers.repeat.fold specify the number of times example
+documents are lexed or folded. Set to a large number like testlexers.repeat.lex=10000
+then run with a profiler.

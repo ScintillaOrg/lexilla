@@ -49,6 +49,12 @@ CXXFLAGS += -Wall -Wextra
 TESTSRC=test*.cxx
 # Files being tested from scintilla/src directory
 TESTEDSRC=\
+ ../../lexlib/Accessor.cxx \
+ ../../lexlib/CharacterSet.cxx \
+ ../../lexlib/LexerBase.cxx \
+ ../../lexlib/LexerModule.cxx \
+ ../../lexlib/LexerSimple.cxx \
+ ../../lexlib/PropSetSimple.cxx \
  ../../lexlib/WordList.cxx
 
 TESTS=$(EXE)
