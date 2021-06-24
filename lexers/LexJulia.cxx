@@ -255,7 +255,9 @@ static int is_wc_cat_id_start(uint32_t wc) {
             cat == ccSc ||  // allow currency symbols
             // other symbols, but not arrows or replacement characters
             (cat == ccSo && !(wc >= 0x2190 && wc <= 0x21FF) &&
-             wc != 0xfffc && wc != 0xfffd) ||
+             wc != 0xfffc && wc != 0xfffd &&
+             wc != 0x233f &&  // notslash
+             wc != 0x00a6) || // broken bar
 
             // math symbol (category Sm) whitelist
             (wc >= 0x2140 && wc <= 0x2a1c &&
