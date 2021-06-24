@@ -17,6 +17,12 @@ class TestDocument : public Scintilla::IDocument {
 	Sci_Position endStyled=0;
 public:
 	void Set(std::string_view sv);
+	TestDocument() = default;
+	// Deleted so TestDocument objects can not be copied.
+	TestDocument(const TestDocument&) = delete;
+	TestDocument(TestDocument&&) = delete;
+	TestDocument &operator=(const TestDocument&) = delete;
+	TestDocument &operator=(TestDocument&&) = delete;
 	virtual ~TestDocument() = default;
 
 	int SCI_METHOD Version() const override;

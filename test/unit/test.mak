@@ -12,6 +12,12 @@ CXXFLAGS = /EHsc /std:c++17 /D_HAS_AUTO_PTR_ETC=1 /wd 4805 $(INCLUDEDIRS)
 TESTSRC=test*.cxx
 # Files being tested from scintilla/src directory
 TESTEDSRC=\
+ ../../lexlib/Accessor.cxx \
+ ../../lexlib/CharacterSet.cxx \
+ ../../lexlib/LexerBase.cxx \
+ ../../lexlib/LexerModule.cxx \
+ ../../lexlib/LexerSimple.cxx \
+ ../../lexlib/PropSetSimple.cxx \
  ../../lexlib/WordList.cxx
 
 TESTS=$(EXE)

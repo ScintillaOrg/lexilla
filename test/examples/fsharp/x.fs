@@ -13,10 +13,10 @@ module Example
 
 # 14 @"See: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/strings#remarks"
 // verbatim string
-let xmlFragment1 = @"<book author=""Milton, John"" title=""Paradise Lost"">"
+let xmlFragment1 = @"<book href=""https://www.worldcat.org/title/paradise-lost/oclc/1083714070"" title=""Paradise Lost"">"
 
 // triple-quoted string
-let xmlFragment2 = """<book author="Milton, John" title="Paradise Lost">"""
+let xmlFragment2 = """<book href="https://www.worldcat.org/title/paradise-lost/oclc/1083714070" title="Paradise Lost">"""
 
 (* you need .NET 5.0 to compile this:
   https://docs.microsoft.com/en-us/dotnet/fsharp/whats-new/fsharp-50#string-interpolation

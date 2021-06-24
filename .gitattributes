@@ -23,8 +23,10 @@
 **.php text
 **.vb text
 **.d text
+**.erl text
 **.jl text
 **.lua text
+**.ml text
 **.nim text
 **.pl text
 **.p6 text
@@ -34,6 +36,7 @@
 **.mms text
 **.tex text
 **.fs text
+**.yaml text
 **.md text
 **.txt text
 **.pch text
