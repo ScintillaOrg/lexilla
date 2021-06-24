@@ -28,6 +28,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#include "StringCopy.h"
 #include "PropSetSimple.h"
 #include "WordList.h"
 #include "LexAccessor.h"
@@ -42,7 +43,6 @@
 using namespace Scintilla;
 using namespace Lexilla;
 
-static const int NUM_JULIA_KEYWORD_LISTS = 4;
 static const int MAX_JULIA_IDENT_CHARS = 1023;
 
 // Options used for LexerJulia
@@ -67,11 +67,12 @@ struct OptionsJulia {
 	}
 };
 
-static const char * const juliaWordLists[NUM_JULIA_KEYWORD_LISTS + 1] = {
+const char * const juliaWordLists[] = {
     "Primary keywords and identifiers",
     "Built in types",
     "Other keywords",
-    "Raw string literals",
+    "Built in functions",
+    "Raw string literal prefixes",
     0,
 };
 
@@ -96,18 +97,48 @@ struct OptionSetJulia : public OptionSet<OptionsJulia> {
 			"This option enables highlighting of syntax error int character or number definition.");
 
 		DefineProperty("lexer.julia.string.interpolation", &OptionsJulia::stringInterpolation,
-			"Set to 0 to not recognize string interpolation at all");
+			"Set to 0 to not recognize string interpolation at all.");
 
 		DefineWordListSets(juliaWordLists);
 	}
 };
 
+LexicalClass juliaLexicalClasses[] = {
+	// Lexer Julia SCLEX_JULIA SCE_JULIA_:
+	0,  "SCE_JULIA_DEFAULT", "default", "White space",
+	1,  "SCE_JULIA_COMMENT", "comment", "Comment",
+	2,  "SCE_JULIA_NUMBER", "number", "Number",
+	3,  "SCE_JULIA_KEYWORD1", "keyword1", "Reserved keywords",
+	4,  "SCE_JULIA_KEYWORD2", "keyword2", "Keyword2",
+	5,  "SCE_JULIA_KEYWORD3", "keyword3", "Keyword3",
+	6,  "SCE_JULIA_CHAR", "char", "Character",
+	7,  "SCE_JULIA_OPERATOR", "operator", "Operator",
+	8,  "SCE_JULIA_BRACKET", "bracket", "Bracket",
+	9,  "SCE_JULIA_IDENTIFIER", "identifier", "Identifier",
+	10, "SCE_JULIA_STRING", "string", "String",
+	11, "SCE_JULIA_SYMBOL", "symbol", "Symbol",
+	12, "SCE_JULIA_MACRO", "macro", "Macro",
+	13, "SCE_JULIA_STRINGINTERP", "stringinterp", "String interpolation",
+	14, "SCE_JULIA_DOCSTRING", "docstring", "Docstring",
+	15, "SCE_JULIA_STRINGLITERAL", "stringliteral", "String literal prefix",
+	16, "SCE_JULIA_COMMAND", "command", "Command",
+	17, "SCE_JULIA_COMMANDLITERAL", "commandliteral", "Command literal prefix",
+	18, "SCE_JULIA_TYPEANNOT", "typeannot", "Type annotation",
+	19, "SCE_JULIA_LEXERROR", "lexerror", "Lexing error",
+	20, "SCE_JULIA_KEYWORD4", "keyword4", "Keyword4",
+};
+
 class LexerJulia : public DefaultLexer {
-	WordList keywords[NUM_JULIA_KEYWORD_LISTS];
+	WordList keywords;
+	WordList identifiers2;
+	WordList identifiers3;
+	WordList identifiers4;
+	WordList prefixes;
 	OptionsJulia options;
 	OptionSetJulia osJulia;
 public:
-	LexerJulia() : DefaultLexer("julia", SCLEX_JULIA) {
+	explicit LexerJulia() :
+		DefaultLexer("julia", SCLEX_JULIA, juliaLexicalClasses, ELEMENTS(juliaLexicalClasses)) {
 	}
 	virtual ~LexerJulia() {
 	}
@@ -127,9 +158,9 @@ public:
 		return osJulia.DescribeProperty(name);
 	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
-        const char * SCI_METHOD PropertyGet(const char *key) override {
-                return osJulia.PropertyGet(key);
-        }
+	const char * SCI_METHOD PropertyGet(const char *key) override {
+		return osJulia.PropertyGet(key);
+	}
 	const char * SCI_METHOD DescribeWordListSets() override {
 		return osJulia.DescribeWordListSets();
 	}
@@ -139,6 +170,7 @@ public:
 	void * SCI_METHOD PrivateCall(int, void *) override {
 		return 0;
 	}
+
 	static ILexer5 *LexerFactoryJulia() {
 		return new LexerJulia();
 	}
@@ -152,9 +184,26 @@ Sci_Position SCI_METHOD LexerJulia::PropertySet(const char *key, const char *val
 }
 
 Sci_Position SCI_METHOD LexerJulia::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywords;
+		break;
+	case 1:
+		wordListN = &identifiers2;
+		break;
+	case 2:
+		wordListN = &identifiers3;
+		break;
+	case 3:
+		wordListN = &identifiers4;
+		break;
+	case 4:
+		wordListN = &prefixes;
+		break;
+	}
 	Sci_Position firstModification = -1;
-	if (n < NUM_JULIA_KEYWORD_LISTS) {
-		WordList *wordListN = &keywords[n];
+	if (wordListN) {
 		WordList wlNew;
 		wlNew.Set(wl);
 		if (*wordListN != wlNew) {
@@ -874,8 +923,8 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                     char s[MAX_JULIA_IDENT_CHARS + 1];
                     sc.GetCurrent(s, sizeof(s));
 
-                    // Check if the string is in the Raw String Literals list
-                    if (keywords[NUM_JULIA_KEYWORD_LISTS - 1].InList(s)) {
+                    // Check if the string is in the Raw String Literal Prefixes list
+                    if (prefixes.InList(s)) {
                     //if (IsRawStringLiteral(s)) {
                         israwstring = true;
                     } else {
@@ -901,14 +950,18 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                         transpose = false;
 
                     } else {
-                        // Ignore the last index of NUM_JULIA_KEYWORD_LISTS that is
-                        // used for Raw string literals.
-                        for (int ii = 0; ii < NUM_JULIA_KEYWORD_LISTS - 1; ii++) {
-                            if (keywords[ii].InList(s)) {
-                                sc.ChangeState(SCE_JULIA_KEYWORD1 + ii);
-                                transpose = false;
-                                break;
-                            }
+                        if (keywords.InList(s)) {
+                            sc.ChangeState(SCE_JULIA_KEYWORD1);
+                            transpose = false;
+                        } else if (identifiers2.InList(s)) {
+                            sc.ChangeState(SCE_JULIA_KEYWORD2);
+                            transpose = false;
+                        } else if (identifiers3.InList(s)) {
+                            sc.ChangeState(SCE_JULIA_KEYWORD3);
+                            transpose = false;
+                        } else if (identifiers4.InList(s)) {
+                            sc.ChangeState(SCE_JULIA_KEYWORD4);
+                            transpose = false;
                         }
                     }
                     sc.SetState(SCE_JULIA_DEFAULT);
