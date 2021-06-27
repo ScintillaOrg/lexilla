@@ -180,6 +180,81 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	plex->Release();
 }
 
+void TestILexer(Scintilla::ILexer5 *plex) {
+	// Test each method of the ILexer interface.
+	// Mostly ensures there are no crashes when calling methods.
+	// Some methods are tested later (Release, Lex, Fold).
+	// PrivateCall performs arbitrary actions so is not safe to call.
+
+	[[maybe_unused]] const int version = plex->Version();
+	assert(version == Scintilla::lvRelease5);
+
+	[[maybe_unused]] const char *language = plex->GetName();
+	assert(language);
+
+	[[maybe_unused]] const int ident = plex->GetIdentifier();
+	assert(ident >= 0);
+
+	[[maybe_unused]] const char *propertyNames = plex->PropertyNames();
+	assert(propertyNames);
+
+	[[maybe_unused]] const int propertyType = plex->PropertyType("unknown");
+	assert(propertyType >= 0 && propertyType <= 2);
+
+	[[maybe_unused]] const char *propertyDescription = plex->DescribeProperty("unknown");
+	assert(propertyDescription);
+
+	[[maybe_unused]] const Sci_Position invalidation = plex->PropertySet("unknown", "unknown");
+	assert(invalidation == 0 || invalidation == -1);
+
+	[[maybe_unused]] const char *wordListDescription = plex->DescribeWordListSets();
+	assert(wordListDescription);
+
+	[[maybe_unused]] const Sci_Position invalidationWordList = plex->WordListSet(9, "unknown");
+	assert(invalidationWordList == 0 || invalidationWordList == -1);
+
+	[[maybe_unused]] const int lineEndTypes = plex->LineEndTypesSupported();
+	assert(lineEndTypes == 0 || lineEndTypes == 1);
+
+	if (const char *bases = plex->GetSubStyleBases()) {
+		// Allocate a substyle for each possible style
+		bases++;
+		while (*bases) {
+			constexpr int newStyles = 3;
+			const int base = *bases;
+			const int baseStyle = plex->AllocateSubStyles(base, newStyles);
+			[[maybe_unused]] const int styleBack = plex->StyleFromSubStyle(baseStyle);
+			assert(styleBack == base);
+			plex->SetIdentifiers(baseStyle, "int nullptr");
+			[[maybe_unused]] const int start = plex->SubStylesStart(base);
+			assert(start == baseStyle);
+			[[maybe_unused]] const int len = plex->SubStylesLength(base);
+			assert(len == newStyles);
+			bases++;
+		}
+		plex->FreeSubStyles();
+	}
+
+	[[maybe_unused]] const int primary = plex->PrimaryStyleFromStyle(2);
+	assert(primary == 2);
+
+	[[maybe_unused]] const int distance = plex->DistanceToSecondaryStyles();
+	assert(distance >= 0);
+
+	// Just see if crashes - nullptr is valid return to indicate not present.
+	[[maybe_unused]] const char *propertyUnknownValue = plex->PropertyGet("unknown");
+
+	const int styles = plex->NamedStyles();
+	for (int style = 0; style < styles; style++) {
+		[[maybe_unused]] const char *name = plex->NameOfStyle(style);
+		assert(name);
+		[[maybe_unused]] const char *tags = plex->TagsOfStyle(style);
+		assert(tags);
+		[[maybe_unused]] const char *description = plex->DescriptionOfStyle(style);
+		assert(description);
+	}
+}
+
 bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
 	// Find and create correct lexer
 	std::string language;
@@ -215,6 +290,9 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 			plex->PropertySet(key.c_str(), val.c_str());
 		}
 	}
+
+	TestILexer(plex);
+
 	std::string text = ReadFile(path);
 	if (text.starts_with(BOM)) {
 		text.erase(0, BOM.length());
