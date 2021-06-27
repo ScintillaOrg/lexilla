@@ -62,7 +62,7 @@ static inline bool IsNewline(const int ch) {
 
 // True if can follow ch down to the end with possibly trailing whitespace
 static bool FollowToLineEnd(const int ch, const int state, const Sci_PositionU endPos, StyleContext &sc) {
-    Sci_PositionU i = 0;
+    Sci_Position i = 0;
     while (sc.GetRelative(++i) == ch)
         ;
     // Skip over whitespace
@@ -121,7 +121,7 @@ static bool AtTermStart(StyleContext &sc) {
 
 static bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
     int count = 1;
-    Sci_PositionU i = 0;
+    Sci_Position i = 0;
     for (;;) {
         ++i;
         int c = sc.GetRelative(i);
@@ -155,7 +155,7 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
     // in the default state.
     bool freezeCursor = false;
 
-    StyleContext sc(startPos, length, initStyle, styler);
+    StyleContext sc(startPos, static_cast<Sci_PositionU>(length), initStyle, styler);
 
     while (sc.More()) {
         // Skip past escaped characters
