@@ -218,7 +218,6 @@ void TestILexer(Scintilla::ILexer5 *plex) {
 
 	if (const char *bases = plex->GetSubStyleBases()) {
 		// Allocate a substyle for each possible style
-		bases++;
 		while (*bases) {
 			constexpr int newStyles = 3;
 			const int base = *bases;
