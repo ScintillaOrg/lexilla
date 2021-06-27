@@ -170,7 +170,7 @@ public:
 	int FirstAllocated() const {
 		int start = 257;
 		for (std::vector<WordClassifier>::const_iterator it = classifiers.begin(); it != classifiers.end(); ++it) {
-			if (start > it->Start())
+			if ((it->Length() > 0) && (start > it->Start()))
 				start = it->Start();
 		}
 		return (start < 256) ? start : -1;
@@ -179,7 +179,7 @@ public:
 	int LastAllocated() const {
 		int last = -1;
 		for (std::vector<WordClassifier>::const_iterator it = classifiers.begin(); it != classifiers.end(); ++it) {
-			if (last < it->Last())
+			if ((it->Length() > 0) && (last < it->Last()))
 				last = it->Last();
 		}
 		return last;
