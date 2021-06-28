@@ -51,7 +51,6 @@ struct OptionsJulia {
     bool foldSyntaxBased;
     bool highlightTypeannotation;
     bool highlightLexerror;
-    bool stringInterpolation;
 	OptionsJulia() {
         fold = true;
         foldComment = true;
@@ -60,7 +59,6 @@ struct OptionsJulia {
         foldSyntaxBased = true;
         highlightTypeannotation = false;
         highlightLexerror = false;
-        stringInterpolation = true;
 	}
 };
 
@@ -69,7 +67,6 @@ const char * const juliaWordLists[] = {
     "Built in types",
     "Other keywords",
     "Built in functions",
-    "Raw string literal prefixes",
     0,
 };
 
@@ -93,9 +90,6 @@ struct OptionSetJulia : public OptionSet<OptionsJulia> {
 		DefineProperty("lexer.julia.highlight.lexerror", &OptionsJulia::highlightLexerror,
 			"This option enables highlighting of syntax error int character or number definition.");
 
-		DefineProperty("lexer.julia.string.interpolation", &OptionsJulia::stringInterpolation,
-			"Set to 0 to not recognize string interpolation at all.");
-
 		DefineWordListSets(juliaWordLists);
 	}
 };
@@ -104,25 +98,25 @@ LexicalClass juliaLexicalClasses[] = {
 	// Lexer Julia SCLEX_JULIA SCE_JULIA_:
 	0,  "SCE_JULIA_DEFAULT", "default", "White space",
 	1,  "SCE_JULIA_COMMENT", "comment", "Comment",
-	2,  "SCE_JULIA_NUMBER", "number", "Number",
-	3,  "SCE_JULIA_KEYWORD1", "keyword1", "Reserved keywords",
-	4,  "SCE_JULIA_KEYWORD2", "keyword2", "Keyword2",
-	5,  "SCE_JULIA_KEYWORD3", "keyword3", "Keyword3",
-	6,  "SCE_JULIA_CHAR", "char", "Character",
+	2,  "SCE_JULIA_NUMBER", "literal numeric", "Number",
+	3,  "SCE_JULIA_KEYWORD1", "keyword", "Reserved keywords",
+	4,  "SCE_JULIA_KEYWORD2", "identifier", "Builtin type names",
+	5,  "SCE_JULIA_KEYWORD3", "identifier", "Constants",
+	6,  "SCE_JULIA_CHAR", "literal string character", "Single quoted string",
 	7,  "SCE_JULIA_OPERATOR", "operator", "Operator",
-	8,  "SCE_JULIA_BRACKET", "bracket", "Bracket",
+	8,  "SCE_JULIA_BRACKET", "bracket operator", "Bracket operator",
 	9,  "SCE_JULIA_IDENTIFIER", "identifier", "Identifier",
-	10, "SCE_JULIA_STRING", "string", "String",
-	11, "SCE_JULIA_SYMBOL", "symbol", "Symbol",
-	12, "SCE_JULIA_MACRO", "macro", "Macro",
-	13, "SCE_JULIA_STRINGINTERP", "stringinterp", "String interpolation",
-	14, "SCE_JULIA_DOCSTRING", "docstring", "Docstring",
-	15, "SCE_JULIA_STRINGLITERAL", "stringliteral", "String literal prefix",
-	16, "SCE_JULIA_COMMAND", "command", "Command",
-	17, "SCE_JULIA_COMMANDLITERAL", "commandliteral", "Command literal prefix",
-	18, "SCE_JULIA_TYPEANNOT", "typeannot", "Type annotation",
-	19, "SCE_JULIA_LEXERROR", "lexerror", "Lexing error",
-	20, "SCE_JULIA_KEYWORD4", "keyword4", "Keyword4",
+	10, "SCE_JULIA_STRING", "literal string", "Double quoted String",
+	11, "SCE_JULIA_SYMBOL", "literal string symbol", "Symbol",
+	12, "SCE_JULIA_MACRO", "macro preprocessor", "Macro",
+	13, "SCE_JULIA_STRINGINTERP", "literal string interpolated", "String interpolation",
+	14, "SCE_JULIA_DOCSTRING", "literal string documentation", "Docstring",
+	15, "SCE_JULIA_STRINGLITERAL", "literal string prefix", "String literal prefix",
+	16, "SCE_JULIA_COMMAND", "literal string command", "Command",
+	17, "SCE_JULIA_COMMANDLITERAL", "literal string command prefix", "Command literal prefix",
+	18, "SCE_JULIA_TYPEANNOT", "operator type identifier", "Type annotation",
+	19, "SCE_JULIA_LEXERROR", "lexer error", "Lexing error",
+	20, "SCE_JULIA_KEYWORD4", "identifier", "Builtin function names",
 };
 
 class LexerJulia : public DefaultLexer {
@@ -130,7 +124,6 @@ class LexerJulia : public DefaultLexer {
 	WordList identifiers2;
 	WordList identifiers3;
 	WordList identifiers4;
-	WordList prefixes;
 	OptionsJulia options;
 	OptionSetJulia osJulia;
 public:
@@ -194,9 +187,6 @@ Sci_Position SCI_METHOD LexerJulia::WordListSet(int n, const char *wl) {
 		break;
 	case 3:
 		wordListN = &identifiers4;
-		break;
-	case 4:
-		wordListN = &prefixes;
 		break;
 	}
 	Sci_Position firstModification = -1;
@@ -918,22 +908,14 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
             case SCE_JULIA_IDENTIFIER:
                 // String literal
                 if (sc.ch == '\"') {
-                    // Check if it is a raw string literal
-                    char s[MAX_JULIA_IDENT_CHARS + 1];
-                    sc.GetCurrent(s, sizeof(s));
-
-                    // Check if the string is in the Raw String Literal Prefixes list
-                    if (prefixes.InList(s)) {
-                    //if (IsRawStringLiteral(s)) {
-                        israwstring = true;
-                    } else {
-                        israwstring = false;
-                    }
-
+                    // If the string literal has a prefix, interpolation is disabled
+                    israwstring = true;
                     sc.ChangeState(SCE_JULIA_STRINGLITERAL);
                     sc.SetState(SCE_JULIA_DEFAULT);
 
                 } else if (sc.ch == '`') {
+                    // If the string literal has a prefix, interpolation is disabled
+                    israwstring = true;
                     sc.ChangeState(SCE_JULIA_COMMANDLITERAL);
                     sc.SetState(SCE_JULIA_DEFAULT);
 
@@ -960,7 +942,9 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                             transpose = false;
                         } else if (identifiers4.InList(s)) {
                             sc.ChangeState(SCE_JULIA_KEYWORD4);
-                            transpose = false;
+                            // These identifiers can be used for variable names also,
+                            // so transpose is not forbidden.
+                            //transpose = false;
                         }
                     }
                     sc.SetState(SCE_JULIA_DEFAULT);
@@ -978,19 +962,19 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                 resumeCharacter(sc, options.highlightLexerror);
                 break;
             case SCE_JULIA_DOCSTRING:
-                resumeString(sc, true, options.stringInterpolation && !israwstring);
+                resumeString(sc, true, !israwstring);
                 if (sc.state == SCE_JULIA_DEFAULT && israwstring) {
                     israwstring = false;
                 }
                 break;
             case SCE_JULIA_STRING:
-                resumeString(sc, false, options.stringInterpolation && !israwstring);
+                resumeString(sc, false, !israwstring);
                 if (sc.state == SCE_JULIA_DEFAULT && israwstring) {
                     israwstring = false;
                 }
                 break;
             case SCE_JULIA_COMMAND:
-                resumeCommand(sc, triple_backtick, options.stringInterpolation);
+                resumeCommand(sc, triple_backtick, !israwstring);
                 break;
             case SCE_JULIA_MACRO:
                 if (IsASpace(sc.ch) || ! IsIdentifierCharacter(sc.ch)) {
