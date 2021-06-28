@@ -85,7 +85,7 @@ struct OptionSetJulia : public OptionSet<OptionsJulia> {
 			"Set this property to 0 to disable syntax based folding.");
 
 		DefineProperty("lexer.julia.highlight.typeannotation", &OptionsJulia::highlightTypeannotation,
-			"This option enables highlighting of type after :: as type annotation instead of parsing from the keyword lists.");
+			"This option enables highlighting of the type identifier after `::`.");
 
 		DefineProperty("lexer.julia.highlight.lexerror", &OptionsJulia::highlightLexerror,
 			"This option enables highlighting of syntax error int character or number definition.");
@@ -111,12 +111,13 @@ LexicalClass juliaLexicalClasses[] = {
 	12, "SCE_JULIA_MACRO", "macro preprocessor", "Macro",
 	13, "SCE_JULIA_STRINGINTERP", "literal string interpolated", "String interpolation",
 	14, "SCE_JULIA_DOCSTRING", "literal string documentation", "Docstring",
-	15, "SCE_JULIA_STRINGLITERAL", "literal string prefix", "String literal prefix",
+	15, "SCE_JULIA_STRINGLITERAL", "literal string", "String literal prefix",
 	16, "SCE_JULIA_COMMAND", "literal string command", "Command",
-	17, "SCE_JULIA_COMMANDLITERAL", "literal string command prefix", "Command literal prefix",
-	18, "SCE_JULIA_TYPEANNOT", "operator type identifier", "Type annotation",
+	17, "SCE_JULIA_COMMANDLITERAL", "literal string command", "Command literal prefix",
+	18, "SCE_JULIA_TYPEANNOT", "identifier type", "Type annotation identifier",
 	19, "SCE_JULIA_LEXERROR", "lexer error", "Lexing error",
 	20, "SCE_JULIA_KEYWORD4", "identifier", "Builtin function names",
+	21, "SCE_JULIA_TYPEOPERATOR", "operator type", "Type annotation operator",
 };
 
 class LexerJulia : public DefaultLexer {
@@ -895,13 +896,11 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
             case SCE_JULIA_OPERATOR:
                 resumeOperator(sc);
                 break;
+            case SCE_JULIA_TYPEOPERATOR:
+                sc.SetState(SCE_JULIA_DEFAULT);
+                break;
             case SCE_JULIA_TYPEANNOT:
-                // Highlight the next identifier, if option is set
-                if (options.highlightTypeannotation) {
-                    if (! IsIdentifierCharacter(sc.ch)) {
-                        sc.SetState(SCE_JULIA_DEFAULT);
-                    }
-                } else {
+                if (! IsIdentifierCharacter(sc.ch)) {
                     sc.SetState(SCE_JULIA_DEFAULT);
                 }
                 break;
@@ -1060,13 +1059,12 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
 
             // Several parsing of operators, should keep the order of `if` blocks
             } else if ((sc.ch == ':' || sc.ch == '<' || sc.ch == '>') && sc.chNext == ':') {
-                sc.SetState(SCE_JULIA_TYPEANNOT);
+                sc.SetState(SCE_JULIA_TYPEOPERATOR);
                 sc.Forward();
                 // Highlight the next identifier, if option is set
-                if (options.highlightTypeannotation) {
-                    if (IsIdentifierFirstCharacter(sc.chNext)) {
-                        sc.Forward();
-                    }
+                if (options.highlightTypeannotation &&
+                    IsIdentifierFirstCharacter(sc.chNext)) {
+                    sc.ForwardSetState(SCE_JULIA_TYPEANNOT);
                 }
             } else if (sc.ch == ':') {
                 // TODO: improve detection of range

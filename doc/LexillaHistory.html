@@ -582,7 +582,11 @@
 	Fixed crash when calling TagsOfStyle on C++ lexer after allocating substyles.
 	</li>
 	<li>
-	Fixed folding for Julia which couuld be inconsistent depending on range folded.
+	Fixed folding for Julia which could be inconsistent depending on range folded.
+	Added SCE_JULIA_KEYWORD4 and SCE_JULIA_TYPEOPERATOR lexical styles and
+	changed keyword set 4 from "Raw string literals" to "Built in functions".
+	Property lexer.julia.string.interpolation removed.
+	Updated set of characters for identifiers.
 	<a href="https://github.com/ScintillaOrg/lexilla/pull/13">Pull request #13</a>.
 	</li>
 	<li>
