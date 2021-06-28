@@ -119,6 +119,22 @@ static bool AtTermStart(StyleContext &sc) {
     return sc.currentPos == 0 || sc.chPrev == 0 || isspacechar(sc.chPrev);
 }
 
+static bool IsCompleteStyleRegion(StyleContext &sc, const char *token) {
+    bool found = false;
+	const size_t start = strlen(token);
+    Sci_Position i = static_cast<Sci_Position>(start);
+    while (!IsNewline(sc.GetRelative(i))) {
+        // make sure an empty pair of single-char tokens doesn't match
+        // with a longer token: {*}{*} != {**}
+	    if (sc.GetRelative(i) == *token && sc.GetRelative(i - 1) != *token) {
+		    found = start > 1U ? sc.GetRelative(i + 1) == token[1] : true;
+			break;
+		}
+        i++;
+    }
+    return AtTermStart(sc) && found;
+}
+
 static bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
     int count = 1;
     Sci_Position i = 0;
@@ -206,24 +222,24 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
         */
         // Strong
         else if (sc.state == SCE_MARKDOWN_STRONG1) {
-            if (sc.Match("**") && sc.chPrev != ' ') {
+            if ((sc.Match("**") && sc.chPrev != ' ') || IsNewline(sc.GetRelative(2))) {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
         }
         else if (sc.state == SCE_MARKDOWN_STRONG2) {
-            if (sc.Match("__") && sc.chPrev != ' ') {
+            if ((sc.Match("__") && sc.chPrev != ' ') || IsNewline(sc.GetRelative(2))) {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
         }
         // Emphasis
         else if (sc.state == SCE_MARKDOWN_EM1) {
-            if (sc.ch == '*' && sc.chPrev != ' ')
+            if ((sc.ch == '*' && sc.chPrev != ' ') || IsNewline(sc.chNext))
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
         }
         else if (sc.state == SCE_MARKDOWN_EM2) {
-            if (sc.ch == '_' && sc.chPrev != ' ')
+            if ((sc.ch == '_' && sc.chPrev != ' ') || IsNewline(sc.chNext))
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
         }
         else if (sc.state == SCE_MARKDOWN_CODEBK) {
@@ -236,7 +252,7 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
             }
         }
         else if (sc.state == SCE_MARKDOWN_STRIKEOUT) {
-            if (sc.Match("~~") && sc.chPrev != ' ') {
+            if ((sc.Match("~~") && sc.chPrev != ' ') || IsNewline(sc.GetRelative(2))) {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
@@ -386,23 +402,23 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
                 sc.SetState(SCE_MARKDOWN_CODE);
             }
             // Strong
-            else if (sc.Match("**") && sc.GetRelative(2) != ' ' && AtTermStart(sc)) {
+            else if (sc.Match("**") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "**")) {
                 sc.SetState(SCE_MARKDOWN_STRONG1);
                 sc.Forward();
            }
-            else if (sc.Match("__") && sc.GetRelative(2) != ' ' && AtTermStart(sc)) {
+            else if (sc.Match("__") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "__")) {
                 sc.SetState(SCE_MARKDOWN_STRONG2);
                 sc.Forward();
             }
             // Emphasis
-            else if (sc.ch == '*' && sc.chNext != ' ' && AtTermStart(sc)) {
+            else if (sc.ch == '*' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "*")) {
                 sc.SetState(SCE_MARKDOWN_EM1);
-            }
-            else if (sc.ch == '_' && sc.chNext != ' ' && AtTermStart(sc)) {
+            } else if (sc.ch == '_' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "_")) {
                 sc.SetState(SCE_MARKDOWN_EM2);
             }
             // Strikeout
-            else if (sc.Match("~~") && sc.GetRelative(2) != ' ' && AtTermStart(sc)) {
+            else if (sc.Match("~~") && !(sc.GetRelative(2) == '~' || sc.GetRelative(2) == ' ') &&
+                IsCompleteStyleRegion(sc, "~~")) {
                 sc.SetState(SCE_MARKDOWN_STRIKEOUT);
                 sc.Forward();
             }
