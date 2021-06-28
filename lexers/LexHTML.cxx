@@ -868,8 +868,8 @@ public:
 		DefaultLexer(
 			isXml_ ? "xml" : (isPHPScript_ ? "phpscript" : "hypertext"),
 			isXml_ ? SCLEX_XML : (isPHPScript_ ? SCLEX_PHPSCRIPT : SCLEX_HTML),
-			isXml_ ? lexicalClassesHTML : lexicalClassesXML,
-			isXml_ ? std::size(lexicalClassesHTML) : std::size(lexicalClassesXML)),
+			isXml_ ?  lexicalClassesXML : lexicalClassesHTML,
+			isXml_ ?  std::size(lexicalClassesXML) : std::size(lexicalClassesHTML)),
 		isXml(isXml_),
 		isPHPScript(isPHPScript_),
 		osHTML(isPHPScript_),
