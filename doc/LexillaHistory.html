@@ -578,6 +578,25 @@
 	<li>
 	On 32-bit Win32 using Visual C++ projects, stop exported functions ending with @n causing failures with GetProcAddress.
 	</li>
+	<li>
+	Fixed crash when calling TagsOfStyle on C++ lexer after allocating substyles.
+	</li>
+	<li>
+	Fixed folding for Julia which could be inconsistent depending on range folded.
+	Added SCE_JULIA_KEYWORD4 and SCE_JULIA_TYPEOPERATOR lexical styles and
+	changed keyword set 4 from "Raw string literals" to "Built in functions".
+	Property lexer.julia.string.interpolation removed.
+	Updated set of characters for identifiers.
+	<a href="https://github.com/ScintillaOrg/lexilla/pull/13">Pull request #13</a>.
+	</li>
+	<li>
+	Fixed Markdown emphasis spans to only be recognized when closed in same paragraph.
+	<a href="https://sourceforge.net/p/scintilla/bugs/1216/">Bug #1216</a>.
+	</li>
+	<li>
+	Fixed Matlab to not allow escape sequences in double-quoted strings.
+	<a href="https://github.com/ScintillaOrg/lexilla/issues/18">Issue #18</a>.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/lexilla510.zip">Release 5.1.0</a>

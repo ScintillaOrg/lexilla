@@ -19,11 +19,13 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <functional>
 
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#include "StringCopy.h"
 #include "PropSetSimple.h"
 #include "StringCopy.h"
 #include "WordList.h"
@@ -118,9 +120,6 @@ LexicalClass juliaLexicalClasses[] = {
 	20, "SCE_JULIA_KEYWORD4", "identifier", "Builtin function names",
 	21, "SCE_JULIA_TYPEOPERATOR", "operator type", "Type annotation operator",
 };
-
-const int sizeJuliaLexicalClasses = static_cast<int>(std::size(juliaLexicalClasses));
-
 
 class LexerJulia : public DefaultLexer {
 	WordList keywords;

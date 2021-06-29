@@ -26,8 +26,10 @@
 **.erl text
 **.jl text
 **.lua text
+**.matlab text
 **.ml text
 **.nim text
+**.octave text
 **.pl text
 **.p6 text
 **.rb text

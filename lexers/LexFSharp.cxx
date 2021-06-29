@@ -13,6 +13,7 @@
 #include <string>
 #include <string_view>
 #include <map>
+#include <functional>
 
 #include "ILexer.h"
 #include "Scintilla.h"
