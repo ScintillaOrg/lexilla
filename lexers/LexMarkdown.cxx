@@ -398,7 +398,7 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
                 sc.SetState(SCE_MARKDOWN_CODE2);
                 sc.Forward();
             }
-            else if (sc.ch == '`' && sc.chNext != ' ' && AtTermStart(sc)) {
+            else if (sc.ch == '`' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "`")) {
                 sc.SetState(SCE_MARKDOWN_CODE);
             }
             // Strong
