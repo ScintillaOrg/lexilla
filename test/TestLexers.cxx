@@ -161,18 +161,31 @@ int Substitute(std::string &s, const std::string &sFind, const std::string &sRep
 	return c;
 }
 
+int WindowsToUnix(std::string &s) {
+	return Substitute(s, "\r\n", "\n");
+}
+
+int UnixToWindows(std::string &s) {
+	return Substitute(s, "\n", "\r\n");
+}
+
 const std::string BOM = "\xEF\xBB\xBF";
 
 void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer5 *plex) {
 	// Convert all line ends to \r\n to check if styles change between \r and \n which makes
 	// it difficult to test on different platforms when files may have line ends changed.
 	std::string text = s;
-	Substitute(text, "\r\n", "\n");
-	Substitute(text, "\n", "\r\n");
+	WindowsToUnix(text);
+	std::string textUnix = text;
+	UnixToWindows(text);
 	TestDocument doc;
 	doc.Set(text);
 	Scintilla::IDocument *pdoc = &doc;
 	plex->Lex(0, pdoc->Length(), 0, pdoc);
+	plex->Fold(0, pdoc->Length(), 0, pdoc);
+	const std::string styledText = MarkedDocument(pdoc);
+	const std::string foldedText = FoldedDocument(pdoc);
+
 	int prevStyle = -1;
 	Sci_Position line = 1;
 	for (Sci_Position pos = 0; pos < pdoc->Length(); pos++) {
@@ -189,6 +202,28 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 		}
 		prevStyle = styleNow;
 	}
+
+	// Lex and fold with \n line ends then check result is same
+
+	TestDocument docUnix;
+	docUnix.Set(textUnix);
+	Scintilla::IDocument *pdocUnix = &docUnix;
+	plex->Lex(0, pdocUnix->Length(), 0, pdocUnix);
+	plex->Fold(0, pdocUnix->Length(), 0, pdocUnix);
+	std::string styledTextUnix = MarkedDocument(pdocUnix);
+	std::string foldedTextUnix = FoldedDocument(pdocUnix);
+
+	// Convert results from \n to \r\n run
+	UnixToWindows(styledTextUnix);
+	UnixToWindows(foldedTextUnix);
+
+	if (styledText != styledTextUnix) {
+		std::cout << "\n" << path.string() << ":1: has different styles with \\n versus \\r\\n line ends\n\n";
+	}
+	if (foldedText != foldedTextUnix) {
+		std::cout << "\n" << path.string() << ":1: has different folds with \\n versus \\r\\n line ends\n\n";
+	}
+
 	plex->Release();
 }
 
@@ -295,7 +330,6 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 	}
 
 	// Set parameters of lexer
-	const std::string keywords = "keywords";
 	for (auto const &[key, val] : propertyMap.properties) {
 		if (key.starts_with("#")) {
 			// Ignore comments
