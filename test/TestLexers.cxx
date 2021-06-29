@@ -122,6 +122,18 @@ public:
 			return prop->second;
 	}
 
+	std::optional<std::string> GetPropertyForFile(std::string_view keyPrefix, std::string_view fileName) const {
+		for (auto const &[key, val] : properties) {
+			if (key.starts_with(keyPrefix)) {
+				const std::string keySuffix = key.substr(keyPrefix.length());
+				if (fileName.ends_with(keySuffix)) {
+					return val;
+				}
+			}
+		}
+		return std::nullopt;
+	}
+
 	std::optional<int> GetPropertyValue(std::string_view key) const {
 		std::optional<std::string> value = GetProperty(key);
 		try {
@@ -254,20 +266,32 @@ void TestILexer(Scintilla::ILexer5 *plex) {
 	}
 }
 
+const char *lexerPrefix = "lexer.*";
+
 bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
 	// Find and create correct lexer
-	std::string language;
-	Scintilla::ILexer5 *plex = nullptr;
-	for (auto const &[key, val] : propertyMap.properties) {
-		if (key.starts_with("lexer.*")) {
-			language = val;
-			plex = Lexilla::MakeLexer(language);
-			break;
-		}
-	}
-	if (!plex) {
-		std::cout << "\n" << path.string() << ":1: has no lexer\n\n";
+	std::optional<std::string> language = propertyMap.GetPropertyForFile(lexerPrefix, path.filename().string());
+	if (!language) {
+		std::cout << "\n" << path.string() << ":1: has no language\n\n";
 		return false;
+	}
+	Scintilla::ILexer5 *plex = Lexilla::MakeLexer(*language);
+	if (!plex) {
+		std::cout << "\n" << path.string() << ":1: has no lexer for " << *language << "\n\n";
+		return false;
+	}
+
+	// Set keywords, keywords2, ... keywords9, for this file 
+	for (int kw = 0; kw < 10; kw++) {
+		std::string kwChoice("keywords");
+		if (kw > 0) {
+			kwChoice.push_back('1' + kw);
+		}
+		kwChoice.append(".*");
+		std::optional<std::string> keywordN = propertyMap.GetPropertyForFile(kwChoice, path.filename().string());
+		if (keywordN) {
+			plex->WordListSet(kw, keywordN->c_str());
+		}
 	}
 
 	// Set parameters of lexer
@@ -276,15 +300,9 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 		if (key.starts_with("#")) {
 			// Ignore comments
 		} else if (key.starts_with("lexer.*")) {
-			// Ignore
+			// Ignore as processed earlier
 		} else if (key.starts_with("keywords")) {
-			// Get character after keywords
-			std::string afterKeywords = key.substr(keywords.length(), 1);
-			char characterAfterKeywords = afterKeywords.empty() ? '1' : afterKeywords[0];
-			if (characterAfterKeywords < '1' || characterAfterKeywords > '9')
-				characterAfterKeywords = '1';
-			const int wordSet = characterAfterKeywords - '1';
-			plex->WordListSet(wordSet, val.c_str());
+			// Ignore as processed earlier
 		} else {
 			plex->PropertySet(key.c_str(), val.c_str());
 		}
@@ -381,7 +399,7 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 
 	plex->Release();
 
-	TestCRLF(path, text, Lexilla::MakeLexer(language));
+	TestCRLF(path, text, Lexilla::MakeLexer(*language));
 
 	return success;
 }
