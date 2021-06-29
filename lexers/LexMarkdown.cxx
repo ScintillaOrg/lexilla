@@ -186,8 +186,9 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
 
         // Conditional state-based actions
         if (sc.state == SCE_MARKDOWN_CODE2) {
-            if (sc.Match("``") && sc.GetRelative(-2) != ' ') {
-                sc.Forward(2);
+            if (sc.Match("``")) {
+                const int closingSpan = (sc.GetRelative(2) == '`') ? 3 : 2;
+                sc.Forward(closingSpan);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
         }
@@ -395,8 +396,9 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
             }
             // Code - also a special case for alternate inside spacing
             else if (sc.Match("``") && sc.GetRelative(3) != ' ' && AtTermStart(sc)) {
+                const int openingSpan = (sc.GetRelative(2) == '`') ? 2 : 1;
                 sc.SetState(SCE_MARKDOWN_CODE2);
-                sc.Forward();
+                sc.Forward(openingSpan);
             }
             else if (sc.ch == '`' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "`")) {
                 sc.SetState(SCE_MARKDOWN_CODE);

@@ -4,6 +4,10 @@
  0 400   0   SELECT datetime() AS `date`;
  0 400   0   ~~~
  0 400   0   
+ 0 400   0   ```sql
+ 0 400   0   SELECT datetime() AS `date`;
+ 0 400   0   ```
+ 0 400   0   
  0 400   0   List of examples:
  0 400   0   
  0 400   0   -   example *one*

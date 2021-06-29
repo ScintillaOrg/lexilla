@@ -4,6 +4,10 @@
 SELECT datetime() AS `date`;
 ~~~{1}
 
+{20}```sql
+SELECT datetime() AS `date`;
+```{1}
+
 {0}List of examples:{1}
 
 {13}-{0}   example {4}*one*{1}
@@ -16,11 +20,11 @@ SELECT datetime() AS `date`;
 {12}   {0} {1}
 {12}   {0} {20}```sql
     SELECT strftime('%Y-%m-%d %H:%M:%S', 'now') AS `date`;
-    ```
-    
-    or, in case of __BBB__:
-    . . .
+    ```{1}
+{12}   {0} {1}
+{12}   {0} or, in case of {3}__BBB__{0}:{1}
+{12}   {0} . . .{1}
 
--   example *three*
+{13}-{0}   example {4}*three*{1}
 
-Last paragraph.
+{0}Last paragraph.{1}
