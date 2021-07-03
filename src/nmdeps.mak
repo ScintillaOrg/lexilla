@@ -33,6 +33,12 @@ $(DIR_O)/DefaultLexer.obj: \
 	../lexlib/Accessor.h \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h
+$(DIR_O)/LexAccessor.obj: \
+	../lexlib/LexAccessor.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/CharacterSet.h
 $(DIR_O)/LexerBase.obj: \
 	../lexlib/LexerBase.cxx \
 	../../scintilla/include/ILexer.h \

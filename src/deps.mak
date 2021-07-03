@@ -33,6 +33,12 @@ DefaultLexer.o: \
 	../lexlib/Accessor.h \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h
+LexAccessor.o: \
+	../lexlib/LexAccessor.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/CharacterSet.h
 LexerBase.o: \
 	../lexlib/LexerBase.cxx \
 	../../scintilla/include/ILexer.h \
