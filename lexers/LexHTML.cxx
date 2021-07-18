@@ -2281,7 +2281,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (ch == '/' && chNext == '/') {
 					i++;
 					state = SCE_HPHP_COMMENTLINE;
-				} else if (ch == '#') {
+				} else if (ch == '#' && chNext != '[') {
 					state = SCE_HPHP_COMMENTLINE;
 				} else if (ch == '\"') {
 					state = SCE_HPHP_HSTRING;
@@ -2405,7 +2405,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '/' && chNext == '/') {
 				i++;
 				state = SCE_HPHP_COMMENTLINE;
-			} else if (ch == '#') {
+			} else if (ch == '#' && chNext != '[') {
 				state = SCE_HPHP_COMMENTLINE;
 			} else if (ch == '\"') {
 				state = SCE_HPHP_HSTRING;

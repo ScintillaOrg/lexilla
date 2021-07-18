@@ -21,4 +21,10 @@ $test = [
 ];
 print_r($test);
 
+# Attribute tests
+#[SingleLineAnnotation('string', 1, null)]
+#[
+	MultiLineAnnotation('string', 1, null)
+]
+
 ?>
