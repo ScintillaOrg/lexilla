@@ -110,6 +110,9 @@ struct FSharpString {
 	constexpr bool HasLength() const {
 		return startPos > ZERO_LENGTH;
 	}
+	constexpr bool CanInterpolate() const {
+		return startChar == '$';
+	}
 };
 
 class UnicodeChar {
@@ -234,8 +237,9 @@ inline bool MatchStringEnd(StyleContext &cxt, const FSharpString &fsStr) {
 	return (fsStr.HasLength() &&
 		// end of quoted identifier?
 		((cxt.ch == '`' && cxt.chPrev == '`') ||
-		// end of triple-quoted-string?
-		(fsStr.startChar == '"' && cxt.MatchIgnoreCase("\"\"\"")) ||
+		// end of literal or interpolated triple-quoted string?
+		 ((fsStr.startChar == '"' || (fsStr.CanInterpolate() && cxt.chPrev != '$')) &&
+		  cxt.MatchIgnoreCase("\"\"\"")) ||
 		// end of verbatim string?
 		(fsStr.startChar == '@' &&
 			// embedded quotes must be in pairs
@@ -257,10 +261,13 @@ inline bool MatchCharacterStart(StyleContext &cxt) {
 }
 
 inline bool CanEmbedQuotes(StyleContext &cxt) {
-	// allow unescaped double quotes inside verbatim and triple-quoted strings, and quoted identifiers:
+	// allow unescaped double quotes inside literal or interpolated triple-quoted strings, verbatim strings,
+	// and quoted identifiers:
 	// - https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/strings
+	// - https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/interpolated-strings#syntax
 	// - https://fsharp.org/specs/language-spec/4.1/FSharpSpec-4.1-latest.pdf#page=25&zoom=auto,-98,600
-	return cxt.MatchIgnoreCase("\"\"\"") || cxt.Match('@', '"') || cxt.Match('`', '`');
+	return cxt.MatchIgnoreCase("$\"\"\"") || cxt.MatchIgnoreCase("\"\"\"") || cxt.Match('@', '"') ||
+	       cxt.Match('`', '`');
 }
 
 inline bool IsNumber(StyleContext &cxt, const int base = 10) {

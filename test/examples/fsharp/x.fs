@@ -21,7 +21,7 @@ let xmlFragment2 = """<book href="https://www.worldcat.org/title/paradise-lost/o
 (* you need .NET 5.0 to compile this:
   https://docs.microsoft.com/en-us/dotnet/fsharp/whats-new/fsharp-50#string-interpolation
 *)
-let interpolated = $"I think {3.0 + 0.14} is close to {System.Math.PI}!"
+let interpolated = $"""C:\{System.DateTime.Now.ToString("yyyy-MM-dd")}\""" + $"{System.Random().Next(System.Int32.MaxValue)}.log"
 
 let ``a byte literal`` = '\209'B
 
