@@ -2390,7 +2390,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 			///////////// start - PHP state handling
 		case SCE_HPHP_WORD:
-			if (!IsAWordChar(ch)) {
+			if (!IsPhpWordChar(ch)) {
 				classifyWordHTPHP(styler.GetStartSegment(), i - 1, keywords5, styler);
 				if (ch == '/' && chNext == '*') {
 					i++;
