@@ -527,7 +527,6 @@ bool isDjangoBlockEnd(const int ch, const int chNext, const std::string &blockTy
 class PhpNumberState {
 	enum NumberBase { BASE_10 = 0, BASE_2, BASE_8, BASE_16 };
 	static constexpr const char *const digitList[] = { "_0123456789", "_01", "_01234567", "_0123456789abcdefABCDEF" };
-	static constexpr const unsigned char baseList[] = { 10, 2, 8, 16 };
 
 	NumberBase base = BASE_10;
 	bool decimalPart = false;
@@ -543,8 +542,6 @@ class PhpNumberState {
 	bool exponentChar = false;
 
 public:
-	inline unsigned char getBase() { return baseList[base]; }
-	inline bool isDecimal() { return decimalPart || exponentPart; }
 	inline bool isInvalid() { return invalid; }
 	inline bool isFinished() { return finished; }
 
