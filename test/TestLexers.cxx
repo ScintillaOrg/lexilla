@@ -316,7 +316,7 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 		return false;
 	}
 
-	// Set keywords, keywords2, ... keywords9, for this file 
+	// Set keywords, keywords2, ... keywords9, for this file
 	for (int kw = 0; kw < 10; kw++) {
 		std::string kwChoice("keywords");
 		if (kw > 0) {
@@ -477,7 +477,7 @@ bool AccessLexilla(std::filesystem::path basePath) {
 }
 
 std::filesystem::path FindLexillaDirectory(std::filesystem::path startDirectory) {
-	// Search up from startDirectory for a directory named "lexilla" or containing a "bin" subdirectory 
+	// Search up from startDirectory for a directory named "lexilla" or containing a "bin" subdirectory
 	std::filesystem::path directory = startDirectory;
 	while (!directory.empty()) {
 		//std::cout << "Searching " << directory.string() << "\n";
