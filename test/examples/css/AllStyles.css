@@ -80,5 +80,10 @@ html/**/
 @media (orientation: portrait)
 { }
 
+/* group rule=22 */
+@supports ( display: flex ) {
+  body { display: flex; }
+}
+
 /* variable=23 */
 $variable:#428bca;

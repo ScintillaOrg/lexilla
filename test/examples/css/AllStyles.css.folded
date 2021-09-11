@@ -80,6 +80,11 @@
  0 400   0   @media (orientation: portrait)
  0 400   0   { }
  0 400   0   
+ 0 400   0   /* group rule=22 */
+ 0 400   0   @supports ( display: flex ) {
+ 0 400   0     body { display: flex; }
+ 0 400   0   }
+ 0 400   0   
  0 400   0   /* variable=23 */
  0 400   0   $variable:#428bca;
  0 400   0   
