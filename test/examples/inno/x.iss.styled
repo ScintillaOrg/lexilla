@@ -1,0 +1,15 @@
+{5}#define{0} app_copyright {10}"Copyright 1999, app corporation"{0}
+
+{4}[Setup]{0}
+{2}AppName{0}=MyApp
+{2}AppCopyright{0}={6}{#app_copyright}{0}
+
+{4}[Files]{0}
+{3}Source{0}: {10}"app.exe"{0}; {3}DestDir{0}: {10}"{tmp}"{0}
+{3}Source{0}: {11}'helper.exe'{0}; {3}DestDir{0}: {11}'{tmp}'{0}
+
+{4}[Code]{0}
+{8}function{0} ShouldInstallComCtlUpdate: Boolean;
+{8}begin{0}
+  Result := {8}False{0};
+{8}end{0};
