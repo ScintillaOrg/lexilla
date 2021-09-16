@@ -3,6 +3,7 @@
  ** Lexer for Inno Setup scripts.
  **/
 // Written by Friedrich Vedder <fvedd@t-online.de>, using code from LexOthers.cxx.
+// Modified by Michael Heath.
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -27,6 +28,27 @@
 #include "LexerModule.h"
 
 using namespace Lexilla;
+
+static bool innoIsBlank(int ch) {
+	return (ch == ' ') || (ch == '\t');
+}
+
+static bool innoNextNotBlankIs(Sci_Position i, Accessor &styler, char needle) {
+	char ch;
+
+	while (i < styler.Length()) {
+		ch = styler.SafeGetCharAt(i);
+
+		if (ch == needle)
+			return true;
+
+		if (!innoIsBlank(ch))
+			return false;
+
+		i++;
+	}
+	return false;
+}
 
 static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler) {
 	int state = SCE_INNO_DEFAULT;
@@ -131,9 +153,9 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 					buffer[bufferCount] = '\0';
 
 					// Check if the buffer contains a keyword
-					if (!isCode && standardKeywords.InList(buffer)) {
+					if (!isCode && standardKeywords.InList(buffer) && innoNextNotBlankIs(i, styler, '=')) {
 						styler.ColourTo(i-1,SCE_INNO_KEYWORD);
-					} else if (!isCode && parameterKeywords.InList(buffer)) {
+					} else if (!isCode && parameterKeywords.InList(buffer) && innoNextNotBlankIs(i, styler, ':')) {
 						styler.ColourTo(i-1,SCE_INNO_PARAMETER);
 					} else if (isCode && pascalKeywords.InList(buffer)) {
 						styler.ColourTo(i-1,SCE_INNO_KEYWORD_PASCAL);
