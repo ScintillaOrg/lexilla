@@ -3,9 +3,11 @@
  2 400   0 + [Setup]
  0 401   0 | AppName=MyApp
  0 401   0 | AppCopyright={#app_copyright}
+ 0 401   0 | WizardSmallImageFile=WizardSmallImageFile.bmp
+ 0 401   0 | OnlyBelowVersion=6.01
  0 401   0 | 
  2 400   0 + [Files]
- 0 401   0 | Source: "app.exe"; DestDir: "{tmp}"
+ 0 401   0 | Source: "app.exe"; DestDir: "{tmp}"; OnlyBelowVersion: 6.01
  0 401   0 | Source: 'helper.exe'; DestDir: '{tmp}'
  0 401   0 | 
  2 400   0 + [Code]

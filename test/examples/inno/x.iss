@@ -3,9 +3,11 @@
 [Setup]
 AppName=MyApp
 AppCopyright={#app_copyright}
+WizardSmallImageFile=WizardSmallImageFile.bmp
+OnlyBelowVersion=6.01
 
 [Files]
-Source: "app.exe"; DestDir: "{tmp}"
+Source: "app.exe"; DestDir: "{tmp}"; OnlyBelowVersion: 6.01
 Source: 'helper.exe'; DestDir: '{tmp}'
 
 [Code]
