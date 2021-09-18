@@ -150,7 +150,11 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 			case SCE_INNO_COMMENT:
 				if (isEOL) {
 					state = SCE_INNO_DEFAULT;
-					styler.ColourTo(i,SCE_INNO_COMMENT);
+					styler.ColourTo(i-1,SCE_INNO_COMMENT);
+
+					// Push back the faulty character
+					chNext = styler[i--];
+					ch = chPrev;
 				}
 				break;
 
@@ -229,16 +233,30 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 				break;
 
 			case SCE_INNO_STRING_DOUBLE:
-				if (ch == '"' || isEOL) {
+				if (ch == '"') {
 					state = SCE_INNO_DEFAULT;
 					styler.ColourTo(i,SCE_INNO_STRING_DOUBLE);
+				} else if (isEOL) {
+					state = SCE_INNO_DEFAULT;
+					styler.ColourTo(i-1,SCE_INNO_STRING_DOUBLE);
+
+					// Push back the faulty character
+					chNext = styler[i--];
+					ch = chPrev;
 				}
 				break;
 
 			case SCE_INNO_STRING_SINGLE:
-				if (ch == '\'' || isEOL) {
+				if (ch == '\'') {
 					state = SCE_INNO_DEFAULT;
 					styler.ColourTo(i,SCE_INNO_STRING_SINGLE);
+				} else if (isEOL) {
+					state = SCE_INNO_DEFAULT;
+					styler.ColourTo(i-1,SCE_INNO_STRING_SINGLE);
+
+					// Push back the faulty character
+					chNext = styler[i--];
+					ch = chPrev;
 				}
 				break;
 
@@ -256,7 +274,11 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 				if (isCStyleComment) {
 					if (isEOL) {
 						state = SCE_INNO_DEFAULT;
-						styler.ColourTo(i,SCE_INNO_COMMENT_PASCAL);
+						styler.ColourTo(i-1,SCE_INNO_COMMENT_PASCAL);
+
+						// Push back the faulty character
+						chNext = styler[i--];
+						ch = chPrev;
 					}
 				} else {
 					if (ch == '}' || (ch == ')' && chPrev == '*')) {
