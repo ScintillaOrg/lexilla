@@ -37,4 +37,6 @@ keyname="{#app_copyright}"not string
 function ShouldInstallComCtlUpdate: Boolean;
 begin
   Result := False;
+  Log('string');
+  IsEscaped('\'good', '\\\'good', '\\'bad');
 end;

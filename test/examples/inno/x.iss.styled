@@ -37,4 +37,6 @@ keyname="{6}{#app_copyright}{0}"not string
 {8}function{0} ShouldInstallComCtlUpdate: Boolean;
 {8}begin{0}
   Result := {8}False{0};
+  Log({11}'string'{0});
+  IsEscaped({11}'\'good'{0}, {11}'\\\'good'{0}, {11}'\\'{0}bad{11}');{0}
 {8}end{0};
