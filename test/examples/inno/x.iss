@@ -10,6 +10,12 @@ OnlyBelowVersion=6.01
 Source: "app.exe"; DestDir: "{tmp}"; OnlyBelowVersion: 6.01
 Source: 'helper.exe'; DestDir: '{tmp}'
 
+[CustomMessages]
+keyname                 =Other tasks:'not string
+
+[Messages]
+keyname="{#app_copyright}"not string
+
 [Code]
 function ShouldInstallComCtlUpdate: Boolean;
 begin
