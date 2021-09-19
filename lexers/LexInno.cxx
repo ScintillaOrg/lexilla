@@ -247,19 +247,7 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 				break;
 
 			case SCE_INNO_STRING_SINGLE:
-				
-				// Single quotes can be escaped by backslashes
-				if (chPrev == '\\' && ch== '\\' && chNext == '\\') {
-					chNext = styler[i++];
-					ch = chNext;
-					break;
-				} else if (chPrev == '\\' && ch== '\\') {
-					break;
-				} else if (ch == '\\' && chNext == '\'') {
-					chNext = styler[i++];
-					ch = chNext;
-					break;
-				} else if (ch == '\'') {
+				if (ch == '\'') {
 					state = SCE_INNO_DEFAULT;
 					styler.ColourTo(i,SCE_INNO_STRING_SINGLE);
 				} else if (isEOL) {

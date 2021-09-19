@@ -38,5 +38,5 @@ function ShouldInstallComCtlUpdate: Boolean;
 begin
   Result := False;
   Log('string');
-  IsEscaped('\'good', '\\\'good', '\\'bad');
+  IsEscaped('''good''', ''bad');
 end;
