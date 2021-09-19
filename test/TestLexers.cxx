@@ -301,21 +301,7 @@ void TestILexer(Scintilla::ILexer5 *plex) {
 	}
 }
 
-const char *lexerPrefix = "lexer.*";
-
-bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
-	// Find and create correct lexer
-	std::optional<std::string> language = propertyMap.GetPropertyForFile(lexerPrefix, path.filename().string());
-	if (!language) {
-		std::cout << "\n" << path.string() << ":1: has no language\n\n";
-		return false;
-	}
-	Scintilla::ILexer5 *plex = Lexilla::MakeLexer(*language);
-	if (!plex) {
-		std::cout << "\n" << path.string() << ":1: has no lexer for " << *language << "\n\n";
-		return false;
-	}
-
+void SetProperties(Scintilla::ILexer5 *plex, const PropertyMap &propertyMap, std::string_view fileName) {
 	// Set keywords, keywords2, ... keywords9, for this file
 	for (int kw = 0; kw < 10; kw++) {
 		std::string kwChoice("keywords");
@@ -323,7 +309,7 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 			kwChoice.push_back('1' + kw);
 		}
 		kwChoice.append(".*");
-		std::optional<std::string> keywordN = propertyMap.GetPropertyForFile(kwChoice, path.filename().string());
+		std::optional<std::string> keywordN = propertyMap.GetPropertyForFile(kwChoice, fileName);
 		if (keywordN) {
 			plex->WordListSet(kw, keywordN->c_str());
 		}
@@ -341,6 +327,24 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 			plex->PropertySet(key.c_str(), val.c_str());
 		}
 	}
+}
+
+const char *lexerPrefix = "lexer.*";
+
+bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
+	// Find and create correct lexer
+	std::optional<std::string> language = propertyMap.GetPropertyForFile(lexerPrefix, path.filename().string());
+	if (!language) {
+		std::cout << "\n" << path.string() << ":1: has no language\n\n";
+		return false;
+	}
+	Scintilla::ILexer5 *plex = Lexilla::MakeLexer(*language);
+	if (!plex) {
+		std::cout << "\n" << path.string() << ":1: has no lexer for " << *language << "\n\n";
+		return false;
+	}
+
+	SetProperties(plex, propertyMap, path.filename().string());
 
 	TestILexer(plex);
 
@@ -433,7 +437,9 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 
 	plex->Release();
 
-	TestCRLF(path, text, Lexilla::MakeLexer(*language));
+	Scintilla::ILexer5 *plexCRLF = Lexilla::MakeLexer(*language);
+	SetProperties(plexCRLF, propertyMap, path.filename().string());
+	TestCRLF(path, text, plexCRLF);
 
 	return success;
 }
