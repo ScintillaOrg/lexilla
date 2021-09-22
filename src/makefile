@@ -14,7 +14,8 @@
 
 .SUFFIXES: .cxx
 
-DIR_BIN=../bin
+DIR_ROOT=..
+DIR_BIN=$(DIR_ROOT)/bin
 
 WARNINGS = -Wpedantic -Wall -Wextra
 
@@ -72,13 +73,20 @@ endif
 
 RANLIB ?= ranlib
 
-vpath %.h ../src ../include ../../scintilla/include ../lexlib
-vpath %.cxx ../src ../lexlib ../lexers
+# detect a build outside of src directory
+DIR_MAKEFILE = $(dir $(subst \,/,$(firstword $(MAKEFILE_LIST))))
+ifneq "$(DIR_MAKEFILE)" "./"
+DIR_ROOT = $(patsubst %/,%,$(dir $(DIR_MAKEFILE:%/=%)))
+endif
+
+vpath %.h $(DIR_ROOT)/src $(DIR_ROOT)/include $(DIR_ROOT)/../scintilla/include $(DIR_ROOT)/lexlib
+vpath %.cxx $(DIR_ROOT)/src $(DIR_ROOT)/lexlib $(DIR_ROOT)/lexers
+vpath %.rc $(DIR_ROOT)/src
 
 DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
 BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
-INCLUDES = -I ../include -I ../../scintilla/include -I ../src -I ../lexlib
+INCLUDES = -I $(DIR_ROOT)/include -I $(DIR_ROOT)/../scintilla/include -I $(DIR_ROOT)/src -I $(DIR_ROOT)/lexlib
 LDFLAGS += -shared
 
 BASE_FLAGS += $(WARNINGS)
@@ -95,12 +103,12 @@ clean:
 	$(WINDRES) $< $@
 
 analyze:
-	$(CXX) --analyze $(DEFINES) $(INCLUDES) $(BASE_FLAGS) $(CXXFLAGS) *.cxx ../lexlib/*.cxx ../lexers/*.cxx
+	$(CXX) --analyze $(DEFINES) $(INCLUDES) $(BASE_FLAGS) $(CXXFLAGS) $(DIR_ROOT)/src/*.cxx $(DIR_ROOT)/lexlib/*.cxx $(DIR_ROOT)/lexers/*.cxx
 
-depend deps.mak:
-	$(PYTHON) DepGen.py
+depend $(DIR_ROOT)/src/deps.mak:
+	cd $(call normalize,$(DIR_ROOT)/src) && $(PYTHON) DepGen.py
 
-LEXERS:=$(sort $(notdir $(wildcard ../lexers/Lex*.cxx)))
+LEXERS:=$(sort $(notdir $(wildcard $(DIR_ROOT)/lexers/Lex*.cxx)))
 
 OBJS = Lexilla.o
 
@@ -132,4 +140,4 @@ $(LIBLEXILLA):  $(LEXILLA_OBJS)
 	$(RANLIB) $@
 
 # Automatically generate dependencies for most files with "make deps"
-include deps.mak
+include $(DIR_ROOT)/src/deps.mak
