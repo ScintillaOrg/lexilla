@@ -921,8 +921,7 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 		int minCommentLevel = indentCurrentLevel;
 		while (!quote &&
 				(lineNext < docLines) &&
-				((indentNext & SC_FOLDLEVELWHITEFLAG) ||
-				 (lineNext <= docLines && IsCommentLine(lineNext, styler)))) {
+				((indentNext & SC_FOLDLEVELWHITEFLAG) || (IsCommentLine(lineNext, styler)))) {
 
 			if (IsCommentLine(lineNext, styler) && indentNext < minCommentLevel) {
 				minCommentLevel = indentNext;
