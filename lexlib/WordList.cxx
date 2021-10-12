@@ -80,7 +80,7 @@ WordList::~WordList() {
 }
 
 WordList::operator bool() const noexcept {
-	return len ? true : false;
+	return len != 0;
 }
 
 bool WordList::operator!=(const WordList &other) const noexcept {
