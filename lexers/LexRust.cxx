@@ -286,6 +286,8 @@ static void ScanNumber(Accessor& styler, Sci_Position& pos) {
 			pos += 2;
 		} else if (c == '6' && n == '4') {
 			pos += 2;
+		} else if (styler.Match(pos, "128")) {
+			pos += 3;
 		} else if (styler.Match(pos, "size")) {
 			pos += 4;
 		} else {
