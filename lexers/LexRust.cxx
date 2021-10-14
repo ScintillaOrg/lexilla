@@ -559,12 +559,8 @@ static void ResumeLineComment(Accessor &styler, Sci_Position& pos, Sci_Position 
 		maybe_doc_comment = true;
 	}
 
-	while (pos < max && c != '\n') {
-		if (pos == styler.LineEnd(styler.GetLine(pos)))
-			styler.SetLineState(styler.GetLine(pos), 0);
-		pos++;
-		c = styler.SafeGetCharAt(pos, '\0');
-	}
+	pos = styler.LineEnd(styler.GetLine(pos));
+	styler.SetLineState(styler.GetLine(pos), SCE_RUST_DEFAULT);
 
 	if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
 		styler.ColourTo(pos - 1, SCE_RUST_COMMENTLINEDOC);
