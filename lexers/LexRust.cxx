@@ -526,7 +526,7 @@ static void ResumeBlockComment(Accessor &styler, Sci_Position& pos, Sci_Position
 				level++;
 			}
 		}
-		else {
+		else if (pos < max) {
 			pos++;
 		}
 		if (pos >= max) {
