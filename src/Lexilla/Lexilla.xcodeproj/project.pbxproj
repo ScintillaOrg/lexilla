@@ -154,6 +154,7 @@
 		28BA73AE24E34DBC00272C2D /* Lexilla.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28BA73AC24E34DBC00272C2D /* Lexilla.cxx */; };
 		70BF497C8D265026B77C97DA /* LexJulia.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 315E4E969868C52C125686B2 /* LexJulia.cxx */; };
 		B32D4A2A9CEC222A5140E99F /* LexFSharp.cxx in Sources */ = {isa = PBXBuildFile; fileRef = F8E54626B22BD9493090F40B /* LexFSharp.cxx */; };
+		510D44AFB91EE873E86ABDD4 /* LexAsciidoc.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 3AF14420BFC43876F16C5995 /* LexAsciidoc.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -306,6 +307,7 @@
 		28BA73B024E3510900272C2D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		315E4E969868C52C125686B2 /* LexJulia.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexJulia.cxx; path = ../../lexers/LexJulia.cxx; sourceTree = SOURCE_ROOT; };
 		F8E54626B22BD9493090F40B /* LexFSharp.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexFSharp.cxx; path = ../../lexers/LexFSharp.cxx; sourceTree = SOURCE_ROOT; };
+		3AF14420BFC43876F16C5995 /* LexAsciidoc.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAsciidoc.cxx; path = ../../lexers/LexAsciidoc.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -354,6 +356,7 @@
 				28BA72EE24E34D9300272C2D /* LexAbaqus.cxx */,
 				28BA730024E34D9400272C2D /* LexAda.cxx */,
 				28BA72DF24E34D9200272C2D /* LexAPDL.cxx */,
+				3AF14420BFC43876F16C5995 /* LexAsciidoc.cxx */,
 				28BA72FF24E34D9400272C2D /* LexAsm.cxx */,
 				28BA72DB24E34D9200272C2D /* LexAsn1.cxx */,
 				28BA72D724E34D9200272C2D /* LexASY.cxx */,
@@ -720,6 +723,7 @@
 				28BA737C24E34D9700272C2D /* LexX12.cxx in Sources */,
 				B32D4A2A9CEC222A5140E99F /* LexFSharp.cxx in Sources */,
 				70BF497C8D265026B77C97DA /* LexJulia.cxx in Sources */,
+				510D44AFB91EE873E86ABDD4 /* LexAsciidoc.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
