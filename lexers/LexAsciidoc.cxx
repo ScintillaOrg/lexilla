@@ -30,6 +30,10 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
+using namespace Lexilla;
+
+namespace {
+
 typedef struct {
     bool start;
     int len1;
@@ -67,10 +71,6 @@ static const MacroItem MacroList[] = {
     {true,  7, 1, "WARNING:"},
     {false, 0, 0, NULL}
 };
-
-using namespace Lexilla;
-
-namespace {
 
 constexpr bool IsNewline(const int ch) {
     // sc.GetRelative(i) returns '\0' if out of range
