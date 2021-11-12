@@ -44,3 +44,11 @@
  0 400 400   | None -> sprintf "%A" "Have a byte string!"B
  0 400 400   |> printfn "%s"
  1 400 400   
+ 0 400 400   // GitHub Issue #38
+ 0 400 400   let unescapeWinPath (path: string) =
+ 0 400 400       path.Replace("\\\\", "\\").Replace("\"", "")
+ 1 400 400   
+ 0 400 400   unescapeWinPath "\\\"Program Files (x86)\\Windows NT\\Accessories\\\""
+ 0 400 400   |> System.IO.Directory.GetFiles
+ 0 400 400   |> printfn "%A"
+ 1 400 400   

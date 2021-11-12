@@ -233,6 +233,13 @@ inline bool MatchStringStart(const StyleContext &cxt) {
 	return (cxt.ch == '"' || cxt.Match('@', '"') || cxt.Match('$', '"') || cxt.Match('`', '`'));
 }
 
+inline bool FollowsEscapedBackslash(StyleContext &cxt) {
+	int count = 0;
+	for (Sci_Position offset = 1; cxt.GetRelative(-offset) == '\\'; offset++)
+		count++;
+	return count % 2 != 0;
+}
+
 inline bool MatchStringEnd(StyleContext &cxt, const FSharpString &fsStr) {
 	return (fsStr.HasLength() &&
 		// end of quoted identifier?
@@ -250,7 +257,7 @@ inline bool MatchStringEnd(StyleContext &cxt, const FSharpString &fsStr) {
 				// pair of quotes at end of string?
 				(cxt.GetRelative(-2) == '"' && cxt.GetRelative(-3) != '@'))))))) ||
 		(!fsStr.HasLength() && cxt.ch == '"' &&
-			(cxt.chPrev != '\\' ||
+			((cxt.chPrev != '\\' || (cxt.GetRelative(-2) == '\\' && !FollowsEscapedBackslash(cxt))) ||
 			// treat backslashes as char literals in verbatim strings
 			(fsStr.startChar == '@' && cxt.chPrev == '\\')));
 }

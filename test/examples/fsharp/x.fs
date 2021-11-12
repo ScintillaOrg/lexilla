@@ -43,3 +43,11 @@ match bigNum () with
 | Some num -> sprintf "%.2f > %u" num ``a byte literal``
 | None -> sprintf "%A" "Have a byte string!"B
 |> printfn "%s"
+
+// GitHub Issue #38
+let unescapeWinPath (path: string) =
+    path.Replace("\\\\", "\\").Replace("\"", "")
+
+unescapeWinPath "\\\"Program Files (x86)\\Windows NT\\Accessories\\\""
+|> System.IO.Directory.GetFiles
+|> printfn "%A"
