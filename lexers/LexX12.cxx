@@ -322,7 +322,7 @@ LexerX12::Terminator LexerX12::DetectSegmentHeader(IDocument *pAccess, Sci_Posit
 	Sci_PositionU Length = pAccess->Length();
 	Length -= pos;
 	char c, Buf[4] = { 0 }; // max 3 + separator
-	for (Sci_PositionU posOffset = 0; posOffset < _countof(Buf) && posOffset < Length; posOffset++)
+	for (Sci_PositionU posOffset = 0; posOffset < std::size(Buf) && posOffset < Length; posOffset++)
 	{
 		pAccess->GetCharRange(&c, pos + posOffset, 1);
 		if (c != m_SeparatorElement)
