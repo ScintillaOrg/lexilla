@@ -647,6 +647,23 @@ $(DIR_O)/LexGAP.obj: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
+$(DIR_O)/LexGDScript.obj: \
+	../lexers/LexGDScript.cxx \
+	../../scintilla/include/ILexer.h \
+	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SubStyles.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexGui4Cli.obj: \
 	../lexers/LexGui4Cli.cxx \
 	../../scintilla/include/ILexer.h \

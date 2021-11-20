@@ -41,6 +41,7 @@ knownConditionTrueFalse:lexilla/lexers/LexEScript.cxx
 constParameter:lexilla/lexers/LexFortran.cxx
 redundantCondition:lexilla/lexers/LexFSharp.cxx
 knownConditionTrueFalse:lexilla/lexers/LexFSharp.cxx
+constParameter:lexilla/lexers/LexGDScript.cxx
 variableScope:lexilla/lexers/LexGui4Cli.cxx
 constParameter:lexilla/lexers/LexHaskell.cxx
 constParameter:lexilla/lexers/LexHex.cxx
@@ -105,6 +106,7 @@ knownConditionTrueFalse:lexilla/lexers/LexYAML.cxx
 // These are due to Accessor::IndentAmount not declaring the callback as taking a const.
 // Changing this could cause problems for downstream projects.
 constParameterCallback:lexilla/lexers/LexEiffel.cxx
+constParameterCallback:lexilla/lexers/LexGDScript.cxx
 constParameterCallback:lexilla/lexers/LexPython.cxx
 constParameterCallback:lexilla/lexers/LexScriptol.cxx
 constParameterCallback:lexilla/lexers/LexVB.cxx
