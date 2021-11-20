@@ -77,6 +77,7 @@ extern LexerModule lmFortran;
 extern LexerModule lmFreeBasic;
 extern LexerModule lmFSharp;
 extern LexerModule lmGAP;
+extern LexerModule lmGDScript;
 extern LexerModule lmGui4Cli;
 extern LexerModule lmHaskell;
 extern LexerModule lmHollywood;
@@ -224,6 +225,7 @@ void AddEachLexer() {
 		&lmFreeBasic,
 		&lmFSharp,
 		&lmGAP,
+		&lmGDScript,
 		&lmGui4Cli,
 		&lmHaskell,
 		&lmHollywood,

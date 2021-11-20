@@ -118,6 +118,7 @@ LEX_OBJS=\
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexFSharp.obj \
 	$(DIR_O)\LexGAP.obj \
+	$(DIR_O)\LexGDScript.obj \
 	$(DIR_O)\LexGui4Cli.obj \
 	$(DIR_O)\LexHaskell.obj \
 	$(DIR_O)\LexHex.obj \
