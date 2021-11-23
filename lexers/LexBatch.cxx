@@ -28,34 +28,36 @@
 
 using namespace Lexilla;
 
-static bool Is0To9(char ch) {
+namespace {
+
+constexpr bool Is0To9(char ch) noexcept {
 	return (ch >= '0') && (ch <= '9');
 }
 
-static bool IsAlphabetic(int ch) {
+bool IsAlphabetic(int ch) noexcept {
 	return IsASCII(ch) && isalpha(ch);
 }
 
-static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
+inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
 // Tests for BATCH Operators
-static bool IsBOperator(char ch) {
+constexpr bool IsBOperator(char ch) noexcept {
 	return (ch == '=') || (ch == '+') || (ch == '>') || (ch == '<') ||
 		(ch == '|') || (ch == '?') || (ch == '*')||
 		(ch == '&') || (ch == '(') || (ch == ')');
 }
 
 // Tests for BATCH Separators
-static bool IsBSeparator(char ch) {
+constexpr bool IsBSeparator(char ch) noexcept {
 	return (ch == '\\') || (ch == '.') || (ch == ';') ||
 		(ch == '\"') || (ch == '\'') || (ch == '/');
 }
 
 // Tests for escape character
-static bool IsEscaped(char* wordStr, Sci_PositionU pos) {
+bool IsEscaped(const char* wordStr, Sci_PositionU pos) noexcept {
 	bool isQoted=false;
 	while (pos>0){
 		pos--;
@@ -68,7 +70,7 @@ static bool IsEscaped(char* wordStr, Sci_PositionU pos) {
 }
 
 // Tests for quote character
-static bool textQuoted(char *lineBuffer, Sci_PositionU endPos) {
+bool textQuoted(const char *lineBuffer, Sci_PositionU endPos) {
 	char strBuffer[1024];
 	strncpy(strBuffer, lineBuffer, endPos);
 	strBuffer[endPos] = '\0';
@@ -85,7 +87,7 @@ static bool textQuoted(char *lineBuffer, Sci_PositionU endPos) {
 	return CurrentStatus;
 }
 
-static void ColouriseBatchDoc(
+void ColouriseBatchDoc(
     Sci_PositionU startPos,
     Sci_Position length,
     int /*initStyle*/,
@@ -109,7 +111,7 @@ static void ColouriseBatchDoc(
 		}
 	}
 
-	char lineBuffer[1024];
+	char lineBuffer[1024] {};
 
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
@@ -123,15 +125,15 @@ static void ColouriseBatchDoc(
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1) || (i==startPos + length-1)) {
 			// End of line (or of line buffer) (or End of Last Line) met, colourise it
 			lineBuffer[linePos] = '\0';
-			Sci_PositionU lengthLine=linePos;
-			Sci_PositionU endPos=i;
+			const Sci_PositionU lengthLine=linePos;
+			const Sci_PositionU endPos=i;
 			Sci_PositionU offset = 0;	// Line Buffer Offset
 			Sci_PositionU cmdLoc;		// External Command / Program Location
-			char wordBuffer[81];		// Word Buffer - large to catch long paths
+			char wordBuffer[81] {};		// Word Buffer - large to catch long paths
 			Sci_PositionU wbl;		// Word Buffer Length
 			Sci_PositionU wbo;		// Word Buffer Offset - also Special Keyword Buffer Length
-			WordList &keywords = *keywordlists[0];      // Internal Commands
-			WordList &keywords2 = *keywordlists[1];     // External Commands (optional)
+			const WordList &keywords = *keywordlists[0];      // Internal Commands
+			const WordList &keywords2 = *keywordlists[1];     // External Commands (optional)
 
 			// CHOICE, ECHO, GOTO, PROMPT and SET have Default Text that may contain Regular Keywords
 			//   Toggling Regular Keyword Checking off improves readability
@@ -141,7 +143,7 @@ static void ColouriseBatchDoc(
 			// Special Keywords are those that allow certain characters without whitespace after the command
 			// Examples are: cd. cd\ md. rd. dir| dir> echo: echo. path=
 			// Special Keyword Buffer used to determine if the first n characters is a Keyword
-			char sKeywordBuffer[10];	// Special Keyword Buffer
+			char sKeywordBuffer[10] {};	// Special Keyword Buffer
 			bool sKeywordFound;		// Exit Special Keyword for-loop if found
 
 			// Skip initial spaces
@@ -194,7 +196,7 @@ static void ColouriseBatchDoc(
 				wbl = 0;
 				for (; offset < lengthLine && wbl < 80 &&
 						!isspacechar(lineBuffer[offset]); wbl++, offset++) {
-					wordBuffer[wbl] = static_cast<char>(tolower(lineBuffer[offset]));
+					wordBuffer[wbl] = tolower(lineBuffer[offset]);
 				}
 				wordBuffer[wbl] = '\0';
 				wbo = 0;
@@ -292,7 +294,7 @@ static void ColouriseBatchDoc(
 						wbo = 0;
 						// Copy Keyword Length from Word Buffer into Special Keyword Buffer
 						for (; wbo < keywordLength; wbo++) {
-							sKeywordBuffer[wbo] = static_cast<char>(wordBuffer[wbo]);
+							sKeywordBuffer[wbo] = wordBuffer[wbo];
 						}
 						sKeywordBuffer[wbo] = '\0';
 						// Check for Special Keyword in list
@@ -412,12 +414,12 @@ static void ColouriseBatchDoc(
 						if (cmdLoc == offset - wbl) {
 							cmdLoc = offset - (wbl - wbo);
 						}
-						bool isArgument = (wordBuffer[1] == '~');
+						const bool isArgument = (wordBuffer[1] == '~');
 						if (isArgument) {
 							Sci_PositionU expansionStopOffset = 2;
 							bool isValid = false;
 							for (; expansionStopOffset < wbl; expansionStopOffset++) {
-								if (isArgument && Is0To9(wordBuffer[expansionStopOffset])) {
+								if (Is0To9(wordBuffer[expansionStopOffset])) {
 									expansionStopOffset++;
 									isValid = true;
 									wbo = expansionStopOffset;
@@ -618,10 +620,12 @@ static void ColouriseBatchDoc(
 	}
 }
 
-static const char *const batchWordListDesc[] = {
+const char *const batchWordListDesc[] = {
 	"Internal Commands",
 	"External Commands",
 	0
 };
+
+}
 
 LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc, "batch", 0, batchWordListDesc);
