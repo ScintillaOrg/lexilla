@@ -127,11 +127,6 @@ void ColouriseBatchDoc(
 			lineBuffer[linePos] = '\0';
 			const Sci_PositionU lengthLine=linePos;
 			const Sci_PositionU endPos=i;
-			Sci_PositionU offset = 0;	// Line Buffer Offset
-			Sci_PositionU cmdLoc;		// External Command / Program Location
-			char wordBuffer[81] {};		// Word Buffer - large to catch long paths
-			Sci_PositionU wbl;		// Word Buffer Length
-			Sci_PositionU wbo;		// Word Buffer Offset - also Special Keyword Buffer Length
 			const WordList &keywords = *keywordlists[0];      // Internal Commands
 			const WordList &keywords2 = *keywordlists[1];     // External Commands (optional)
 
@@ -140,12 +135,8 @@ void ColouriseBatchDoc(
 			// Other Regular Keywords and External Commands / Programs might also benefit from toggling
 			//   Need a more robust algorithm to properly toggle Regular Keyword Checking
 			bool stopLineProcessing=false;  // Used to stop line processing if Comment or Drive Change found
-			// Special Keywords are those that allow certain characters without whitespace after the command
-			// Examples are: cd. cd\ md. rd. dir| dir> echo: echo. path=
-			// Special Keyword Buffer used to determine if the first n characters is a Keyword
-			char sKeywordBuffer[10] {};	// Special Keyword Buffer
-			bool sKeywordFound;		// Exit Special Keyword for-loop if found
 
+			Sci_PositionU offset = 0;	// Line Buffer Offset
 			// Skip initial spaces
 			while ((offset < lengthLine) && (isspacechar(lineBuffer[offset]))) {
 				offset++;
@@ -153,7 +144,7 @@ void ColouriseBatchDoc(
 			// Colorize Default Text
 			styler.ColourTo(startLine + offset - 1, SCE_BAT_DEFAULT);
 			// Set External Command / Program Location
-			cmdLoc = offset;
+			Sci_PositionU cmdLoc = offset;
 
 			// Check for Fake Label (Comment) or Real Label - return if found
 			if (lineBuffer[offset] == ':') {
@@ -192,14 +183,15 @@ void ColouriseBatchDoc(
 					// Colorize Default Text
 					styler.ColourTo(startLine + offset - 1, SCE_BAT_DEFAULT);
 				}
+				char wordBuffer[81]{};		// Word Buffer - large to catch long paths
 				// Copy word from Line Buffer into Word Buffer
-				wbl = 0;
+				Sci_PositionU wbl = 0;		// Word Buffer Length
 				for (; offset < lengthLine && wbl < 80 &&
 						!isspacechar(lineBuffer[offset]); wbl++, offset++) {
 					wordBuffer[wbl] = tolower(lineBuffer[offset]);
 				}
 				wordBuffer[wbl] = '\0';
-				wbo = 0;
+				Sci_PositionU wbo = 0;		// Word Buffer Offset - also Special Keyword Buffer Length
 
 				// Check for Comment - return if found
 				if ((CompareCaseInsensitive(wordBuffer, "rem") == 0) && continueProcessing) {
@@ -289,8 +281,12 @@ void ColouriseBatchDoc(
 					// Check for Special Keyword
 					//     Affected Commands are in Length range 2-6
 					//     Good that ERRORLEVEL, EXIST, CALL, DO, LOADHIGH, and LH are unaffected
-					sKeywordFound = false;
+					bool sKeywordFound = false;		// Exit Special Keyword for-loop if found
 					for (Sci_PositionU keywordLength = 2; keywordLength < wbl && keywordLength < 7 && !sKeywordFound; keywordLength++) {
+						// Special Keywords are those that allow certain characters without whitespace after the command
+						// Examples are: cd. cd\ md. rd. dir| dir> echo: echo. path=
+						// Special Keyword Buffer used to determine if the first n characters is a Keyword
+						char sKeywordBuffer[10]{};	// Special Keyword Buffer
 						wbo = 0;
 						// Copy Keyword Length from Word Buffer into Special Keyword Buffer
 						for (; wbo < keywordLength; wbo++) {

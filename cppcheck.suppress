@@ -27,7 +27,6 @@ unreadVariable:lexilla/lexers/LexBaan.cxx
 constParameter:lexilla/lexers/LexBash.cxx
 uninitMemberVar:lexilla/lexers/LexBash.cxx
 variableScope:lexilla/lexers/LexBash.cxx
-variableScope:lexilla/lexers/LexBatch.cxx
 variableScope:lexilla/lexers/LexCmake.cxx
 knownConditionTrueFalse:lexilla/lexers/LexCmake.cxx
 constParameter:lexilla/lexers/LexCLW.cxx
