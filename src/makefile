@@ -72,18 +72,20 @@ endif
 
 RANLIB ?= ranlib
 
+SCINTILLA_INCLUDE = ../../scintilla/include
+
 vpath %.h ../src ../include ../../scintilla/include ../lexlib
 vpath %.cxx ../src ../lexlib ../lexers
 
 DEFINES += -D$(if $(DEBUG),DEBUG,NDEBUG)
 BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 
-INCLUDES = -I ../include -I ../../scintilla/include -I ../src -I ../lexlib
+INCLUDES = -I ../include -I $(SCINTILLA_INCLUDE) -I ../src -I ../lexlib
 LDFLAGS += -shared
 
 BASE_FLAGS += $(WARNINGS)
 
-all:	$(LEXILLA) $(LIBLEXILLA)
+all:	$(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
 
 clean:
 	$(DEL) *.o *.obj *.a *.res *.map *.plist $(call normalize,$(LEXILLA) $(LIBLEXILLA))
@@ -99,6 +101,9 @@ analyze:
 
 depend deps.mak:
 	$(PYTHON) DepGen.py
+
+$(SCINTILLA_INCLUDE):
+	@echo Scintilla must be installed at ../../scintilla to provide access to Scintilla headers.
 
 LEXERS:=$(sort $(notdir $(wildcard ../lexers/Lex*.cxx)))
 

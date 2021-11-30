@@ -51,6 +51,7 @@ bool IsGDComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 }
 
 constexpr bool IsGDSingleQuoteStringState(int st) noexcept {
+  
 	return ((st == SCE_GD_CHARACTER) || (st == SCE_GD_STRING));
 }
 
