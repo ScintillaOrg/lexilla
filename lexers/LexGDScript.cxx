@@ -51,19 +51,17 @@ bool IsGDComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 }
 
 constexpr bool IsGDSingleQuoteStringState(int st) noexcept {
-	return ((st == SCE_P_CHARACTER) || (st == SCE_P_STRING) ||
-		(st == SCE_P_FCHARACTER) || (st == SCE_P_FSTRING));
+	return ((st == SCE_GD_CHARACTER) || (st == SCE_GD_STRING));
 }
 
 constexpr bool IsGDTripleQuoteStringState(int st) noexcept {
-	return ((st == SCE_P_TRIPLE) || (st == SCE_P_TRIPLEDOUBLE) ||
-		(st == SCE_P_FTRIPLE) || (st == SCE_P_FTRIPLEDOUBLE));
+	return ((st == SCE_GD_TRIPLE) || (st == SCE_GD_TRIPLEDOUBLE));
 }
 
 char GetGDStringQuoteChar(int st) noexcept {
-	if ((st == SCE_P_CHARACTER) || (st == SCE_P_TRIPLE))
+	if ((st == SCE_GD_CHARACTER) || (st == SCE_GD_TRIPLE))
 		return '\'';
-	if ((st == SCE_P_STRING) || (st == SCE_P_TRIPLEDOUBLE))
+	if ((st == SCE_GD_STRING) || (st == SCE_GD_TRIPLEDOUBLE))
 		return '"';
 
 	return '\0';
@@ -76,23 +74,23 @@ int GetGDStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex)
 
 	if (ch != '"' && ch != '\'') {
 		*nextIndex = i + 1;
-		return SCE_P_DEFAULT;
+		return SCE_GD_DEFAULT;
 	}
 
 	if (ch == chNext && ch == styler.SafeGetCharAt(i + 2)) {
 		*nextIndex = i + 3;
 
 		if (ch == '"')
-			return SCE_P_TRIPLEDOUBLE;
+			return SCE_GD_TRIPLEDOUBLE;
 		else
-			return SCE_P_TRIPLE;
+			return SCE_GD_TRIPLE;
 	} else {
 		*nextIndex = i + 1;
 
 		if (ch == '"')
-			return SCE_P_STRING;
+			return SCE_GD_STRING;
 		else
-			return SCE_P_CHARACTER;
+			return SCE_GD_CHARACTER;
 	}
 }
 
@@ -191,26 +189,26 @@ struct OptionSetGDScript : public OptionSet<OptionsGDScript> {
 	}
 };
 
-const char styleSubable[] = { SCE_P_IDENTIFIER, 0 };
+const char styleSubable[] = { SCE_GD_IDENTIFIER, 0 };
 
 LexicalClass lexicalClasses[] = {
-	// Lexer GDScript SCLEX_GDSCRIPT SCE_P_:
-	0, "SCE_P_DEFAULT", "default", "White space",
-	1, "SCE_P_COMMENTLINE", "comment line", "Comment",
-	2, "SCE_P_NUMBER", "literal numeric", "Number",
-	3, "SCE_P_STRING", "literal string", "String",
-	4, "SCE_P_CHARACTER", "literal string", "Single quoted string",
-	5, "SCE_P_WORD", "keyword", "Keyword",
-	6, "SCE_P_TRIPLE", "literal string", "Triple quotes",
-	7, "SCE_P_TRIPLEDOUBLE", "literal string", "Triple double quotes",
-	8, "SCE_P_CLASSNAME", "identifier", "Class name definition",
-	9, "SCE_P_DEFNAME", "identifier", "Function or method name definition",
-	10, "SCE_P_OPERATOR", "operator", "Operators",
-	11, "SCE_P_IDENTIFIER", "identifier", "Identifiers",
-	12, "SCE_P_COMMENTBLOCK", "comment", "Comment-blocks",
-	13, "SCE_P_STRINGEOL", "error literal string", "End of line where string is not closed",
-	14, "SCE_P_WORD2", "identifier", "Highlighted identifiers",
-	15, "SCE_P_DECORATOR", "preprocessor", "Decorators",
+	// Lexer GDScript SCLEX_GDSCRIPT SCE_GD_:
+	0, "SCE_GD_DEFAULT", "default", "White space",
+	1, "SCE_GD_COMMENTLINE", "comment line", "Comment",
+	2, "SCE_GD_NUMBER", "literal numeric", "Number",
+	3, "SCE_GD_STRING", "literal string", "String",
+	4, "SCE_GD_CHARACTER", "literal string", "Single quoted string",
+	5, "SCE_GD_WORD", "keyword", "Keyword",
+	6, "SCE_GD_TRIPLE", "literal string", "Triple quotes",
+	7, "SCE_GD_TRIPLEDOUBLE", "literal string", "Triple double quotes",
+	8, "SCE_GD_CLASSNAME", "identifier", "Class name definition",
+	9, "SCE_GD_FUNCNAME", "identifier", "Function or method name definition",
+	10, "SCE_GD_OPERATOR", "operator", "Operators",
+	11, "SCE_GD_IDENTIFIER", "identifier", "Identifiers",
+	12, "SCE_GD_COMMENTBLOCK", "comment", "Comment-blocks",
+	13, "SCE_GD_STRINGEOL", "error literal string", "End of line where string is not closed",
+	14, "SCE_GD_WORD2", "identifier", "Highlighted identifiers",
+	15, "SCE_GD_ANNOTATION", "annotation", "Annotations",
 };
 
 }
@@ -332,7 +330,7 @@ Sci_Position SCI_METHOD LexerGDScript::WordListSet(int n, const char *wl) {
 }
 
 void LexerGDScript::ProcessLineEnd(StyleContext &sc, bool &inContinuedString) {
-	if ((sc.state == SCE_P_DEFAULT)
+	if ((sc.state == SCE_GD_DEFAULT)
 			|| IsGDTripleQuoteStringState(sc.state)) {
 		// Perform colourisation of white space and triple quoted strings at end of each line to allow
 		// tab marking to work inside white space and triple quoted strings
@@ -343,8 +341,8 @@ void LexerGDScript::ProcessLineEnd(StyleContext &sc, bool &inContinuedString) {
 		if (inContinuedString || options.stringsOverNewline) {
 			inContinuedString = false;
 		} else {
-			sc.ChangeState(SCE_P_STRINGEOL);
-			sc.ForwardSetState(SCE_P_DEFAULT);
+			sc.ChangeState(SCE_GD_STRINGEOL);
+			sc.ForwardSetState(SCE_GD_DEFAULT);
 		}
 	}
 }
@@ -363,8 +361,8 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			while (lineCurrent > 0) {
 				const Sci_Position eolPos = styler.LineStart(lineCurrent) - 1;
 				const int eolStyle = styler.StyleAt(eolPos);
-				if (eolStyle == SCE_P_STRING || eolStyle == SCE_P_CHARACTER
-						|| eolStyle == SCE_P_STRINGEOL) {
+				if (eolStyle == SCE_GD_STRING || eolStyle == SCE_GD_CHARACTER
+						|| eolStyle == SCE_GD_STRINGEOL) {
 					lineCurrent -= 1;
 				} else {
 					break;
@@ -372,12 +370,12 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			}
 			startPos = styler.LineStart(lineCurrent);
 		}
-		initStyle = startPos == 0 ? SCE_P_DEFAULT : styler.StyleAt(startPos - 1);
+		initStyle = startPos == 0 ? SCE_GD_DEFAULT : styler.StyleAt(startPos - 1);
 	}
 
 	initStyle = initStyle & 31;
-	if (initStyle == SCE_P_STRINGEOL) {
-		initStyle = SCE_P_DEFAULT;
+	if (initStyle == SCE_GD_STRINGEOL) {
+		initStyle = SCE_GD_DEFAULT;
 	}
 
 	kwType kwLast = kwOther;
@@ -385,7 +383,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 	styler.IndentAmount(lineCurrent, &spaceFlags, IsGDComment);
 	bool base_n_number = false;
 
-	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_P_IDENTIFIER);
+	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_GD_IDENTIFIER);
 
 	StyleContext sc(startPos, endPos - startPos, initStyle, styler);
 
@@ -422,25 +420,25 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 
 		bool needEOLCheck = false;
 
-		if (sc.state == SCE_P_OPERATOR) {
+		if (sc.state == SCE_GD_OPERATOR) {
 			kwLast = kwOther;
-			sc.SetState(SCE_P_DEFAULT);
-		} else if (sc.state == SCE_P_NUMBER) {
+			sc.SetState(SCE_GD_DEFAULT);
+		} else if (sc.state == SCE_GD_NUMBER) {
 			if (!IsAWordChar(sc.ch, false) &&
 					!(!base_n_number && ((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E')))) {
-				sc.SetState(SCE_P_DEFAULT);
+				sc.SetState(SCE_GD_DEFAULT);
 			}
-		} else if (sc.state == SCE_P_IDENTIFIER) {
+		} else if (sc.state == SCE_GD_IDENTIFIER) {
 			if ((sc.ch == '.') || (!IsAWordChar(sc.ch, options.unicodeIdentifiers))) {
 				char s[100];
 				sc.GetCurrent(s, sizeof(s));
-				int style = SCE_P_IDENTIFIER;
+				int style = SCE_GD_IDENTIFIER;
 				if (keywords.InList(s)) {
-					style = SCE_P_WORD;
+					style = SCE_GD_WORD;
 				} else if (kwLast == kwClass) {
-					style = SCE_P_CLASSNAME;
+					style = SCE_GD_CLASSNAME;
 				} else if (kwLast == kwDef) {
-					style = SCE_P_DEFNAME;
+					style = SCE_GD_FUNCNAME;
 				} else if (keywords2.InList(s)) {
 					if (options.keywords2NoSubIdentifiers) {
 						// We don't want to highlight keywords2
@@ -448,9 +446,9 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 						// i.e. not open in "foo.open".
 						const Sci_Position pos = styler.GetStartSegment() - 1;
 						if (pos < 0 || (styler.SafeGetCharAt(pos, '\0') != '.'))
-							style = SCE_P_WORD2;
+							style = SCE_GD_WORD2;
 					} else {
-						style = SCE_P_WORD2;
+						style = SCE_GD_WORD2;
 					}
 				} else {
 					const int subStyle = classifierIdentifiers.ValueFor(s);
@@ -459,8 +457,8 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					}
 				}
 				sc.ChangeState(style);
-				sc.SetState(SCE_P_DEFAULT);
-				if (style == SCE_P_WORD) {
+				sc.SetState(SCE_GD_DEFAULT);
+				if (style == SCE_GD_WORD) {
 					if (0 == strcmp(s, "class"))
 						kwLast = kwClass;
 					else if (0 == strcmp(s, "func"))
@@ -473,13 +471,13 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					kwLast = kwOther;
 				}
 			}
-		} else if ((sc.state == SCE_P_COMMENTLINE) || (sc.state == SCE_P_COMMENTBLOCK)) {
+		} else if ((sc.state == SCE_GD_COMMENTLINE) || (sc.state == SCE_GD_COMMENTBLOCK)) {
 			if (sc.ch == '\r' || sc.ch == '\n') {
-				sc.SetState(SCE_P_DEFAULT);
+				sc.SetState(SCE_GD_DEFAULT);
 			}
-		} else if (sc.state == SCE_P_DECORATOR) {
+		} else if (sc.state == SCE_GD_ANNOTATION) {
 			if (!IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
-				sc.SetState(SCE_P_DEFAULT);
+				sc.SetState(SCE_GD_DEFAULT);
 			}
 		} else if (IsGDSingleQuoteStringState(sc.state)) {
 			if (sc.ch == '\\') {
@@ -493,25 +491,25 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					sc.Forward();
 				}
 			} else if (sc.ch == GetGDStringQuoteChar(sc.state)) {
-				sc.ForwardSetState(SCE_P_DEFAULT);
+				sc.ForwardSetState(SCE_GD_DEFAULT);
 				needEOLCheck = true;
 			}
-		} else if (sc.state == SCE_P_TRIPLE) {
+		} else if (sc.state == SCE_GD_TRIPLE) {
 			if (sc.ch == '\\') {
 				sc.Forward();
 			} else if (sc.Match(R"(''')")) {
 				sc.Forward();
 				sc.Forward();
-				sc.ForwardSetState(SCE_P_DEFAULT);
+				sc.ForwardSetState(SCE_GD_DEFAULT);
 				needEOLCheck = true;
 			}
-		} else if (sc.state == SCE_P_TRIPLEDOUBLE) {
+		} else if (sc.state == SCE_GD_TRIPLEDOUBLE) {
 			if (sc.ch == '\\') {
 				sc.Forward();
 			} else if (sc.Match(R"(""")")) {
 				sc.Forward();
 				sc.Forward();
-				sc.ForwardSetState(SCE_P_DEFAULT);
+				sc.ForwardSetState(SCE_GD_DEFAULT);
 				needEOLCheck = true;
 			}
 		}
@@ -532,33 +530,33 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		}
 
 		// Check for a new state starting character
-		if (sc.state == SCE_P_DEFAULT) {
+		if (sc.state == SCE_GD_DEFAULT) {
 			if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				if (sc.ch == '0' && (sc.chNext == 'x' || sc.chNext == 'X')) {
 					base_n_number = true;
-					sc.SetState(SCE_P_NUMBER);
+					sc.SetState(SCE_GD_NUMBER);
 				} else if (sc.ch == '0' &&
 						(sc.chNext == 'o' || sc.chNext == 'O' || sc.chNext == 'b' || sc.chNext == 'B')) {
 					if (options.base2or8Literals) {
 						base_n_number = true;
-						sc.SetState(SCE_P_NUMBER);
+						sc.SetState(SCE_GD_NUMBER);
 					} else {
-						sc.SetState(SCE_P_NUMBER);
-						sc.ForwardSetState(SCE_P_IDENTIFIER);
+						sc.SetState(SCE_GD_NUMBER);
+						sc.ForwardSetState(SCE_GD_IDENTIFIER);
 					}
 				} else {
 					base_n_number = false;
-					sc.SetState(SCE_P_NUMBER);
+					sc.SetState(SCE_GD_NUMBER);
 				}
 			} else if (isoperator(sc.ch) || sc.ch == '`') {
-				sc.SetState(SCE_P_OPERATOR);
+				sc.SetState(SCE_GD_OPERATOR);
 			} else if (sc.ch == '#') {
-				sc.SetState(sc.chNext == '#' ? SCE_P_COMMENTBLOCK : SCE_P_COMMENTLINE);
+				sc.SetState(sc.chNext == '#' ? SCE_GD_COMMENTBLOCK : SCE_GD_COMMENTLINE);
 			} else if (sc.ch == '@') {
 				if (IsFirstNonWhitespace(sc.currentPos, styler))
-					sc.SetState(SCE_P_DECORATOR);
+					sc.SetState(SCE_GD_ANNOTATION);
 				else
-					sc.SetState(SCE_P_OPERATOR);
+					sc.SetState(SCE_GD_OPERATOR);
 			} else if (IsGDStringStart(sc.ch)) {
 				Sci_PositionU nextIndex = 0;
 				sc.SetState(GetGDStringState(styler, sc.currentPos, &nextIndex));
@@ -566,7 +564,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					sc.Forward();
 				}
             } else if (IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
-				sc.SetState(SCE_P_IDENTIFIER);
+				sc.SetState(SCE_GD_IDENTIFIER);
 			}
 		}
 	}
@@ -622,7 +620,7 @@ void SCI_METHOD LexerGDScript::Fold(Sci_PositionU startPos, Sci_Position length,
 
 	// Set up initial loop state
 	startPos = styler.LineStart(lineCurrent);
-	int prev_state = SCE_P_DEFAULT & 31;
+	int prev_state = SCE_GD_DEFAULT & 31;
 	if (lineCurrent >= 1)
 		prev_state = styler.StyleAt(startPos - 1) & 31;
 	int prevQuote = options.foldQuotes && IsGDTripleQuoteStringState(prev_state);
