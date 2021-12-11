@@ -27,6 +27,9 @@
 
 namespace {
 
+constexpr std::string_view suffixStyled = ".styled";
+constexpr std::string_view suffixFolded = ".folded";
+
 std::string ReadFile(std::filesystem::path path) {
 	std::ifstream ifs(path, std::ios::binary);
 	std::string content((std::istreambuf_iterator<char>(ifs)),
@@ -331,6 +334,29 @@ void SetProperties(Scintilla::ILexer5 *plex, const PropertyMap &propertyMap, std
 
 const char *lexerPrefix = "lexer.*";
 
+size_t FirstLineDifferent(std::string_view a, std::string_view b) {
+	size_t i = 0;
+	while (i < std::min(a.size(), b.size()) && a.at(i) == b.at(i)) {
+		i++;
+	}
+	return std::count(a.begin(), a.begin() + i, '\n');
+}
+
+bool CheckSame(std::string_view augmentedText, std::string_view augmentedTextNew, std::string_view item, std::string_view suffix, const std::filesystem::path &path) {
+	if (augmentedTextNew == augmentedText) {
+		return true;
+	}
+	const size_t lineNumber = FirstLineDifferent(augmentedText, augmentedTextNew) + 1;
+	std::cout << "\n" << path.string() << ":" << lineNumber << ":";
+	std::cout << " has different " << item << "\n\n";
+	std::filesystem::path pathNew = path;
+	pathNew += suffix;
+	pathNew += ".new";
+	std::ofstream ofs(pathNew, std::ios::binary);
+	ofs << augmentedTextNew;
+	return false;
+}
+
 bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
 	// Find and create correct lexer
 	std::optional<std::string> language = propertyMap.GetPropertyForFile(lexerPrefix, path.filename().string());
@@ -354,11 +380,11 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 	}
 
 	std::filesystem::path pathStyled = path;
-	pathStyled += ".styled";
+	pathStyled += suffixStyled;
 	const std::string styledText = ReadFile(pathStyled);
 
 	std::filesystem::path pathFolded = path;
-	pathFolded += ".folded";
+	pathFolded += suffixFolded;
 	const std::string foldedText = ReadFile(pathFolded);
 
 	const int repeatLex = propertyMap.GetPropertyValue("testlexers.repeat.lex").value_or(1);
@@ -377,23 +403,13 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 	bool success = true;
 
 	const std::string styledTextNew = MarkedDocument(pdoc);
-	if (styledTextNew != styledText) {
+	if (!CheckSame(styledText, styledTextNew, "styles", suffixStyled, path)) {
 		success = false;
-		std::cout << "\n" << path.string() << ":1: is different\n\n";
-		std::filesystem::path pathNew = path;
-		pathNew += ".styled.new";
-		std::ofstream ofs(pathNew, std::ios::binary);
-		ofs << styledTextNew;
 	}
 
 	const std::string foldedTextNew = FoldedDocument(pdoc);
-	if (foldedTextNew != foldedText) {
+	if (!CheckSame(foldedText, foldedTextNew, "folds", suffixFolded, path)) {
 		success = false;
-		std::cout << "\n" << path.string() << ":1: has different folds\n\n";
-		std::filesystem::path pathNew = path;
-		pathNew += ".folded.new";
-		std::ofstream ofs(pathNew, std::ios::binary);
-		ofs << foldedTextNew;
 	}
 
 	const std::optional<int> perLineDisable = propertyMap.GetPropertyValue("testlexers.per.line.disable");
@@ -415,23 +431,13 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 		}
 
 		const std::string styledTextNewPerLine = MarkedDocument(pdoc);
-		if (styledTextNewPerLine != styledText) {
+		if (!CheckSame(styledText, styledTextNewPerLine, "per-line styles", suffixStyled, path)) {
 			success = false;
-			std::cout << "\n" << path.string() << ":1: per-line is different\n\n";
-			std::filesystem::path pathNew = path;
-			pathNew += ".styled.new";
-			std::ofstream ofs(pathNew, std::ios::binary);
-			ofs << styledTextNewPerLine;
 		}
 
 		const std::string foldedTextNewPerLine = FoldedDocument(pdoc);
-		if (foldedTextNewPerLine != foldedText) {
+		if (!CheckSame(foldedText, foldedTextNewPerLine, "per-line folds", suffixFolded, path)) {
 			success = false;
-			std::cout << "\n" << path.string() << ":1: per-line has different folds\n\n";
-			std::filesystem::path pathNew = path;
-			pathNew += ".folded.new";
-			std::ofstream ofs(pathNew, std::ios::binary);
-			ofs << foldedTextNewPerLine;
 		}
 	}
 
@@ -451,8 +457,8 @@ bool TestDirectory(std::filesystem::path directory, std::filesystem::path basePa
 	for (auto &p : std::filesystem::directory_iterator(directory)) {
 		if (!p.is_directory()) {
 			const std::string extension = p.path().extension().string();
-			if (extension != ".properties" && extension != ".styled" && extension != ".new" &&
-				extension != ".folded") {
+			if (extension != ".properties" && extension != suffixStyled && extension != ".new" &&
+				extension != suffixFolded) {
 				const std::filesystem::path relativePath = p.path().lexically_relative(basePath);
 				std::cout << "Lexing " << relativePath.string() << '\n';
 				if (!TestFile(p, properties)) {
