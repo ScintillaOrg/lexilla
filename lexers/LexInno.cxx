@@ -151,18 +151,12 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 					// Start of a Pascal comment
 					state = SCE_INNO_COMMENT_PASCAL;
 					isCommentRound = true;
-					// Push forward to the asterisk
-					ch = chNext;
-					chNext = styler[++i];
-					styler.ColourTo(i, SCE_INNO_COMMENT_PASCAL);
+					styler.ColourTo(i + 1, SCE_INNO_COMMENT_PASCAL);
 				} else if (isCode && ch == '/' && chNext == '/') {
 					// Start of C-style comment
 					state = SCE_INNO_COMMENT_PASCAL;
 					isCommentSlash = true;
-					// Push forward to the next slash
-					ch = chNext;
-					chNext = styler[++i];
-					styler.ColourTo(i, SCE_INNO_COMMENT_PASCAL);
+					styler.ColourTo(i + 1, SCE_INNO_COMMENT_PASCAL);
 				} else if (!isMessages && ch == '"') {
 					// Start of a double-quote string
 					state = SCE_INNO_STRING_DOUBLE;
