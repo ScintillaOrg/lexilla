@@ -88,6 +88,10 @@ std::string FoldedDocument(const Scintilla::IDocument *pdoc) {
 	return os.str();
 }
 
+std::pair<std::string, std::string> MarkedAndFoldedDocument(const Scintilla::IDocument *pdoc) {
+	return { MarkedDocument(pdoc), FoldedDocument(pdoc) };
+}
+
 class PropertyMap {
 public:
 	using PropMap = std::map<std::string, std::string>;
@@ -151,6 +155,29 @@ public:
 
 };
 
+size_t FirstLineDifferent(std::string_view a, std::string_view b) {
+	size_t i = 0;
+	while (i < std::min(a.size(), b.size()) && a.at(i) == b.at(i)) {
+		i++;
+	}
+	return std::count(a.begin(), a.begin() + i, '\n');
+}
+
+bool CheckSame(std::string_view augmentedText, std::string_view augmentedTextNew, std::string_view item, std::string_view suffix, const std::filesystem::path &path) {
+	if (augmentedTextNew == augmentedText) {
+		return true;
+	}
+	const size_t lineNumber = FirstLineDifferent(augmentedText, augmentedTextNew) + 1;
+	std::cout << "\n" << path.string() << ":" << lineNumber << ":";
+	std::cout << " has different " << item << "\n\n";
+	std::filesystem::path pathNew = path;
+	pathNew += suffix;
+	pathNew += ".new";
+	std::ofstream ofs(pathNew, std::ios::binary);
+	ofs << augmentedTextNew;
+	return false;
+}
+
 int Substitute(std::string &s, const std::string &sFind, const std::string &sReplace) {
 	int c = 0;
 	const size_t lenFind = sFind.size();
@@ -174,7 +201,22 @@ int UnixToWindows(std::string &s) {
 
 const std::string BOM = "\xEF\xBB\xBF";
 
-void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer5 *plex) {
+void StyleLineByLine(TestDocument &doc, Scintilla::ILexer5 *plex) {
+	Scintilla::IDocument *pdoc = &doc;
+	const Sci_Position lines = doc.LineFromPosition(doc.Length());
+	Sci_Position startLine = 0;
+	for (Sci_Position line = 0; line <= lines; line++) {
+		const Sci_Position endLine = doc.LineStart(line + 1);
+		int styleStart = 0;
+		if (startLine > 0)
+			styleStart = doc.StyleAt(startLine - 1);
+		plex->Lex(startLine, endLine - startLine, styleStart, pdoc);
+		plex->Fold(startLine, endLine - startLine, styleStart, pdoc);
+		startLine = endLine;
+	}
+}
+
+void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer5 *plex, bool disablePerLineTests) {
 	// Convert all line ends to \r\n to check if styles change between \r and \n which makes
 	// it difficult to test on different platforms when files may have line ends changed.
 	std::string text = s;
@@ -186,8 +228,7 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	Scintilla::IDocument *pdoc = &doc;
 	plex->Lex(0, pdoc->Length(), 0, pdoc);
 	plex->Fold(0, pdoc->Length(), 0, pdoc);
-	const std::string styledText = MarkedDocument(pdoc);
-	const std::string foldedText = FoldedDocument(pdoc);
+	const auto [styledText, foldedText] = MarkedAndFoldedDocument(pdoc);
 
 	int prevStyle = -1;
 	Sci_Position line = 1;
@@ -213,8 +254,7 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	Scintilla::IDocument *pdocUnix = &docUnix;
 	plex->Lex(0, pdocUnix->Length(), 0, pdocUnix);
 	plex->Fold(0, pdocUnix->Length(), 0, pdocUnix);
-	std::string styledTextUnix = MarkedDocument(pdocUnix);
-	std::string foldedTextUnix = FoldedDocument(pdocUnix);
+	auto [styledTextUnix, foldedTextUnix] = MarkedAndFoldedDocument(pdocUnix);
 
 	// Convert results from \n to \r\n run
 	UnixToWindows(styledTextUnix);
@@ -225,6 +265,17 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	}
 	if (foldedText != foldedTextUnix) {
 		std::cout << "\n" << path.string() << ":1: has different folds with \\n versus \\r\\n line ends\n\n";
+	}
+
+	// Test line by line lexing/folding with Unix \n line ends
+	if (!disablePerLineTests) {
+		StyleLineByLine(docUnix, plex);
+		auto [styledTextNewPerLine, foldedTextNewPerLine] = MarkedAndFoldedDocument(pdocUnix);
+		// Convert results from \n to \r\n run
+		UnixToWindows(styledTextNewPerLine);
+		UnixToWindows(foldedTextNewPerLine);
+		CheckSame(styledTextUnix, styledTextNewPerLine, "per-line styles \\n", suffixStyled, path);
+		CheckSame(foldedTextUnix, foldedTextNewPerLine, "per-line folds \\n", suffixFolded, path);
 	}
 
 	plex->Release();
@@ -334,29 +385,6 @@ void SetProperties(Scintilla::ILexer5 *plex, const PropertyMap &propertyMap, std
 
 const char *lexerPrefix = "lexer.*";
 
-size_t FirstLineDifferent(std::string_view a, std::string_view b) {
-	size_t i = 0;
-	while (i < std::min(a.size(), b.size()) && a.at(i) == b.at(i)) {
-		i++;
-	}
-	return std::count(a.begin(), a.begin() + i, '\n');
-}
-
-bool CheckSame(std::string_view augmentedText, std::string_view augmentedTextNew, std::string_view item, std::string_view suffix, const std::filesystem::path &path) {
-	if (augmentedTextNew == augmentedText) {
-		return true;
-	}
-	const size_t lineNumber = FirstLineDifferent(augmentedText, augmentedTextNew) + 1;
-	std::cout << "\n" << path.string() << ":" << lineNumber << ":";
-	std::cout << " has different " << item << "\n\n";
-	std::filesystem::path pathNew = path;
-	pathNew += suffix;
-	pathNew += ".new";
-	std::ofstream ofs(pathNew, std::ios::binary);
-	ofs << augmentedTextNew;
-	return false;
-}
-
 bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap) {
 	// Find and create correct lexer
 	std::optional<std::string> language = propertyMap.GetPropertyForFile(lexerPrefix, path.filename().string());
@@ -402,12 +430,10 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 
 	bool success = true;
 
-	const std::string styledTextNew = MarkedDocument(pdoc);
+	const auto [styledTextNew, foldedTextNew] = MarkedAndFoldedDocument(pdoc);
 	if (!CheckSame(styledText, styledTextNew, "styles", suffixStyled, path)) {
 		success = false;
 	}
-
-	const std::string foldedTextNew = FoldedDocument(pdoc);
 	if (!CheckSame(foldedText, foldedTextNew, "folds", suffixFolded, path)) {
 		success = false;
 	}
@@ -415,37 +441,20 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 	const std::optional<int> perLineDisable = propertyMap.GetPropertyValue("testlexers.per.line.disable");
 	const bool disablePerLineTests = perLineDisable.value_or(false);
 
+	// Test line by line lexing/folding
 	if (success && !disablePerLineTests) {
-		// Test line by line lexing/folding
 		doc.Set(text);
-		const Sci_Position lines = doc.LineFromPosition(doc.Length());
-		Sci_Position startLine = 0;
-		for (Sci_Position line = 0; line <= lines; line++) {
-			const Sci_Position endLine = doc.LineStart(line+1);
-			int styleStart = 0;
-			if (startLine > 0)
-				styleStart = doc.StyleAt(startLine - 1);
-			plex->Lex(startLine, endLine - startLine, styleStart, pdoc);
-			plex->Fold(startLine, endLine - startLine, styleStart, pdoc);
-			startLine = endLine;
-		}
-
-		const std::string styledTextNewPerLine = MarkedDocument(pdoc);
-		if (!CheckSame(styledText, styledTextNewPerLine, "per-line styles", suffixStyled, path)) {
-			success = false;
-		}
-
-		const std::string foldedTextNewPerLine = FoldedDocument(pdoc);
-		if (!CheckSame(foldedText, foldedTextNewPerLine, "per-line folds", suffixFolded, path)) {
-			success = false;
-		}
+		StyleLineByLine(doc, plex);
+		const auto [styledTextNewPerLine, foldedTextNewPerLine] = MarkedAndFoldedDocument(pdoc);
+		success = success && CheckSame(styledText, styledTextNewPerLine, "per-line styles", suffixStyled, path);
+		success = success && CheckSame(foldedText, foldedTextNewPerLine, "per-line folds", suffixFolded, path);
 	}
 
 	plex->Release();
 
 	Scintilla::ILexer5 *plexCRLF = Lexilla::MakeLexer(*language);
 	SetProperties(plexCRLF, propertyMap, path.filename().string());
-	TestCRLF(path, text, plexCRLF);
+	TestCRLF(path, text, plexCRLF, disablePerLineTests);
 
 	return success;
 }
