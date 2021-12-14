@@ -221,6 +221,7 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	// it difficult to test on different platforms when files may have line ends changed.
 	std::string text = s;
 	WindowsToUnix(text);
+	const bool originalIsUnix = text == s;
 	std::string textUnix = text;
 	UnixToWindows(text);
 	TestDocument doc;
@@ -268,7 +269,7 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	}
 
 	// Test line by line lexing/folding with Unix \n line ends
-	if (!disablePerLineTests) {
+	if (!disablePerLineTests && !originalIsUnix) {
 		StyleLineByLine(docUnix, plex);
 		auto [styledTextNewPerLine, foldedTextNewPerLine] = MarkedAndFoldedDocument(pdocUnix);
 		// Convert results from \n to \r\n run
