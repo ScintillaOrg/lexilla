@@ -330,6 +330,7 @@ LexicalClass lexicalClasses[] = {
 	17, "SCE_P_FCHARACTER", "literal string interpolated", "Single quoted f-string",
 	18, "SCE_P_FTRIPLE", "literal string interpolated", "Triple quoted f-string",
 	19, "SCE_P_FTRIPLEDOUBLE", "literal string interpolated", "Triple double quoted f-string",
+	20, "SCE_P_ATTRIBUTE", "Attribute of identifiers", "Attribute of identifiers",
 };
 
 }
@@ -641,6 +642,9 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
+					const Sci_Position pos = styler.GetStartSegment() - 1;
+					if (pos < 0 || (styler.SafeGetCharAt(pos, '\0') == '.'))
+						style = SCE_P_ATTRIBUTE;
 				}
 				sc.ChangeState(style);
 				sc.SetState(SCE_P_DEFAULT);
