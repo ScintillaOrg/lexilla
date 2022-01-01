@@ -648,12 +648,27 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
-					const Sci_Position pos = styler.GetStartSegment() - 1;
-					if ((options.identifierAttributes >= 1) && (pos < 0 || (styler.SafeGetCharAt(pos, '\0') == '.'))) {
-						if ((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) {
-							style = SCE_P_ATTRIBUTE;
-						} else if (options.identifierAttributes == 2) {
-							style = SCE_P_ATTRIBUTE;
+					if (options.identifierAttributes >= 1) {
+						// Does the user even want attributes styled?
+						Sci_Position pos = styler.GetStartSegment() - 1;
+						unsigned char ch = styler.SafeGetCharAt(pos, '\0');
+						while (ch != '\0' && (ch == '.' || ch == ' ' || ch == '\\' || ch == '\t' || ch == '\n' || ch == '\r')) {
+							// Backwards search for a . while only allowing certain valid characters
+							if (IsAWordChar(ch, options.unicodeIdentifiers)) {
+								break;
+							}
+							pos--;
+							ch = styler.SafeGetCharAt(pos, '\0');
+						}
+						if (pos < 0 || ch == '.') {
+							// Is this an attribute we could style? if it is, do as asked
+							if ((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) {
+								// Respect already styled identifiers
+								style = SCE_P_ATTRIBUTE;
+							} else if (options.identifierAttributes == 2) {
+								// The nuclear option
+								style = SCE_P_ATTRIBUTE;
+							}
 						}
 					}
 				}
