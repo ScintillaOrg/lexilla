@@ -1,4 +1,4 @@
-# Enumerate all styles: 0 to 19
+# Enumerate all styles: 0 to 20
 # comment=1
 
 # whitespace=0
@@ -61,3 +61,20 @@ f'''{a}'''
 
 # double-triple-quoted-f-string=19
 f"""{a}"""
+
+# attributes=20
+s = "thing thing".findall("thing")
+a.very.complicated.expression.findall("test")
+b.very.complicated.expression.
+    findall("test2")
+c.very.complicated.expression. \
+    findall("test3")
+d.very.complicated.expression.\
+    findall("test4")
+@staticmethod.attrtest
+@staticmethod.
+attrtest
+@staticmethod. \
+attrtest
+@staticmethod.\
+attrtest

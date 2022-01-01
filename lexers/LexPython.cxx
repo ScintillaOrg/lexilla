@@ -306,7 +306,9 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 
 		DefineProperty("lexer.python.identifier.attributes", &OptionsPython::identifierAttributes,
 			       "Set to 1 to allow for styling of all identifier attributes that are not already styled."
-			       "Set to 2 to allow for blindly styling of all identifier attributes.");
+			       "Set to 2 to allow for styling of all identifier attributes that are not already styled. Also styles decorator attributes, as decorators."
+			       "Set to 3 to allow for styling of all identifier attributes and also styling decorator attributes. Styles decorator attributes as decorators."
+			       "Set to 4 to allow for styling of all identifier attributes regaurdless of what kind of attribute. Styles decorator attributes as attributes.");
 
 		DefineWordListSets(pythonWordListDesc);
 	}
@@ -648,7 +650,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
-					if (options.identifierAttributes >= 1) {
+					if (options.identifierAttributes > 0) {
 						// Does the user even want attributes styled?
 						Sci_Position pos = styler.GetStartSegment() - 1;
 						unsigned char ch = styler.SafeGetCharAt(pos, '\0');
@@ -662,11 +664,37 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 						}
 						if (pos < 0 || ch == '.') {
 							// Is this an attribute we could style? if it is, do as asked
+							bool isDecoratorAttribute = false;
+							const Sci_Position attrLine = styler.GetLine(pos);
+							for (Sci_Position i = styler.LineStart(attrLine); i < pos; i++) {
+								const char attrCh = styler[i];
+								if (attrCh == '@')
+									isDecoratorAttribute = true;
+								// Detect if this attribute belongs to a decorator
+								if (!(ch == ' ' || ch == '\t'))
+									break;
+							}
 							if ((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) {
-								// Respect already styled identifiers
-								style = SCE_P_ATTRIBUTE;
-							} else if (options.identifierAttributes == 2) {
-								// The nuclear option
+								// Respect already styled attributes and ignore decorator attributes
+								if (!isDecoratorAttribute){
+									style = SCE_P_ATTRIBUTE;
+								}
+							} else if ((options.identifierAttributes == 2)  && (style == SCE_P_IDENTIFIER)) {
+								// Style decorator attributes as decorators but respect already styled identifiers
+								if (isDecoratorAttribute){
+									style = SCE_P_DECORATOR;
+								} else {
+									style = SCE_P_ATTRIBUTE;
+								}
+							} else if (options.identifierAttributes == 3) {
+								// Ignore already styled identifiers, style decorator attributes as decorators
+								if (isDecoratorAttribute){
+									style = SCE_P_DECORATOR;
+								} else {
+									style = SCE_P_ATTRIBUTE;
+								}
+							} else if (options.identifierAttributes == 4) {
+								// The nuclear option, ignore everything else, style all attributes as attributes
 								style = SCE_P_ATTRIBUTE;
 							}
 						}

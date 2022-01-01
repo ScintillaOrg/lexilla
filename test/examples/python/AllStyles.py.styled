@@ -1,4 +1,4 @@
-{1}# Enumerate all styles: 0 to 19{0}
+{1}# Enumerate all styles: 0 to 20{0}
 {1}# comment=1{0}
 
 {1}# whitespace=0{0}
@@ -61,3 +61,20 @@
 
 {1}# double-triple-quoted-f-string=19{0}
 {19}f"""{{11}a{19}}"""{0}
+
+{1}# attributes=20{0}
+{11}s{0} {10}={0} {3}"thing thing"{10}.{11}findall{10}({3}"thing"{10}){0}
+{11}a{10}.{11}very{10}.{11}complicated{10}.{11}expression{10}.{11}findall{10}({3}"test"{10}){0}
+{11}b{10}.{11}very{10}.{11}complicated{10}.{11}expression{10}.{0}
+    {11}findall{10}({3}"test2"{10}){0}
+{11}c{10}.{11}very{10}.{11}complicated{10}.{11}expression{10}.{0} \
+    {11}findall{10}({3}"test3"{10}){0}
+{11}d{10}.{11}very{10}.{11}complicated{10}.{11}expression{10}.{0}\
+    {11}findall{10}({3}"test4"{10}){0}
+{15}@staticmethod{10}.{11}attrtest{0}
+{15}@staticmethod{10}.{0}
+{11}attrtest{0}
+{15}@staticmethod{10}.{0} \
+{11}attrtest{0}
+{15}@staticmethod{10}.{0}\
+{11}attrtest{0}
