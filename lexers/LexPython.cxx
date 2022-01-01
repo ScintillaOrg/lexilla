@@ -231,6 +231,7 @@ struct OptionsPython {
 	bool foldQuotes;
 	bool foldCompact;
 	bool unicodeIdentifiers;
+	int identifierAttributes;
 
 	OptionsPython() noexcept {
 		whingeLevel = 0;
@@ -244,6 +245,7 @@ struct OptionsPython {
 		foldQuotes = false;
 		foldCompact = false;
 		unicodeIdentifiers = true;
+		identifierAttributes = 0;
 	}
 
 	literalsAllowed AllowedLiterals() const noexcept {
@@ -302,6 +304,10 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 		DefineProperty("lexer.python.unicode.identifiers", &OptionsPython::unicodeIdentifiers,
 			       "Set to 0 to not recognise Python 3 Unicode identifiers.");
 
+		DefineProperty("lexer.python.identifier.attributes", &OptionsPython::identifierAttributes,
+			       "Set to 1 to allow for styling of all identifier attributes that are not already styled."
+			       "Set to 2 to allow for blindly styling of all identifier attributes.");
+
 		DefineWordListSets(pythonWordListDesc);
 	}
 };
@@ -330,7 +336,7 @@ LexicalClass lexicalClasses[] = {
 	17, "SCE_P_FCHARACTER", "literal string interpolated", "Single quoted f-string",
 	18, "SCE_P_FTRIPLE", "literal string interpolated", "Triple quoted f-string",
 	19, "SCE_P_FTRIPLEDOUBLE", "literal string interpolated", "Triple double quoted f-string",
-	20, "SCE_P_ATTRIBUTE", "Attribute of identifiers", "Attribute of identifiers",
+	20, "SCE_P_ATTRIBUTE", "attribute of identifiers", "Identifiers",
 };
 
 }
@@ -643,8 +649,13 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 						style = subStyle;
 					}
 					const Sci_Position pos = styler.GetStartSegment() - 1;
-					if (pos < 0 || (styler.SafeGetCharAt(pos, '\0') == '.'))
-						style = SCE_P_ATTRIBUTE;
+					if ((options.identifierAttributes >= 1) && (pos < 0 || (styler.SafeGetCharAt(pos, '\0') == '.'))) {
+						if ((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) {
+							style = SCE_P_ATTRIBUTE;
+						} else if (options.identifierAttributes == 2) {
+							style = SCE_P_ATTRIBUTE;
+						}
+					}
 				}
 				sc.ChangeState(style);
 				sc.SetState(SCE_P_DEFAULT);
