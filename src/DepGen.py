@@ -25,7 +25,10 @@ def Generate():
 		os.path.join(lexilla, "lexlib")]
 
 	# Create the dependencies file for g++
-	deps = Dependencies.FindDependencies(sources,  includes, ".o", "../lexilla/")
+	deps = Dependencies.FindDependencies(sources, includes, ".o", "../lexilla/")
+
+	# Place the objects in $(DIR_O)
+	deps = [["$(DIR_O)/"+obj, headers] for obj, headers in deps]
 
 	Dependencies.UpdateDependencies(os.path.join(lexilla, "src", "deps.mak"), deps, topComment)
 
