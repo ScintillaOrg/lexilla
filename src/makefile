@@ -20,22 +20,22 @@ DIR_BIN = ../bin
 WARNINGS = -Wpedantic -Wall -Wextra
 
 ifdef windir
-	SHARED_NAME = lexilla
-	SHAREDEXTENSION = dll
-	WINDRES ?= windres
-	VERSION_RESOURCE = $(DIR_O)/LexillaVersion.o
+    SHARED_NAME = lexilla
+    SHAREDEXTENSION = dll
+    WINDRES ?= windres
+    VERSION_RESOURCE = $(DIR_O)/LexillaVersion.o
 else
-	SHARED_NAME = liblexilla
-	ifeq ($(shell uname),Darwin)
-		CLANG := 1
-		LDFLAGS += -dynamiclib
-		SHAREDEXTENSION = dylib
-		BASE_FLAGS += -arch arm64 -arch x86_64
-		LDFLAGS += -arch arm64 -arch x86_64
-	else
-		SHAREDEXTENSION = so
-	endif
-	BASE_FLAGS += -fvisibility=hidden
+    SHARED_NAME = liblexilla
+    ifeq ($(shell uname),Darwin)
+        CLANG := 1
+        LDFLAGS += -dynamiclib
+        SHAREDEXTENSION = dylib
+        BASE_FLAGS += -arch arm64 -arch x86_64
+        LDFLAGS += -arch arm64 -arch x86_64
+    else
+        SHAREDEXTENSION = so
+    endif
+        BASE_FLAGS += -fvisibility=hidden
 endif
 
 LEXILLA = $(DIR_BIN)/$(SHARED_NAME).$(SHAREDEXTENSION)
@@ -44,20 +44,20 @@ LIBLEXILLA = $(DIR_BIN)/liblexilla.a
 BASE_FLAGS += --std=c++17
 
 ifdef CLANG
-	CXX = clang++
-	ifdef windir
-		# Clang on Win32 uses MSVC headers so will complain about strcpy without this
-		DEFINES += -D_CRT_SECURE_NO_DEPRECATE=1
-	endif
+    CXX = clang++
+    ifdef windir
+        # Clang on Win32 uses MSVC headers so will complain about strcpy without this
+        DEFINES += -D_CRT_SECURE_NO_DEPRECATE=1
+    endif
 endif
 
 ifdef windir
-	LDFLAGS += -mwindows
-	ifndef CLANG
-		LDFLAGS += -Wl,--kill-at
-	endif
+    LDFLAGS += -mwindows
+    ifndef CLANG
+        LDFLAGS += -Wl,--kill-at
+    endif
 else
-	BASE_FLAGS += -fPIC
+    BASE_FLAGS += -fPIC
 endif
 
 # Take care of changing Unix style '/' directory separator to '\' on Windows
@@ -66,9 +66,9 @@ normalize = $(if $(windir),$(subst /,\,$1),$1)
 PYTHON = $(if $(windir),pyw,python3)
 
 ifdef windir
-	DEL = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
+    DEL = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
 else
-	DEL = rm -f
+    DEL = rm -f
 endif
 
 RANLIB ?= ranlib
@@ -87,7 +87,7 @@ LDFLAGS += -shared
 BASE_FLAGS += $(WARNINGS)
 
 ifneq "$(origin DEPS)" "undefined"
-	override DEPS = -MMD
+    override DEPS = -MMD
 endif
 
 all: $(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
@@ -139,8 +139,8 @@ $(LIBLEXILLA): $(LEXILLA_OBJS)
 	$(RANLIB) $@
 
 ifndef DEPS
-# Automatically generate dependencies for most files with "make depend"
-include deps.mak
+    # Automatically generate dependencies for most files with "make depend"
+    include deps.mak
 else
--include $(LEXILLA_OBJS:.o=.d)
+    -include $(LEXILLA_OBJS:.o=.d)
 endif
