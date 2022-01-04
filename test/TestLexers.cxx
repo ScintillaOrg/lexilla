@@ -12,9 +12,11 @@
 #include <vector>
 #include <map>
 #include <optional>
+#include <algorithm>
 
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <fstream>
 #include <filesystem>
 
