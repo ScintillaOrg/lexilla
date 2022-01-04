@@ -1,4 +1,4 @@
- 0 400   0   # Enumerate all styles: 0 to 20
+ 0 400   0   # Enumerate all styles: 0 to 19
  0 400   0   # comment=1
  1 400   0   
  0 400   0   # whitespace=0
@@ -61,21 +61,3 @@
  1 400   0   
  0 400   0   # double-triple-quoted-f-string=19
  0 400   0   f"""{a}"""
- 1 400   0   
- 0 400   0   # attributes=20
- 0 400   0   s = "thing thing".findall("thing")
- 0 400   0   a.very.complicated.expression.findall("test")
- 2 400   0 + b.very.complicated.expression.
- 0 404   0 |     findall("test2")
- 2 400   0 + c.very.complicated.expression. \
- 0 404   0 |     findall("test3")
- 2 400   0 + d.very.complicated.expression.\
- 0 404   0 |     findall("test4")
- 0 400   0   @staticmethod.attrtest
- 0 400   0   @staticmethod.
- 0 400   0   attrtest
- 0 400   0   @staticmethod. \
- 0 400   0   attrtest
- 0 400   0   @staticmethod.\
- 0 400   0   attrtest
- 1 400   0   

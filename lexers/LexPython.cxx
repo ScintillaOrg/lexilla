@@ -338,7 +338,7 @@ LexicalClass lexicalClasses[] = {
 	17, "SCE_P_FCHARACTER", "literal string interpolated", "Single quoted f-string",
 	18, "SCE_P_FTRIPLE", "literal string interpolated", "Triple quoted f-string",
 	19, "SCE_P_FTRIPLEDOUBLE", "literal string interpolated", "Triple double quoted f-string",
-	20, "SCE_P_ATTRIBUTE", "attribute of identifiers", "Identifiers",
+	20, "SCE_P_ATTRIBUTE", "identifier", "Attribute of identifier",
 };
 
 }
