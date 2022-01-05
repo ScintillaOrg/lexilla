@@ -14,6 +14,7 @@
 
 .SUFFIXES: .cxx
 
+DIR_O=.
 DIR_BIN=../bin
 
 WARNINGS = -Wpedantic -Wall -Wextra
@@ -22,7 +23,7 @@ ifdef windir
     SHARED_NAME = lexilla
     SHAREDEXTENSION = dll
     WINDRES ?= windres
-    VERSION_RESOURCE = LexillaVersion.o
+    VERSION_RESOURCE = $(DIR_O)/LexillaVersion.o
 else
     SHARED_NAME = liblexilla
     ifeq ($(shell uname),Darwin)
@@ -88,12 +89,12 @@ BASE_FLAGS += $(WARNINGS)
 all:	$(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
 
 clean:
-	$(DEL) *.o *.obj *.a *.res *.map *.plist $(call normalize,$(LEXILLA) $(LIBLEXILLA))
+	$(DEL) $(call normalize, $(addprefix $(DIR_O)/, *.o *.obj *.a *.res *.map *.plist) $(LEXILLA) $(LIBLEXILLA))
 
-%.o: %.cxx
+$(DIR_O)/%.o: %.cxx
 	$(CXX) $(DEFINES) $(INCLUDES) $(BASE_FLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-%.o:	%.rc
+$(DIR_O)/%.o: %.rc
 	$(WINDRES) $< $@
 
 analyze:
@@ -124,10 +125,7 @@ LEXLIB_OBJS=\
 	WordList.o
 
 # Required by libraries and DLLs that include lexing
-LEXILLA_OBJS=\
-	$(OBJS) \
-	$(LEXLIB_OBJS) \
-	$(LEXERS:.cxx=.o)
+LEXILLA_OBJS := $(addprefix $(DIR_O)/, $(OBJS) $(LEXLIB_OBJS) $(LEXERS:.cxx=.o))
 
 $(LEXILLA): $(LEXILLA_OBJS) $(VERSION_RESOURCE)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
