@@ -183,9 +183,8 @@ int stateForPrintState(int StateToPrint) {
 	return state;
 }
 
-inline bool IsNumber(Sci_PositionU start, Accessor &styler) {
-	return IsADigit(styler[start]) || (styler[start] == '.') ||
-	       (styler[start] == '-') || (styler[start] == '#');
+constexpr bool IsNumberChar(char ch) noexcept {
+	return IsADigit(ch) || ch == '.' || ch == '-' || ch == '#';
 }
 
 inline bool isStringState(int state) {
@@ -255,9 +254,8 @@ inline bool isCommentASPState(int state) {
 }
 
 void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
-	const bool wordIsNumber = IsNumber(start, styler);
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
-	if (wordIsNumber) {
+	if (IsNumberChar(styler[start])) {
 		chAttr = SCE_H_NUMBER;
 	} else {
 		std::string s = GetStringSegment(styler, start, end);
@@ -2031,7 +2029,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (ch == '\'' && chPrev == '=') {
 					state = SCE_H_SINGLESTRING;
 				} else {
-					if (IsNumber(styler.GetStartSegment(), styler)) {
+					if (IsNumberChar(styler[styler.GetStartSegment()])) {
 						styler.ColourTo(i - 1, SCE_H_NUMBER);
 					} else {
 						styler.ColourTo(i - 1, StateToPrint);
