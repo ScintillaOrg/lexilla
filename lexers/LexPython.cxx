@@ -232,6 +232,7 @@ struct OptionsPython {
 	bool foldCompact;
 	bool unicodeIdentifiers;
 	int identifierAttributes;
+	int decoratorAttributes;
 
 	OptionsPython() noexcept {
 		whingeLevel = 0;
@@ -246,6 +247,7 @@ struct OptionsPython {
 		foldCompact = false;
 		unicodeIdentifiers = true;
 		identifierAttributes = 0;
+		decoratorAttributes = 0;
 	}
 
 	literalsAllowed AllowedLiterals() const noexcept {
@@ -305,10 +307,12 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 			       "Set to 0 to not recognise Python 3 Unicode identifiers.");
 
 		DefineProperty("lexer.python.identifier.attributes", &OptionsPython::identifierAttributes,
-			       "Set to 1 to allow for styling of all identifier attributes that are not already styled."
-			       "Set to 2 to allow for styling of all identifier attributes that are not already styled. Also styles decorator attributes, as decorators."
-			       "Set to 3 to allow for styling of all identifier attributes and also styling decorator attributes. Styles decorator attributes as decorators."
-			       "Set to 4 to allow for styling of all identifier attributes regaurdless of what kind of attribute. Styles decorator attributes as attributes.");
+			       "Set to 0 to not recognise Python identifiers."
+			       "Set to 1 to recognise Python identifiers.");
+
+		DefineProperty("lexer.python.decorator.attributes", &OptionsPython::decoratorAttributes,
+			       "Set to 0 to not recognise Python decorator identifiers."
+			       "Set to 1 to recognise Python decorator identifiers.");
 
 		DefineWordListSets(pythonWordListDesc);
 	}
@@ -650,7 +654,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
-					if (options.identifierAttributes > 0) {
+					if (options.identifierAttributes > 0 || options.decoratorAttributes > 0) {
 						// Does the user even want attributes styled?
 						Sci_Position pos = styler.GetStartSegment() - 1;
 						unsigned char ch = styler.SafeGetCharAt(pos, '\0');
@@ -674,27 +678,12 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 								if (!(ch == ' ' || ch == '\t'))
 									break;
 							}
-							if ((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) {
-								// Respect already styled attributes and ignore decorator attributes
-								if (!isDecoratorAttribute){
-									style = SCE_P_ATTRIBUTE;
-								}
-							} else if ((options.identifierAttributes == 2)  && (style == SCE_P_IDENTIFIER)) {
-								// Style decorator attributes as decorators but respect already styled identifiers
-								if (isDecoratorAttribute){
-									style = SCE_P_DECORATOR;
-								} else {
-									style = SCE_P_ATTRIBUTE;
-								}
-							} else if (options.identifierAttributes == 3) {
-								// Ignore already styled identifiers, style decorator attributes as decorators
-								if (isDecoratorAttribute){
-									style = SCE_P_DECORATOR;
-								} else {
-									style = SCE_P_ATTRIBUTE;
-								}
-							} else if (options.identifierAttributes == 4) {
-								// The nuclear option, ignore everything else, style all attributes as attributes
+							if ((isDecoratorAttribute) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))){
+								// Style decorator attributes as decorators but respect already styled identifiers (unless requested to ignore already styled identifiers)
+								style = SCE_P_DECORATOR;
+							}
+							if ((!isDecoratorAttribute) && (((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) || (options.identifierAttributes == 2))){
+								// Style attributes and ignore decorator attributes but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_ATTRIBUTE;
 							}
 						}
