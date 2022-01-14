@@ -668,21 +668,24 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 						}
 						if (pos < 0 || ch == '.') {
 							// Is this an attribute we could style? if it is, do as asked
+							bool isComment = false;
 							bool isDecoratorAttribute = false;
 							const Sci_Position attrLine = styler.GetLine(pos);
 							for (Sci_Position i = styler.LineStart(attrLine); i < pos; i++) {
 								const char attrCh = styler[i];
 								if (attrCh == '@')
 									isDecoratorAttribute = true;
+								if (attrCh == '#')
+									isComment = true;
 								// Detect if this attribute belongs to a decorator
 								if (!(ch == ' ' || ch == '\t'))
 									break;
 							}
-							if ((isDecoratorAttribute) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))){
+							if (((isDecoratorAttribute) && (!isComment)) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))){
 								// Style decorator attributes as decorators but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_DECORATOR;
 							}
-							if ((!isDecoratorAttribute) && (((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) || (options.identifierAttributes == 2))){
+							if (((!isDecoratorAttribute) && (!isComment)) && (((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) || (options.identifierAttributes == 2))){
 								// Style attributes and ignore decorator attributes but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_ATTRIBUTE;
 							}
