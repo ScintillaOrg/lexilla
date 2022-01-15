@@ -307,12 +307,12 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 			       "Set to 0 to not recognise Python 3 Unicode identifiers.");
 
 		DefineProperty("lexer.python.identifier.attributes", &OptionsPython::identifierAttributes,
-			       "Set to 0 to not recognise Python identifiers."
-			       "Set to 1 to recognise Python identifiers.");
+			       "Set to 0 to not recognise Python identifier attributes."
+			       "Set to 1 to recognise Python identifiers attributes by default.");
 
 		DefineProperty("lexer.python.decorator.attributes", &OptionsPython::decoratorAttributes,
-			       "Set to 0 to not recognise Python decorator identifiers."
-			       "Set to 1 to recognise Python decorator identifiers.");
+			       "Set to 0 to not recognise Python decorator identifier attributes."
+			       "Set to 1 to recognise Python decorator identifier attributes by default.");
 
 		DefineWordListSets(pythonWordListDesc);
 	}
