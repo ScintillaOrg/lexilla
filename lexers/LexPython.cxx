@@ -231,7 +231,7 @@ struct OptionsPython {
 	bool foldQuotes;
 	bool foldCompact;
 	bool unicodeIdentifiers;
-	int automaticsubwordsIdentifier;
+	int automaticsubwordsAttribute;
 	int automaticsubwordsDecorator;
 
 	OptionsPython() noexcept {
@@ -246,7 +246,7 @@ struct OptionsPython {
 		foldQuotes = false;
 		foldCompact = false;
 		unicodeIdentifiers = true;
-		automaticsubwordsIdentifier = 0;
+		automaticsubwordsAttribute = 0;
 		automaticsubwordsDecorator = 0;
 	}
 
@@ -306,7 +306,7 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 		DefineProperty("lexer.python.unicode.identifiers", &OptionsPython::unicodeIdentifiers,
 			       "Set to 0 to not recognise Python 3 Unicode identifiers.");
 
-		DefineProperty("lexer.python.automatic.subwords.identifier", &OptionsPython::automaticsubwordsIdentifier,
+		DefineProperty("lexer.python.automatic.subwords.attribute", &OptionsPython::automaticsubwordsAttribute,
 			       "Set to 0 to not recognise Python identifier attributes."
 			       "Set to 1 to recognise Python identifiers attributes by default.");
 
@@ -654,7 +654,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
-					if (options.automaticsubwordsIdentifier > 0 || options.automaticsubwordsDecorator > 0) {
+					if (options.automaticsubwordsAttribute > 0 || options.automaticsubwordsDecorator > 0) {
 						// Does the user even want attributes styled?
 						Sci_Position pos = styler.GetStartSegment() - 1;
 						unsigned char ch = styler.SafeGetCharAt(pos, '\0');
@@ -685,7 +685,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 								// Style decorator attributes as decorators but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_DECORATOR;
 							}
-							if (((!isDecoratorAttribute) && (!isComment)) && (((options.automaticsubwordsIdentifier == 1) && (style == SCE_P_IDENTIFIER)) || (options.automaticsubwordsIdentifier == 2))){
+							if (((!isDecoratorAttribute) && (!isComment)) && (((options.automaticsubwordsAttribute == 1) && (style == SCE_P_IDENTIFIER)) || (options.automaticsubwordsAttribute == 2))){
 								// Style attributes and ignore decorator attributes but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_ATTRIBUTE;
 							}
