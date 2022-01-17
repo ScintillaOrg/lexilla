@@ -231,8 +231,8 @@ struct OptionsPython {
 	bool foldQuotes;
 	bool foldCompact;
 	bool unicodeIdentifiers;
-	int automaticsubwordsAttribute;
-	int automaticsubwordsDecorator;
+	int identifierAttributes;
+	int decoratorAttributes;
 
 	OptionsPython() noexcept {
 		whingeLevel = 0;
@@ -246,8 +246,8 @@ struct OptionsPython {
 		foldQuotes = false;
 		foldCompact = false;
 		unicodeIdentifiers = true;
-		automaticsubwordsAttribute = 0;
-		automaticsubwordsDecorator = 0;
+		identifierAttributes = 0;
+		decoratorAttributes = 0;
 	}
 
 	literalsAllowed AllowedLiterals() const noexcept {
@@ -306,13 +306,11 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 		DefineProperty("lexer.python.unicode.identifiers", &OptionsPython::unicodeIdentifiers,
 			       "Set to 0 to not recognise Python 3 Unicode identifiers.");
 
-		DefineProperty("lexer.python.automatic.subwords.attribute", &OptionsPython::automaticsubwordsAttribute,
-			       "Set to 0 to not recognise Python identifier attributes."
-			       "Set to 1 to recognise Python identifiers attributes by default.");
+		DefineProperty("lexer.python.identifier.attributes", &OptionsPython::identifierAttributes,
+			       "Set to 1 to recognise Python identifier attributes.");
 
-		DefineProperty("lexer.python.automatic.subwords.decorator", &OptionsPython::automaticsubwordsDecorator,
-			       "Set to 0 to not recognise Python decorator identifier attributes."
-			       "Set to 1 to recognise Python decorator identifier attributes by default.");
+		DefineProperty("lexer.python.decorator.attributes", &OptionsPython::decoratorAttributes,
+			       "Set to 1 to recognise Python decorator attributes.");
 
 		DefineWordListSets(pythonWordListDesc);
 	}
@@ -654,7 +652,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
-					if (options.automaticsubwordsAttribute > 0 || options.automaticsubwordsDecorator > 0) {
+					if (options.identifierAttributes > 0 || options.decoratorAttributes > 0) {
 						// Does the user even want attributes styled?
 						Sci_Position pos = styler.GetStartSegment() - 1;
 						unsigned char ch = styler.SafeGetCharAt(pos, '\0');
@@ -681,11 +679,11 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 								if (!(ch == ' ' || ch == '\t'))
 									break;
 							}
-							if (((isDecoratorAttribute) && (!isComment)) && (((options.automaticsubwordsDecorator == 1)  && (style == SCE_P_IDENTIFIER)) || (options.automaticsubwordsDecorator == 2))){
+							if (((isDecoratorAttribute) && (!isComment)) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))){
 								// Style decorator attributes as decorators but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_DECORATOR;
 							}
-							if (((!isDecoratorAttribute) && (!isComment)) && (((options.automaticsubwordsAttribute == 1) && (style == SCE_P_IDENTIFIER)) || (options.automaticsubwordsAttribute == 2))){
+							if (((!isDecoratorAttribute) && (!isComment)) && (((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) || (options.identifierAttributes == 2))){
 								// Style attributes and ignore decorator attributes but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_ATTRIBUTE;
 							}
