@@ -1215,7 +1215,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case eScriptPHP:
 				//not currently supported				case eScriptVBS:
 
-				if ((state != SCE_HPHP_COMMENT) && (state != SCE_HPHP_COMMENTLINE) && (state != SCE_HJ_COMMENT) && (state != SCE_HJ_COMMENTLINE) && (state != SCE_HJ_COMMENTDOC) && (!isStringState(state))) {
+				if (!(state == SCE_HPHP_COMMENT || state == SCE_HPHP_COMMENTLINE) &&
+				    !(state == SCE_HJ_REGEX || state == SCE_HJ_COMMENT || state == SCE_HJ_COMMENTLINE || state == SCE_HJ_COMMENTDOC) &&
+				    !isStringState(state)) {
 				//Platform::DebugPrintf("state=%d, StateToPrint=%d, initStyle=%d\n", state, StateToPrint, initStyle);
 				//if ((state == SCE_HPHP_OPERATOR) || (state == SCE_HPHP_DEFAULT) || (state == SCE_HJ_SYMBOLS) || (state == SCE_HJ_START) || (state == SCE_HJ_DEFAULT)) {
 					if (ch == '#') {
