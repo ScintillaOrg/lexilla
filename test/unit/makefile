@@ -1,6 +1,6 @@
 # Build all the unit tests using GNU make and either g++ or clang
 # Should be run using mingw32-make on Windows, not nmake
-# On Windows g++ is used, on OS X clang, and on Linux G++ is used by default
+# On Windows g++ is used, on macOS clang, and on Linux G++ is used by default
 # but clang can be used by defining CLANG when invoking make
 # clang works only with libc++, not libstdc++
 # Tested with clang 9 and g++ 9
@@ -9,7 +9,7 @@ CXXSTD=c++17
 
 ifndef windir
 ifeq ($(shell uname),Darwin)
-# On OS X always use clang as g++ is old version
+# On macOS always use clang as g++ is old version
 CLANG = 1
 USELIBCPP = 1
 endif
@@ -20,7 +20,7 @@ CXXFLAGS += --std=$(CXXSTD)
 ifdef CLANG
 CXX = clang++
 ifdef USELIBCPP
-# OS X, use libc++ but don't have sanitizers
+# macOS, use libc++ but don't have sanitizers
 CXXFLAGS += --stdlib=libc++
 LINKFLAGS = -lc++
 else
