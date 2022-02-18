@@ -142,9 +142,6 @@ constVariable:lexilla/lexers/LexTACL.cxx
 constVariable:lexilla/lexers/LexTADS3.cxx
 constVariable:lexilla/lexers/LexTAL.cxx
 
-// bp.itBracket not actually redundant as needed by return statements
-redundantAssignment:lexilla/lexers/LexCPP.cxx
-
 // Suppress consting argv in main as non-const is standard
 constParameter:lexilla/examples/CheckLexilla/CheckLexilla.c
 

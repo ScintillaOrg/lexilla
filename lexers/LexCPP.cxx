@@ -99,6 +99,8 @@ bool OnlySpaceOrTab(const std::string &s) noexcept {
 	return true;
 }
 
+using Tokens = std::vector<std::string>;
+
 std::vector<std::string> StringSplit(const std::string &text, int separator) {
 	std::vector<std::string> vs(text.empty() ? 0 : 1);
 	for (const char ch : text) {
@@ -112,33 +114,26 @@ std::vector<std::string> StringSplit(const std::string &text, int separator) {
 }
 
 struct BracketPair {
-	std::vector<std::string>::iterator itBracket;
-	std::vector<std::string>::iterator itEndBracket;
+	Tokens::iterator itBracket;
+	Tokens::iterator itEndBracket;
 };
 
-BracketPair FindBracketPair(std::vector<std::string> &tokens) {
-	BracketPair bp;
-	std::vector<std::string>::iterator itTok = std::find(tokens.begin(), tokens.end(), "(");
-	bp.itBracket = tokens.end();
-	bp.itEndBracket = tokens.end();
-	if (itTok != tokens.end()) {
-		bp.itBracket = itTok;
+BracketPair FindBracketPair(Tokens &tokens) {
+	Tokens::iterator itBracket = std::find(tokens.begin(), tokens.end(), "(");
+	if (itBracket != tokens.end()) {
 		size_t nest = 0;
-		while (itTok != tokens.end()) {
+		for (Tokens::iterator itTok = itBracket; itTok != tokens.end(); ++itTok) {
 			if (*itTok == "(") {
 				nest++;
 			} else if (*itTok == ")") {
 				nest--;
 				if (nest == 0) {
-					bp.itEndBracket = itTok;
-					return bp;
+					return { itBracket, itTok };
 				}
 			}
-			++itTok;
 		}
 	}
-	bp.itBracket = tokens.end();
-	return bp;
+	return { tokens.end(), tokens.end() };
 }
 
 void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
