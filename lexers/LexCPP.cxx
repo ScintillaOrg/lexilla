@@ -119,7 +119,7 @@ struct BracketPair {
 };
 
 BracketPair FindBracketPair(Tokens &tokens) {
-	Tokens::iterator itBracket = std::find(tokens.begin(), tokens.end(), "(");
+	const Tokens::iterator itBracket = std::find(tokens.begin(), tokens.end(), "(");
 	if (itBracket != tokens.end()) {
 		size_t nest = 0;
 		for (Tokens::iterator itTok = itBracket; itTok != tokens.end(); ++itTok) {
@@ -771,14 +771,14 @@ Sci_Position SCI_METHOD LexerCPP::WordListSet(int n, const char *wl) {
 void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
-	CharacterSet setOKBeforeRE(CharacterSet::setNone, "([{=,:;!%^&*|?~+-");
-	CharacterSet setCouldBePostOp(CharacterSet::setNone, "+-");
+	const CharacterSet setOKBeforeRE(CharacterSet::setNone, "([{=,:;!%^&*|?~+-");
+	const CharacterSet setCouldBePostOp(CharacterSet::setNone, "+-");
 
-	CharacterSet setDoxygen(CharacterSet::setAlpha, "$@\\&<>#{}[]");
+	const CharacterSet setDoxygen(CharacterSet::setAlpha, "$@\\&<>#{}[]");
 
 	setWordStart = CharacterSet(CharacterSet::setAlpha, "_", true);
 
-	CharacterSet setInvalidRawFirst(CharacterSet::setNone, " )\\\t\v\f\n");
+	const CharacterSet setInvalidRawFirst(CharacterSet::setNone, " )\\\t\v\f\n");
 
 	if (options.identifiersAllowDollars) {
 		setWordStart.Add('$');
@@ -828,7 +828,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	if (!options.updatePreprocessor)
 		ppDefineHistory.clear();
 
-	std::vector<PPDefinition>::iterator itInvalid = std::find_if(ppDefineHistory.begin(), ppDefineHistory.end(),
+	const std::vector<PPDefinition>::iterator itInvalid = std::find_if(
+		ppDefineHistory.begin(), ppDefineHistory.end(),
 		[lineCurrent](const PPDefinition &p) noexcept { return p.line >= lineCurrent; });
 	if (itInvalid != ppDefineHistory.end()) {
 		ppDefineHistory.erase(itInvalid, ppDefineHistory.end());
@@ -945,7 +946,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					} else if (keywords4.InList(s)) {
 						sc.ChangeState(SCE_C_GLOBALCLASS|activitySet);
 					} else {
-						int subStyle = classifierIdentifiers.ValueFor(s);
+						const int subStyle = classifierIdentifiers.ValueFor(s);
 						if (subStyle >= 0) {
 							sc.ChangeState(subStyle|activitySet);
 						}
@@ -1078,7 +1079,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					if (!(IsASpace(sc.ch) || (sc.ch == 0))) {
 						sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
 					} else if (!keywords3.InList(s + 1) && !keywords3.InList(s)) {
-						int subStyleCDKW = classifierDocKeyWords.ValueFor(s+1);
+						const int subStyleCDKW = classifierDocKeyWords.ValueFor(s+1);
 						if (subStyleCDKW >= 0) {
 							sc.ChangeState(subStyleCDKW|activitySet);
 						} else {
@@ -1095,7 +1096,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						sc.GetCurrentLowered(s, sizeof(s));
 					}
 					if (!keywords3.InList(s)) {
-						int subStyleCDKW = classifierDocKeyWords.ValueFor(s + 1);
+						const int subStyleCDKW = classifierDocKeyWords.ValueFor(s + 1);
 						if (subStyleCDKW >= 0) {
 							sc.ChangeState(subStyleCDKW | activitySet);
 						} else {
@@ -1328,11 +1329,11 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						if (sc.Match("ifdef") || sc.Match("ifndef")) {
 							const bool isIfDef = sc.Match("ifdef");
 							const int startRest = isIfDef ? 5 : 6;
-							std::string restOfLine = GetRestOfLine(styler, sc.currentPos + startRest + 1, false);
-							bool foundDef = preprocessorDefinitions.find(restOfLine) != preprocessorDefinitions.end();
+							const std::string restOfLine = GetRestOfLine(styler, sc.currentPos + startRest + 1, false);
+							const bool foundDef = preprocessorDefinitions.find(restOfLine) != preprocessorDefinitions.end();
 							preproc.StartSection(isIfDef == foundDef);
 						} else if (sc.Match("if")) {
-							std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 2, true);
+							const std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 2, true);
 							const bool ifGood = EvaluateExpression(restOfLine, preprocessorDefinitions);
 							preproc.StartSection(ifGood);
 						} else if (sc.Match("else")) {
@@ -1597,7 +1598,7 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 					tokens.erase(tokens.begin() + i + 1, tokens.begin() + i + 3);
 				} else if (((i+3)<tokens.size()) && (tokens[i+3] == ")")) {
 					// defined(<identifier>)
-					SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i+2]);
+					const SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i+2]);
 					if (it != preprocessorDefinitions.end()) {
 						val = "1";
 					}
@@ -1608,7 +1609,7 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 				}
 			} else {
 				// defined <identifier>
-				SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i+1]);
+				const SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i+1]);
 				if (it != preprocessorDefinitions.end()) {
 					val = "1";
 				}
@@ -1626,7 +1627,7 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 	for (size_t i = 0; (i<tokens.size()) && (iterations < maxIterations);) {
 		iterations++;
 		if (setWordStart.Contains(tokens[i][0])) {
-			SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i]);
+			const SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i]);
 			if (it != preprocessorDefinitions.end()) {
 				// Tokenize value
 				Tokens macroTokens = Tokenize(it->second.value);
@@ -1653,7 +1654,8 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 
 						for (size_t iMacro = 0; iMacro < macroTokens.size();) {
 							if (setWordStart.Contains(macroTokens[iMacro][0])) {
-								std::map<std::string, std::string>::const_iterator itFind = arguments.find(macroTokens[iMacro]);
+								const std::map<std::string, std::string>::const_iterator itFind =
+									arguments.find(macroTokens[iMacro]);
 								if (itFind != arguments.end()) {
 									// TODO: Possible that value will be expression so should insert tokenized form
 									macroTokens[iMacro] = itFind->second;
@@ -1704,7 +1706,7 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 			int isTrue = atoi(tokens[j+1].c_str());
 			if (tokens[j] == "!")
 				isTrue = !isTrue;
-			Tokens::iterator itInsert =
+			const Tokens::iterator itInsert =
 				tokens.erase(tokens.begin() + j, tokens.begin() + j + 2);
 			tokens.insert(itInsert, isTrue ? "1" : "0");
 		} else {
@@ -1754,7 +1756,7 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 					result = valA || valB;
 				else if (tokens[k+1] == "&&")
 					result = valA && valB;
-				Tokens::iterator itInsert =
+				const Tokens::iterator itInsert =
 					tokens.erase(tokens.begin() + k, tokens.begin() + k + 3);
 				tokens.insert(itInsert, std::to_string(result));
 			} else {
