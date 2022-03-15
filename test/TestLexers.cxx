@@ -32,6 +32,11 @@ namespace {
 constexpr std::string_view suffixStyled = ".styled";
 constexpr std::string_view suffixFolded = ".folded";
 
+constexpr std::string_view prefixIf = "if ";
+constexpr std::string_view prefixMatch = "match ";
+constexpr std::string_view prefixEqual = "= ";
+constexpr std::string_view prefixComment = "#";
+
 std::string ReadFile(std::filesystem::path path) {
 	std::ifstream ifs(path, std::ios::binary);
 	std::string content((std::istreambuf_iterator<char>(ifs)),
@@ -94,12 +99,106 @@ std::pair<std::string, std::string> MarkedAndFoldedDocument(const Scintilla::IDo
 	return { MarkedDocument(pdoc), FoldedDocument(pdoc) };
 }
 
+std::vector<std::string> StringSplit(const std::string_view &text, int separator) {
+	std::vector<std::string> vs(text.empty() ? 0 : 1);
+	for (std::string_view::const_iterator it = text.begin(); it != text.end(); ++it) {
+		if (*it == separator) {
+			vs.push_back(std::string());
+		} else {
+			vs.back() += *it;
+		}
+	}
+	return vs;
+}
+
+static constexpr bool IsSpaceOrTab(char ch) noexcept {
+	return (ch == ' ') || (ch == '\t');
+}
+
 class PropertyMap {
+
+	std::string Evaluate(std::string_view text) {
+		if (text.find(' ') != std::string_view::npos) {
+			if (text.starts_with(prefixEqual)) {
+				const std::string_view sExpressions = text.substr(prefixEqual.length());
+				std::vector<std::string> parts = StringSplit(sExpressions, ';');
+				if (parts.size() > 1) {
+					for (size_t part = 1; part < parts.size(); part++) {
+						if (parts[part] != parts[0]) {
+							return "0";
+						}
+					}
+					return "1";
+				}
+			}
+			return {};
+		} else {
+			std::optional<std::string> value = GetProperty(text);
+			if (value) {
+				return *value;
+			}
+			return {};
+		}
+	}
+
+	std::string Expand(std::string withVars) {
+		constexpr size_t maxVars = 100;
+		size_t varStart = withVars.rfind("$(");
+		for (size_t count = 0; (count < maxVars) && (varStart != std::string::npos); count++) {
+			const size_t varEnd = withVars.find(')', varStart + 2);
+			if (varEnd == std::string::npos) {
+				break;
+			}
+
+			const std::string_view whole = withVars;
+			const std::string_view var = whole.substr(varStart + 2, varEnd - (varStart + 2));
+			const std::string val = Evaluate(var);
+
+			withVars.erase(varStart, varEnd - varStart + 1);
+			withVars.insert(varStart, val);
+
+			varStart = withVars.rfind("$(");
+		}
+		return withVars;
+	}
+
+	bool ProcessLine(std::string_view text, bool ifIsTrue) {
+		// If clause ends with first non-indented line
+		if (!ifIsTrue && (text.empty() || IsSpaceOrTab(text[0]))) {
+			return false;
+		}
+		ifIsTrue = true;
+		if (text.starts_with(prefixIf)) {
+			const std::string value = Expand(std::string(text.substr(prefixIf.length())));
+			if (value == "0" || value == "") {
+				ifIsTrue = false;
+			}
+		} else if (text.starts_with(prefixMatch)) {
+			std::optional<std::string> fileNameExt = GetProperty("FileNameExt");
+			ifIsTrue = fileNameExt == text.substr(prefixMatch.length());
+		} else {
+			while (!text.empty() && IsSpaceOrTab(text.at(0))) {
+				text.remove_prefix(1);
+			}
+			if (text.starts_with(prefixComment)) {
+				return ifIsTrue;
+			}
+			const size_t positionEquals = text.find("=");
+			if (positionEquals != std::string::npos) {
+				const std::string key(text.substr(0, positionEquals));
+				const std::string_view value = text.substr(positionEquals + 1);
+				properties[key] = value;
+			}
+		}
+		return ifIsTrue;
+	}
+
 public:
 	using PropMap = std::map<std::string, std::string>;
 	PropMap properties;
 
 	void ReadFromFile(std::filesystem::path path) {
+		bool ifIsTrue = true;
 		std::ifstream ifs(path);
 		std::string line;
 		std::string logicalLine;
@@ -112,12 +211,7 @@ public:
 			if (logicalLine.ends_with("\\")) {
 				logicalLine.pop_back();
 			} else {
-				const size_t positionEquals = logicalLine.find("=");
-				if (positionEquals != std::string::npos) {
-					const std::string key = logicalLine.substr(0, positionEquals);
-					const std::string value = logicalLine.substr(positionEquals + 1);
-					properties[key] = value;
-				}
+				ifIsTrue = ProcessLine(logicalLine, ifIsTrue);
 				logicalLine.clear();
 			}
 		}
@@ -374,9 +468,7 @@ void SetProperties(Scintilla::ILexer5 *plex, const PropertyMap &propertyMap, std
 
 	// Set parameters of lexer
 	for (auto const &[key, val] : propertyMap.properties) {
-		if (key.starts_with("#")) {
-			// Ignore comments
-		} else if (key.starts_with("lexer.*")) {
+		if (key.starts_with("lexer.*")) {
 			// Ignore as processed earlier
 		} else if (key.starts_with("keywords")) {
 			// Ignore as processed earlier
@@ -463,8 +555,6 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 }
 
 bool TestDirectory(std::filesystem::path directory, std::filesystem::path basePath) {
-	PropertyMap properties;
-	properties.ReadFromFile(directory / "SciTE.properties");
 	bool success = true;
 	for (auto &p : std::filesystem::directory_iterator(directory)) {
 		if (!p.is_directory()) {
@@ -473,6 +563,9 @@ bool TestDirectory(std::filesystem::path directory, std::filesystem::path basePa
 				extension != suffixFolded) {
 				const std::filesystem::path relativePath = p.path().lexically_relative(basePath);
 				std::cout << "Lexing " << relativePath.string() << '\n';
+				PropertyMap properties;
+				properties.properties["FileNameExt"] = p.path().filename().string();
+				properties.ReadFromFile(directory / "SciTE.properties");
 				if (!TestFile(p, properties)) {
 					success = false;
 				}
