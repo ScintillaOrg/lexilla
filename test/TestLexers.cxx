@@ -265,7 +265,8 @@ bool CheckSame(std::string_view augmentedText, std::string_view augmentedTextNew
 	}
 	const size_t lineNumber = FirstLineDifferent(augmentedText, augmentedTextNew) + 1;
 	std::cout << "\n" << path.string() << ":" << lineNumber << ":";
-	std::cout << " has different " << item << "\n\n";
+	const std::string differenceType = augmentedText.empty() ? "new" : "different";
+	std::cout << " has " << differenceType << " " << item << "\n\n";
 	std::filesystem::path pathNew = path;
 	pathNew += suffix;
 	pathNew += ".new";
@@ -312,7 +313,8 @@ void StyleLineByLine(TestDocument &doc, Scintilla::ILexer5 *plex) {
 	}
 }
 
-void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer5 *plex, bool disablePerLineTests) {
+bool TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer5 *plex, bool disablePerLineTests) {
+	bool success = true;
 	// Convert all line ends to \r\n to check if styles change between \r and \n which makes
 	// it difficult to test on different platforms when files may have line ends changed.
 	std::string text = s;
@@ -338,6 +340,7 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 				std::cout << path.string() << ":" << line << ":" <<
 					" different styles between \\r and \\n at " <<
 					pos << ": " << prevStyle << ", " << styleNow << "\n";
+				success = false;
 			}
 			line++;
 		}
@@ -359,9 +362,11 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 
 	if (styledText != styledTextUnix) {
 		std::cout << "\n" << path.string() << ":1: has different styles with \\n versus \\r\\n line ends\n\n";
+		success = false;
 	}
 	if (foldedText != foldedTextUnix) {
 		std::cout << "\n" << path.string() << ":1: has different folds with \\n versus \\r\\n line ends\n\n";
+		success = false;
 	}
 
 	// Test line by line lexing/folding with Unix \n line ends
@@ -371,11 +376,16 @@ void TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 		// Convert results from \n to \r\n run
 		UnixToWindows(styledTextNewPerLine);
 		UnixToWindows(foldedTextNewPerLine);
-		CheckSame(styledTextUnix, styledTextNewPerLine, "per-line styles \\n", suffixStyled, path);
-		CheckSame(foldedTextUnix, foldedTextNewPerLine, "per-line folds \\n", suffixFolded, path);
+		if (!CheckSame(styledTextUnix, styledTextNewPerLine, "per-line styles \\n", suffixStyled, path)) {
+			success = false;
+		}
+		if (!CheckSame(foldedTextUnix, foldedTextNewPerLine, "per-line folds \\n", suffixFolded, path)) {
+			success = false;
+		}
 	}
 
 	plex->Release();
+	return success;
 }
 
 void TestILexer(Scintilla::ILexer5 *plex) {
@@ -547,9 +557,11 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 
 	plex->Release();
 
-	Scintilla::ILexer5 *plexCRLF = Lexilla::MakeLexer(*language);
-	SetProperties(plexCRLF, propertyMap, path.filename().string());
-	TestCRLF(path, text, plexCRLF, disablePerLineTests);
+	if (success) {
+		Scintilla::ILexer5 *plexCRLF = Lexilla::MakeLexer(*language);
+		SetProperties(plexCRLF, propertyMap, path.filename().string());
+		success = TestCRLF(path, text, plexCRLF, disablePerLineTests);
+	}
 
 	return success;
 }
