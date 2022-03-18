@@ -1821,7 +1821,7 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
                 levelCurrent--;
             }
         }
-        if (atEOL) {
+        if (atEOL || (i == endPos - 1)) {
             int lev = levelPrev;
             if (visibleChars == 0 && foldCompact)
                 lev |= SC_FOLDLEVELWHITEFLAG;
