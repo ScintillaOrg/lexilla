@@ -714,6 +714,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                         false);
 
     bool preferRE = true;
+    bool afterDef = false;
     int state = initStyle;
     Sci_Position lengthDoc = startPos + length;
 
@@ -862,7 +863,10 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                 Quote.New();
                 Quote.Open(ch);
             } else if (ch == '<' && chNext == '<' && chNext2 != '=') {
-
+                if (afterDef) {
+                    afterDef = false;
+                    prevWord[0] = 0;
+                }
                 // Recognise the '<<' symbol - either a here document or a binary op
                 styler.ColourTo(i - 1, state);
                 i++;
@@ -893,6 +897,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                 }
                 preferRE = (state != SCE_RB_HERE_DELIM);
             } else if (ch == ':') {
+                afterDef = false;
                 styler.ColourTo(i - 1, state);
                 if (chNext == ':') {
                     // Mark "::" as an operator, not symbol start
@@ -1009,7 +1014,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                     state = SCE_RB_DEFAULT;
                     preferRE = true;
                 }
-            } else if (ch == '%') {
+            } else if (ch == '%' && !afterDef) {
                 styler.ColourTo(i - 1, state);
                 bool have_string = false;
                 if (strchr(q_chars, chNext) && !isSafeWordcharOrHigh(chNext2)) {
@@ -1046,6 +1051,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                     preferRE = true;
                 }
             } else if (ch == '?') {
+                afterDef = false;
                 styler.ColourTo(i - 1, state);
                 if (iswhitespace(chNext) || chNext == '\n' || chNext == '\r') {
                     styler.ColourTo(i, SCE_RB_OPERATOR);
@@ -1057,6 +1063,16 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                 }
             } else if (isoperator(ch) || ch == '.') {
                 styler.ColourTo(i - 1, state);
+                if (afterDef) {
+                    afterDef = false;
+                    prevWord[0] = 0;
+                    if (chNext == '@' && (ch == '+' || ch == '-' || ch == '!')) {
+                        // unary operator method
+                        ch = chNext;
+                        chNext = chNext2;
+                        i += 1;
+                    }
+                }
                 styler.ColourTo(i, SCE_RB_OPERATOR);
                 // If we're ending an expression or block,
                 // assume it ends an object, and the ambivalent
@@ -1082,12 +1098,16 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                 }
                 // Stay in default state
             } else if (isEOLChar(ch)) {
+                afterDef = false;
                 // Make sure it's a true line-end, with no backslash
                 if ((ch == '\r' || (ch == '\n' && chPrev != '\r'))
                         && chPrev != '\\') {
                     // Assume we've hit the end of the statement.
                     preferRE = true;
                 }
+            }
+            if (afterDef && state != SCE_RB_DEFAULT) {
+                afterDef = false;
             }
         } else if (state == SCE_RB_WORD) {
             if (ch == '.' || !isSafeWordcharOrHigh(ch)) {
@@ -1130,6 +1150,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                     int word_style = ClassifyWordRb(wordStartPos, i - 1, keywords, styler, prevWord);
                     switch (word_style) {
                     case SCE_RB_WORD:
+                        afterDef = strcmp(prevWord, "def") == 0;
                         preferRE = RE_CanFollowKeyword(prevWord);
                         break;
 
