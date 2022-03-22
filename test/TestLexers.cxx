@@ -45,6 +45,7 @@ std::string ReadFile(std::filesystem::path path) {
 }
 
 std::string MarkedDocument(const Scintilla::IDocument *pdoc) {
+	assert(pdoc);
 	std::ostringstream os(std::ios::binary);
 	char prevStyle = -1;
 	for (Sci_Position pos = 0; pos < pdoc->Length(); pos++) {
@@ -76,6 +77,7 @@ void PrintLevel(std::ostringstream &os, int level) {
 }
 
 std::string FoldedDocument(const Scintilla::IDocument *pdoc) {
+	assert(pdoc);
 	std::ostringstream os(std::ios::binary);
 	Sci_Position linePrev = -1;
 	char ch = '\0';
@@ -124,7 +126,7 @@ class PropertyMap {
 				std::vector<std::string> parts = StringSplit(sExpressions, ';');
 				if (parts.size() > 1) {
 					for (size_t part = 1; part < parts.size(); part++) {
-						if (parts[part] != parts[0]) {
+						if (parts.at(part) != parts.at(0)) {
 							return "0";
 						}
 					}
@@ -164,7 +166,7 @@ class PropertyMap {
 
 	bool ProcessLine(std::string_view text, bool ifIsTrue) {
 		// If clause ends with first non-indented line
-		if (!ifIsTrue && (text.empty() || IsSpaceOrTab(text[0]))) {
+		if (!ifIsTrue && (text.empty() || IsSpaceOrTab(text.at(0)))) {
 			return false;
 		}
 		ifIsTrue = true;
@@ -251,7 +253,7 @@ public:
 
 };
 
-size_t FirstLineDifferent(std::string_view a, std::string_view b) {
+constexpr size_t FirstLineDifferent(std::string_view a, std::string_view b) {
 	size_t i = 0;
 	while (i < std::min(a.size(), b.size()) && a.at(i) == b.at(i)) {
 		i++;
@@ -299,6 +301,7 @@ int UnixToWindows(std::string &s) {
 const std::string BOM = "\xEF\xBB\xBF";
 
 void StyleLineByLine(TestDocument &doc, Scintilla::ILexer5 *plex) {
+	assert(plex);
 	Scintilla::IDocument *pdoc = &doc;
 	const Sci_Position lines = doc.LineFromPosition(doc.Length());
 	Sci_Position startLine = 0;
@@ -389,6 +392,8 @@ bool TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 }
 
 void TestILexer(Scintilla::ILexer5 *plex) {
+	assert(plex);
+
 	// Test each method of the ILexer interface.
 	// Mostly ensures there are no crashes when calling methods.
 	// Some methods are tested later (Release, Lex, Fold).
@@ -424,11 +429,11 @@ void TestILexer(Scintilla::ILexer5 *plex) {
 	[[maybe_unused]] const int lineEndTypes = plex->LineEndTypesSupported();
 	assert(lineEndTypes == 0 || lineEndTypes == 1);
 
-	if (const char *bases = plex->GetSubStyleBases()) {
+	if (std::string_view bases = plex->GetSubStyleBases(); !bases.empty()) {
 		// Allocate a substyle for each possible style
-		while (*bases) {
+		while (!bases.empty()) {
 			constexpr int newStyles = 3;
-			const int base = *bases;
+			const int base = bases.front();
 			const int baseStyle = plex->AllocateSubStyles(base, newStyles);
 			[[maybe_unused]] const int styleBack = plex->StyleFromSubStyle(baseStyle);
 			assert(styleBack == base);
@@ -437,7 +442,7 @@ void TestILexer(Scintilla::ILexer5 *plex) {
 			assert(start == baseStyle);
 			[[maybe_unused]] const int len = plex->SubStylesLength(base);
 			assert(len == newStyles);
-			bases++;
+			bases.remove_prefix(1);
 		}
 		plex->FreeSubStyles();
 	}
@@ -463,6 +468,8 @@ void TestILexer(Scintilla::ILexer5 *plex) {
 }
 
 void SetProperties(Scintilla::ILexer5 *plex, const PropertyMap &propertyMap, std::string_view fileName) {
+	assert(plex);
+
 	// Set keywords, keywords2, ... keywords9, for this file
 	for (int kw = 0; kw < 10; kw++) {
 		std::string kwChoice("keywords");
