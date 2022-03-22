@@ -57,6 +57,56 @@ namespace {
 		return (ch >= 0x80) && (ch < 0xc0);
 	}
 
+	constexpr unsigned char TrailByteValue(unsigned char c) {
+		// The top 2 bits are 0b10 to indicate a trail byte.
+		// The lower 6 bits contain the value.
+		return c & 0b0011'1111;
+	}
+}
+
+std::u32string UTF32FromUTF8(std::string_view svu8) {
+	std::u32string ret;
+	for (size_t i = 0; i < svu8.length();) {
+		unsigned char ch = svu8.at(i);
+		const unsigned int byteCount = UTF8BytesOfLead[ch];
+		unsigned int value = 0;
+
+		if (i + byteCount > svu8.length()) {
+			// Trying to read past end
+			ret.push_back(ch);
+			break;
+		}
+
+		i++;
+		switch (byteCount) {
+		case 1:
+			value = ch;
+			break;
+		case 2:
+			value = (ch & 0x1F) << 6;
+			ch = svu8.at(i++);
+			value += TrailByteValue(ch);
+			break;
+		case 3:
+			value = (ch & 0xF) << 12;
+			ch = svu8.at(i++);
+			value += TrailByteValue(ch) << 6;
+			ch = svu8.at(i++);
+			value += TrailByteValue(ch);
+			break;
+		default:
+			value = (ch & 0x7) << 18;
+			ch = svu8.at(i++);
+			value += TrailByteValue(ch) << 12;
+			ch = svu8.at(i++);
+			value += TrailByteValue(ch) << 6;
+			ch = svu8.at(i++);
+			value += TrailByteValue(ch);
+			break;
+		}
+		ret.push_back(value);
+	}
+	return ret;
 }
 
 void TestDocument::Set(std::string_view sv) {
