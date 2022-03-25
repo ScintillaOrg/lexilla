@@ -62,3 +62,10 @@
 {5}def{0} {9}ab{0} {11}c{0}
 	{11}puts{0} {11}c{0}
 {5}end{0}
+
+{2}# Test folding of multi-line SCE_RB_STRING_QW{0}
+{11}puts{0} {28}%W(
+a
+b
+c
+){0}

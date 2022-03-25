@@ -62,3 +62,10 @@ def a(b, c) b; c end
 def ab c
 	puts c
 end
+
+# Test folding of multi-line SCE_RB_STRING_QW
+puts %W(
+a
+b
+c
+)

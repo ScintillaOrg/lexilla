@@ -1854,6 +1854,12 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
             } else if (styleNext == SCE_RB_DEFAULT) {
                 levelCurrent--;
             }
+        } else if (style == SCE_RB_STRING_QW) {
+            if (stylePrev != style) {
+                levelCurrent++;
+            } else if (styleNext != style) {
+                levelCurrent--;
+            }
         }
         if (method_definition != MethodDefinition::None) {
             switch (method_definition) {

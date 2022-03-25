@@ -62,4 +62,11 @@
  2 400   0 + def ab c
  0 401   0 | 	puts c
  0 401   0 | end
+ 1 400   0   
+ 0 400   0   # Test folding of multi-line SCE_RB_STRING_QW
+ 2 400   0 + puts %W(
+ 0 401   0 | a
+ 0 401   0 | b
+ 0 401   0 | c
+ 0 401   0 | )
  0 400   0   
