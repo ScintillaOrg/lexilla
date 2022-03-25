@@ -126,15 +126,15 @@ static bool AtTermStart(StyleContext &sc) {
 
 static bool IsCompleteStyleRegion(StyleContext &sc, const char *token) {
     bool found = false;
-	const size_t start = strlen(token);
+    const size_t start = strlen(token);
     Sci_Position i = static_cast<Sci_Position>(start);
     while (!IsNewline(sc.GetRelative(i))) {
         // make sure an empty pair of single-char tokens doesn't match
         // with a longer token: {*}{*} != {**}
-	    if (sc.GetRelative(i) == *token && sc.GetRelative(i - 1) != *token) {
-		    found = start > 1U ? sc.GetRelative(i + 1) == token[1] : true;
-			break;
-		}
+        if (sc.GetRelative(i) == *token && sc.GetRelative(i - 1) != *token) {
+            found = start > 1U ? sc.GetRelative(i + 1) == token[1] : true;
+            break;
+        }
         i++;
     }
     return AtTermStart(sc) && found;
@@ -160,14 +160,14 @@ static bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
             }
             else {
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
-		return false;
+                return false;
             }
         }
     }
 }
 
 static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-                               WordList **, Accessor &styler) {
+                                WordList **, Accessor &styler) {
     Sci_PositionU endPos = startPos + length;
     int precharCount = 0;
     bool isLinkNameDetecting = false;
@@ -177,7 +177,7 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
     bool freezeCursor = false;
 
     // property lexer.markdown.header.eolfill
-    //  Set to 1 to highlight all ATX header text. 
+    //  Set to 1 to highlight all ATX header text.
     bool headerEOLFill = styler.GetPropertyInt("lexer.markdown.header.eolfill", 0) == 1;
 
     StyleContext sc(startPos, static_cast<Sci_PositionU>(length), initStyle, styler);
@@ -346,8 +346,8 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
 
         // The header lasts until the newline
         else if (sc.state == SCE_MARKDOWN_HEADER1 || sc.state == SCE_MARKDOWN_HEADER2 ||
-                sc.state == SCE_MARKDOWN_HEADER3 || sc.state == SCE_MARKDOWN_HEADER4 ||
-                sc.state == SCE_MARKDOWN_HEADER5 || sc.state == SCE_MARKDOWN_HEADER6) {
+                 sc.state == SCE_MARKDOWN_HEADER3 || sc.state == SCE_MARKDOWN_HEADER4 ||
+                 sc.state == SCE_MARKDOWN_HEADER5 || sc.state == SCE_MARKDOWN_HEADER6) {
             if (headerEOLFill) {
                 if (sc.atLineStart) {
                     sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
@@ -404,21 +404,21 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
         // Any link
         if (sc.state == SCE_MARKDOWN_LINK) {
             if (sc.Match("](") && sc.GetRelative(-1) != '\\') {
-              sc.Forward(2);
-              isLinkNameDetecting = true;
+                sc.Forward(2);
+                isLinkNameDetecting = true;
             }
             else if (sc.Match("]:") && sc.GetRelative(-1) != '\\') {
-              sc.Forward(2);
-              sc.SetState(SCE_MARKDOWN_DEFAULT);
+                sc.Forward(2);
+                sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
             else if (!isLinkNameDetecting && sc.ch == ']' && sc.GetRelative(-1) != '\\') {
-              sc.Forward();
-              sc.SetState(SCE_MARKDOWN_DEFAULT);
+                sc.Forward();
+                sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
             else if (isLinkNameDetecting && sc.ch == ')' && sc.GetRelative(-1) != '\\') {
-              sc.Forward();
-              sc.SetState(SCE_MARKDOWN_DEFAULT);
-              isLinkNameDetecting = false;
+                sc.Forward();
+                sc.SetState(SCE_MARKDOWN_DEFAULT);
+                isLinkNameDetecting = false;
             }
         }
 
@@ -430,11 +430,11 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
             }
             // Links and Images
             if (sc.Match("![")) {
-              sc.SetState(SCE_MARKDOWN_LINK);
-              sc.Forward(1);
+                sc.SetState(SCE_MARKDOWN_LINK);
+                sc.Forward(1);
             }
             else if (sc.ch == '[' && sc.GetRelative(-1) != '\\') {
-              sc.SetState(SCE_MARKDOWN_LINK);
+                sc.SetState(SCE_MARKDOWN_LINK);
             }
             // Code - also a special case for alternate inside spacing
             else if (sc.Match("``") && sc.GetRelative(3) != ' ' && AtTermStart(sc)) {
@@ -449,7 +449,7 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
             else if (sc.Match("**") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "**")) {
                 sc.SetState(SCE_MARKDOWN_STRONG1);
                 sc.Forward();
-           }
+            }
             else if (sc.Match("__") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "__")) {
                 sc.SetState(SCE_MARKDOWN_STRONG2);
                 sc.Forward();
@@ -457,12 +457,13 @@ static void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int
             // Emphasis
             else if (sc.ch == '*' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "*")) {
                 sc.SetState(SCE_MARKDOWN_EM1);
-            } else if (sc.ch == '_' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "_")) {
+            }
+            else if (sc.ch == '_' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "_")) {
                 sc.SetState(SCE_MARKDOWN_EM2);
             }
             // Strikeout
             else if (sc.Match("~~") && !(sc.GetRelative(2) == '~' || sc.GetRelative(2) == ' ') &&
-                IsCompleteStyleRegion(sc, "~~")) {
+                     IsCompleteStyleRegion(sc, "~~")) {
                 sc.SetState(SCE_MARKDOWN_STRIKEOUT);
                 sc.Forward();
             }
