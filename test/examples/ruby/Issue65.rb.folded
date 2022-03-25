@@ -1,65 +1,65 @@
- 2 400   0 + def dbg_args(a, b=1, c:, d: 6, &block) = puts("Args passed: #{[a, b, c, d, block.call]}")
- 0 401   0 | dbg_args(0, c: 5) { 7 }
- 1 401   0 | 
- 2 401   0 + class A
- 2 402   0 + 	def attr = @attr
- 2 403   0 + 	def attr=(value)
- 0 404   0 | 		@attr = value
- 0 404   0 | 	end
- 2 403   0 + 	def attr? = !!@attr
- 2 404   0 + 	def attr! = @attr = true
- 0 405   0 | 	# unary operator
- 2 405   0 + 	def -@ = 1
- 2 406   0 + 	def +@ = 1
- 2 407   0 + 	def ! = 1
- 2 408   0 + 	def !@ = 1
- 0 409   0 | 	# binary operator
- 2 409   0 + 	def +(value) = 1 + value
- 2 40a   0 + 	def -(value) = 1 - value
- 2 40b   0 + 	def *(value) = 1 * value
- 2 40c   0 + 	def **(value) = 1 ** value
- 2 40d   0 + 	def /(value) = 1 / value
- 2 40e   0 + 	def %(value) = 1 % value
- 2 40f   0 + 	def &(value) = 1 & value
- 2 410   0 + 	def ^(value) = 1 ^ value
- 2 411   0 + 	def >>(value) = 1 >> value
- 2 412   0 + 	def <<(value) = 1 << value
- 2 413   0 + 	def ==(other) = true
- 2 414   0 + 	def !=(other) = true
- 2 415   0 + 	def ===(other) = true
- 2 416   0 + 	def =~(other) = true
- 2 417   0 + 	def <=>(other) = true
- 2 418   0 + 	def <(other) = true
- 2 419   0 + 	def <=(other) = true
- 2 41a   0 + 	def >(other) = true
- 2 41b   0 + 	def >=(other) = true
- 0 41c   0 | 	# element reference and assignment
- 2 41c   0 + 	def [](a, b) = puts(a + b)
- 2 41d   0 + 	def []=(a, b, c)
- 0 41e   0 | 		puts a + b + c
- 0 41e   0 | 	end
- 0 41d   0 | 	# array decomposition
- 2 41d   0 + 	def dec(((a, b), c)) = puts(a + b + c)
- 0 41e   0 | 	# class method
- 2 41e   0 + 	def self.method = ""
- 0 41f   0 | 	# test short method name
- 2 41f   0 + 	def a = 1
- 2 420   0 + 	def ab = 1
- 0 421   0 | end
- 1 420   0 | 
- 0 420   0 | # class method
- 2 420   0 + def String.hello
- 0 421   0 |   "Hello, world!"
- 0 421   0 | end
- 0 420   0 | # singleton method
- 0 420   0 | greeting = "Hello"
- 2 420   0 + def greeting.broaden
- 0 421   0 |   self + ", world!"
- 0 421   0 | end
- 0 420   0 | # one line definition
- 0 420   0 | def a(b, c) b; c end
- 0 420   0 | # parentheses omitted
- 2 420   0 + def ab c
- 0 421   0 | 	puts c
- 0 421   0 | end
- 0 420   0 | 
+ 0 400   0   def dbg_args(a, b=1, c:, d: 6, &block) = puts("Args passed: #{[a, b, c, d, block.call]}")
+ 0 400   0   dbg_args(0, c: 5) { 7 }
+ 1 400   0   
+ 2 400   0 + class A
+ 0 401   0 | 	def attr = @attr
+ 2 401   0 + 	def attr=(value)
+ 0 402   0 | 		@attr = value
+ 0 402   0 | 	end
+ 0 401   0 | 	def attr? = !!@attr
+ 0 401   0 | 	def attr! = @attr = true
+ 0 401   0 | 	# unary operator
+ 0 401   0 | 	def -@ = 1
+ 0 401   0 | 	def +@ = 1
+ 0 401   0 | 	def ! = 1
+ 0 401   0 | 	def !@ = 1
+ 0 401   0 | 	# binary operator
+ 0 401   0 | 	def +(value) = 1 + value
+ 0 401   0 | 	def -(value) = 1 - value
+ 0 401   0 | 	def *(value) = 1 * value
+ 0 401   0 | 	def **(value) = 1 ** value
+ 0 401   0 | 	def /(value) = 1 / value
+ 0 401   0 | 	def %(value) = 1 % value
+ 0 401   0 | 	def &(value) = 1 & value
+ 0 401   0 | 	def ^(value) = 1 ^ value
+ 0 401   0 | 	def >>(value) = 1 >> value
+ 0 401   0 | 	def <<(value) = 1 << value
+ 0 401   0 | 	def ==(other) = true
+ 0 401   0 | 	def !=(other) = true
+ 0 401   0 | 	def ===(other) = true
+ 0 401   0 | 	def =~(other) = true
+ 0 401   0 | 	def <=>(other) = true
+ 0 401   0 | 	def <(other) = true
+ 0 401   0 | 	def <=(other) = true
+ 0 401   0 | 	def >(other) = true
+ 0 401   0 | 	def >=(other) = true
+ 0 401   0 | 	# element reference and assignment
+ 0 401   0 | 	def [](a, b) = puts(a + b)
+ 2 401   0 + 	def []=(a, b, c)
+ 0 402   0 | 		puts a + b + c
+ 0 402   0 | 	end
+ 0 401   0 | 	# array decomposition
+ 0 401   0 | 	def dec(((a, b), c)) = puts(a + b + c)
+ 0 401   0 | 	# class method
+ 0 401   0 | 	def self.method = ""
+ 0 401   0 | 	# test short method name
+ 0 401   0 | 	def a = 1
+ 0 401   0 | 	def ab = 1
+ 0 401   0 | end
+ 1 400   0   
+ 0 400   0   # class method
+ 2 400   0 + def String.hello
+ 0 401   0 |   "Hello, world!"
+ 0 401   0 | end
+ 0 400   0   # singleton method
+ 0 400   0   greeting = "Hello"
+ 2 400   0 + def greeting.broaden
+ 0 401   0 |   self + ", world!"
+ 0 401   0 | end
+ 0 400   0   # one line definition
+ 0 400   0   def a(b, c) b; c end
+ 0 400   0   # parentheses omitted
+ 2 400   0 + def ab c
+ 0 401   0 | 	puts c
+ 0 401   0 | end
+ 0 400   0   

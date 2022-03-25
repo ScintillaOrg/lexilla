@@ -1775,10 +1775,22 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
                                          & SC_FOLDLEVELNUMBERMASK
                                          & ~SC_FOLDLEVELBASE);
     int levelCurrent = levelPrev;
+    char chPrev = '\0';
     char chNext = styler[startPos];
     int styleNext = styler.StyleAt(startPos);
     int stylePrev = startPos <= 1 ? SCE_RB_DEFAULT : styler.StyleAt(startPos - 1);
     bool buffer_ends_with_eol = false;
+    // detect endless method definition to fix up code folding
+    enum class MethodDefinition {
+        None,
+        Define,
+        Operator,
+        Name,
+        Argument,
+    };
+    MethodDefinition method_definition = MethodDefinition::None;
+    int argument_paren_count = 0;
+
     for (Sci_PositionU i = startPos; i < endPos; i++) {
         char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
@@ -1821,8 +1833,10 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
                 // Don't decrement below 0
                 if (levelCurrent > 0)
                     levelCurrent--;
+            } else if (!strcmp(prevWord, "def")) {
+                levelCurrent++;
+                method_definition = MethodDefinition::Define;
             } else if (!strcmp(prevWord, "if")
-                       || !strcmp(prevWord, "def")
                        || !strcmp(prevWord, "class")
                        || !strcmp(prevWord, "module")
                        || !strcmp(prevWord, "begin")
@@ -1842,6 +1856,56 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
                 levelCurrent--;
             }
         }
+        if (method_definition != MethodDefinition::None) {
+            switch (method_definition) {
+            case MethodDefinition::Define:
+                if (style == SCE_RB_OPERATOR) {
+                    method_definition = MethodDefinition::Operator;
+                } else if (style == SCE_RB_DEFNAME) {
+                    method_definition = MethodDefinition::Name;
+                } else if (!(style == SCE_RB_WORD || IsASpaceOrTab(ch))) {
+                    method_definition = MethodDefinition::None;
+                }
+                if (method_definition <= MethodDefinition::Define) {
+                    break;
+                }
+                // fall through for unary operator or single letter name
+                [[fallthrough]];
+            case MethodDefinition::Operator:
+            case MethodDefinition::Name:
+                if (isEOLChar(chNext) || chNext == '#') {
+                    method_definition = MethodDefinition::None;
+                } else if (chNext == '(' || chNext <= ' ') {
+                    // setter method cannot be defined in an endless method definition.
+                    if (ch == '=' && (method_definition == MethodDefinition::Name || chPrev == ']')) {
+                        method_definition = MethodDefinition::None;
+                    } else {
+                        method_definition = MethodDefinition::Argument;
+                        argument_paren_count = 0;
+                    }
+                }
+                break;
+            case MethodDefinition::Argument:
+                if (style == SCE_RB_OPERATOR) {
+                    if (ch == '(') {
+                        ++argument_paren_count;
+                    } else if (ch == ')') {
+                        --argument_paren_count;
+                    } else if (argument_paren_count == 0) {
+                        method_definition = MethodDefinition::None;
+                        if (ch == '=' && levelCurrent > 0) {
+                            levelCurrent--;
+                        }
+                    }
+                } else if (argument_paren_count == 0 && !IsASpaceOrTab(ch)) {
+                    // '=' must be first character after method name or right parenthesis
+                    method_definition = MethodDefinition::None;
+                }
+                break;
+            default:
+                break;
+            }
+        }
         if (atEOL || (i == endPos - 1)) {
             int lev = levelPrev;
             if (visibleChars == 0 && foldCompact)
@@ -1853,10 +1917,13 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
             levelPrev = levelCurrent;
             visibleChars = 0;
             buffer_ends_with_eol = true;
+            method_definition = MethodDefinition::None;
+            argument_paren_count = 0;
         } else if (!isspacechar(ch)) {
             visibleChars++;
             buffer_ends_with_eol = false;
         }
+        chPrev = ch;
         stylePrev = style;
     }
     // Fill in the real level of the next line, keeping the current flags as they will be filled in later
