@@ -1779,7 +1779,6 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
     char chNext = styler[startPos];
     int styleNext = styler.StyleAt(startPos);
     int stylePrev = startPos <= 1 ? SCE_RB_DEFAULT : styler.StyleAt(startPos - 1);
-    bool buffer_ends_with_eol = false;
     // detect endless method definition to fix up code folding
     enum class MethodDefinition {
         None,
@@ -1916,26 +1915,14 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
             lineCurrent++;
             levelPrev = levelCurrent;
             visibleChars = 0;
-            buffer_ends_with_eol = true;
             method_definition = MethodDefinition::None;
             argument_paren_count = 0;
         } else if (!isspacechar(ch)) {
             visibleChars++;
-            buffer_ends_with_eol = false;
         }
         chPrev = ch;
         stylePrev = style;
     }
-    // Fill in the real level of the next line, keeping the current flags as they will be filled in later
-    if (!buffer_ends_with_eol) {
-        int new_lev = levelCurrent;
-        if (visibleChars == 0 && foldCompact)
-            new_lev |= SC_FOLDLEVELWHITEFLAG;
-        if ((levelCurrent > levelPrev) && (visibleChars > 0))
-            new_lev |= SC_FOLDLEVELHEADERFLAG;
-        levelCurrent = new_lev;
-    }
-    styler.SetLevel(lineCurrent, levelCurrent|SC_FOLDLEVELBASE);
 }
 
 static const char *const rubyWordListDesc[] = {
