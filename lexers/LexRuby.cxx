@@ -1321,7 +1321,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                                                 i - HereDoc.DelimiterLength + 1,
                                                 lengthDoc,
                                                 HereDoc.Delimiter)) {
-                styler.ColourTo(i - 1 - HereDoc.DelimiterLength, state);
+                styler.ColourTo(i - HereDoc.DelimiterLength, state);
                 styler.ColourTo(i, SCE_RB_HERE_DELIM);
                 state = SCE_RB_DEFAULT;
                 preferRE = false;
