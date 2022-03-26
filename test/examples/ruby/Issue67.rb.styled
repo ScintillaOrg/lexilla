@@ -1,0 +1,8 @@
+{2}# heredoc method call, other argument{0}
+{11}puts{0} {10}<<{20}~EOT{10}.{5}chomp{21}
+	squiggly heredoc
+{20}EOT{0}
+
+{11}puts{0} {10}<<{20}ONE{10},{0} {11}__FILE__{10},{0} {5}__LINE__{21}
+content for heredoc one
+{20}ONE{0}

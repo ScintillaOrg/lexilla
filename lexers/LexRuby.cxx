@@ -595,7 +595,7 @@ static bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
                 return definitely_not_a_here_doc;
             } else {
                 char ch = styler[j];
-                if (ch == '#' || isEOLChar(ch)) {
+                if (ch == '#' || isEOLChar(ch) || ch == '.' || ch == ',') {
                     // This is OK, so break and continue;
                     break;
                 } else {
