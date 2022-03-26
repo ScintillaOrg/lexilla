@@ -71,6 +71,8 @@ static int CheckKeywordFoldPoint(char *str) {
 		strcmp ("try", str) == 0 ||
 		strcmp ("do", str) == 0 ||
 		strcmp ("parfor", str) == 0 ||
+		strcmp ("classdef", str) == 0 ||
+		strcmp ("spmd", str) == 0 ||
 		strcmp ("function", str) == 0)
 		return 1;
 	if (strncmp("end", str, 3) == 0 ||
