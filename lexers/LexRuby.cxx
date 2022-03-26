@@ -792,7 +792,12 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
         if (HereDoc.State == 1 && isEOLChar(ch)) {
             // Begin of here-doc (the line after the here-doc delimiter):
             HereDoc.State = 2;
-            styler.ColourTo(i-1, state);
+            if (state == SCE_RB_WORD) {
+                const Sci_Position wordStartPos = styler.GetStartSegment();
+                ClassifyWordRb(wordStartPos, i - 1, keywords, styler, prevWord);
+            } else {
+                styler.ColourTo(i - 1, state);
+            }
             // Don't check for a missing quote, just jump into
             // the here-doc state
             state = SCE_RB_HERE_Q;
