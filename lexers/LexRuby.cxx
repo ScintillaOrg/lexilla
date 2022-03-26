@@ -102,7 +102,7 @@ static bool keywordIsModifier(const char *word,
                               Sci_Position pos,
                               Accessor &styler);
 
-static int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, char *prevWord) {
+static int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, WordList &keywords, Accessor &styler, char *prevWord) {
     char s[MAX_KEYWORD_LENGTH];
     Sci_PositionU i, j;
     Sci_PositionU lim = end - start + 1; // num chars to copy
@@ -113,13 +113,22 @@ static int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, WordList &keyw
         s[j] = styler[i];
     }
     s[j] = '\0';
-    int chAttr;
+    int chAttr = SCE_RB_IDENTIFIER;
+    int style = SCE_RB_DEFAULT;
     if (0 == strcmp(prevWord, "class"))
         chAttr = SCE_RB_CLASSNAME;
     else if (0 == strcmp(prevWord, "module"))
         chAttr = SCE_RB_MODULE_NAME;
-    else if (0 == strcmp(prevWord, "def"))
+    else if (0 == strcmp(prevWord, "def")) {
         chAttr = SCE_RB_DEFNAME;
+        if (ch == '.') {
+            if (strcmp(s, "self") == 0) {
+                style = SCE_RB_WORD_DEMOTED;
+            } else {
+                style = SCE_RB_IDENTIFIER;
+            }
+        }
+    }
     else if (keywords.InList(s) && ((start == 0) || !followsDot(start - 1, styler))) {
         if (keywordIsAmbiguous(s)
                 && keywordIsModifier(s, start, styler)) {
@@ -136,15 +145,15 @@ static int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, WordList &keyw
             chAttr = SCE_RB_WORD_DEMOTED;
         } else {
             chAttr = SCE_RB_WORD;
+            style = SCE_RB_WORD;
+            strcpy(prevWord, s);
         }
-    } else
-        chAttr = SCE_RB_IDENTIFIER;
-    styler.ColourTo(end, chAttr);
-    if (chAttr == SCE_RB_WORD) {
-        strcpy(prevWord, s);
-    } else {
+    }
+    if (style == SCE_RB_DEFAULT) {
+        style = chAttr;
         prevWord[0] = 0;
     }
+    styler.ColourTo(end, style);
     return chAttr;
 }
 
@@ -794,7 +803,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
             HereDoc.State = 2;
             if (state == SCE_RB_WORD) {
                 const Sci_Position wordStartPos = styler.GetStartSegment();
-                ClassifyWordRb(wordStartPos, i - 1, keywords, styler, prevWord);
+                ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord);
             } else {
                 styler.ColourTo(i - 1, state);
             }
@@ -1068,7 +1077,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                 }
             } else if (isoperator(ch) || ch == '.') {
                 styler.ColourTo(i - 1, state);
-                if (afterDef) {
+                if (afterDef && ch != '.') {
                     afterDef = false;
                     prevWord[0] = 0;
                     if (chNext == '@' && (ch == '+' || ch == '-' || ch == '!')) {
@@ -1152,7 +1161,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                     preferRE = false;
                 } else {
                     Sci_Position wordStartPos = styler.GetStartSegment();
-                    int word_style = ClassifyWordRb(wordStartPos, i - 1, keywords, styler, prevWord);
+                    int word_style = ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord);
                     switch (word_style) {
                     case SCE_RB_WORD:
                         afterDef = strcmp(prevWord, "def") == 0;
@@ -1178,6 +1187,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                     if (ch == '.') {
                         // We might be redefining an operator-method
                         preferRE = false;
+                        afterDef = word_style == SCE_RB_DEFNAME;
                     }
                     // And if it's the first
                     redo_char(i, ch, chNext, chNext2, state); // pass by ref
@@ -1485,7 +1495,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
     if (state == SCE_RB_WORD) {
         // We've ended on a word, possibly at EOF, and need to
         // classify it.
-        (void) ClassifyWordRb(styler.GetStartSegment(), lengthDoc - 1, keywords, styler, prevWord);
+        (void) ClassifyWordRb(styler.GetStartSegment(), lengthDoc - 1, '\0', keywords, styler, prevWord);
     } else {
         styler.ColourTo(lengthDoc - 1, state);
     }
@@ -1871,7 +1881,7 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
             case MethodDefinition::Define:
                 if (style == SCE_RB_OPERATOR) {
                     method_definition = MethodDefinition::Operator;
-                } else if (style == SCE_RB_DEFNAME) {
+                } else if (style == SCE_RB_DEFNAME || style == SCE_RB_WORD_DEMOTED || style == SCE_RB_CLASSNAME || style == SCE_RB_IDENTIFIER) {
                     method_definition = MethodDefinition::Name;
                 } else if (!(style == SCE_RB_WORD || IsASpaceOrTab(ch))) {
                     method_definition = MethodDefinition::None;
