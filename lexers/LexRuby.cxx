@@ -461,7 +461,6 @@ static Sci_Position findExpressionStart(Sci_Position pos,
 
 static bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
                                  Accessor &styler) {
-    int prevStyle;
     // Use full document, not just part we're styling
     Sci_Position lengthDoc = styler.Length();
     Sci_Position lineStart = styler.GetLine(lt2StartPos);
@@ -478,9 +477,10 @@ static bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
     if (firstWordPosn >= lt2StartPos) {
         return definitely_not_a_here_doc;
     }
-    prevStyle = styler.StyleAt(firstWordPosn);
+    int prevStyle = styler.StyleAt(firstWordPosn);
     // If we have '<<' following a keyword, it's not a heredoc
     if (prevStyle != SCE_RB_IDENTIFIER
+            && prevStyle != SCE_RB_GLOBAL       // $stdout and $stderr
             && prevStyle != SCE_RB_SYMBOL
             && prevStyle != SCE_RB_INSTANCE_VAR
             && prevStyle != SCE_RB_CLASS_VAR) {
