@@ -41,7 +41,7 @@ class A
 	# array decomposition
 	def dec(((a, b), c)) = puts(a + b + c)
 	# class method
-	def self.method = ""
+	def self.say(*s) = puts(s)
 	# test short method name
 	def a = 1
 	def ab = 1
