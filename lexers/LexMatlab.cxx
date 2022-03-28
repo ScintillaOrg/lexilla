@@ -73,6 +73,7 @@ static int CheckKeywordFoldPoint(char *str) {
 		strcmp ("parfor", str) == 0 ||
 		strcmp ("classdef", str) == 0 ||
 		strcmp ("spmd", str) == 0 ||
+        strcmp ("arguments", str) == 0 ||
 		strcmp ("function", str) == 0)
 		return 1;
 	if (strncmp("end", str, 3) == 0 ||
@@ -112,6 +113,12 @@ static void ColouriseMatlabOctaveDoc(
 	int nonSpaceColumn = -1;
 	// approximate column position of the current character in a line
 	int column = 0;
+    
+    // This line contains a function declaration
+    bool funcDeclarationLine = false;
+    // We've just seen "function" keyword, so now we may expect the "arguments"
+    // keyword opening the corresponding code block 
+    bool expectingArgumentsBlock = false;
 
         // use the line state of each line to store the block comment depth
 	Sci_Position curLine = styler.GetLine(startPos);
@@ -130,7 +137,24 @@ static void ColouriseMatlabOctaveDoc(
 			// reset the column to 0, nonSpace to -1 (not set)
 			column = 0;
 			nonSpaceColumn = -1;
+            
+            // If some function was declared in the previous line, we expect
+            // to see arguments code block
+            if(funcDeclarationLine && ismatlab)
+                expectingArgumentsBlock = true;
+            // Reset the flag
+            funcDeclarationLine = false;
 		}
+        
+        // Only comments allowed between the function declaration and the 
+        // arguments code block
+        if (expectingArgumentsBlock && !funcDeclarationLine) {
+            if ((sc.state != SCE_MATLAB_KEYWORD) &&
+                (sc.state != SCE_MATLAB_COMMENT) &&
+                (sc.state != SCE_MATLAB_DEFAULT)) {
+                expectingArgumentsBlock = false;
+            }
+        }        
 
 		// save the column position of first non space character in a line
 		if((nonSpaceColumn == -1) && (! IsASpace(sc.ch)))
@@ -166,12 +190,28 @@ static void ColouriseMatlabOctaveDoc(
 					if (strcmp ("end", s) == 0 && allow_end_op) {
 						sc.ChangeState(SCE_MATLAB_NUMBER);
 					}
+                    // Need this flag to hadle "arguments" block correctly
+                    if (strcmp("function", s) == 0) {
+                        funcDeclarationLine = true;
+                    }
+                    expectingArgumentsBlock = funcDeclarationLine ? expectingArgumentsBlock : false;
 					sc.SetState(SCE_MATLAB_DEFAULT);
 					transpose = false;
 				} else {
-					sc.ChangeState(SCE_MATLAB_IDENTIFIER);
-					sc.SetState(SCE_MATLAB_DEFAULT);
-					transpose = true;
+                    // "arguments" is a keyword here, despite not being in the keywords list
+                    if (expectingArgumentsBlock && (strcmp("arguments", s) == 0)) {
+                        // No need to expect another arguments block
+                        expectingArgumentsBlock = false;
+                        sc.SetState(SCE_MATLAB_DEFAULT);
+                        transpose = false;
+                    } else {
+                        // Found an identifier after the fun declaration
+                        // No need to wait for the arguments block anymore
+                        expectingArgumentsBlock = funcDeclarationLine ? expectingArgumentsBlock : false;
+                        sc.ChangeState(SCE_MATLAB_IDENTIFIER);
+                        sc.SetState(SCE_MATLAB_DEFAULT);
+                        transpose = true;
+                    }
 				}
 			}
 		} else if (sc.state == SCE_MATLAB_NUMBER) {
