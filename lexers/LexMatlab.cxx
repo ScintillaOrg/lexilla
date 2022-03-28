@@ -73,6 +73,7 @@ static int CheckKeywordFoldPoint(char *str) {
 		strcmp ("parfor", str) == 0 ||
 		strcmp ("classdef", str) == 0 ||
 		strcmp ("spmd", str) == 0 ||
+		strcmp ("arguments", str) == 0 ||
 		strcmp ("function", str) == 0)
 		return 1;
 	if (strncmp("end", str, 3) == 0 ||
@@ -90,6 +91,10 @@ static bool IsSpaceToEOL(Sci_Position startPos, Accessor &styler) {
 	}
 	return true;
 }
+
+#define MATLAB_STATE_FLAGS_OFFSET        8
+#define MATLAB_STATE_COMM_DEPTH_MASK     (0xFF)
+#define MATLAB_STATE_EXPECTING_ARG_BLOCK (1 << MATLAB_STATE_FLAGS_OFFSET)
 
 static void ColouriseMatlabOctaveDoc(
             Sci_PositionU startPos, Sci_Position length, int initStyle,
@@ -113,9 +118,21 @@ static void ColouriseMatlabOctaveDoc(
 	// approximate column position of the current character in a line
 	int column = 0;
 
-        // use the line state of each line to store the block comment depth
+	// This line contains a function declaration
+	bool funcDeclarationLine = false;
+	// We've just seen "function" keyword, so now we may expect the "arguments"
+	// keyword opening the corresponding code block
+	int expectingArgumentsBlock = 0;
+
+	// use the line state of each line to store the block comment depth
 	Sci_Position curLine = styler.GetLine(startPos);
-        int commentDepth = curLine > 0 ? styler.GetLineState(curLine-1) : 0;
+	int commentDepth = 0;
+	// Restore the previous line's state, if there was such a line
+	if (curLine > 0) {
+		int prevState = styler.GetLineState(curLine-1);
+		commentDepth = prevState & MATLAB_STATE_COMM_DEPTH_MASK;
+		expectingArgumentsBlock = prevState & MATLAB_STATE_EXPECTING_ARG_BLOCK;
+	}
 
 
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -125,11 +142,25 @@ static void ColouriseMatlabOctaveDoc(
                	if(sc.atLineStart) {
 			// set the line state to the current commentDepth
 			curLine = styler.GetLine(sc.currentPos);
-                        styler.SetLineState(curLine, commentDepth);
+			styler.SetLineState(curLine, commentDepth | expectingArgumentsBlock);
 
 			// reset the column to 0, nonSpace to -1 (not set)
 			column = 0;
 			nonSpaceColumn = -1;
+
+			// Reset the flag
+			funcDeclarationLine = false;
+		}
+
+		// Only comments allowed between the function declaration and the
+		// arguments code block
+		if (expectingArgumentsBlock && !funcDeclarationLine) {
+			if ((sc.state != SCE_MATLAB_KEYWORD) &&
+					(sc.state != SCE_MATLAB_COMMENT) &&
+					(sc.state != SCE_MATLAB_DEFAULT)) {
+				expectingArgumentsBlock = 0;
+				styler.SetLineState(curLine, commentDepth | expectingArgumentsBlock);
+			}
 		}
 
 		// save the column position of first non space character in a line
@@ -166,14 +197,32 @@ static void ColouriseMatlabOctaveDoc(
 					if (strcmp ("end", s) == 0 && allow_end_op) {
 						sc.ChangeState(SCE_MATLAB_NUMBER);
 					}
+					// Need this flag to handle "arguments" block correctly
+					if (strcmp("function", s) == 0) {
+						funcDeclarationLine = true;
+						expectingArgumentsBlock = ismatlab ? MATLAB_STATE_EXPECTING_ARG_BLOCK : 0;
+					}
+					expectingArgumentsBlock = funcDeclarationLine ? expectingArgumentsBlock : 0;
 					sc.SetState(SCE_MATLAB_DEFAULT);
 					transpose = false;
 				} else {
-					sc.ChangeState(SCE_MATLAB_IDENTIFIER);
-					sc.SetState(SCE_MATLAB_DEFAULT);
-					transpose = true;
+					// "arguments" is a keyword here, despite not being in the keywords list
+					if (expectingArgumentsBlock && (strcmp("arguments", s) == 0)) {
+						// No need to expect another arguments block
+						expectingArgumentsBlock = 0;
+						sc.SetState(SCE_MATLAB_DEFAULT);
+						transpose = false;
+					} else {
+						// Found an identifier after the fun declaration
+						// No need to wait for the arguments block anymore
+						expectingArgumentsBlock = funcDeclarationLine ? expectingArgumentsBlock : 0;
+						sc.ChangeState(SCE_MATLAB_IDENTIFIER);
+						sc.SetState(SCE_MATLAB_DEFAULT);
+						transpose = true;
+					}
 				}
 			}
+			styler.SetLineState(curLine, commentDepth | expectingArgumentsBlock);
 		} else if (sc.state == SCE_MATLAB_NUMBER) {
 			if (!isdigit(sc.ch) && sc.ch != '.'
 			        && !(sc.ch == 'e' || sc.ch == 'E')
@@ -208,7 +257,7 @@ static void ColouriseMatlabOctaveDoc(
                            	if(commentDepth > 0) commentDepth --;
 
 				curLine = styler.GetLine(sc.currentPos);
-				styler.SetLineState(curLine, commentDepth);
+				styler.SetLineState(curLine, commentDepth | expectingArgumentsBlock);
 				sc.Forward();
 
 				if (commentDepth == 0) {
@@ -221,7 +270,7 @@ static void ColouriseMatlabOctaveDoc(
  				commentDepth ++;
 
 				curLine = styler.GetLine(sc.currentPos);
-				styler.SetLineState(curLine, commentDepth);
+				styler.SetLineState(curLine, commentDepth | expectingArgumentsBlock);
 				sc.Forward();
 				transpose = false;
 
@@ -244,7 +293,7 @@ static void ColouriseMatlabOctaveDoc(
 					}
 				}
 				curLine = styler.GetLine(sc.currentPos);
-				styler.SetLineState(curLine, commentDepth);
+				styler.SetLineState(curLine, commentDepth | expectingArgumentsBlock);
 				sc.SetState(SCE_MATLAB_COMMENT);
 			} else if (sc.ch == '!' && sc.chNext != '=' ) {
 				if(ismatlab) {
