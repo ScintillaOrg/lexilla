@@ -292,7 +292,7 @@ void SCI_METHOD LexerJSON::Lex(Sci_PositionU startPos,
 				}
 				break;
 			case SCE_JSON_LINECOMMENT:
-				if (context.atLineEnd) {
+				if (context.MatchLineEnd()) {
 					context.SetState(SCE_JSON_DEFAULT);
 				}
 				break;
@@ -383,7 +383,7 @@ void SCI_METHOD LexerJSON::Lex(Sci_PositionU startPos,
 				context.SetState(SCE_JSON_DEFAULT);
 				break;
 			case SCE_JSON_ERROR:
-				if (context.atLineEnd) {
+				if (context.MatchLineEnd()) {
 					context.SetState(SCE_JSON_DEFAULT);
 				}
 				break;
