@@ -1195,7 +1195,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
             }
         } else if (state == SCE_RB_NUMBER) {
             if (!is_real_number) {
-                if (ch != '\\') {
+                if (ch != '\\' || chPrev == '\\') {
                     styler.ColourTo(i, state);
                     state = SCE_RB_DEFAULT;
                     preferRE = false;
