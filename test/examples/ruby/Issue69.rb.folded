@@ -1,3 +1,5 @@
+ 0 400   0   # -*- coding: utf-8 -*-
+ 1 400   0   
  0 400   0   # single character strings
  0 400   0   puts ?a
  0 400   0   puts ?\n

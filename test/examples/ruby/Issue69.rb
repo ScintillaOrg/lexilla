@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # single character strings
 puts ?a
 puts ?\n
