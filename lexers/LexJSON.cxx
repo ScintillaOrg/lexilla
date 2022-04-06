@@ -311,7 +311,7 @@ void SCI_METHOD LexerJSON::Lex(Sci_PositionU startPos,
 				}
 				if (context.ch == '"') {
 					context.SetState(stringStyleBefore);
-					context.ForwardSetState(SCE_C_DEFAULT);
+					context.ForwardSetState(SCE_JSON_DEFAULT);
 				} else if (context.ch == '\\') {
 					if (!escapeSeq.newSequence(context.chNext)) {
 						context.SetState(SCE_JSON_ERROR);
