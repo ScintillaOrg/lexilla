@@ -322,7 +322,7 @@ static void ColouriseMatlabOctaveDoc(
 				sc.Forward();
 
 				if (commentDepth == 0) {
-					sc.ForwardSetState(SCE_D_DEFAULT);
+					sc.ForwardSetState(SCE_MATLAB_DEFAULT);
 					transpose = false;
 				}
 			} else if( IsCommentChar(sc.ch) && sc.chNext == '{' && nonSpaceColumn == column && IsSpaceToEOL(sc.currentPos+2, styler)) {
