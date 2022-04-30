@@ -382,6 +382,7 @@ const char *const cppWordLists[] = {
             "Global classes and typedefs",
             "Preprocessor definitions",
             "Task marker and error marker keywords",
+            "Variables",
             nullptr,
 };
 
@@ -489,6 +490,7 @@ LexicalClass lexicalClasses[] = {
 	25, "SCE_C_USERLITERAL", "literal", "User defined literals",
 	26, "SCE_C_TASKMARKER", "comment taskmarker", "Task Marker",
 	27, "SCE_C_ESCAPESEQUENCE", "literal string escapesequence", "Escape sequence",
+	28, "SCE_C_VARIABLE", "variable", "Variable",
 };
 
 const int sizeLexicalClasses = static_cast<int>(std::size(lexicalClasses));
@@ -512,6 +514,7 @@ class LexerCPP : public ILexer5 {
 	WordList keywords4;
 	WordList ppDefinitions;
 	WordList markerList;
+	WordList variables;
 	struct SymbolValue {
 		std::string value;
 		std::string arguments;
@@ -945,6 +948,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						sc.ChangeState(SCE_C_WORD2|activitySet);
 					} else if (keywords4.InList(s)) {
 						sc.ChangeState(SCE_C_GLOBALCLASS|activitySet);
+					} else if (variables.InList(s)) {
+						sc.ChangeState(SCE_C_VARIABLE|activitySet);
 					} else {
 						const int subStyle = classifierIdentifiers.ValueFor(s);
 						if (subStyle >= 0) {
