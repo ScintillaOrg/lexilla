@@ -732,7 +732,7 @@ void SetProperties(Scintilla::ILexer5 *plex, const PropertyMap &propertyMap, std
 	for (int kw = 0; kw < 10; kw++) {
 		std::string kwChoice("keywords");
 		if (kw > 0) {
-			kwChoice.push_back('1' + kw);
+			kwChoice.push_back(static_cast<char>('1' + kw));
 		}
 		kwChoice.append(".*");
 		std::optional<std::string> keywordN = propertyMap.GetPropertyForFile(kwChoice, fileName);
