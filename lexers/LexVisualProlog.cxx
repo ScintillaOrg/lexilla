@@ -333,7 +333,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             }
             break;
         case SCE_VISUALPROLOG_COMMENT_LINE:
-            if (sc.atLineEnd) {
+            if (sc.MatchLineEnd()) {
                 int nextState = (nestLevel == 0) ? SCE_VISUALPROLOG_DEFAULT : SCE_VISUALPROLOG_COMMENT_BLOCK;
                 sc.SetState(nextState);
             } else if (sc.Match('@')) {
@@ -342,13 +342,13 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             }
             break;
         case SCE_VISUALPROLOG_COMMENT_KEY_ERROR:
-            if (!setDoxygen.Contains(sc.ch) || sc.atLineEnd) {
+            if (!setDoxygen.Contains(sc.ch) || sc.MatchLineEnd()) {
                 char s[1000];
                 sc.GetCurrent(s, sizeof(s));
                 if (docKeywords.InList(s+1)) {
                     sc.ChangeState(SCE_VISUALPROLOG_COMMENT_KEY);
                 }
-                if (SCE_VISUALPROLOG_COMMENT_LINE == styleBeforeDocKeyword && sc.atLineEnd) {
+                if (SCE_VISUALPROLOG_COMMENT_LINE == styleBeforeDocKeyword && sc.MatchLineEnd()) {
                     // end line comment
                     int nextState = (nestLevel == 0) ? SCE_VISUALPROLOG_DEFAULT : SCE_VISUALPROLOG_COMMENT_BLOCK;
                     sc.SetState(nextState);
@@ -372,7 +372,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             sc.SetState(SCE_VISUALPROLOG_STRING);
             // Falls through.
         case SCE_VISUALPROLOG_STRING:
-            if (sc.atLineEnd) {
+            if (sc.MatchLineEnd()) {
                 sc.SetState(SCE_VISUALPROLOG_STRING_EOL_OPEN);
             } else if (sc.Match(closingQuote)) {
                 sc.ForwardSetState(SCE_VISUALPROLOG_DEFAULT);
@@ -388,11 +388,13 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             break;
         case SCE_VISUALPROLOG_STRING_VERBATIM_SPECIAL:
         case SCE_VISUALPROLOG_STRING_VERBATIM_EOL:
+            if(sc.state == SCE_VISUALPROLOG_STRING_VERBATIM_EOL && !sc.atLineStart)
+                break;
             // return to SCE_VISUALPROLOG_STRING_VERBATIM and treat as such (fall-through)
             sc.SetState(SCE_VISUALPROLOG_STRING_VERBATIM);
             // Falls through.
         case SCE_VISUALPROLOG_STRING_VERBATIM:
-            if (sc.atLineEnd) {
+            if (sc.MatchLineEnd()) {
                 sc.SetState(SCE_VISUALPROLOG_STRING_VERBATIM_EOL);
             } else if (sc.Match(closingQuote)) {
                 if (closingQuote == sc.chNext) {
@@ -405,7 +407,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             break;
         }
 
-        if (sc.atLineEnd) {
+        if (sc.MatchLineEnd()) {
             // Update the line state, so it can be seen by next line
             int lineState = 0;
             if (SCE_VISUALPROLOG_STRING_VERBATIM_EOL == sc.state) {
