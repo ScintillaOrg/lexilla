@@ -43,7 +43,9 @@
 **.p6 text
 **.rb text
 **.rs text
+**.sql text
 **.tcl text
+**.tsql text
 **.err text
 **.mms text
 **.tex text
