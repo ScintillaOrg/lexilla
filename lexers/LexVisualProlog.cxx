@@ -49,8 +49,10 @@ using namespace Lexilla;
 // Options used for LexerVisualProlog
 struct OptionsVisualProlog {
     bool verbatimStrings;
+    bool backQuotedStrings;
     OptionsVisualProlog() {
         verbatimStrings = true;
+        backQuotedStrings = false;
     }
 };
 
@@ -66,6 +68,8 @@ struct OptionSetVisualProlog : public OptionSet<OptionsVisualProlog> {
     OptionSetVisualProlog() {
         DefineProperty("lexer.visualprolog.verbatim.strings", &OptionsVisualProlog::verbatimStrings,
             "Set to 0 to disable highlighting verbatim strings using '@'.");
+        DefineProperty("lexer.visualprolog.backquoted.strings", &OptionsVisualProlog::backQuotedStrings,
+            "Set to 1 to enable using back quotes (``) to delimit strings.");
         DefineWordListSets(visualPrologWordLists);
     }
 };
@@ -447,6 +451,9 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
                 sc.SetState(SCE_VISUALPROLOG_STRING);
             } else if (sc.Match('"')) {
                 closingQuote = '"';
+                sc.SetState(SCE_VISUALPROLOG_STRING);
+            } else if (options.backQuotedStrings && sc.Match('`')) {
+                closingQuote = '`';
                 sc.SetState(SCE_VISUALPROLOG_STRING);
             } else if (sc.Match('#')) {
                 sc.SetState(SCE_VISUALPROLOG_KEY_DIRECTIVE);
