@@ -48,7 +48,9 @@ using namespace Lexilla;
 
 // Options used for LexerVisualProlog
 struct OptionsVisualProlog {
+    bool verbatimStrings;
     OptionsVisualProlog() {
+        verbatimStrings = true;
     }
 };
 
@@ -62,6 +64,8 @@ static const char *const visualPrologWordLists[] = {
 
 struct OptionSetVisualProlog : public OptionSet<OptionsVisualProlog> {
     OptionSetVisualProlog() {
+        DefineProperty("lexer.visualprolog.verbatim.strings", &OptionsVisualProlog::verbatimStrings,
+            "Set to 0 to disable highlighting verbatim strings using '@'.");
         DefineWordListSets(visualPrologWordLists);
     }
 };
@@ -421,7 +425,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
 
         // Determine if a new state should be entered.
         if (sc.state == SCE_VISUALPROLOG_DEFAULT) {
-            if (sc.Match('@') && isOpenStringVerbatim(sc.chNext, closingQuote)) {
+            if (options.verbatimStrings && sc.Match('@') && isOpenStringVerbatim(sc.chNext, closingQuote)) {
                 sc.SetState(SCE_VISUALPROLOG_STRING_VERBATIM);
                 sc.Forward();
             } else if (IsADigit(sc.ch) || (sc.Match('.') && IsADigit(sc.chNext))) {
@@ -446,7 +450,8 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
                 sc.SetState(SCE_VISUALPROLOG_STRING);
             } else if (sc.Match('#')) {
                 sc.SetState(SCE_VISUALPROLOG_KEY_DIRECTIVE);
-            } else if (isoperator(static_cast<char>(sc.ch)) || sc.Match('\\')) {
+            } else if (isoperator(static_cast<char>(sc.ch)) || sc.Match('\\') ||
+                (!options.verbatimStrings && sc.Match('@'))) {
                 sc.SetState(SCE_VISUALPROLOG_OPERATOR);
             }
         }
