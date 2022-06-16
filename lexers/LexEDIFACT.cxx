@@ -80,7 +80,7 @@ public:
 
 	const char * SCI_METHOD PropertyGet(const char *key) override
 	{
-		m_lastPropertyValue = "";
+		m_lastPropertyValue.clear();
 		if (!strcmp(key, "fold"))
 		{
 			m_lastPropertyValue = m_bFold ? "1" : "0";

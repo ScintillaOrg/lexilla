@@ -85,16 +85,16 @@ struct OptionsAsm {
 	bool foldCompact;
 	std::string commentChar;
 	OptionsAsm() {
-		delimiter = "";
+		delimiter.clear();
 		fold = false;
 		foldSyntaxBased = true;
 		foldCommentMultiline = false;
 		foldCommentExplicit = false;
-		foldExplicitStart = "";
-		foldExplicitEnd   = "";
+		foldExplicitStart.clear();
+		foldExplicitEnd.clear();
 		foldExplicitAnywhere = false;
 		foldCompact = true;
-		commentChar = "";
+		commentChar.clear();
 	}
 };
 

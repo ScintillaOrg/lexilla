@@ -170,8 +170,8 @@ struct OptionsBasic {
 		fold = false;
 		foldSyntaxBased = true;
 		foldCommentExplicit = false;
-		foldExplicitStart = "";
-		foldExplicitEnd   = "";
+		foldExplicitStart.clear();
+		foldExplicitEnd.clear();
 		foldExplicitAnywhere = false;
 		foldCompact = true;
 	}

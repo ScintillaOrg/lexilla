@@ -445,11 +445,11 @@ void SCI_METHOD LexerVerilog::Lex(Sci_PositionU startPos, Sci_Position length, i
 	}
 
 	SymbolTable preprocessorDefinitions = preprocessorDefinitionsStart;
-	for (std::vector<PPDefinition>::iterator itDef = ppDefineHistory.begin(); itDef != ppDefineHistory.end(); ++itDef) {
-		if (itDef->isUndef)
-			preprocessorDefinitions.erase(itDef->key);
+	for (const auto &def : ppDefineHistory) {
+		if (def.isUndef)
+			preprocessorDefinitions.erase(def.key);
 		else
-			preprocessorDefinitions[itDef->key] = SymbolValue(itDef->value, itDef->arguments);
+			preprocessorDefinitions[def.key] = SymbolValue(def.value, def.arguments);
 	}
 
 	int activitySet = preproc.IsInactive() ? activeFlag : 0;
@@ -712,9 +712,8 @@ void SCI_METHOD LexerVerilog::Lex(Sci_PositionU startPos, Sci_Position length, i
 						} else if (sc.Match("undefineall")) {
 							if (options.updatePreprocessor && !preproc.IsInactive()) {
 								// remove all preprocessor definitions
-								std::map<std::string, SymbolValue>::iterator itDef;
-								for(itDef = preprocessorDefinitions.begin(); itDef != preprocessorDefinitions.end(); ++itDef) {
-									ppDefineHistory.push_back(PPDefinition(curLine, itDef->first, "", true));
+								for (const auto &def : preprocessorDefinitions) {
+									ppDefineHistory.push_back(PPDefinition(curLine, def.first, "", true));
 								}
 								preprocessorDefinitions.clear();
 								definitionsChanged = true;
@@ -722,7 +721,7 @@ void SCI_METHOD LexerVerilog::Lex(Sci_PositionU startPos, Sci_Position length, i
 						} else if (sc.Match("undef")) {
 							if (options.updatePreprocessor && !preproc.IsInactive()) {
 								std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 5, true);
-								std::vector<std::string> tokens = Tokenize(restOfLine);
+								const auto &tokens = Tokenize(restOfLine);
 								std::string key;
 								if (tokens.size() >= 1) {
 									key = tokens[0];

@@ -220,7 +220,7 @@ public :
 		return sqlStatement.ValueAt(lineNumber);
 	}
 
-	SQLStates() {}
+	SQLStates() = default;
 
 private :
 	SparseState <sql_state_t> sqlStatement;

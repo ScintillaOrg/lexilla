@@ -263,8 +263,7 @@ class LinePPState {
 		}
 	}
 public:
-	LinePPState() noexcept {
-	}
+	LinePPState() noexcept = default;
 	bool ValidLevel() const noexcept {
 		return level >= 0 && level < maximumNestingLevel;
 	}
@@ -365,8 +364,8 @@ struct OptionsCPP {
 		foldComment = false;
 		foldCommentMultiline = true;
 		foldCommentExplicit = true;
-		foldExplicitStart = "";
-		foldExplicitEnd = "";
+		foldExplicitStart.clear();
+		foldExplicitEnd.clear();
 		foldExplicitAnywhere = false;
 		foldPreprocessor = false;
 		foldPreprocessorAtElse = false;
@@ -654,7 +653,7 @@ public:
 			if (styleActive < sizeLexicalClasses)
 				returnBuffer += lexicalClasses[styleActive].tags;
 			else
-				returnBuffer = "";
+				returnBuffer.clear();
 			return returnBuffer.c_str();
 		}
 		return "";
@@ -883,7 +882,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			lineCurrent++;
 			lineEndNext = styler.LineEnd(lineCurrent);
 			vlls.Add(lineCurrent, preproc);
-			if (rawStringTerminator != "") {
+			if (!rawStringTerminator.empty()) {
 				rawSTNew.Set(lineCurrent-1, rawStringTerminator);
 			}
 		}
@@ -894,7 +893,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				lineCurrent++;
 				lineEndNext = styler.LineEnd(lineCurrent);
 				vlls.Add(lineCurrent, preproc);
-				if (rawStringTerminator != "") {
+				if (!rawStringTerminator.empty()) {
 					rawSTNew.Set(lineCurrent-1, rawStringTerminator);
 				}
 				sc.Forward();
@@ -1161,7 +1160,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					for (size_t termPos=rawStringTerminator.size(); termPos; termPos--)
 						sc.Forward();
 					sc.SetState(SCE_C_DEFAULT|activitySet);
-					rawStringTerminator = "";
+					rawStringTerminator.clear();
 				}
 				break;
 			case SCE_C_CHARACTER:
@@ -1634,13 +1633,13 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 				if (it->second.IsMacro()) {
 					if ((i + 1 < tokens.size()) && (tokens.at(i + 1) == "(")) {
 						// Create map of argument name to value
-						Tokens argumentNames = StringSplit(it->second.arguments, ',');
+						const auto &argumentNames = StringSplit(it->second.arguments, ',');
 						std::map<std::string, std::string> arguments;
 						size_t arg = 0;
 						size_t tok = i+2;
 						while ((tok < tokens.size()) && (arg < argumentNames.size()) && (tokens.at(tok) != ")")) {
 							if (tokens.at(tok) != ",") {
-								arguments[argumentNames.at(arg)] = tokens.at(tok);
+								arguments[argumentNames[arg]] = tokens.at(tok);
 								arg++;
 							}
 							tok++;
@@ -1814,7 +1813,7 @@ bool LexerCPP::EvaluateExpression(const std::string &expr, const SymbolTable &pr
 
 	// "0" or "" -> false else true
 	const bool isFalse = tokens.empty() ||
-		((tokens.size() == 1) && ((tokens[0] == "") || tokens[0] == "0"));
+		((tokens.size() == 1) && (tokens[0].empty() || tokens[0] == "0"));
 	return !isFalse;
 }
 

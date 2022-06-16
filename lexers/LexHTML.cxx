@@ -705,8 +705,7 @@ struct OptionsHTML {
 	bool foldComment = false;
 	bool foldHeredoc = false;
 	bool foldXmlAtTagOpen = false;
-	OptionsHTML() noexcept {
-	}
+	OptionsHTML() noexcept = default;
 };
 
 const char * const htmlWordListDesc[] = {
