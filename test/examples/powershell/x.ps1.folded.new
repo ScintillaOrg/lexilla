@@ -1,0 +1,10 @@
+ 0 400   0   # Tests for PowerShell
+ 0 400   0   
+ 0 400   0   # Backticks should escape in double quoted strings
+ 0 400   0   $double_quote_str_esc_1 = "`"XXX`""
+ 0 400   0   $double_quote_str_esc_2 = "This `"string`" `$useses `r`n Backticks '``'"
+ 0 400   0   
+ 0 400   0   # Backticks should be ignored in quoted strings
+ 0 400   0   $single_quote_str_esc_1 = 'XXX`'
+ 0 400   0   $single_quote_str_esc_2 = 'XXX```'
+ 0 400   0   
