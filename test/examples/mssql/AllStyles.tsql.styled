@@ -44,9 +44,8 @@
 {2}-- stored procedure = 14{0}
 {14}sp_fulltext_database{0}
 
-{2}-- style 15 is temporary and not consistently visible{0}
 {2}-- default (preferencing data type) = 15{0}
-{6}x{0} {2}--{0}
+{6}x{15} {2}--{0}
 
 {2}-- column name 2 = 16{0}
 {16}[COLUMN]{5};{0}

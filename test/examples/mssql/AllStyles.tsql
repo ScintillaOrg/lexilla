@@ -44,7 +44,6 @@ object_id
 -- stored procedure = 14
 sp_fulltext_database
 
--- style 15 is temporary and not consistently visible
 -- default (preferencing data type) = 15
 x --
 

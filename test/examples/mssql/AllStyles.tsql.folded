@@ -44,7 +44,6 @@
  0 400   0   -- stored procedure = 14
  0 400   0   sp_fulltext_database
  1 400   0   
- 0 400   0   -- style 15 is temporary and not consistently visible
  0 400   0   -- default (preferencing data type) = 15
  0 400   0   x --
  1 400   0   
