@@ -336,6 +336,28 @@ constexpr bool IsSpaceOrTab(char ch) noexcept {
 	return (ch == ' ') || (ch == '\t');
 }
 
+void PrintRanges(const std::vector<bool> &v) {
+	std::cout << "    ";
+	std::optional<size_t> startRange;
+	for (size_t style = 0; style <= v.size(); style++) {
+		// Goes one past size so that final range is closed
+		if ((style < v.size()) && v.at(style)) {
+			if (!startRange) {
+				startRange = style;
+			}
+		} else if (startRange) {
+			const size_t endRange = style - 1;
+			std::cout << *startRange;
+			if (*startRange != endRange) {
+				std::cout << "-" << endRange;
+			}
+			std::cout << " ";
+			startRange.reset();
+		}
+	}
+	std::cout << "\n";
+}
+
 class PropertyMap {
 
 	std::string Evaluate(std::string_view text) {
@@ -817,13 +839,7 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 			const unsigned style = pdoc->StyleAt(pos);
 			used.at(style) = true;
 		}
-		std::cout << "    ";
-		for (int style = 0; style < 0x80; style++) {
-			if (used.at(style)) {
-				std::cout << style << " ";
-			}
-		}
-		std::cout << "\n";
+		PrintRanges(used);
 	}
 
 	const std::optional<int> perLineDisable = propertyMap.GetPropertyValue("testlexers.per.line.disable");
