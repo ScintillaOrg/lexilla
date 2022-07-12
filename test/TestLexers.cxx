@@ -533,7 +533,7 @@ public:
 
 };
 
-constexpr size_t FirstLineDifferent(std::string_view a, std::string_view b) {
+size_t FirstLineDifferent(std::string_view a, std::string_view b) {
 	size_t i = 0;
 	while (i < std::min(a.size(), b.size()) && a.at(i) == b.at(i)) {
 		i++;
