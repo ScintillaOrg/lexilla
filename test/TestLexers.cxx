@@ -332,7 +332,7 @@ std::vector<std::string> StringSplit(const std::string_view &text, int separator
 	return vs;
 }
 
-static constexpr bool IsSpaceOrTab(char ch) noexcept {
+constexpr bool IsSpaceOrTab(char ch) noexcept {
 	return (ch == ' ') || (ch == '\t');
 }
 
@@ -511,7 +511,7 @@ public:
 
 };
 
-size_t FirstLineDifferent(std::string_view a, std::string_view b) {
+constexpr size_t FirstLineDifferent(std::string_view a, std::string_view b) {
 	size_t i = 0;
 	while (i < std::min(a.size(), b.size()) && a.at(i) == b.at(i)) {
 		i++;
@@ -575,6 +575,7 @@ void StyleLineByLine(TestDocument &doc, Scintilla::ILexer5 *plex) {
 }
 
 bool TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer5 *plex, bool disablePerLineTests) {
+	assert(plex);
 	bool success = true;
 	// Convert all line ends to \r\n to check if styles change between \r and \n which makes
 	// it difficult to test on different platforms when files may have line ends changed.
@@ -586,6 +587,7 @@ bool TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	TestDocument doc;
 	doc.Set(text);
 	Scintilla::IDocument *pdoc = &doc;
+	assert(pdoc);
 	plex->Lex(0, pdoc->Length(), 0, pdoc);
 	plex->Fold(0, pdoc->Length(), 0, pdoc);
 	const auto [styledText, foldedText] = MarkedAndFoldedDocument(pdoc);
@@ -613,6 +615,7 @@ bool TestCRLF(std::filesystem::path path, const std::string s, Scintilla::ILexer
 	TestDocument docUnix;
 	docUnix.Set(textUnix);
 	Scintilla::IDocument *pdocUnix = &docUnix;
+	assert(pdocUnix);
 	plex->Lex(0, pdocUnix->Length(), 0, pdocUnix);
 	plex->Fold(0, pdocUnix->Length(), 0, pdocUnix);
 	auto [styledTextUnix, foldedTextUnix] = MarkedAndFoldedDocument(pdocUnix);
@@ -790,6 +793,7 @@ bool TestFile(const std::filesystem::path &path, const PropertyMap &propertyMap)
 	TestDocument doc;
 	doc.Set(text);
 	Scintilla::IDocument *pdoc = &doc;
+	assert(pdoc);
 	for (int i = 0; i < repeatLex; i++) {
 		plex->Lex(0, pdoc->Length(), 0, pdoc);
 	}
