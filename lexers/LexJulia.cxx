@@ -1021,6 +1021,7 @@ void SCI_METHOD LexerJulia::Lex(Sci_PositionU startPos, Sci_Position length, int
                 }
             } else if (sc.ch == '!') {
                 sc.SetState(SCE_JULIA_OPERATOR);
+                transpose = false;
             } else if (sc.ch == '\'') {
                 if (transpose) {
                     sc.SetState(SCE_JULIA_OPERATOR);
