@@ -1,0 +1,22 @@
+ 0 400 400   # End simple string at closing quote or EOL.
+ 1 400 400   
+ 0 400 400   $variable = 'test'
+ 0 400 400   function test
+ 2 400 401 + {
+ 0 401 400 | }
+ 1 400 400   
+ 0 400 400   $variable = 'test
+ 0 400 400   function test
+ 2 400 401 + {
+ 0 401 400 | }
+ 1 400 400   
+ 0 400 400   $variable = "test"
+ 0 400 400   function test
+ 2 400 401 + {
+ 0 401 400 | }
+ 1 400 400   
+ 0 400 400   $variable = "test
+ 0 400 400   function test
+ 2 400 401 + {
+ 0 401 400 | }
+ 0 400   0   

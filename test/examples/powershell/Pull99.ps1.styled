@@ -1,0 +1,21 @@
+{1}# End simple string at closing quote or EOL.{0}
+
+{5}$variable{0} {6}={0} {3}'test'{0}
+{7}function{0} {7}test{0}
+{6}{{0}
+{6}}{0}
+
+{5}$variable{0} {6}={0} {3}'test
+{7}function{0} {7}test{0}
+{6}{{0}
+{6}}{0}
+
+{5}$variable{0} {6}={0} {2}"test"{0}
+{7}function{0} {7}test{0}
+{6}{{0}
+{6}}{0}
+
+{5}$variable{0} {6}={0} {2}"test
+{7}function{0} {7}test{0}
+{6}{{0}
+{6}}{0}

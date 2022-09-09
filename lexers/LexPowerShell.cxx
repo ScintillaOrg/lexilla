@@ -50,7 +50,7 @@ static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, 
 	for (; sc.More(); sc.Forward()) {
 
 		if (sc.state == SCE_POWERSHELL_COMMENT) {
-			if (sc.atLineEnd) {
+			if (sc.ch == '\r' || sc.atLineEnd) {
 				sc.SetState(SCE_POWERSHELL_DEFAULT);
 			}
 		} else if (sc.state == SCE_POWERSHELL_COMMENTSTREAM) {
@@ -76,14 +76,14 @@ static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, 
 			}
 		} else if (sc.state == SCE_POWERSHELL_STRING) {
 			// This is a doubles quotes string
-			if (sc.ch == '\"') {
+			if (sc.ch == '\"' || sc.atLineEnd) {
 				sc.ForwardSetState(SCE_POWERSHELL_DEFAULT);
 			} else if (sc.ch == '`') {
 				sc.Forward(); // skip next escaped character
 			}
 		} else if (sc.state == SCE_POWERSHELL_CHARACTER) {
 			// This is a single quote string
-			if (sc.ch == '\'') {
+			if (sc.ch == '\'' || sc.atLineEnd) {
 				sc.ForwardSetState(SCE_POWERSHELL_DEFAULT);
 			}
 		} else if (sc.state == SCE_POWERSHELL_HERE_STRING) {
