@@ -107,7 +107,7 @@ static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, 
 				sc.SetState(SCE_POWERSHELL_DEFAULT);
 			}
 		} else if (sc.state == SCE_POWERSHELL_OPERATOR) {
-			if (!isoperator(static_cast<char>(sc.ch))) {
+			if (!isoperator(sc.ch)) {
 				sc.SetState(SCE_POWERSHELL_DEFAULT);
 			}
 		} else if (sc.state == SCE_POWERSHELL_IDENTIFIER) {
@@ -148,7 +148,7 @@ static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, 
 				sc.SetState(SCE_POWERSHELL_VARIABLE);
 			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				sc.SetState(SCE_POWERSHELL_NUMBER);
-			} else if (isoperator(static_cast<char>(sc.ch))) {
+			} else if (isoperator(sc.ch)) {
 				sc.SetState(SCE_POWERSHELL_OPERATOR);
 			} else if (IsAWordChar(sc.ch)) {
 				sc.SetState(SCE_POWERSHELL_IDENTIFIER);
