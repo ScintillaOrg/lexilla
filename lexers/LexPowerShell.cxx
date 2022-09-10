@@ -50,7 +50,7 @@ static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, 
 	for (; sc.More(); sc.Forward()) {
 
 		if (sc.state == SCE_POWERSHELL_COMMENT) {
-			if (sc.atLineEnd) {
+			if (sc.MatchLineEnd()) {
 				sc.SetState(SCE_POWERSHELL_DEFAULT);
 			}
 		} else if (sc.state == SCE_POWERSHELL_COMMENTSTREAM) {
