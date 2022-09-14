@@ -1,0 +1,44 @@
+{1}# https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Reserved-words{0}
+{2}if{0}
+
+{1}# base keyword (3){0}
+{3}abbreviate{0}
+
+{1}# other keyword (4){0}
+{4}acme{0}
+
+{1}# infix operator{0}
+{1}# https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Special-operators{0}
+{10}%x%{0}
+
+{1}# https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Literal-constants{0}
+{1}# Valid integer constants{0}
+{5}1{9}L{0}, {5}0{9}x10L{0}, {5}1000000{9}L{0}, {5}1{9}e6L{0}
+
+{1}# Valid numeric constants{0}
+{5}1{0} {5}10{0} {5}0.1{0} {5}.2{0} {5}1{9}e{8}-{5}7{0} {5}1.2{9}e{8}+{5}7{0}
+{5}1.1{9}L{0}, {5}1{9}e{8}-{5}3{9}L{0}, {5}0{9}x1.1p{8}-{5}2{0}
+
+{1}# Valid complex constants{0}
+{5}2{9}i{0} {5}4.1{9}i{0} {5}1{9}e{8}-{5}2{9}i{0}
+
+{1}# https://search.r-project.org/R/refmans/base/html/Quotes.html{0}
+{1}# single quotes{0}
+{7}'"It\'s alive!", he screamed.'{0}
+
+{1}# double quotes{0}
+{6}"\"It's alive!\", he screamed."{0}
+
+{1}# escape sequence{0}
+{6}"\n0\r1\t2\b3\a4\f5\\6\'7\"8\`9"{0}
+{6}"\1230\x121\u12342\U000123453\u{1234}4\U{00012345}5"{0}
+
+{1}# Backticks{0}
+{9}d{8}${0}`{5}1{9}st{0} {9}column{0}`
+
+{1}# raw string{0}
+{9}r{6}"---(\1--)-)---"{0}
+
+{1}# infix EOL (11){0}
+{11}%a
+{1}#back to comment{0}
