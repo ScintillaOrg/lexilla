@@ -109,11 +109,14 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 
 		case SCE_R_STRING:
 		case SCE_R_STRING2:
+		case SCE_R_BACKTICKS:
 			if (sc.ch == '\\') {
-				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
+				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\' || sc.chNext == '`') {
 					sc.Forward();
 				}
-			} else if ((sc.state == SCE_R_STRING && sc.ch == '\"') || (sc.state == SCE_R_STRING2 && sc.ch == '\'')) {
+			} else if ((sc.state == SCE_R_STRING && sc.ch == '\"')
+				|| (sc.state == SCE_R_STRING2 && sc.ch == '\'')
+				|| (sc.state == SCE_R_BACKTICKS && sc.ch == '`')) {
 				sc.ForwardSetState(SCE_R_DEFAULT);
 			}
 			break;
@@ -145,6 +148,8 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 				sc.SetState(SCE_R_INFIX);
 			} else if (sc.ch == '\'') {
 				sc.SetState(SCE_R_STRING2);
+			} else if (sc.ch == '`') {
+				sc.SetState(SCE_R_BACKTICKS);
 			} else if (IsAnOperator(sc.ch)) {
 				sc.SetState(SCE_R_OPERATOR);
 			}
