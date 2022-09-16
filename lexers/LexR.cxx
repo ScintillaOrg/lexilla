@@ -47,6 +47,12 @@ constexpr bool IsAnOperator(int ch) noexcept {
 	return false;
 }
 
+constexpr bool IsHexDigit(int ch) noexcept {
+	return (ch >= '0' && ch <= '9')
+		|| (ch >= 'A' && ch <= 'F')
+		|| (ch >= 'a' && ch <= 'f');
+}
+
 void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
@@ -69,7 +75,13 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			break;
 
 		case SCE_R_NUMBER:
-			if (!IsADigit(sc.ch) && !(sc.ch == '.' && IsADigit(sc.chNext))) {
+			// https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Literal-constants
+			if (AnyOf(sc.ch, 'e', 'E', 'p', 'P') && (IsADigit(sc.chNext) || sc.chNext == '+' || sc.chNext == '-')) {
+				sc.Forward(); // exponent part
+			} else if (!(IsHexDigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext)))) {
+				if (AnyOf(sc.ch, 'L', 'i')) {
+					sc.Forward(); // integer and complex qualifier
+				}
 				sc.SetState(SCE_R_DEFAULT);
 			}
 			break;
@@ -120,6 +132,9 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 		if (sc.state == SCE_R_DEFAULT) {
 			if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				sc.SetState(SCE_R_NUMBER);
+				if (sc.ch == '0' && AnyOf(sc.chNext, 'x', 'X')) {
+					sc.Forward();
+				}
 			} else if (IsAWordStart(sc.ch) ) {
 				sc.SetState(SCE_R_IDENTIFIER);
 			} else if (sc.Match('#')) {

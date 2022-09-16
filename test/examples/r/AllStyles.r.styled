@@ -13,14 +13,14 @@
 
 {1}# https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Literal-constants{0}
 {1}# Valid integer constants{0}
-{5}1{9}L{0}, {5}0{9}x10L{0}, {5}1000000{9}L{0}, {5}1{9}e6L{0}
+{5}1L{0}, {5}0x10L{0}, {5}1000000L{0}, {5}1e6L{0}
 
 {1}# Valid numeric constants{0}
-{5}1{0} {5}10{0} {5}0.1{0} {5}.2{0} {5}1{9}e{8}-{5}7{0} {5}1.2{9}e{8}+{5}7{0}
-{5}1.1{9}L{0}, {5}1{9}e{8}-{5}3{9}L{0}, {5}0{9}x1.1p{8}-{5}2{0}
+{5}1{0} {5}10{0} {5}0.1{0} {5}.2{0} {5}1e-7{0} {5}1.2e+7{0}
+{5}1.1L{0}, {5}1e-3L{0}, {5}0x1.1p-2{0}
 
 {1}# Valid complex constants{0}
-{5}2{9}i{0} {5}4.1{9}i{0} {5}1{9}e{8}-{5}2{9}i{0}
+{5}2i{0} {5}4.1i{0} {5}1e-2i{0}
 
 {1}# https://search.r-project.org/R/refmans/base/html/Quotes.html{0}
 {1}# single quotes{0}
