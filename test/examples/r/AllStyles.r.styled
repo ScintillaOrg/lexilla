@@ -36,8 +36,11 @@
 {1}# Backticks{0}
 {9}d{8}${12}`1st column`{0}
 
-{1}# raw string{0}
-{9}r{6}"---(\1--)-)---"{0}
+{1}# double quoted raw string{0}
+{13}r"---(\1--)-)---"{0}
+
+{1}# single quoted raw string{0}
+{14}R'---(\1--)-)---'{0}
 
 {1}# infix EOL (11){0}
 {11}%a

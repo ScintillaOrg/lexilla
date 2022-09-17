@@ -53,12 +53,37 @@ constexpr bool IsHexDigit(int ch) noexcept {
 		|| (ch >= 'a' && ch <= 'f');
 }
 
+// https://search.r-project.org/R/refmans/base/html/Quotes.html
+int CheckRawString(LexAccessor &styler, Sci_Position pos, int &dashCount) {
+	dashCount = 0;
+	while (true) {
+		const char ch = styler.SafeGetCharAt(pos++);
+		switch (ch) {
+		case '-':
+			++dashCount;
+			break;
+		case '(':
+			return ')';
+		case '[':
+			return ']';
+		case '{':
+			return '}';
+		default:
+			dashCount = 0;
+			return 0;
+		}
+	}
+}
+
 void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
 	const WordList &keywords   = *keywordlists[0];
 	const WordList &keywords2 = *keywordlists[1];
 	const WordList &keywords3 = *keywordlists[2];
+	// state for raw string
+	int matchingDelimiter = 0;
+	int dashCount = 0;
 
 	// Do not leak onto next line
 	if (initStyle == SCE_R_INFIXEOL) {
@@ -66,6 +91,11 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 	}
 
 	StyleContext sc(startPos, length, initStyle, styler);
+	if (sc.currentLine > 0) {
+		const int lineState = styler.GetLineState(sc.currentLine - 1);
+		matchingDelimiter = lineState & 0xff;
+		dashCount = lineState >> 8;
+	}
 
 	for (; sc.More(); sc.Forward()) {
 		// Determine if the current state should terminate.
@@ -121,6 +151,24 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			}
 			break;
 
+		case SCE_R_RAWSTRING:
+		case SCE_R_RAWSTRING2:
+			while (sc.ch == matchingDelimiter) {
+				sc.Forward();
+				int count = dashCount;
+				while (count != 0 && sc.ch == '-') {
+					--count;
+					sc.Forward();
+				}
+				if (count == 0 && sc.ch == ((sc.state == SCE_R_RAWSTRING) ? '\"' : '\'')) {
+					matchingDelimiter = 0;
+					dashCount = 0;
+					sc.ForwardSetState(SCE_R_DEFAULT);
+					break;
+				}
+			}
+			break;
+
 		case SCE_R_INFIX:
 			if (sc.ch == '%') {
 				sc.ForwardSetState(SCE_R_DEFAULT);
@@ -138,6 +186,17 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 				if (sc.ch == '0' && AnyOf(sc.chNext, 'x', 'X')) {
 					sc.Forward();
 				}
+			} else if (AnyOf(sc.ch, 'r', 'R') && AnyOf(sc.chNext, '\"', '\'')) {
+				const int chNext = sc.chNext;
+				matchingDelimiter = CheckRawString(styler, sc.currentPos + 2, dashCount);
+				if (matchingDelimiter) {
+					sc.SetState((chNext == '\"') ? SCE_R_RAWSTRING : SCE_R_RAWSTRING2);
+					sc.Forward(dashCount + 2);
+				} else {
+					// syntax error
+					sc.SetState(SCE_R_IDENTIFIER);
+					sc.ForwardSetState((chNext == '\"') ? SCE_R_STRING : SCE_R_STRING2);
+				}
 			} else if (IsAWordStart(sc.ch) ) {
 				sc.SetState(SCE_R_IDENTIFIER);
 			} else if (sc.Match('#')) {
@@ -153,6 +212,11 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			} else if (IsAnOperator(sc.ch)) {
 				sc.SetState(SCE_R_OPERATOR);
 			}
+		}
+
+		if (sc.atLineEnd) {
+			const int lineState = matchingDelimiter | (dashCount << 8);
+			styler.SetLineState(sc.currentLine, lineState);
 		}
 	}
 	sc.Complete();

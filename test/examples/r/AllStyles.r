@@ -36,8 +36,11 @@ acme
 # Backticks
 d$`1st column`
 
-# raw string
+# double quoted raw string
 r"---(\1--)-)---"
+
+# single quoted raw string
+R'---(\1--)-)---'
 
 # infix EOL (11)
 %a
