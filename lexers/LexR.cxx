@@ -53,7 +53,44 @@ constexpr bool IsHexDigit(int ch) noexcept {
 		|| (ch >= 'a' && ch <= 'f');
 }
 
+constexpr bool IsOctalDigit(int ch) noexcept {
+	return ch >= '0' && ch <= '7';
+}
+
+constexpr bool IsOctalOrHex(int ch, bool hex) noexcept {
+	return IsOctalDigit(ch) || (hex && IsHexDigit(ch));
+}
+
 // https://search.r-project.org/R/refmans/base/html/Quotes.html
+struct EscapeSequence {
+	int outerState = SCE_R_DEFAULT;
+	int digitsLeft = 0;
+	bool hex = false;
+	bool brace = false;
+
+	// highlight any character as escape sequence, unrecognized escape sequence is syntax error.
+	void resetEscapeState(int state, int chNext) noexcept {
+		outerState = state;
+		digitsLeft = 1;
+		hex = true;
+		brace = false;
+		if (chNext == 'x') {
+			digitsLeft = 3;
+		} else if (chNext == 'u') {
+			digitsLeft = 5;
+		} else if (chNext == 'U') {
+			digitsLeft = 9;
+		} else if (IsOctalDigit(chNext)) {
+			digitsLeft = 3;
+			hex = false;
+		}
+	}
+	bool atEscapeEnd(int ch) noexcept {
+		--digitsLeft;
+		return digitsLeft <= 0 || !IsOctalOrHex(ch, hex);
+	}
+};
+
 int CheckRawString(LexAccessor &styler, Sci_Position pos, int &dashCount) {
 	dashCount = 0;
 	while (true) {
@@ -84,6 +121,11 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 	// state for raw string
 	int matchingDelimiter = 0;
 	int dashCount = 0;
+
+	// property lexer.r.escape.sequence
+	//	Set to 1 to enable highlighting of escape sequences in strings.
+	const bool escapeSequence = styler.GetPropertyInt("lexer.r.escape.sequence", 0) != 0;
+	EscapeSequence escapeSeq;
 
 	StyleContext sc(startPos, length, initStyle, styler);
 	if (sc.currentLine > 0) {
@@ -136,13 +178,35 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 		case SCE_R_STRING2:
 		case SCE_R_BACKTICKS:
 			if (sc.ch == '\\') {
-				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\' || sc.chNext == '`') {
+				if (escapeSequence) {
+					escapeSeq.resetEscapeState(sc.state, sc.chNext);
+					sc.SetState(SCE_R_ESCAPESEQUENCE);
 					sc.Forward();
+					if (sc.chNext == '{' && AnyOf(sc.ch, 'u', 'U')) {
+						escapeSeq.brace = true;
+						sc.Forward();
+					} else if (sc.MatchLineEnd()) {
+						// don't highlight line ending as escape sequence:
+						// escapeSeq.outerState is lost when editing on next line.
+						sc.SetState(escapeSeq.outerState);
+					}
+				} else {
+					sc.Forward(); // Skip all characters after the backslash
 				}
 			} else if ((sc.state == SCE_R_STRING && sc.ch == '\"')
 				|| (sc.state == SCE_R_STRING2 && sc.ch == '\'')
 				|| (sc.state == SCE_R_BACKTICKS && sc.ch == '`')) {
 				sc.ForwardSetState(SCE_R_DEFAULT);
+			}
+			break;
+
+		case SCE_R_ESCAPESEQUENCE:
+			if (escapeSeq.atEscapeEnd(sc.ch)) {
+				if (escapeSeq.brace && sc.ch == '}') {
+					sc.Forward();
+				}
+				sc.SetState(escapeSeq.outerState);
+				continue;
 			}
 			break;
 
