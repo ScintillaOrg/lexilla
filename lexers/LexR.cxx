@@ -47,18 +47,8 @@ constexpr bool IsAnOperator(int ch) noexcept {
 	return false;
 }
 
-constexpr bool IsHexDigit(int ch) noexcept {
-	return (ch >= '0' && ch <= '9')
-		|| (ch >= 'A' && ch <= 'F')
-		|| (ch >= 'a' && ch <= 'f');
-}
-
-constexpr bool IsOctalDigit(int ch) noexcept {
-	return ch >= '0' && ch <= '7';
-}
-
 constexpr bool IsOctalOrHex(int ch, bool hex) noexcept {
-	return IsOctalDigit(ch) || (hex && IsHexDigit(ch));
+	return IsAnOctalDigit(ch) || (hex && IsAHeXDigit(ch));
 }
 
 // https://search.r-project.org/R/refmans/base/html/Quotes.html
@@ -80,7 +70,7 @@ struct EscapeSequence {
 			digitsLeft = 5;
 		} else if (chNext == 'U') {
 			digitsLeft = 9;
-		} else if (IsOctalDigit(chNext)) {
+		} else if (IsAnOctalDigit(chNext)) {
 			digitsLeft = 3;
 			hex = false;
 		}
@@ -145,7 +135,7 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			// https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Literal-constants
 			if (AnyOf(sc.ch, 'e', 'E', 'p', 'P') && (IsADigit(sc.chNext) || sc.chNext == '+' || sc.chNext == '-')) {
 				sc.Forward(); // exponent part
-			} else if (!(IsHexDigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext)))) {
+			} else if (!(IsAHeXDigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext)))) {
 				if (AnyOf(sc.ch, 'L', 'i')) {
 					sc.Forward(); // integer and complex qualifier
 				}
