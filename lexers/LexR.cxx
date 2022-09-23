@@ -85,11 +85,6 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 	int matchingDelimiter = 0;
 	int dashCount = 0;
 
-	// Do not leak onto next line
-	if (initStyle == SCE_R_INFIXEOL) {
-		initStyle = SCE_R_DEFAULT;
-	}
-
 	StyleContext sc(startPos, length, initStyle, styler);
 	if (sc.currentLine > 0) {
 		const int lineState = styler.GetLineState(sc.currentLine - 1);
@@ -174,7 +169,12 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 				sc.ForwardSetState(SCE_R_DEFAULT);
 			} else if (sc.atLineEnd) {
 				sc.ChangeState(SCE_R_INFIXEOL);
-				sc.ForwardSetState(SCE_R_DEFAULT);
+			}
+			break;
+
+		case SCE_R_INFIXEOL:
+			if (sc.atLineStart) {
+				sc.SetState(SCE_R_DEFAULT);
 			}
 			break;
 		}
