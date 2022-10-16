@@ -586,8 +586,7 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 				break;
 			case SCE_FSHARP_OPERATOR:
 				// special-case "()" and "[]" tokens as KEYWORDS - RR
-				if (setClosingTokens.Contains(sc.ch) &&
-					((sc.ch == ')' && sc.chPrev == '(') || (sc.ch == ']' && sc.chPrev == '['))) {
+				if ((sc.ch == ')' && sc.chPrev == '(') || (sc.ch == ']' && sc.chPrev == '[')) {
 					sc.ChangeState(SCE_FSHARP_KEYWORD);
 					colorSpan++;
 				} else {
