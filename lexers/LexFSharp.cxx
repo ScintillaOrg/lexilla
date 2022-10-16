@@ -357,14 +357,8 @@ Sci_Position SCI_METHOD LexerFSharp::WordListSet(int n, const char *wl) {
 	if (n < WORDLIST_SIZE) {
 		wordListN = &keywords[n];
 	}
-	if (wordListN) {
-		WordList wlNew;
-		wlNew.Set(wl);
-
-		if (*wordListN != wlNew) {
-			wordListN->Set(wl);
-			firstModification = 0;
-		}
+	if (wordListN && wordListN->Set(wl)) {
+		firstModification = 0;
 	}
 	return firstModification;
 }
