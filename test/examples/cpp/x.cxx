@@ -43,4 +43,12 @@ int main() {
 	printf("\x013ac \xdz");
 	printf("\ua34df \uz");
 	printf("\Ua34df7833 \Uz");
+	if ( test ) // line continuation in SCE_C_COMMENTLINE \
+	{
+		printf("abc\
+		\ndfg");
+	} /// line continuation in SCE_C_COMMENTLINEDOC \
+	else
+	{ //! line continuation in SCE_C_COMMENTLINEDOC 2 \
+	}
 }

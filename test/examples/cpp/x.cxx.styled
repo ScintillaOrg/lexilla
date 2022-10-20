@@ -43,4 +43,12 @@
 	{11}printf{10}({6}"{27}\x013a{6}c {27}\xd{6}z"{10});{0}
 	{11}printf{10}({6}"{27}\ua34d{6}f {27}\u{6}z"{10});{0}
 	{11}printf{10}({6}"{27}\Ua34df783{6}3 {27}\U{6}z"{10});{0}
+	{11}if{0} {10}({0} {11}test{0} {10}){0} {2}// line continuation in SCE_C_COMMENTLINE \
+{0}	{10}{{0}
+		{11}printf{10}({6}"abc\
+		{27}\n{6}dfg"{10});{0}
+	{10}}{0} {15}/// line continuation in SCE_C_COMMENTLINEDOC \
+{0}	{11}else{0}
+	{10}{{0} {15}//! line continuation in SCE_C_COMMENTLINEDOC 2 \
+{0}	{10}}{0}
 {10}}{0}

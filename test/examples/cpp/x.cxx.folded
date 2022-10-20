@@ -43,5 +43,13 @@
  0 401 401 | 	printf("\x013ac \xdz");
  0 401 401 | 	printf("\ua34df \uz");
  0 401 401 | 	printf("\Ua34df7833 \Uz");
+ 0 401 401 | 	if ( test ) // line continuation in SCE_C_COMMENTLINE \
+ 2 401 402 + 	{
+ 2 402 403 + 		printf("abc\
+ 0 403 402 | 		\ndfg");
+ 0 402 401 | 	} /// line continuation in SCE_C_COMMENTLINEDOC \
+ 0 401 401 | 	else
+ 2 401 402 + 	{ //! line continuation in SCE_C_COMMENTLINEDOC 2 \
+ 0 402 401 | 	}
  0 401 400 | }
  1 400 400   

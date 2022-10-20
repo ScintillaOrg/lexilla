@@ -796,9 +796,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	bool seenDocKeyBrace = false;
 
 	Sci_Position lineCurrent = styler.GetLine(startPos);
-	if ((MaskActive(initStyle) == SCE_C_PREPROCESSOR) ||
-      (MaskActive(initStyle) == SCE_C_COMMENTLINE) ||
-      (MaskActive(initStyle) == SCE_C_COMMENTLINEDOC)) {
+	if (MaskActive(initStyle) == SCE_C_PREPROCESSOR) {
 		// Set continuationLine if last character of previous line is '\'
 		if (lineCurrent > 0) {
 			const Sci_Position endLinePrevious = styler.LineEnd(lineCurrent - 1);
@@ -889,7 +887,9 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 		}
 
 		// Handle line continuation generically.
-		if (sc.ch == '\\') {
+		if (sc.ch == '\\' &&
+		MaskActive(sc.state) != SCE_C_COMMENTLINE &&
+		MaskActive(sc.state) != SCE_C_COMMENTLINEDOC) {
 			if ((sc.currentPos+1) >= lineEndNext) {
 				lineCurrent++;
 				lineEndNext = styler.LineEnd(lineCurrent);
