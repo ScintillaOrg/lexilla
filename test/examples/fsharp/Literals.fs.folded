@@ -1,0 +1,41 @@
+ 0 400 400   namespace Literals
+ 1 400 400   
+ 0 400 400   module Issue110 =
+ 0 400 400       let hexA = +0xA1B2C3D4
+ 0 400 400       let hexB = -0xCC100000
+ 1 400 400   
+ 0 400 400       // regression checks
+ 0 400 400       let hexC = 0xCC100000
+ 0 400 400       let binA = +0b0000_1010
+ 0 400 400       let binB = -0b1010_0000
+ 0 400 400       let binC = 0b1010_0000
+ 0 400 400       let octA = +0o1237777700
+ 0 400 400       let octB = -0o1237777700
+ 0 400 400       let octC = 0o1237777700
+ 0 400 400       let i8a = +0001y
+ 0 400 400       let i8b = -0001y
+ 0 400 400       let u8 = 0001uy
+ 0 400 400       let f32a = +0.001e-003
+ 0 400 400       let f32b = -0.001E+003
+ 0 400 400       let f32c = 0.001e-003
+ 0 400 400       let f128a = +0.001m
+ 0 400 400       let f128b = -0.001m
+ 0 400 400       let f128c = 0.001m
+ 1 400 400   
+ 0 400 400       // invalid literals
+ 0 400 400       let hexD = 0xa0bcde0o
+ 0 400 400       let hexE = +0xa0bcd0o
+ 0 400 400       let hexF = -0xa0bcd0o
+ 0 400 400       let binD = 0b1010_1110xf000
+ 0 400 400       let binE = +0b1010_1110xf000
+ 0 400 400       let binF = -0b1010_1110xf000
+ 0 400 400       let binG = 0b1010_1110o
+ 0 400 400       let binH = +0b1010_1110o
+ 0 400 400       let binI = -0b1010_1110o
+ 0 400 400       let octD = 0o3330xaBcDeF
+ 0 400 400       let octE = +0o3330xaBcDe
+ 0 400 400       let octF = -0o3330xaBcDe
+ 0 400 400       let octG = 0o3330b
+ 0 400 400       let octH = 0o3330b
+ 0 400 400       let octI = 0o3330b
+ 1 400 400   

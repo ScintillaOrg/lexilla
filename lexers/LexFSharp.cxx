@@ -96,7 +96,7 @@ const CharacterSet setClosingTokens = CharacterSet(CharacterSet::setNone, ")}]")
 const CharacterSet setFormatSpecs = CharacterSet(CharacterSet::setNone, ".%aAbBcdeEfFgGiMoOstuxX0123456789");
 const CharacterSet setDotNetFormatSpecs = CharacterSet(CharacterSet::setNone, "cCdDeEfFgGnNpPxX");
 const CharacterSet setFormatFlags = CharacterSet(CharacterSet::setNone, ".-+0 ");
-const CharacterSet numericMetaChars1 = CharacterSet(CharacterSet::setNone, "_IbeEflmnosuxy");
+const CharacterSet numericMetaChars1 = CharacterSet(CharacterSet::setNone, "_IeEflmnsuy");
 const CharacterSet numericMetaChars2 = CharacterSet(CharacterSet::setNone, "lnsy");
 std::map<int, int> numericPrefixes = { { 'b', 2 }, { 'o', 8 }, { 'x', 16 } };
 constexpr Sci_Position ZERO_LENGTH = -1;
@@ -422,12 +422,6 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 				} else if (IsADigit(sc.ch, currentBase) ||
 					   ((sc.ch == '+' || sc.ch == '-') && IsADigit(sc.chNext))) {
 					state = SCE_FSHARP_NUMBER;
-					if (sc.ch == '0') {
-						const int prefix = sc.chNext;
-						if (numericPrefixes.find(prefix) != numericPrefixes.end()) {
-							currentBase = numericPrefixes[prefix];
-						}
-					}
 				} else if (setOperators.Contains(sc.ch) &&
 					   // don't use operator style in async keywords (e.g. `return!`)
 					   !(sc.ch == '!' && iswordstart(sc.chPrev)) &&
@@ -589,6 +583,15 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 				state = SCE_FSHARP_DEFAULT;
 				break;
 			case SCE_FSHARP_NUMBER:
+				if (currentBase == 10) {
+					if (sc.ch == '0' && numericPrefixes.find(sc.chNext) != numericPrefixes.end()) {
+						currentBase = numericPrefixes[sc.chNext];
+						sc.Forward(2);
+					} else if (sc.chPrev == '0' && numericPrefixes.find(sc.ch) != numericPrefixes.end()) {
+						currentBase = numericPrefixes[sc.ch];
+						sc.Forward();
+					}
+				}
 				state = (IsNumber(sc, currentBase) || IsFloat(sc))
 					? SCE_FSHARP_NUMBER
 					// change style even when operators aren't spaced
