@@ -39,3 +39,12 @@
  0 400 400       let octH = 0o3330b
  0 400 400       let octI = 0o3330b
  1 400 400   
+ 0 400 400   module Issue111 =
+ 0 400 400       // invalid literals
+ 0 400 400       let a = 0000_123abc
+ 0 400 400       let b = +000_123abc
+ 0 400 400       let c = -0001_23abc
+ 0 400 400       let d = 00123_000b
+ 0 400 400       let e = +0123_000o
+ 0 400 400       let f = -0123_000xcd
+ 1 400 400   

@@ -38,3 +38,12 @@ module Issue110 =
     let octG = 0o3330b
     let octH = 0o3330b
     let octI = 0o3330b
+
+module Issue111 =
+    // invalid literals
+    let a = 0000_123abc
+    let b = +000_123abc
+    let c = -0001_23abc
+    let d = 00123_000b
+    let e = +0123_000o
+    let f = -0123_000xcd

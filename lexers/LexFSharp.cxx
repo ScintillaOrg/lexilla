@@ -583,11 +583,14 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 				state = SCE_FSHARP_DEFAULT;
 				break;
 			case SCE_FSHARP_NUMBER:
-				if (currentBase == 10) {
-					if (sc.ch == '0' && numericPrefixes.find(sc.chNext) != numericPrefixes.end()) {
+				if ((setOperators.Contains(sc.chPrev) || IsASpaceOrTab(sc.chPrev)) && sc.ch == '0') {
+					if (numericPrefixes.find(sc.chNext) != numericPrefixes.end()) {
 						currentBase = numericPrefixes[sc.chNext];
 						sc.Forward(2);
-					} else if (sc.chPrev == '0' && numericPrefixes.find(sc.ch) != numericPrefixes.end()) {
+					}
+				} else if ((setOperators.Contains(sc.GetRelative(-2)) || IsASpaceOrTab(sc.GetRelative(-2))) &&
+					   sc.chPrev == '0') {
+					if (numericPrefixes.find(sc.ch) != numericPrefixes.end()) {
 						currentBase = numericPrefixes[sc.ch];
 						sc.Forward();
 					}
