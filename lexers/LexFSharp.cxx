@@ -96,8 +96,8 @@ const CharacterSet setClosingTokens = CharacterSet(CharacterSet::setNone, ")}]")
 const CharacterSet setFormatSpecs = CharacterSet(CharacterSet::setNone, ".%aAbBcdeEfFgGiMoOstuxX0123456789");
 const CharacterSet setDotNetFormatSpecs = CharacterSet(CharacterSet::setNone, "cCdDeEfFgGnNpPxX");
 const CharacterSet setFormatFlags = CharacterSet(CharacterSet::setNone, ".-+0 ");
-const CharacterSet numericMetaChars1 = CharacterSet(CharacterSet::setNone, "_IeEflmnsuy");
-const CharacterSet numericMetaChars2 = CharacterSet(CharacterSet::setNone, "lnsy");
+const CharacterSet numericMetaChars1 = CharacterSet(CharacterSet::setNone, "_uU");
+const CharacterSet numericMetaChars2 = CharacterSet(CharacterSet::setNone, "fFIlLmMnsy");
 std::map<int, int> numericPrefixes = { { 'b', 2 }, { 'o', 8 }, { 'x', 16 } };
 constexpr Sci_Position ZERO_LENGTH = -1;
 
@@ -283,9 +283,13 @@ inline bool IsNumber(StyleContext &cxt, const int base = 10) {
 		(IsADigit(cxt.GetRelative(-2), base) && numericMetaChars2.Contains(cxt.ch));
 }
 
-inline bool IsFloat(const StyleContext &cxt) {
-	return (cxt.ch == '.' && IsADigit(cxt.chPrev)) ||
-		((cxt.ch == '+' || cxt.ch == '-' ) && IsADigit(cxt.chNext));
+inline bool IsFloat(StyleContext &cxt) {
+	if (cxt.MatchIgnoreCase("e+") || cxt.MatchIgnoreCase("e-")) {
+		cxt.Forward();
+		return true;
+	}
+	return ((cxt.chPrev == '.' && IsADigit(cxt.ch)) ||
+		(IsADigit(cxt.chPrev) && (cxt.ch == '.' || numericMetaChars2.Contains(cxt.ch))));
 }
 
 inline bool IsLineEnd(StyleContext &cxt, const Sci_Position offset) {

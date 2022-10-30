@@ -47,3 +47,39 @@ module Issue111 =
     let d = 00123_000b
     let e = +0123_000o
     let f = -0123_000xcd
+
+module Issue112 =
+    let i64 = 0001L
+    let u64 = 001UL
+    let f32a = 001.F
+    let f32b = +01.0F
+    let f32c = -01.00000F
+    let f32d = 0b0000_0010lf
+    let f32e = 0o000_010lf
+    let f32f = 0x0000000000000010lf
+    let f64a = 0b0000_0010LF
+    let f64b = 0o000_010LF
+    let f64c = 0x0000000000000010LF
+    let f128a = 001.M
+    let f128b = +01.0M
+    let f128c = -01.00000M
+
+    // regression checks
+    let i32 = -0001l
+    let u32 = +001ul
+    let i128 = 9999999999999999999999999999I
+    let f32g = 001.f
+    let f32h = +01.0f
+    let f32i = -01.00000f
+    let f64d = 010000e+009
+    let f64e = +001.0e-009
+    let f64f = -001.e+009
+    let f128d = 001.m
+    let f128e = +01.0m
+    let f128f = -01.00000m
+
+    // arithmetic expressions
+    let a = -001.f+01.0F
+    let b = +0b0111_111UL-0x100UL
+    let c = -01.0F + +001.f
+    let d = -0x100UL - +0b0111_111UL
