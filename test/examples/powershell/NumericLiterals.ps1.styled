@@ -1,4 +1,4 @@
-{1}# Treat any leading [-+.] as default to reduce match complexity{0}
+{1}# Treat any leading [-+] as default to reduce match complexity{0}
 {1}# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_numeric_literals?view=powershell-7.3#examples{0}
 {4}100{0}
 {4}100u{0}
@@ -30,6 +30,6 @@
 {1}# Range{0}
 {4}1{6}..{4}100{0}
 
-{1}# 7d is numeric while 7z is default+identifier{0}
+{1}# Issue118: 7d is numeric while 7z is user defined keyword{0}
 {4}7d{0}
-7{7}z{0}
+{12}7z{0}

@@ -140,7 +140,7 @@ static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, 
 				if (sc.MatchLineEnd() || IsASpaceOrTab(sc.ch) || isoperator(sc.ch)) {
 					sc.SetState(SCE_POWERSHELL_DEFAULT);
 				} else {
-					sc.ChangeState(SCE_POWERSHELL_DEFAULT);
+					sc.ChangeState(SCE_POWERSHELL_IDENTIFIER);
 				}
 			}
 		} else if (sc.state == SCE_POWERSHELL_VARIABLE) {
