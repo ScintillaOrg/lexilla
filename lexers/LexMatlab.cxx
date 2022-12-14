@@ -301,14 +301,16 @@ static void ColouriseMatlabOctaveDoc(
 				} else {
 					sc.ForwardSetState(SCE_MATLAB_DEFAULT);
 				}
+			} else if (sc.MatchLineEnd()) {
+				sc.SetState(SCE_MATLAB_DEFAULT);
 			}
 		} else if (sc.state == SCE_MATLAB_DOUBLEQUOTESTRING) {
 			if (sc.ch == '\\' && !ismatlab) {
-				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
-					sc.Forward();
-				}
+				sc.Forward(); // skip escape sequence, new line and others after backlash
 			} else if (sc.ch == '\"') {
 				sc.ForwardSetState(SCE_MATLAB_DEFAULT);
+			} else if (sc.MatchLineEnd()) {
+				sc.SetState(SCE_MATLAB_DEFAULT);
 			}
 		} else if (sc.state == SCE_MATLAB_COMMAND) {
 			if (sc.atLineEnd) {
