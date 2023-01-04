@@ -258,7 +258,7 @@ bool IsMatchOrCaseIdentifier(const StyleContext &sc, Accessor &styler, const cha
 	}
 	if (nextChar == '.' && nextCharPos >= sc.currentPos) {
 		const unsigned char followingChar = GetNextNonWhitespaceChar(styler, nextCharPos+1, sc.lineEnd);
-		if (!isdigit(followingChar)) {
+		if (!IsADigit(followingChar)) {
 			return true;
 		}
 	}
