@@ -30,7 +30,7 @@ class StyleContext {
 		if (multiByteAccess) {
 			chNext = multiByteAccess->GetCharacterAndWidth(currentPos+width, &widthNext);
 		} else {
-			const char charNext = styler.SafeGetCharAt(currentPos + width, 0);
+			const unsigned char charNext = styler.SafeGetCharAt(currentPos + width, 0);
 			chNext = charNext;
 		}
 		// End of line determined from line end position, allowing CR, LF,
