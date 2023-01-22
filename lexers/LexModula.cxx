@@ -261,7 +261,7 @@ static void FoldModulaDoc( Sci_PositionU startPos,
 					if( clv_new < clv_old ) {
 						nextLevel--;
 						pos = styler.LineStart( cln );
-						while( ( ch = styler.SafeGetCharAt( pos ) ) != '\n' ) {
+						while( ( ch = styler.SafeGetCharAt( pos, '\n' )) != '\n') {
 							if( ch == 'P' ) {
 								if( styler.StyleAt(pos) == SCE_MODULA_KEYWORD )	{
 									if( checkKeyIdentOper( styler, pos, endPos,
