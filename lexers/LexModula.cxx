@@ -386,6 +386,8 @@ static void ColouriseModulaDoc(	Sci_PositionU startPos,
 						continue;
 					} else {
 						/** check procedure identifier */
+						sc.Forward( kl );
+						continue;
 					}
 				} else {
 					for( i = 0; i < BUFLEN - 1; i++ ) {

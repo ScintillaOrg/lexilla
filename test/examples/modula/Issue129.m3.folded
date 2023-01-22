@@ -1,0 +1,9 @@
+ 0 400   0   INTERFACE Test;
+ 0 400   0   
+ 0 400   0   TYPE
+ 0 400   0     (* Opaque types *)
+ 0 400   0     HANDLE                  = ADDRESS;
+ 0 400   0     HMOD(* Module handle *) = HANDLE;
+ 0 400   0   
+ 0 400   0   END Test.
+ 0 400   0   
