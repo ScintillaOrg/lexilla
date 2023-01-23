@@ -83,7 +83,7 @@ static inline unsigned IsOperator( StyleContext & sc, WordList & op ) {
 static inline bool IsEOL( Accessor &styler, Sci_PositionU curPos ) {
 	unsigned ch = styler.SafeGetCharAt( curPos );
 	if( ( ch == '\r' && styler.SafeGetCharAt( curPos + 1 ) == '\n' ) ||
-		( ch == '\n' ) ) {
+		( ch == '\n' && styler.SafeGetCharAt( curPos - 1 ) != '\r' ) ) {
 		return true;
 	}
 	return false;
