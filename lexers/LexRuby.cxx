@@ -137,8 +137,7 @@ static int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, WordL
                 style = SCE_RB_IDENTIFIER;
             }
         }
-    }
-    else if (keywords.InList(s) && ((start == 0) || !followsDot(start - 1, styler))) {
+    } else if (keywords.InList(s) && ((start == 0) || !followsDot(start - 1, styler))) {
         if (keywordIsAmbiguous(s)
                 && keywordIsModifier(s, start, styler)) {
 
@@ -188,8 +187,7 @@ static bool isMatch(Accessor &styler, Sci_Position lengthDoc, Sci_Position pos, 
 static bool lookingAtHereDocDelim(Accessor   	&styler,
                                   Sci_Position 	pos,
                                   Sci_Position 	lengthDoc,
-                                  const char   *HereDocDelim)
-{
+                                  const char   *HereDocDelim) {
     if (!isMatch(styler, lengthDoc, pos, HereDocDelim)) {
         return false;
     }
@@ -351,8 +349,8 @@ static bool RE_CanFollowKeyword(const char *keyword) {
 // Don't look at styles in case we're looking forward
 
 static Sci_Position skipWhitespace(Sci_Position startPos,
-                          Sci_Position endPos,
-                          Accessor &styler) {
+                                   Sci_Position endPos,
+                                   Accessor &styler) {
     for (Sci_Position i = startPos; i < endPos; i++) {
         if (!iswhitespace(styler[i])) {
             return i;
@@ -1530,8 +1528,7 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
 static void getPrevWord(Sci_Position pos,
                         char *prevWord,
                         Accessor &styler,
-                        int word_state)
-{
+                        int word_state) {
     Sci_Position i;
     styler.Flush();
     for (i = pos - 1; i > 0; i--) {
@@ -1549,8 +1546,7 @@ static void getPrevWord(Sci_Position pos,
     *dst = 0;
 }
 
-static bool keywordIsAmbiguous(const char *prevWord)
-{
+static bool keywordIsAmbiguous(const char *prevWord) {
     // Order from most likely used to least likely
     // Lots of ways to do a loop in Ruby besides 'while/until'
     if (!strcmp(prevWord, "if")
@@ -1571,8 +1567,7 @@ static bool keywordIsAmbiguous(const char *prevWord)
 
 static bool keywordIsModifier(const char *word,
                               Sci_Position pos,
-                              Accessor &styler)
-{
+                              Accessor &styler) {
     if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
         return keywordDoStartsLoop(pos, styler);
     }
@@ -1682,8 +1677,7 @@ static bool keywordIsModifier(const char *word,
 // on the current line
 
 static bool keywordDoStartsLoop(Sci_Position pos,
-                                Accessor &styler)
-{
+                                Accessor &styler) {
     char ch;
     Sci_Position lineStart = styler.GetLine(pos);
     Sci_Position lineStartPosn = styler.LineStart(lineStart);
