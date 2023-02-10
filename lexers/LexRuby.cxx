@@ -35,9 +35,14 @@ constexpr inline bool isEOLChar(char ch) noexcept {
     return (ch == '\r') || (ch == '\n');
 }
 
-#define isSafeASCII(ch) ((unsigned int)(ch) <= 127)
+constexpr bool isSafeASCII(char ch) noexcept {
+    return static_cast<unsigned char>(ch) <= 127;
+}
+
 // This one's redundant, but makes for more readable code
-#define isHighBitChar(ch) ((unsigned int)(ch) > 127)
+constexpr bool isHighBitChar(char ch) noexcept {
+    return static_cast<unsigned char>(ch) > 127;
+}
 
 inline bool isSafeAlpha(char ch) noexcept {
     return (isSafeASCII(ch) && isalpha(ch)) || ch == '_';
@@ -78,7 +83,7 @@ inline bool isQestionMarkChar(char chNext, char chNext2) noexcept {
 #define MAX_KEYWORD_LENGTH 200
 
 #define STYLE_MASK 63
-#define actual_style(style) (style & STYLE_MASK)
+#define actual_style(style) ((style) & STYLE_MASK)
 
 bool followsDot(Sci_PositionU pos, Accessor &styler) {
     styler.Flush();
@@ -115,12 +120,12 @@ bool keywordIsModifier(const char *word,
 
 int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, WordList &keywords, Accessor &styler, char *prevWord) {
     char s[MAX_KEYWORD_LENGTH];
-    Sci_PositionU i, j;
+    Sci_PositionU j = 0;
     Sci_PositionU lim = end - start + 1; // num chars to copy
     if (lim >= MAX_KEYWORD_LENGTH) {
         lim = MAX_KEYWORD_LENGTH - 1;
     }
-    for (i = start, j = 0; j < lim; i++, j++) {
+    for (Sci_PositionU i = start; j < lim; i++, j++) {
         s[j] = styler[i];
     }
     s[j] = '\0';
@@ -386,7 +391,8 @@ bool sureThisIsHeredoc(Sci_Position iPrev,
         // to establish the context.  Not too likely though.
         return true;
     } else {
-        switch (prevStyle = styler.StyleAt(firstWordPosn)) {
+        prevStyle = styler.StyleAt(firstWordPosn);
+        switch (prevStyle) {
         case SCE_RB_WORD:
         case SCE_RB_WORD_DEMOTED:
         case SCE_RB_IDENTIFIER:
@@ -426,8 +432,7 @@ bool haveTargetMatch(Sci_Position currPos,
     if (lengthDoc - currPos < targetEndPos - targetStartPos) {
         return false;
     }
-    Sci_Position i, j;
-    for (i = targetStartPos, j = currPos;
+    for (Sci_Position i = targetStartPos, j = currPos;
             i < targetEndPos && j < lengthDoc;
             i++, j++) {
         if (styler[i] != styler[j]) {
@@ -566,7 +571,8 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
         return definitely_not_a_here_doc;
     }
     bool allow_indent;
-    Sci_Position target_start, target_end;
+    Sci_Position target_start;
+    Sci_Position target_end;
     // From this point on no more styling, since we're looking ahead
     if (styler[j] == '-' || styler[j] == '~') {
         allow_indent = true;
@@ -746,13 +752,14 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
     styler.StartAt(startPos);
     styler.StartSegment(startPos);
 
-    static constexpr int q_states[] = {SCE_RB_STRING_Q,
-                                       SCE_RB_STRING_QQ,
-                                       SCE_RB_STRING_QR,
-                                       SCE_RB_STRING_QW,
-                                       SCE_RB_STRING_QW,
-                                       SCE_RB_STRING_QX
-                                      };
+    static constexpr int q_states[] = {
+        SCE_RB_STRING_Q,
+        SCE_RB_STRING_QQ,
+        SCE_RB_STRING_QR,
+        SCE_RB_STRING_QW,
+        SCE_RB_STRING_QW,
+        SCE_RB_STRING_QX
+    };
     constexpr const char *q_chars = "qQrwWx";
 
     // In most cases a value of 2 should be ample for the code in the
@@ -1573,7 +1580,7 @@ bool keywordIsModifier(const char *word,
     if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
         return keywordDoStartsLoop(pos, styler);
     }
-    char ch, chPrev, chPrev2;
+    char ch;
     int style = SCE_RB_DEFAULT;
     Sci_Position lineStart = styler.GetLine(pos);
     Sci_Position lineStartPosn = styler.LineStart(lineStart);
@@ -1583,8 +1590,8 @@ bool keywordIsModifier(const char *word,
     while (lineStartPosn > 0) {
         ch = styler[lineStartPosn-1];
         if (ch == '\n' || ch == '\r') {
-            chPrev  = styler.SafeGetCharAt(lineStartPosn-2);
-            chPrev2 = styler.SafeGetCharAt(lineStartPosn-3);
+            const char chPrev  = styler.SafeGetCharAt(lineStartPosn-2);
+            const char chPrev2 = styler.SafeGetCharAt(lineStartPosn-3);
             lineStart = styler.GetLine(lineStartPosn-1);
             // If we find a continuation line, include it in our analysis.
             if (chPrev == '\\') {
@@ -1603,7 +1610,8 @@ bool keywordIsModifier(const char *word,
     while (--pos >= lineStartPosn) {
         style = actual_style(styler.StyleAt(pos));
         if (style == SCE_RB_DEFAULT) {
-            if (iswhitespace(ch = styler[pos])) {
+            ch = styler[pos];
+            if (iswhitespace(ch)) {
                 //continue
             } else if (ch == '\r' || ch == '\n') {
                 // Scintilla's LineStart() and GetLine() routines aren't
@@ -1612,8 +1620,8 @@ bool keywordIsModifier(const char *word,
 
                 // Also, lineStartPosn may have been moved to more than one
                 // line above word's line while pushing past continuations.
-                chPrev = styler.SafeGetCharAt(pos - 1);
-                chPrev2 = styler.SafeGetCharAt(pos - 2);
+                const char chPrev = styler.SafeGetCharAt(pos - 1);
+                const char chPrev2 = styler.SafeGetCharAt(pos - 2);
                 if (chPrev == '\\') {
                     pos-=1;  // gloss over the "\\"
                     //continue
@@ -1680,14 +1688,14 @@ bool keywordIsModifier(const char *word,
 
 bool keywordDoStartsLoop(Sci_Position pos,
                          Accessor &styler) {
-    char ch;
     const Sci_Position lineStart = styler.GetLine(pos);
     const Sci_Position lineStartPosn = styler.LineStart(lineStart);
     styler.Flush();
     while (--pos >= lineStartPosn) {
         const int style = actual_style(styler.StyleAt(pos));
         if (style == SCE_RB_DEFAULT) {
-            if ((ch = styler[pos]) == '\r' || ch == '\n') {
+            const char ch = styler[pos];
+            if (ch == '\r' || ch == '\n') {
                 // Scintilla's LineStart() and GetLine() routines aren't
                 // platform-independent, so if we have text prepared with
                 // a different system we can't rely on it.
