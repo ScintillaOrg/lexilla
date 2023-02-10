@@ -145,7 +145,6 @@ constVariable:lexilla/lexers/LexOpal.cxx
 constVariable:lexilla/lexers/LexPS.cxx
 constVariable:lexilla/lexers/LexPascal.cxx
 constVariable:lexilla/lexers/LexRebol.cxx
-constVariable:lexilla/lexers/LexRuby.cxx
 constVariable:lexilla/lexers/LexSorcus.cxx
 constVariable:lexilla/lexers/LexStata.cxx
 constVariable:lexilla/lexers/LexTACL.cxx
