@@ -1895,7 +1895,8 @@ static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle
         } else if (style == SCE_RB_STRING_QW) {
             if (stylePrev != style) {
                 levelCurrent++;
-            } else if (styleNext != style) {
+            }
+            if (styleNext != style) {
                 levelCurrent--;
             }
         }
