@@ -1912,7 +1912,7 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
             } else if (styleNext == SCE_RB_DEFAULT) {
                 levelCurrent--;
             }
-        } else if (style == SCE_RB_STRING_QW) {
+        } else if (style == SCE_RB_STRING_QW || style == SCE_RB_STRING_W) {
             if (stylePrev != style) {
                 levelCurrent++;
             }
