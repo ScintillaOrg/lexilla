@@ -811,10 +811,6 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
     int brace_counts = 0;   // Number of #{ ... } things within an expression
 
     Sci_Position i;
-    for (i = 0; i < INNER_STRINGS_MAX_COUNT; i++) {
-        inner_string_types[i] = 0;
-        inner_expn_brace_counts[i] = 0;
-    }
     for (i = startPos; i < lengthDoc; i++) {
         char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
