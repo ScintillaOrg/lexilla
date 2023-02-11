@@ -655,10 +655,9 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
         last_line = lineStart + 50;
     }
     for (Sci_Position line_num = lineStart + 1; line_num <= last_line; line_num++) {
+        j = styler.LineStart(line_num);
         if (allow_indent) {
-            j = skipWhitespace(styler.LineStart(line_num), lengthDoc, styler);
-        } else {
-            j = styler.LineStart(line_num);
+            j = skipWhitespace(j, lengthDoc, styler);
         }
         // target_end is one past the end
         if (haveTargetMatch(j, lengthDoc, target_start, target_end, styler)) {
@@ -810,8 +809,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
     int inner_string_count = 0;
     int brace_counts = 0;   // Number of #{ ... } things within an expression
 
-    Sci_Position i;
-    for (i = startPos; i < lengthDoc; i++) {
+    for (Sci_Position i = startPos; i < lengthDoc; i++) {
         char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
         char chNext2 = styler.SafeGetCharAt(i + 2);
