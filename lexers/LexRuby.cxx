@@ -292,6 +292,25 @@ public:
     }
 };
 
+constexpr bool isPercentLiteral(int state) noexcept {
+    return state == SCE_RB_STRING_Q
+           || state == SCE_RB_STRING_QQ
+           // excluded SCE_RB_STRING_QR
+           || state == SCE_RB_STRING_W
+           || state == SCE_RB_STRING_QW
+           || state == SCE_RB_STRING_I
+           || state == SCE_RB_STRING_QI
+           || state == SCE_RB_STRING_QS
+           || state == SCE_RB_STRING_QX;
+}
+
+constexpr bool isInterpolableLiteral(int state) noexcept {
+    return state != SCE_RB_STRING_Q
+           && state != SCE_RB_STRING_W
+           && state != SCE_RB_STRING_I
+           && state != SCE_RB_STRING_QS
+           && state != SCE_RB_CHARACTER;
+}
 
 void enterInnerExpression(int  *p_inner_string_types,
                           int  *p_inner_expn_brace_counts,
@@ -756,11 +775,14 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
         SCE_RB_STRING_Q,
         SCE_RB_STRING_QQ,
         SCE_RB_STRING_QR,
+        SCE_RB_STRING_W,
         SCE_RB_STRING_QW,
-        SCE_RB_STRING_QW,
-        SCE_RB_STRING_QX
+        SCE_RB_STRING_QX,
+        SCE_RB_STRING_I,
+        SCE_RB_STRING_QI,
+        SCE_RB_STRING_QS,
     };
-    constexpr const char *q_chars = "qQrwWx";
+    constexpr const char *q_chars = "qQrwWxiIs";
 
     // In most cases a value of 2 should be ample for the code in the
     // Ruby library, and the code the user is likely to enter.
@@ -1479,8 +1501,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                 }
             }
             // Quotes of all kinds...
-        } else if (state == SCE_RB_STRING_Q || state == SCE_RB_STRING_QQ ||
-                   state == SCE_RB_STRING_QX || state == SCE_RB_STRING_QW ||
+        } else if (isPercentLiteral(state) ||
                    state == SCE_RB_STRING || state == SCE_RB_CHARACTER ||
                    state == SCE_RB_BACKTICKS) {
             if (!Quote.Down && !isspacechar(ch)) {
@@ -1499,8 +1520,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                 Quote.Count++;
             } else if (ch == '#' && chNext == '{'
                        && inner_string_count < INNER_STRINGS_MAX_COUNT
-                       && state != SCE_RB_CHARACTER
-                       && state != SCE_RB_STRING_Q) {
+                       && isInterpolableLiteral(state)) {
                 // process #{ ... }
                 styler.ColourTo(i - 1, state);
                 styler.ColourTo(i + 1, SCE_RB_OPERATOR);
