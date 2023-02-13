@@ -214,28 +214,26 @@ static void ColouriseYAMLLine(
 }
 
 static void ColouriseYAMLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler) {
-	char lineBuffer[1024] = "";
+	std::string lineBuffer;
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	Sci_PositionU linePos = 0;
 	Sci_PositionU startLine = startPos;
 	Sci_PositionU endPos = startPos + length;
 	Sci_PositionU maxPos = styler.Length();
 	Sci_PositionU lineCurrent = styler.GetLine(startPos);
 
 	for (Sci_PositionU i = startPos; i < maxPos && i < endPos; i++) {
-		lineBuffer[linePos++] = styler[i];
-		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
+		lineBuffer.push_back(styler[i]);
+		if (AtEOL(styler, i)) {
 			// End of line (or of line buffer) met, colourise it
-			lineBuffer[linePos] = '\0';
-			ColouriseYAMLLine(lineBuffer, lineCurrent, linePos, startLine, i, *keywordLists[0], styler);
-			linePos = 0;
+			ColouriseYAMLLine(lineBuffer.data(), lineCurrent, lineBuffer.length(), startLine, i, *keywordLists[0], styler);
+			lineBuffer.clear();
 			startLine = i + 1;
 			lineCurrent++;
 		}
 	}
-	if (linePos > 0) {	// Last line does not have ending characters
-		ColouriseYAMLLine(lineBuffer, lineCurrent, linePos, startLine, startPos + length - 1, *keywordLists[0], styler);
+	if (!lineBuffer.empty()) {	// Last line does not have ending characters
+		ColouriseYAMLLine(lineBuffer.data(), lineCurrent, lineBuffer.length(), startLine, startPos + length - 1, *keywordLists[0], styler);
 	}
 }
 
