@@ -5,12 +5,12 @@
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
+#include <cstdio>
+#include <cstdarg>
 
 #include <string>
 #include <string_view>
@@ -137,7 +137,7 @@ static void ColouriseMakeDoc(Sci_PositionU startPos, Sci_Position length, int, W
 }
 
 static const char *const emptyWordListDesc[] = {
-	0
+	nullptr
 };
 
-LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile", 0, emptyWordListDesc);
+LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile", nullptr, emptyWordListDesc);
