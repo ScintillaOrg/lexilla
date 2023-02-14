@@ -1082,7 +1082,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                     Quote.Open(chNext);
                     advance_char(i, ch, chNext, chNext2); // pass by ref
                     have_string = true;
-                } else if (!isSafeWordcharOrHigh(chNext) && !iswhitespace(chNext) && !isEOLChar(chNext)) {
+                } else if (!isSafeWordcharOrHigh(chNext) && !iswhitespace(chNext) && !isEOLChar(chNext) && chNext != '=') {
                     // Ruby doesn't allow high bit chars here,
                     // but the editor host might
                     Quote.New();
