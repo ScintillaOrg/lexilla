@@ -841,7 +841,14 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
             }
             // Don't check for a missing quote, just jump into
             // the here-doc state
-            state = SCE_RB_HERE_Q;
+            state = SCE_RB_HERE_QQ;
+            if (HereDoc.Quoted) {
+                if (HereDoc.Quote == '\'') {
+                    state = SCE_RB_HERE_Q;
+                } else if (HereDoc.Quote == '`') {
+                    state = SCE_RB_HERE_QX;
+                }
+            }
         }
 
         // Regular transitions
@@ -1346,7 +1353,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                     preferRE = false;
                 }
             }
-        } else if (state == SCE_RB_HERE_Q) {
+        } else if (state == SCE_RB_HERE_Q || state == SCE_RB_HERE_QQ || state == SCE_RB_HERE_QX) {
             // Not needed: HereDoc.State == 2
             // Indentable here docs: look backwards
             // Non-indentable: look forwards, like in Perl

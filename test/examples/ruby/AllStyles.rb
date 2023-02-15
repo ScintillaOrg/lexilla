@@ -1,5 +1,5 @@
 # Enumerate all styles where possible: 0..31,40..45
-# 22,23,30,31,40,45 are never set and 1 switches rest of file to error state
+# 30,31,40,45 are never set and 1 switches rest of file to error state
 
 #0 whitespace
     #
@@ -66,14 +66,20 @@ module Module15 end
 <<DELIMITER20
 DELIMITER20
 
-#21:here doc
-<<D
-21:here doc
+#21:single quoted heredoc
+<<'D'
+21:here doc #{1 + 1}
 D
 
-#22:here qq never set
+#22:double quoted heredoc
+<<"D"
+22:here doc #{1 + 1}
+D
 
-#23:here qw never set
+#23:back tick quoted heredoc
+<<`D`
+23:here doc #{1 + 1}
+D
 
 #24:q quoted string
 %q!24:quotes's!
