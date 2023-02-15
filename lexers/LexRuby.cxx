@@ -31,7 +31,7 @@ using namespace Lexilla;
 namespace {
 
 //XXX Identical to Perl, put in common area
-constexpr inline bool isEOLChar(char ch) noexcept {
+constexpr bool isEOLChar(char ch) noexcept {
     return (ch == '\r') || (ch == '\n');
 }
 
@@ -67,8 +67,8 @@ inline bool isSafeWordcharOrHigh(char ch) noexcept {
     return isHighBitChar(ch) || isalnum(ch) || ch == '_';
 }
 
-constexpr bool inline iswhitespace(char ch) noexcept {
-    return ch == ' ' || ch == '\t';
+constexpr bool isWhiteSpace(char ch) noexcept {
+    return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
 }
 
 inline bool isQestionMarkChar(char chNext, char chNext2) noexcept {
@@ -378,7 +378,7 @@ Sci_Position skipWhitespace(Sci_Position startPos,
                             Sci_Position endPos,
                             Accessor &styler) {
     for (Sci_Position i = startPos; i < endPos; i++) {
-        if (!iswhitespace(styler[i])) {
+        if (!IsASpaceOrTab(styler[i])) {
             return i;
         }
     }
@@ -1063,26 +1063,16 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
             } else if (ch == '%' && !afterDef) {
                 styler.ColourTo(i - 1, state);
                 bool have_string = false;
-                if (strchr(q_chars, chNext) && !isSafeWordcharOrHigh(chNext2)) {
+                const char *hit = strchr(q_chars, chNext);
+                if (hit != nullptr && !isSafeWordcharOrHigh(chNext2)) {
                     Quote.New();
-                    const char *hit = strchr(q_chars, chNext);
-                    if (hit != nullptr) {
-                        state = q_states[hit - q_chars];
-                        Quote.Open(chNext2);
-                        i += 2;
-                        ch = chNext2;
-                        chNext = styler.SafeGetCharAt(i + 1);
-                        have_string = true;
-                    }
-                } else if (preferRE && !isSafeWordcharOrHigh(chNext)) {
-                    // Ruby doesn't allow high bit chars here,
-                    // but the editor host might
-                    Quote.New();
-                    state = SCE_RB_STRING_QQ;
-                    Quote.Open(chNext);
-                    advance_char(i, ch, chNext, chNext2); // pass by ref
+                    state = q_states[hit - q_chars];
+                    Quote.Open(chNext2);
+                    i += 2;
+                    ch = chNext2;
+                    chNext = styler.SafeGetCharAt(i + 1);
                     have_string = true;
-                } else if (!isSafeWordcharOrHigh(chNext) && !iswhitespace(chNext) && !isEOLChar(chNext) && chNext != '=') {
+                } else if ((preferRE || (!isWhiteSpace(chNext) && chNext != '=')) && !isSafeWordcharOrHigh(chNext)) {
                     // Ruby doesn't allow high bit chars here,
                     // but the editor host might
                     Quote.New();
@@ -1154,7 +1144,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                                         inner_string_count,
                                         state, brace_counts, Quote);
                 } else {
-                    preferRE = (strchr(")}].", ch) == nullptr);
+                    preferRE = !AnyOf(ch, ')', '}', ']', '.');
                 }
                 // Stay in default state
             } else if (isEOLChar(ch)) {
@@ -1181,7 +1171,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                 if (ch == '='
                         && isSafeWordcharOrHigh(chPrev)
                         && (chNext == '('
-                            || strchr(" \t\n\r", chNext) != nullptr)
+                            || isWhiteSpace(chNext))
                         && (!strcmp(prevWord, "def")
                             || followsDot(styler.GetStartSegment(), styler))) {
                     // <name>= is a name only when being def'd -- Get it the next time
@@ -1189,7 +1179,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                     // <name>, (op, =), <name>
                 } else if (ch == ':'
                            && isSafeWordcharOrHigh(chPrev)
-                           && strchr(" \t\n\r", chNext) != nullptr) {
+                           && isWhiteSpace(chNext)) {
                     state = SCE_RB_SYMBOL;
                 } else if ((ch == '?' || ch == '!')
                            && isSafeWordcharOrHigh(chPrev)
@@ -1423,7 +1413,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
             }
         } else if (state == SCE_RB_POD) {
             // PODs end with ^=end\s, -- any whitespace can follow =end
-            if (strchr(" \t\n\r", ch) != nullptr
+            if (isWhiteSpace(ch)
                     && i > 5
                     && isEOLChar(styler[i - 5])
                     && isMatch(styler, lengthDoc, i - 4, "=end")) {
@@ -1625,7 +1615,7 @@ bool keywordIsModifier(const char *word,
         style = actual_style(styler.StyleAt(pos));
         if (style == SCE_RB_DEFAULT) {
             ch = styler[pos];
-            if (iswhitespace(ch)) {
+            if (IsASpaceOrTab(ch)) {
                 //continue
             } else if (ch == '\r' || ch == '\n') {
                 // Scintilla's LineStart() and GetLine() routines aren't
@@ -1872,9 +1862,9 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                 }
             }
         } else if (style == SCE_RB_OPERATOR) {
-            if (strchr("[{(", ch)) {
+            if (AnyOf(ch, '[', '{', '(')) {
                 levelCurrent++;
-            } else if (strchr(")}]", ch)) {
+            } else if (AnyOf(ch, ']', '}', ')')) {
                 // Don't decrement below 0
                 if (levelCurrent > 0)
                     levelCurrent--;
