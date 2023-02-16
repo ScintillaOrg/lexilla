@@ -1346,13 +1346,26 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                 }
             }
         } else if (state == SCE_RB_HERE_Q || state == SCE_RB_HERE_QQ || state == SCE_RB_HERE_QX) {
+            if (ch == '\\' && !isEOLChar(chNext)) {
+                advance_char(i, ch, chNext, chNext2);
+            } else if (ch == '#' && state != SCE_RB_HERE_Q
+                       && chNext == '{' && innerExpr.canEnter()) {
+                // process #{ ... }
+                styler.ColourTo(i - 1, state);
+                styler.ColourTo(i + 1, SCE_RB_OPERATOR);
+                innerExpr.enter(state, Quote);
+                preferRE = true;
+                // Skip one
+                advance_char(i, ch, chNext, chNext2);
+            }
+
             // Not needed: HereDoc.State == 2
             // Indentable here docs: look backwards
             // Non-indentable: look forwards, like in Perl
             //
             // Why: so we can quickly resolve things like <<-" abc"
 
-            if (!HereDoc.CanBeIndented) {
+            else if (!HereDoc.CanBeIndented) {
                 if (isEOLChar(chPrev)
                         && isMatch(styler, lengthDoc, i, HereDoc.Delimiter)) {
                     styler.ColourTo(i - 1, state);
