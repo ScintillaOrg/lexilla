@@ -89,6 +89,7 @@ constParameter:lexilla/lexers/LexRaku.cxx
 variableScope:lexilla/lexers/LexRaku.cxx
 redundantInitialization:lexilla/lexers/LexRegistry.cxx
 constParameter:lexilla/lexers/LexRuby.cxx
+knownConditionTrueFalse:lexilla/lexers/LexRuby.cxx
 constParameter:lexilla/lexers/LexRust.cxx
 constParameter:lexilla/lexers/LexScriptol.cxx
 knownConditionTrueFalse:lexilla/lexers/LexScriptol.cxx
