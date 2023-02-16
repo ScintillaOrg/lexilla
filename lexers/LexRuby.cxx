@@ -1834,6 +1834,7 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
     };
     MethodDefinition method_definition = MethodDefinition::None;
     int argument_paren_count = 0;
+    bool heredocOpen = false;
 
     for (Sci_PositionU i = startPos; i < endPos; i++) {
         const char ch = chNext;
@@ -1893,10 +1894,11 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                       ) {
                 levelCurrent++;
             }
-        } else if (style == SCE_RB_HERE_DELIM) {
-            if (styler.SafeGetCharAt(i-2) == '<' && styler.SafeGetCharAt(i-1) == '<') {
+        } else if (style == SCE_RB_HERE_DELIM && !heredocOpen) {
+            if (stylePrev == SCE_RB_OPERATOR && chPrev == '<' && styler.SafeGetCharAt(i - 2) == '<') {
                 levelCurrent++;
-            } else if (styleNext == SCE_RB_DEFAULT) {
+                heredocOpen = true;
+            } else if (styleNext != SCE_RB_HERE_DELIM) {
                 levelCurrent--;
             }
         } else if (style == SCE_RB_STRING_QW || style == SCE_RB_STRING_W) {
@@ -1969,6 +1971,7 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
             visibleChars = 0;
             method_definition = MethodDefinition::None;
             argument_paren_count = 0;
+            heredocOpen = false;
         } else if (!isspacechar(ch)) {
             visibleChars++;
         }
