@@ -118,6 +118,9 @@ bool keywordIsModifier(const char *word,
                        Sci_Position pos,
                        Accessor &styler);
 
+// pseudo style: prefer regex after identifier
+#define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
+
 int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, WordList &keywords, Accessor &styler, char *prevWord) {
     char s[MAX_KEYWORD_LENGTH];
     Sci_PositionU j = 0;
@@ -169,6 +172,14 @@ int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, WordList &ke
         prevWord[0] = 0;
     }
     styler.ColourTo(end, style);
+
+    if (chAttr == SCE_RB_IDENTIFIER) {
+        // find heredoc in lib/ruby folder: rg "\w+\s+<<[\w\-~'\"`]"
+        // Kernel methods
+        if (!strcmp(s, "puts") || !strcmp(s, "print") || !strcmp(s, "warn") || !strcmp(s, "eval")) {
+            chAttr = SCE_RB_IDENTIFIER_PREFERRE;
+        }
+    }
     return chAttr;
 }
 
@@ -1179,7 +1190,10 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                 } else if (ch == ':'
                            && isSafeWordcharOrHigh(chPrev)
                            && isWhiteSpace(chNext)) {
-                    state = SCE_RB_SYMBOL;
+                    // keyword argument, symbol Hash key
+                    styler.ColourTo(i, SCE_RB_SYMBOL);
+                    state = SCE_RB_DEFAULT;
+                    preferRE = true;
                 } else if ((ch == '?' || ch == '!')
                            && isSafeWordcharOrHigh(chPrev)
                            && !isSafeWordcharOrHigh(chNext)) {
@@ -1204,24 +1218,20 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                         break;
 
                     case SCE_RB_WORD_DEMOTED:
+                    case SCE_RB_DEFNAME:
+                    case SCE_RB_IDENTIFIER_PREFERRE:
                         preferRE = true;
                         break;
 
                     case SCE_RB_IDENTIFIER:
-                        if (isMatch(styler, lengthDoc, wordStartPos, "print")) {
-                            preferRE = true;
-                        } else if (isEOLChar(ch)) {
-                            preferRE = true;
-                        } else {
-                            preferRE = false;
-                        }
+                        preferRE = isEOLChar(ch);
                         break;
+
                     default:
                         preferRE = false;
                     }
                     if (ch == '.') {
                         // We might be redefining an operator-method
-                        preferRE = false;
                         afterDef = word_style == SCE_RB_DEFNAME;
                     }
                     // And if it's the first
