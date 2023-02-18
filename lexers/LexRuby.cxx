@@ -112,11 +112,8 @@ bool followsDot(Sci_PositionU pos, Accessor &styler) {
 
 // Forward declarations
 bool keywordIsAmbiguous(const char *prevWord) noexcept;
-bool keywordDoStartsLoop(Sci_Position pos,
-                         Accessor &styler);
-bool keywordIsModifier(const char *word,
-                       Sci_Position pos,
-                       Accessor &styler);
+bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler);
+bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler);
 
 // pseudo style: prefer regex after identifier
 #define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
@@ -202,10 +199,7 @@ bool isMatch(Accessor &styler, Sci_Position lengthDoc, Sci_Position pos, const c
 // and then check for leading white space
 
 // Precondition: the here-doc target can be indented
-bool lookingAtHereDocDelim(Accessor   	&styler,
-                           Sci_Position 	pos,
-                           Sci_Position 	lengthDoc,
-                           const char   *HereDocDelim) {
+bool lookingAtHereDocDelim(Accessor &styler, Sci_Position pos, Sci_Position lengthDoc, const char *HereDocDelim) {
     if (!isMatch(styler, lengthDoc, pos, HereDocDelim)) {
         return false;
     }
@@ -236,8 +230,7 @@ constexpr char opposite(char ch) noexcept {
 // Null transitions when we see we've reached the end
 // and need to relex the curr char.
 
-void redo_char(Sci_Position &i, char &ch, char &chNext, char &chNext2,
-               int &state) noexcept {
+void redo_char(Sci_Position &i, char &ch, char &chNext, char &chNext2, int &state) noexcept {
     i--;
     chNext2 = chNext;
     chNext = ch;
@@ -251,8 +244,7 @@ void advance_char(Sci_Position &i, char &ch, char &chNext, char &chNext2) noexce
 }
 
 // precondition: startPos points to one after the EOL char
-bool currLineContainsHereDelims(Sci_Position &startPos,
-                                Accessor &styler) {
+bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
     if (startPos <= 1)
         return false;
 
@@ -323,8 +315,7 @@ constexpr bool isInterpolableLiteral(int state) noexcept {
            && state != SCE_RB_CHARACTER;
 }
 
-bool isEmptyLine(Sci_Position pos,
-                 Accessor &styler) {
+bool isEmptyLine(Sci_Position pos, Accessor &styler) {
     int spaceFlags = 0;
     const Sci_Position lineCurrent = styler.GetLine(pos);
     const int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, nullptr);
@@ -355,9 +346,7 @@ bool RE_CanFollowKeyword(const char *keyword) noexcept {
 // Look at chars up to but not including endPos
 // Don't look at styles in case we're looking forward
 
-Sci_Position skipWhitespace(Sci_Position startPos,
-                            Sci_Position endPos,
-                            Accessor &styler) {
+Sci_Position skipWhitespace(Sci_Position startPos, Sci_Position endPos, Accessor &styler) {
     for (Sci_Position i = startPos; i < endPos; i++) {
         if (!IsASpaceOrTab(styler[i])) {
             return i;
@@ -372,9 +361,7 @@ Sci_Position skipWhitespace(Sci_Position startPos,
 //
 // iPrev points to the start of <<
 
-bool sureThisIsHeredoc(Sci_Position iPrev,
-                       Accessor &styler,
-                       char *prevWord) {
+bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
 
     // Not so fast, since Ruby's so dynamic.  Check the context
     // to make sure we're OK.
@@ -424,11 +411,7 @@ bool sureThisIsHeredoc(Sci_Position iPrev,
 
 // Routine that saves us from allocating a buffer for the here-doc target
 // targetEndPos points one past the end of the current target
-bool haveTargetMatch(Sci_Position currPos,
-                     Sci_Position lengthDoc,
-                     Sci_Position targetStartPos,
-                     Sci_Position targetEndPos,
-                     Accessor &styler) {
+bool haveTargetMatch(Sci_Position currPos, Sci_Position lengthDoc, Sci_Position targetStartPos, Sci_Position targetEndPos, Accessor &styler) {
     if (lengthDoc - currPos < targetEndPos - targetStartPos) {
         return false;
     }
@@ -444,9 +427,7 @@ bool haveTargetMatch(Sci_Position currPos,
 
 // Finds the start position of the expression containing @p pos
 // @p min_pos should be a known expression start, e.g. the start of the line
-Sci_Position findExpressionStart(Sci_Position pos,
-                                 Sci_Position min_pos,
-                                 Accessor &styler) {
+Sci_Position findExpressionStart(Sci_Position pos, Sci_Position min_pos, Accessor &styler) {
     int depth = 0;
     for (; pos > min_pos; pos -= 1) {
         const int style = styler.StyleAt(pos - 1);
@@ -482,8 +463,7 @@ Sci_Position findExpressionStart(Sci_Position pos,
 
 // return true == yes, we have no heredocs
 
-bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
-                          Accessor &styler) {
+bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     // Use full document, not just part we're styling
     const Sci_Position lengthDoc = styler.Length();
     const Sci_Position lineStart = styler.GetLine(lt2StartPos);
@@ -653,11 +633,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
 // move to the start of the first line that is not in a
 // multi-line construct
 
-void synchronizeDocStart(Sci_PositionU &startPos,
-                         Sci_Position &length,
-                         int &initStyle,
-                         Accessor &styler,
-                         bool skipWhiteSpace=false) {
+void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &initStyle, Accessor &styler, bool skipWhiteSpace=false) {
 
     styler.Flush();
     const int style = actual_style(styler.StyleAt(startPos));
@@ -703,8 +679,7 @@ void synchronizeDocStart(Sci_PositionU &startPos,
     initStyle = SCE_RB_DEFAULT;
 }
 
-void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-                    WordList *keywordlists[], Accessor &styler) {
+void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[], Accessor &styler) {
 
     // Lexer for Ruby often has to backtrack to start of current style to determine
     // which characters are being used as quotes, how deeply nested is the
@@ -733,8 +708,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
     int numDots = 0;  // For numbers --
     // Don't start lexing in the middle of a num
 
-    synchronizeDocStart(startPos, length, initStyle, styler, // ref args
-                        false);
+    synchronizeDocStart(startPos, length, initStyle, styler, false);
 
     bool preferRE = true;
     bool afterDef = false;
@@ -1547,10 +1521,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 // Helper functions for folding, disambiguation keywords
 // Assert that there are no high-bit chars
 
-void getPrevWord(Sci_Position pos,
-                 char *prevWord,
-                 Accessor &styler,
-                 int word_state) {
+void getPrevWord(Sci_Position pos, char *prevWord, Accessor &styler, int word_state) {
     Sci_Position i;
     styler.Flush();
     for (i = pos - 1; i > 0; i--) {
@@ -1587,9 +1558,7 @@ bool keywordIsAmbiguous(const char *prevWord) noexcept {
 // if, while, unless, until modify a statement
 // do after a while or until, as a noise word (like then after if)
 
-bool keywordIsModifier(const char *word,
-                       Sci_Position pos,
-                       Accessor &styler) {
+bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
     if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
         return keywordDoStartsLoop(pos, styler);
     }
@@ -1699,8 +1668,7 @@ bool keywordIsModifier(const char *word,
 // Nothing fancy -- look to see if we follow a while/until somewhere
 // on the current line
 
-bool keywordDoStartsLoop(Sci_Position pos,
-                         Accessor &styler) {
+bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler) {
     const Sci_Position lineStart = styler.GetLine(pos);
     const Sci_Position lineStartPosn = styler.LineStart(lineStart);
     styler.Flush();
@@ -1816,13 +1784,11 @@ bool IsCommentLine(Sci_Position line, Accessor &styler) {
  *  Later offer to fold POD, here-docs, strings, and blocks of comments
  */
 
-void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-               WordList *[], Accessor &styler) {
+void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler) {
     const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
     const bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 
-    synchronizeDocStart(startPos, length, initStyle, styler, // ref args
-                        false);
+    synchronizeDocStart(startPos, length, initStyle, styler, false);
     const Sci_PositionU endPos = startPos + length;
     int visibleChars = 0;
     Sci_Position lineCurrent = styler.GetLine(startPos);
