@@ -315,6 +315,48 @@ constexpr bool isInterpolableLiteral(int state) noexcept {
            && state != SCE_RB_CHARACTER;
 }
 
+inline bool isSingleSpecialVariable(char ch) noexcept {
+    // https://docs.ruby-lang.org/en/master/globals_rdoc.html
+    return strchr("~*$?!@/\\;,.=:<>\"&`'+", ch) != nullptr;
+}
+
+void InterpolateVariable(LexAccessor &styler, int state, Sci_Position &i, char &ch, char &chNext, char chNext2) {
+    Sci_Position pos = i;
+    styler.ColourTo(pos - 1, state);
+    styler.ColourTo(pos, SCE_RB_OPERATOR);
+    state = SCE_RB_GLOBAL;
+    pos += 2;
+    unsigned len = 0;
+    if (chNext == '$') {
+        if (chNext2 == '-') {
+            ++pos;
+            len = 2;
+        } else if (isSingleSpecialVariable(chNext2)) {
+            ++pos;
+            len = 1;
+        }
+    } else {
+        state = SCE_RB_INSTANCE_VAR;
+        if (chNext2 == '@') {
+            state = SCE_RB_CLASS_VAR;
+            ++pos;
+        }
+    }
+    while (true) {
+        chNext2 = styler.SafeGetCharAt(pos);
+        --len;
+        if (len == 0 || !isSafeWordcharOrHigh(chNext2)) {
+            break;
+        }
+        ++pos;
+    }
+    --pos;
+    styler.ColourTo(pos, state);
+    i = pos;
+    ch = chNext;
+    chNext = chNext2;
+}
+
 bool isEmptyLine(Sci_Position pos, Accessor &styler) {
     int spaceFlags = 0;
     const Sci_Position lineCurrent = styler.GetLine(pos);
@@ -959,7 +1001,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                     i += 3;
                     ch = styler.SafeGetCharAt(i);
                     chNext = styler.SafeGetCharAt(i+1);
-                } else if (chNext == '$' && strchr("_~*$?!@/\\;,.=:<>\"&`'+", chNext2)) {
+                } else if (chNext == '$' && isSingleSpecialVariable(chNext2)) {
                     // single-character special global variables
                     i += 2;
                     ch = chNext2;
@@ -1333,14 +1375,20 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
             if (ch == '\\' && !isEOLChar(chNext)) {
                 advance_char(i, ch, chNext, chNext2);
             } else if (ch == '#' && state != SCE_RB_HERE_Q
-                       && chNext == '{' && innerExpr.canEnter()) {
-                // process #{ ... }
-                styler.ColourTo(i - 1, state);
-                styler.ColourTo(i + 1, SCE_RB_OPERATOR);
-                innerExpr.enter(state, Quote);
-                preferRE = true;
-                // Skip one
-                advance_char(i, ch, chNext, chNext2);
+                       && (chNext == '{' || chNext == '@' || chNext == '$')) {
+                if (chNext == '{') {
+                    if (innerExpr.canEnter()) {
+                        // process #{ ... }
+                        styler.ColourTo(i - 1, state);
+                        styler.ColourTo(i + 1, SCE_RB_OPERATOR);
+                        innerExpr.enter(state, Quote);
+                        preferRE = true;
+                        // Skip one
+                        advance_char(i, ch, chNext, chNext2);
+                    }
+                } else {
+                    InterpolateVariable(styler, state, i, ch, chNext, chNext2);
+                }
             }
 
             // Not needed: HereDoc.State == 2
@@ -1439,14 +1487,18 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                 Quote.Count++;
 
             } else if (ch == '#') {
-                if (chNext == '{' && innerExpr.canEnter()) {
-                    // process #{ ... }
-                    styler.ColourTo(i - 1, state);
-                    styler.ColourTo(i + 1, SCE_RB_OPERATOR);
-                    innerExpr.enter(state, Quote);
-                    preferRE = true;
-                    // Skip one
-                    advance_char(i, ch, chNext, chNext2);
+                if (chNext == '{') {
+                    if (innerExpr.canEnter()) {
+                        // process #{ ... }
+                        styler.ColourTo(i - 1, state);
+                        styler.ColourTo(i + 1, SCE_RB_OPERATOR);
+                        innerExpr.enter(state, Quote);
+                        preferRE = true;
+                        // Skip one
+                        advance_char(i, ch, chNext, chNext2);
+                    }
+                } else if (chNext == '@' || chNext == '$') {
+                    InterpolateVariable(styler, state, i, ch, chNext, chNext2);
                 } else {
                     //todo: distinguish comments from pound chars
                     // for now, handle as comment
@@ -1491,16 +1543,20 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                 }
             } else if (ch == Quote.Up) {
                 Quote.Count++;
-            } else if (ch == '#' && chNext == '{'
-                       && innerExpr.canEnter()
-                       && isInterpolableLiteral(state)) {
-                // process #{ ... }
-                styler.ColourTo(i - 1, state);
-                styler.ColourTo(i + 1, SCE_RB_OPERATOR);
-                innerExpr.enter(state, Quote);
-                preferRE = true;
-                // Skip one
-                advance_char(i, ch, chNext, chNext2);
+            } else if (ch == '#' && isInterpolableLiteral(state)) {
+                if (chNext == '{') {
+                    if (innerExpr.canEnter()) {
+                        // process #{ ... }
+                        styler.ColourTo(i - 1, state);
+                        styler.ColourTo(i + 1, SCE_RB_OPERATOR);
+                        innerExpr.enter(state, Quote);
+                        preferRE = true;
+                        // Skip one
+                        advance_char(i, ch, chNext, chNext2);
+                    }
+                } else if (chNext == '@' || chNext == '$') {
+                    InterpolateVariable(styler, state, i, ch, chNext, chNext2);
+                }
             }
         }
 
