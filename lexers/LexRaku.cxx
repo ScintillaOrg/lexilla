@@ -1046,7 +1046,7 @@ void SCI_METHOD LexerRaku::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	WordList lastAdverbs;			// last adverbs seen
 	Sci_Position len;				// temp length value
 	char s[100];					// temp char string
-	int typeDetect;					// temp type detected (for regex and Q lang)
+	int typeDetect = -1;			// temp type detected (for regex and Q lang)
 	Sci_Position lengthToEnd;		// length until the end of range
 
 	// Backtrack to safe start position before complex quoted elements
