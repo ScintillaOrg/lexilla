@@ -35,6 +35,14 @@ TEST_CASE("WordList") {
 		REQUIRE(!wl.InList("class"));
 	}
 
+	SECTION("StringInList") {
+		wl.Set("else struct");
+		std::string sStruct = "struct";
+		REQUIRE(wl.InList(sStruct));
+		std::string sClass = "class";
+		REQUIRE(!wl.InList(sClass));
+	}
+
 	SECTION("InListUnicode") {
 		// "cheese" in English
 		// "kase" ('k', 'a with diaeresis', 's', 'e') in German
