@@ -91,6 +91,10 @@ constexpr bool IsSpaceOrTab(int ch) noexcept {
 	return ch == ' ' || ch == '\t';
 }
 
+constexpr bool IsOperatorOrSpace(int ch) noexcept {
+	return isoperator(ch) || IsASpace(ch);
+}
+
 bool OnlySpaceOrTab(const std::string &s) noexcept {
 	for (const char ch : s) {
 		if (!IsSpaceOrTab(ch))
@@ -138,23 +142,18 @@ BracketPair FindBracketPair(Tokens &tokens) {
 
 void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 		int activity, const WordList &markerList, bool caseSensitive){
-	if ((isoperator(sc.chPrev) || IsASpace(sc.chPrev)) && markerList.Length()) {
-		constexpr Sci_PositionU lengthMarker = 50;
-		char marker[lengthMarker+1] = "";
-		const Sci_PositionU currPos = sc.currentPos;
-		Sci_PositionU i = 0;
-		while (i < lengthMarker) {
-			const char ch = styler.SafeGetCharAt(currPos + i);
-			if (IsASpace(ch) || isoperator(ch)) {
+	if (IsOperatorOrSpace(sc.chPrev) && !IsOperatorOrSpace(sc.ch) && markerList.Length()) {
+		std::string marker;
+		for (Sci_PositionU currPos = sc.currentPos; true; currPos++) {
+			const char ch = styler.SafeGetCharAt(currPos);
+			if (IsOperatorOrSpace(ch)) {
 				break;
 			}
 			if (caseSensitive)
-				marker[i] = ch;
+				marker.push_back(ch);
 			else
-				marker[i] = MakeLowerCase(ch);
-			i++;
+				marker.push_back(MakeLowerCase(ch));
 		}
-		marker[i] = '\0';
 		if (markerList.InList(marker)) {
 			sc.SetState(SCE_C_TASKMARKER|activity);
 		}
@@ -1220,7 +1219,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				}
 				break;
 			case SCE_C_TASKMARKER:
-				if (isoperator(sc.ch) || IsASpace(sc.ch)) {
+				if (IsOperatorOrSpace(sc.ch)) {
 					sc.SetState(styleBeforeTaskMarker|activitySet);
 					styleBeforeTaskMarker = SCE_C_DEFAULT;
 				}
