@@ -768,6 +768,9 @@ Sci_Position SCI_METHOD LexerCPP::WordListSet(int n, const char *wl) {
 void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
+	const StyleContext::Transform transform = caseSensitive ?
+		StyleContext::Transform::none : StyleContext::Transform::lower;
+
 	const CharacterSet setOKBeforeRE(CharacterSet::setNone, "([{=,:;!%^&*|?~+-");
 	const CharacterSet setCouldBePostOp(CharacterSet::setNone, "+-");
 
@@ -843,6 +846,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 
 	std::string rawStringTerminator = rawStringTerminators.ValueAt(lineCurrent-1);
 	SparseState<std::string> rawSTNew(lineCurrent);
+
+	std::string currentText;
 
 	int activitySet = preproc.ActiveState();
 
@@ -929,31 +934,29 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				break;
 			case SCE_C_IDENTIFIER:
 				if (sc.atLineStart || sc.atLineEnd || !setWord.Contains(sc.ch) || (sc.ch == '.')) {
-					char s[1000];
-					if (caseSensitive) {
-						sc.GetCurrent(s, sizeof(s));
-					} else {
-						sc.GetCurrentLowered(s, sizeof(s));
-					}
-					if (keywords.InList(s)) {
-						lastWordWasUUID = strcmp(s, "uuid") == 0;
+					sc.GetCurrentString(currentText, transform);
+					if (keywords.InList(currentText)) {
+						lastWordWasUUID = currentText == "uuid";
 						sc.ChangeState(SCE_C_WORD|activitySet);
-					} else if (keywords2.InList(s)) {
+					} else if (keywords2.InList(currentText)) {
 						sc.ChangeState(SCE_C_WORD2|activitySet);
-					} else if (keywords4.InList(s)) {
+					} else if (keywords4.InList(currentText)) {
 						sc.ChangeState(SCE_C_GLOBALCLASS|activitySet);
 					} else {
-						const int subStyle = classifierIdentifiers.ValueFor(s);
+						const int subStyle = classifierIdentifiers.ValueFor(currentText);
 						if (subStyle >= 0) {
 							sc.ChangeState(subStyle|activitySet);
 						}
 					}
 					const bool literalString = sc.ch == '\"';
 					if (literalString || sc.ch == '\'') {
-						size_t lenS = strlen(s);
+						std::string_view s = currentText;
+						size_t lenS = s.length();
 						const bool raw = literalString && sc.chPrev == 'R' && !setInvalidRawFirst.Contains(sc.chNext);
-						if (raw)
-							s[lenS--] = '\0';
+						if (raw) {
+							s.remove_suffix(1);
+							lenS--;
+						}
 						const bool valid =
 							(lenS == 0) ||
 							((lenS == 1) && ((s[0] == 'L') || (s[0] == 'u') || (s[0] == 'U'))) ||
@@ -1067,33 +1070,27 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					seenDocKeyBrace = true;
 				} else if (!setDoxygen.Contains(sc.ch)
 				           && !(seenDocKeyBrace && (sc.ch == ',' || sc.ch == '.'))) {
-					char s[100];
-					if (caseSensitive) {
-						sc.GetCurrent(s, sizeof(s));
-					} else {
-						sc.GetCurrentLowered(s, sizeof(s));
-					}
 					if (!(IsASpace(sc.ch) || (sc.ch == 0))) {
 						sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
-					} else if (!keywords3.InList(s + 1) && !keywords3.InList(s)) {
-						const int subStyleCDKW = classifierDocKeyWords.ValueFor(s+1);
-						if (subStyleCDKW >= 0) {
-							sc.ChangeState(subStyleCDKW|activitySet);
-						} else {
-							sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
+					} else {
+						sc.GetCurrentString(currentText, transform);
+						assert(!currentText.empty());
+						std::string currentSuffix = currentText.substr(1);
+						if (!keywords3.InList(currentSuffix) && !keywords3.InList(currentText)) {
+							const int subStyleCDKW = classifierDocKeyWords.ValueFor(currentSuffix.c_str());
+							if (subStyleCDKW >= 0) {
+								sc.ChangeState(subStyleCDKW | activitySet);
+							} else {
+								sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR | activitySet);
+							}
 						}
 					}
 					sc.SetState(styleBeforeDCKeyword|activitySet);
 					seenDocKeyBrace = false;
 				} else if (sc.ch == '>') {
-					char s[100];
-					if (caseSensitive) {
-						sc.GetCurrent(s, sizeof(s));
-					} else {
-						sc.GetCurrentLowered(s, sizeof(s));
-					}
-					if (!keywords3.InList(s)) {
-						const int subStyleCDKW = classifierDocKeyWords.ValueFor(s + 1);
+					sc.GetCurrentString(currentText, transform);
+					if (!keywords3.InList(currentText)) {
+						const int subStyleCDKW = classifierDocKeyWords.ValueFor(currentText.substr(1));
 						if (subStyleCDKW >= 0) {
 							sc.ChangeState(subStyleCDKW | activitySet);
 						} else {
