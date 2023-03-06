@@ -244,7 +244,7 @@ static void ColouriseCamlDoc(
 			}/* else
 				// fall through for SML char literal (handle like string) */
 			// Falls through.
-
+			[[fallthrough]];
 		case SCE_CAML_STRING:
 			// [try to] interpret as [additional] [SML char/] string literal char
 			if (isSML && sc.Match('\\') && sc.chPrev != '\\' && isspace(sc.chNext))

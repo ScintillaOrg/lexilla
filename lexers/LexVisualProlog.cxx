@@ -373,6 +373,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             // return to SCE_VISUALPROLOG_STRING and treat as such (fall-through)
             sc.SetState(SCE_VISUALPROLOG_STRING);
             // Falls through.
+            [[fallthrough]];
         case SCE_VISUALPROLOG_STRING:
             if (sc.MatchLineEnd()) {
                 sc.SetState(SCE_VISUALPROLOG_STRING_EOL_OPEN);
@@ -395,6 +396,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             // return to SCE_VISUALPROLOG_STRING_VERBATIM and treat as such (fall-through)
             sc.SetState(SCE_VISUALPROLOG_STRING_VERBATIM);
             // Falls through.
+            [[fallthrough]];
         case SCE_VISUALPROLOG_STRING_VERBATIM:
             if (sc.MatchLineEnd()) {
                 sc.SetState(SCE_VISUALPROLOG_STRING_VERBATIM_EOL);

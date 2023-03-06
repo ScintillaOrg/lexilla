@@ -350,6 +350,7 @@ static void ColouriseCssDoc(Sci_PositionU startPos, Sci_Position length, int ini
 					if (isLessDocument) // give priority to pseudo elements
 						break;
 					// Falls through.
+					[[fallthrough]];
 				case SCE_CSS_VALUE:
 					lastStateVar = sc.state;
 					sc.SetState(SCE_CSS_VARIABLE);

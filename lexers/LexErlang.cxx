@@ -119,6 +119,7 @@ static void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				// V--- Falling through!
 				// Falls through.
+				[[fallthrough]];
 				case COMMENT_FUNCTION : {
 					if (sc.ch != '%') {
 						to_late_to_comment = true;
@@ -132,6 +133,7 @@ static void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				// V--- Falling through!
 				// Falls through.
+				[[fallthrough]];
 				case COMMENT_MODULE : {
 					if (parse_state != COMMENT) {
 						// Search for comment documentation

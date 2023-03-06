@@ -398,6 +398,7 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
                styleBeforeTaskMarker = SCE_ABL_DEFAULT;
             }
             // fall through
+            [[fallthrough]];
          case SCE_ABL_COMMENT:
             if (sc.Match('*', '/')) {
                sc.Forward();
