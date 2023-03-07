@@ -104,6 +104,13 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	return IsXidContinue(ch);
 }
 
+inline bool IsAGetNodeChar(int ch) {
+	if (IsASCII(ch))
+		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/');
+
+	return false;
+}
+
 inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
 		return (IsUpperOrLowerCase(ch) || ch == '_');
@@ -209,6 +216,7 @@ LexicalClass lexicalClasses[] = {
 	13, "SCE_GD_STRINGEOL", "error literal string", "End of line where string is not closed",
 	14, "SCE_GD_WORD2", "identifier", "Highlighted identifiers",
 	15, "SCE_GD_ANNOTATION", "annotation", "Annotations",
+	16, "SCE_GD_GETNODE", "getnode", "Cached Node Path",
 };
 
 }
@@ -479,6 +487,10 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			if (!IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
 				sc.SetState(SCE_GD_DEFAULT);
 			}
+		} else if (sc.state == SCE_GD_GETNODE) {
+			if (!IsAGetNodeChar(sc.ch)) {
+				sc.SetState(SCE_GD_DEFAULT);
+			}
 		} else if (IsGDSingleQuoteStringState(sc.state)) {
 			if (sc.ch == '\\') {
 				if ((sc.chNext == '\r') && (sc.GetRelative(2) == '\n')) {
@@ -557,6 +569,8 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					sc.SetState(SCE_GD_ANNOTATION);
 				else
 					sc.SetState(SCE_GD_OPERATOR);
+			} else if (sc.ch == '$') {
+				sc.SetState(SCE_GD_GETNODE);
 			} else if (IsGDStringStart(sc.ch)) {
 				Sci_PositionU nextIndex = 0;
 				sc.SetState(GetGDStringState(styler, sc.currentPos, &nextIndex));
