@@ -491,7 +491,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				sc.SetState(SCE_GD_DEFAULT);
 			}
 		} else if (sc.state == SCE_GD_GETNODE) {
-			if (!IsAGetNodeChar(sc.ch)) {
+			if (!IsAGetNodeChar(sc.ch, options.unicodeIdentifiers)) {
 				sc.SetState(SCE_GD_DEFAULT);
 			}
 		} else if (IsGDSingleQuoteStringState(sc.state)) {
