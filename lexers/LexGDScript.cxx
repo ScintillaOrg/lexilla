@@ -108,7 +108,10 @@ inline bool IsAGetNodeChar(int ch) {
 	if (IsASCII(ch))
 		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/');
 
-	return false;
+	if (!unicodeIdentifiers)
+		return false;
+
+	return IsXidContinue(ch);
 }
 
 inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
