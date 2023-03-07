@@ -104,7 +104,7 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	return IsXidContinue(ch);
 }
 
-inline bool IsAGetNodeChar(int ch) {
+inline bool IsAGetNodeChar(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
 		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/');
 
