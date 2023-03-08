@@ -106,7 +106,7 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 
 inline bool IsANodeIdentifierChar(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
-		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/');
+		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/' || ch =='%');
 
 	if (!unicodeIdentifiers)
 		return false;
@@ -402,7 +402,9 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 	Sci_Position startIndicator = sc.currentPos;
 	bool inContinuedString = false;
 	bool percentFlag = false;
-
+	int stringQuoteState = 0;
+	bool isGDStringPath = false;
+	
 	for (; sc.More(); sc.Forward()) {
 
 		if (sc.atLineStart) {
@@ -434,7 +436,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		}
 		
 		bool needEOLCheck = false;
-		
+
 
 		if (sc.state == SCE_GD_OPERATOR) {
 			kwLast = kwOther;
@@ -572,6 +574,16 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			} else if ((sc.ch == '$') || (sc.ch == '%' && !percentFlag)) {
 				percentFlag = true;
 				sc.SetState(SCE_GD_NODE_IDENTIFIER);
+				if(IsGDStringStart(sc.chNext)) {
+					percentFlag = false;
+					Sci_PositionU nextIndex = 0;
+					stringQuoteState = GetGDStringState(styler, sc.currentPos, &nextIndex);
+					sc.ForwardSetState(SCE_GD_NODE_IDENTIFIER);
+					while (nextIndex > (sc.currentPos + 1) && sc.More()) {
+						sc.Forward();
+					}
+					isGDStringPath = true;
+				}
 			} else if (isoperator(sc.ch) || sc.ch == '`') {
 				percentFlag = (sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}');
 				sc.SetState(SCE_GD_OPERATOR);
@@ -584,7 +596,15 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					sc.SetState(SCE_GD_OPERATOR);
 			} else if (IsGDStringStart(sc.ch)) {
 				Sci_PositionU nextIndex = 0;
-				sc.SetState(GetGDStringState(styler, sc.currentPos, &nextIndex));
+				if(isGDStringPath) {
+					isGDStringPath = false;
+					sc.SetState(stringQuoteState);
+					GetGDStringState(styler, sc.currentPos, &nextIndex);
+					sc.SetState(SCE_GD_DEFAULT);
+					percentFlag = true;
+				} else {
+					sc.SetState(GetGDStringState(styler, sc.currentPos, &nextIndex));
+				}
 				while (nextIndex > (sc.currentPos + 1) && sc.More()) {
 					sc.Forward();
 				}
