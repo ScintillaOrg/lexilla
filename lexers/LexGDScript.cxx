@@ -573,7 +573,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				percentFlag = true;
 				sc.SetState(SCE_GD_NODE_IDENTIFIER);
 			} else if (isoperator(sc.ch) || sc.ch == '`') {
-				percentFlag = (sc.ch == ')');
+				percentFlag = (sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}');
 				sc.SetState(SCE_GD_OPERATOR);
 			} else if (sc.ch == '#') {
 				sc.SetState(sc.chNext == '#' ? SCE_GD_COMMENTBLOCK : SCE_GD_COMMENTLINE);
