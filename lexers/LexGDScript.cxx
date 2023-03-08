@@ -106,7 +106,7 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 
 inline bool IsANodeIdentifierChar(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
-		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/');
+		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/' || ch =='%');
 
 	if (!unicodeIdentifiers)
 		return false;
@@ -402,7 +402,9 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 	Sci_Position startIndicator = sc.currentPos;
 	bool inContinuedString = false;
 	bool percentFlag = false;
-
+	int stringQuoteState = 0;
+	bool isGDStringPath = false;
+	
 	for (; sc.More(); sc.Forward()) {
 
 		if (sc.atLineStart) {
@@ -434,7 +436,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		}
 		
 		bool needEOLCheck = false;
-		
+
 
 		if (sc.state == SCE_GD_OPERATOR) {
 			kwLast = kwOther;
@@ -496,8 +498,19 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				sc.SetState(SCE_GD_DEFAULT);
 			}
 		} else if (sc.state == SCE_GD_NODE_IDENTIFIER) {
-			if (!IsANodeIdentifierChar(sc.ch, options.unicodeIdentifiers)) {
-				sc.SetState(SCE_GD_DEFAULT);
+			if (isGDStringPath) {
+				if (sc.ch == GetGDStringQuoteChar(stringQuoteState) ) {
+					isGDStringPath = false;
+					needEOLCheck = true;
+				}
+			} else {
+				if (IsGDStringStart(sc.ch)) {
+					isGDStringPath = true;
+					Sci_PositionU nextIndex = 0;
+					stringQuoteState = GetGDStringState(styler, sc.currentPos, &nextIndex);
+				} else if (!IsANodeIdentifierChar(sc.ch, options.unicodeIdentifiers)) {
+					sc.SetState(SCE_GD_DEFAULT);
+				}
 			}
 		} else if (IsGDSingleQuoteStringState(sc.state)) {
 			if (sc.ch == '\\') {
@@ -573,7 +586,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				percentFlag = true;
 				sc.SetState(SCE_GD_NODE_IDENTIFIER);
 			} else if (isoperator(sc.ch) || sc.ch == '`') {
-				percentFlag = (sc.ch == ')');
+				percentFlag = (sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}');
 				sc.SetState(SCE_GD_OPERATOR);
 			} else if (sc.ch == '#') {
 				sc.SetState(sc.chNext == '#' ? SCE_GD_COMMENTBLOCK : SCE_GD_COMMENTLINE);
