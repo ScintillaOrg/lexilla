@@ -94,6 +94,16 @@ int GetGDStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex)
 	}
 }
 
+int GetGDStringState(char ch) {
+	if (ch != '"' && ch != '\'')
+		return SCE_GD_DEFAULT;
+
+	if (ch == '"')
+		return SCE_GD_STRING;
+	else
+		return SCE_GD_CHARACTER;
+}
+
 inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
 		return (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
@@ -104,7 +114,7 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	return IsXidContinue(ch);
 }
 
-inline bool IsANodeIdentifierChar(int ch, bool unicodeIdentifiers) {
+inline bool IsANodePathChar(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
 		return (IsAlphaNumeric(ch) || ch == '_' || ch == '/' || ch =='%');
 
@@ -219,7 +229,7 @@ LexicalClass lexicalClasses[] = {
 	13, "SCE_GD_STRINGEOL", "error literal string", "End of line where string is not closed",
 	14, "SCE_GD_WORD2", "identifier", "Highlighted identifiers",
 	15, "SCE_GD_ANNOTATION", "annotation", "Annotations",
-	16, "SCE_GD_NODE_IDENTIFIER", "node identifier", "Node Identifiers",
+	16, "SCE_GD_NODEPATH", "path", "Node path",
 };
 
 }
@@ -401,9 +411,8 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 	bool indentGood = true;
 	Sci_Position startIndicator = sc.currentPos;
 	bool inContinuedString = false;
-	bool percentFlag = false;
-	int stringQuoteState = 0;
-	bool isGDStringPath = false;
+	bool percentIsOperator = false;
+	int nodePathStringState = SCE_GD_DEFAULT;
 	
 	for (; sc.More(); sc.Forward()) {
 
@@ -425,10 +434,8 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			}
 		}
 		
-		
-		
 		if (sc.atLineEnd) {
-			percentFlag = false;
+			percentIsOperator = false;
 			ProcessLineEnd(sc, inContinuedString);
 			lineCurrent++;
 			if (!sc.More())
@@ -436,7 +443,6 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		}
 		
 		bool needEOLCheck = false;
-
 
 		if (sc.state == SCE_GD_OPERATOR) {
 			kwLast = kwOther;
@@ -497,18 +503,15 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			if (!IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
 				sc.SetState(SCE_GD_DEFAULT);
 			}
-		} else if (sc.state == SCE_GD_NODE_IDENTIFIER) {
-			if (isGDStringPath) {
-				if (sc.ch == GetGDStringQuoteChar(stringQuoteState) ) {
-					isGDStringPath = false;
-					needEOLCheck = true;
+		} else if (sc.state == SCE_GD_NODEPATH) {
+			if (nodePathStringState != SCE_GD_DEFAULT) {
+				if (sc.ch == GetGDStringQuoteChar(nodePathStringState) ) {
+					nodePathStringState = SCE_GD_DEFAULT;
 				}
 			} else {
 				if (IsGDStringStart(sc.ch)) {
-					isGDStringPath = true;
-					Sci_PositionU nextIndex = 0;
-					stringQuoteState = GetGDStringState(styler, sc.currentPos, &nextIndex);
-				} else if (!IsANodeIdentifierChar(sc.ch, options.unicodeIdentifiers)) {
+					nodePathStringState = GetGDStringState(sc.ch);
+				} else if (!IsANodePathChar(sc.ch, options.unicodeIdentifiers)) {
 					sc.SetState(SCE_GD_DEFAULT);
 				}
 			}
@@ -574,7 +577,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 						base_n_number = true;
 						sc.SetState(SCE_GD_NUMBER);
 					} else {
-						percentFlag = true;
+						percentIsOperator = true;
 						sc.SetState(SCE_GD_NUMBER);
 						sc.ForwardSetState(SCE_GD_IDENTIFIER);
 					}
@@ -582,11 +585,11 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					base_n_number = false;
 					sc.SetState(SCE_GD_NUMBER);
 				}
-			} else if ((sc.ch == '$') || (sc.ch == '%' && !percentFlag)) {
-				percentFlag = true;
-				sc.SetState(SCE_GD_NODE_IDENTIFIER);
+			} else if ((sc.ch == '$') || (sc.ch == '%' && !percentIsOperator)) {
+				percentIsOperator = true;
+				sc.SetState(SCE_GD_NODEPATH);
 			} else if (isoperator(sc.ch) || sc.ch == '`') {
-				percentFlag = (sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}');
+				percentIsOperator = (sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}');
 				sc.SetState(SCE_GD_OPERATOR);
 			} else if (sc.ch == '#') {
 				sc.SetState(sc.chNext == '#' ? SCE_GD_COMMENTBLOCK : SCE_GD_COMMENTLINE);
@@ -602,7 +605,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 					sc.Forward();
 				}
             } else if (IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
-				percentFlag = true;
+				percentIsOperator = true;
 				sc.SetState(SCE_GD_IDENTIFIER);
 			}
 		}
