@@ -48,22 +48,13 @@ static constexpr int keywordClasses[] = {
 namespace {
 
 struct OptionsFSharp {
-	bool fold;
-	bool foldCompact;
-	bool foldComment;
-	bool foldCommentStream;
-	bool foldCommentMultiLine;
-	bool foldPreprocessor;
-	bool foldImports;
-	OptionsFSharp() {
-		fold = true;
-		foldCompact = true;
-		foldComment = true;
-		foldCommentStream = true;
-		foldCommentMultiLine = true;
-		foldPreprocessor = false;
-		foldImports = true;
-	}
+	bool fold = true;
+	bool foldCompact = true;
+	bool foldComment = true;
+	bool foldCommentStream = true;
+	bool foldCommentMultiLine = true;
+	bool foldPreprocessor = false;
+	bool foldImports = true;
 };
 
 struct OptionSetFSharp : public OptionSet<OptionsFSharp> {
@@ -92,12 +83,8 @@ struct OptionSetFSharp : public OptionSet<OptionsFSharp> {
 };
 
 struct FSharpString {
-	Sci_Position startPos;
-	int startChar;
-	FSharpString() {
-		startPos = INVALID_POSITION;
-		startChar = '"';
-	}
+	Sci_Position startPos = INVALID_POSITION;
+	int startChar = '"';
 	constexpr bool HasLength() const {
 		return startPos > INVALID_POSITION;
 	}
@@ -295,6 +282,10 @@ public:
 	      numericMetaChars1(CharacterSet::setNone, "_uU"),
 	      numericMetaChars2(CharacterSet::setNone, "fFIlLmMnsy") {
 	}
+	LexerFSharp(const LexerFSharp &) = delete;
+	LexerFSharp(LexerFSharp &&) = delete;
+	LexerFSharp &operator=(const LexerFSharp &) = delete;
+	LexerFSharp &operator=(LexerFSharp &&) = delete;
 	static ILexer5 *LexerFactoryFSharp() {
 		return new LexerFSharp();
 	}
@@ -375,7 +366,7 @@ Sci_Position SCI_METHOD LexerFSharp::WordListSet(int n, const char *wl) {
 void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 	StyleContext sc(start, static_cast<Sci_PositionU>(length), initStyle, styler);
-	Sci_Position lineCurrent = styler.GetLine(start);
+	Sci_Position lineCurrent = styler.GetLine(static_cast<Sci_Position>(start));
 	Sci_PositionU cursor = 0;
 	UnicodeChar uniCh = UnicodeChar();
 	FSharpString fsStr = FSharpString();
