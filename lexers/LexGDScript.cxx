@@ -433,7 +433,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				startIndicator = sc.currentPos;
 			}
 		}
-		
+
 		if (sc.atLineEnd) {
 			percentIsOperator = false;
 			ProcessLineEnd(sc, inContinuedString);
@@ -441,7 +441,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 			if (!sc.More())
 				break;
 		}
-		
+
 		bool needEOLCheck = false;
 
 		if (sc.state == SCE_GD_OPERATOR) {
