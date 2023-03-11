@@ -94,7 +94,7 @@ int GetGDStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex)
 	}
 }
 
-int GetGDStringState(char ch) {
+int GetGDStringState(int ch) {
 	if (ch != '"' && ch != '\'')
 		return SCE_GD_DEFAULT;
 
