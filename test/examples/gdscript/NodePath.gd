@@ -27,3 +27,7 @@ $/test/"No % de"/test % %test
 %node/"n o d e"/'n o d e' % %"No De"
 
 "%010d" % 12345
+
+1 % 1
+
+a % b

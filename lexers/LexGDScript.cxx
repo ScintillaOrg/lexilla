@@ -572,11 +572,13 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		if (sc.state == SCE_GD_DEFAULT) {
 			if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				if (sc.ch == '0' && (sc.chNext == 'x' || sc.chNext == 'X')) {
+					percentIsOperator = true;
 					base_n_number = true;
 					sc.SetState(SCE_GD_NUMBER);
 				} else if (sc.ch == '0' &&
 						(sc.chNext == 'o' || sc.chNext == 'O' || sc.chNext == 'b' || sc.chNext == 'B')) {
 					if (options.base2or8Literals) {
+						percentIsOperator = true;
 						base_n_number = true;
 						sc.SetState(SCE_GD_NUMBER);
 					} else {
@@ -585,6 +587,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 						sc.ForwardSetState(SCE_GD_IDENTIFIER);
 					}
 				} else {
+					percentIsOperator = true;
 					base_n_number = false;
 					sc.SetState(SCE_GD_NUMBER);
 				}
@@ -602,6 +605,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				else
 					sc.SetState(SCE_GD_OPERATOR);
 			} else if (IsGDStringStart(sc.ch)) {
+				percentIsOperator = true;
 				Sci_PositionU nextIndex = 0;
 				sc.SetState(GetGDStringState(styler, sc.currentPos, &nextIndex));
 				while (nextIndex > (sc.currentPos + 1) && sc.More()) {
