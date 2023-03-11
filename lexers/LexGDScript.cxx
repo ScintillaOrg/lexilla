@@ -528,6 +528,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				}
 			} else if (sc.ch == GetGDStringQuoteChar(sc.state)) {
 				sc.ForwardSetState(SCE_GD_DEFAULT);
+				percentIsOperator = true;
 				needEOLCheck = true;
 			}
 		} else if (sc.state == SCE_GD_TRIPLE) {
@@ -537,6 +538,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				sc.Forward();
 				sc.Forward();
 				sc.ForwardSetState(SCE_GD_DEFAULT);
+				percentIsOperator = true;
 				needEOLCheck = true;
 			}
 		} else if (sc.state == SCE_GD_TRIPLEDOUBLE) {
@@ -546,6 +548,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				sc.Forward();
 				sc.Forward();
 				sc.ForwardSetState(SCE_GD_DEFAULT);
+				percentIsOperator = true;
 				needEOLCheck = true;
 			}
 		}
