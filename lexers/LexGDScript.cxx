@@ -411,7 +411,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 	bool indentGood = true;
 	Sci_Position startIndicator = sc.currentPos;
 	bool inContinuedString = false;
-	bool percentIsOperator = false;
+	bool percentIsNodePath = false;
 	int nodePathStringState = SCE_GD_DEFAULT;
 	
 	for (; sc.More(); sc.Forward()) {
@@ -435,7 +435,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		}
 
 		if (sc.atLineEnd) {
-			percentIsOperator = false;
+			percentIsNodePath = false;
 			ProcessLineEnd(sc, inContinuedString);
 			lineCurrent++;
 			if (!sc.More())
@@ -528,7 +528,6 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				}
 			} else if (sc.ch == GetGDStringQuoteChar(sc.state)) {
 				sc.ForwardSetState(SCE_GD_DEFAULT);
-				percentIsOperator = true;
 				needEOLCheck = true;
 			}
 		} else if (sc.state == SCE_GD_TRIPLE) {
@@ -538,7 +537,6 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				sc.Forward();
 				sc.Forward();
 				sc.ForwardSetState(SCE_GD_DEFAULT);
-				percentIsOperator = true;
 				needEOLCheck = true;
 			}
 		} else if (sc.state == SCE_GD_TRIPLEDOUBLE) {
@@ -548,7 +546,6 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				sc.Forward();
 				sc.Forward();
 				sc.ForwardSetState(SCE_GD_DEFAULT);
-				percentIsOperator = true;
 				needEOLCheck = true;
 			}
 		}
@@ -572,30 +569,25 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 		if (sc.state == SCE_GD_DEFAULT) {
 			if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				if (sc.ch == '0' && (sc.chNext == 'x' || sc.chNext == 'X')) {
-					percentIsOperator = true;
 					base_n_number = true;
 					sc.SetState(SCE_GD_NUMBER);
 				} else if (sc.ch == '0' &&
 						(sc.chNext == 'o' || sc.chNext == 'O' || sc.chNext == 'b' || sc.chNext == 'B')) {
 					if (options.base2or8Literals) {
-						percentIsOperator = true;
 						base_n_number = true;
 						sc.SetState(SCE_GD_NUMBER);
 					} else {
-						percentIsOperator = true;
-						sc.SetState(SCE_GD_NUMBER);
 						sc.ForwardSetState(SCE_GD_IDENTIFIER);
 					}
 				} else {
-					percentIsOperator = true;
 					base_n_number = false;
 					sc.SetState(SCE_GD_NUMBER);
 				}
-			} else if ((sc.ch == '$') || (sc.ch == '%' && !percentIsOperator)) {
-				percentIsOperator = true;
+			} else if ((sc.ch == '$') || (sc.ch == '%' && (percentIsNodePath || IsFirstNonWhitespace(sc.currentPos, styler)))) {
+				percentIsNodePath = false;
 				sc.SetState(SCE_GD_NODEPATH);
 			} else if (isoperator(sc.ch) || sc.ch == '`') {
-				percentIsOperator = (sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}');
+				percentIsNodePath = !((sc.ch == ')') || (sc.ch == ']') || (sc.ch == '}'));
 				sc.SetState(SCE_GD_OPERATOR);
 			} else if (sc.ch == '#') {
 				sc.SetState(sc.chNext == '#' ? SCE_GD_COMMENTBLOCK : SCE_GD_COMMENTLINE);
@@ -605,14 +597,12 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 				else
 					sc.SetState(SCE_GD_OPERATOR);
 			} else if (IsGDStringStart(sc.ch)) {
-				percentIsOperator = true;
 				Sci_PositionU nextIndex = 0;
 				sc.SetState(GetGDStringState(styler, sc.currentPos, &nextIndex));
 				while (nextIndex > (sc.currentPos + 1) && sc.More()) {
 					sc.Forward();
 				}
             } else if (IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
-				percentIsOperator = true;
 				sc.SetState(SCE_GD_IDENTIFIER);
 			}
 		}
