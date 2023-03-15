@@ -201,8 +201,8 @@ class LexillaData:
     def __init__(self, scintillaRoot):
         # Discover version information
         self.version = (scintillaRoot / "version.txt").read_text().strip()
-        self.versionDotted = self.version[0] + '.' + self.version[1] + '.' + \
-            self.version[2]
+        self.versionDotted = self.version[0:-2] + '.' + self.version[-2] + '.' + \
+            self.version[-1]
         self.versionCommad = self.versionDotted.replace(".", ", ") + ', 0'
 
         with (scintillaRoot / "doc" / "Lexilla.html").open() as f:
