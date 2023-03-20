@@ -159,7 +159,15 @@ void ColouriseBatchDoc(
 					styler.ColourTo(endPos, SCE_BAT_COMMENT);
 				} else {
 					// Colorize Real Label
-					styler.ColourTo(endPos, SCE_BAT_LABEL);
+					const char *startLabelName = lineBuffer + offset + 1;
+					// Set of label-terminating characters determined experimentally
+					const char *endLabel = strpbrk(startLabelName, "\t &+:<>|");
+					if (endLabel) {
+						styler.ColourTo(startLine + offset + endLabel - startLabelName, SCE_BAT_LABEL);
+						styler.ColourTo(endPos, SCE_BAT_AFTER_LABEL);	// New style
+					} else {
+						styler.ColourTo(endPos, SCE_BAT_LABEL);
+					}
 				}
 				stopLineProcessing=true;
 			// Check for Drive Change (Drive Change is internal command) - return if found
