@@ -6,11 +6,11 @@
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <cstdlib>
+#include <cassert>
 #include <cstring>
+#include <cctype>
 #include <cstdio>
 #include <cstdarg>
-#include <cassert>
-#include <cctype>
 
 #include <string>
 #include <string_view>
