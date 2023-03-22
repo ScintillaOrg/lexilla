@@ -79,7 +79,7 @@ bool textQuoted(const char *lineBuffer, Sci_PositionU endPos) {
 	const size_t strLength = strlen(strQuotes);
 	for (size_t i = 0; i < strLength; i++) {
 		const char *pQuote = strchr(strBuffer, strQuotes[i]);
-        while (pQuote)
+		while (pQuote)
 		{
 			if (!IsEscaped(strBuffer, pQuote - strBuffer)) {
 				CurrentStatus = !CurrentStatus;
@@ -640,7 +640,7 @@ void ColouriseBatchDoc(
 const char *const batchWordListDesc[] = {
 	"Internal Commands",
 	"External Commands",
-    nullptr
+	nullptr
 };
 
 }
