@@ -159,9 +159,11 @@ void ColouriseBatchDoc(
 					styler.ColourTo(endPos, SCE_BAT_COMMENT);
 				} else {
 					// Colorize Real Label
+					// :[\t ]*[^\t &+:<>|]+
 					const char *startLabelName = lineBuffer + offset + 1;
+					const size_t whitespaceLength = strspn(startLabelName, "\t ");
 					// Set of label-terminating characters determined experimentally
-					const char *endLabel = strpbrk(startLabelName, "\t &+:<>|");
+					const char *endLabel = strpbrk(startLabelName + whitespaceLength, "\t &+:<>|");
 					if (endLabel) {
 						styler.ColourTo(startLine + offset + endLabel - startLabelName, SCE_BAT_LABEL);
 						styler.ColourTo(endPos, SCE_BAT_AFTER_LABEL);	// New style
