@@ -66,7 +66,7 @@ using namespace Lexilla;
 #define BASH_DELIM_COMMAND		4
 #define BASH_DELIM_BACKTICK		5
 
-#define BASH_DELIM_STACK_MAX	7
+#define BASH_QUOTE_STACK_MAX	7
 
 namespace {
 
@@ -370,9 +370,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		int Up, Down;
 		int Style;
 		int Depth;			// levels pushed
-		int CountStack[BASH_DELIM_STACK_MAX];
-		int UpStack   [BASH_DELIM_STACK_MAX];
-		int StyleStack[BASH_DELIM_STACK_MAX];
+		int CountStack[BASH_QUOTE_STACK_MAX];
+		int UpStack   [BASH_QUOTE_STACK_MAX];
+		int StyleStack[BASH_QUOTE_STACK_MAX];
 		QuoteStackCls() {
 			Count = 0;
 			Up    = '\0';
@@ -387,7 +387,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			Style = s;
 		}
 		void Push(int u, int s) {
-			if (Depth >= BASH_DELIM_STACK_MAX)
+			if (Depth >= BASH_QUOTE_STACK_MAX)
 				return;
 			CountStack[Depth] = Count;
 			UpStack   [Depth] = Up;
