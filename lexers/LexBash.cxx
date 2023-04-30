@@ -1007,14 +1007,14 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
+	int styleNext = styler.StyleIndexAt(startPos);
 	char word[8] = { '\0' }; // we're not interested in long words anyway
 	unsigned int wordlen = 0;
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int style = styleNext;
-		styleNext = styler.StyleAt(i + 1);
+		styleNext = styler.StyleIndexAt(i + 1);
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		// Comment folding
 		if (options.foldComment && atEOL && IsCommentLine(lineCurrent, styler))
