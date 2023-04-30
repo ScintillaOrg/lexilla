@@ -39,4 +39,22 @@
  2 400   0 + <<EOF
  0 401   0 |   Here-doc.
  0 401   0 | EOF
+ 1 400   0   
+ 0 400   0   # other quoted types are mapped to current classes
+ 1 400   0   
+ 0 400   0   # double-quoted-string=5
+ 0 400   0   $"string"
+ 0 400   0   $'str'
+ 1 400   0   
+ 0 400   0   # back-ticks=11
+ 0 400   0   $`ls`
+ 0 400   0   $(ls)
+ 1 400   0   
+ 0 400   0   # Use substyles
+ 1 400   0   
+ 0 400   0   # Substyled identifier=128
+ 0 400   0   map
+ 1 400   0   
+ 0 400   0   # Substyled scalar=129
+ 0 400   0   $CWD
  0 400   0   
