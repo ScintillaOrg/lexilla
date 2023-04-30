@@ -6,11 +6,11 @@
 // Adapted from LexPerl by Kein-Hong Man 2004
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
+#include <cstdarg>
 
 #include <string>
 #include <string_view>
@@ -70,7 +70,7 @@ using namespace Lexilla;
 
 namespace {
 
-inline int translateBashDigit(int ch) {
+constexpr int translateBashDigit(int ch) noexcept {
 	if (ch >= '0' && ch <= '9') {
 		return ch - '0';
 	} else if (ch >= 'a' && ch <= 'z') {
@@ -85,7 +85,7 @@ inline int translateBashDigit(int ch) {
 	return BASH_BASE_ERROR;
 }
 
-inline int getBashNumberBase(char *s) {
+int getBashNumberBase(char *s) noexcept {
 	int i = 0;
 	int base = 0;
 	while (*s) {
@@ -98,7 +98,7 @@ inline int getBashNumberBase(char *s) {
 	return base;
 }
 
-int opposite(int ch) {
+constexpr int opposite(int ch) noexcept {
 	if (ch == '(') return ')';
 	if (ch == '[') return ']';
 	if (ch == '{') return '}';
@@ -109,7 +109,8 @@ int opposite(int ch) {
 int GlobScan(StyleContext &sc) {
 	// forward scan for zsh globs, disambiguate versus bash arrays
 	// complex expressions may still fail, e.g. unbalanced () '' "" etc
-	int c, sLen = 0;
+	int c;
+	int sLen = 0;
 	int pCount = 0;
 	int hash = 0;
 	while ((c = sc.GetRelativeCharacter(++sLen)) != 0) {
@@ -133,10 +134,10 @@ int GlobScan(StyleContext &sc) {
 }
 
 bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
-	Sci_Position pos = styler.LineStart(line);
-	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+	const Sci_Position pos = styler.LineStart(line);
+	const Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
-		char ch = styler[i];
+		const char ch = styler[i];
 		if (ch == '#')
 			return true;
 		else if (ch != ' ' && ch != '\t')
@@ -159,7 +160,7 @@ struct OptionsBash {
 
 const char * const bashWordListDesc[] = {
 	"Keywords",
-	0
+	nullptr
 };
 
 struct OptionSetBash : public OptionSet<OptionsBash> {
@@ -176,7 +177,7 @@ struct OptionSetBash : public OptionSet<OptionsBash> {
 
 const char styleSubable[] = { SCE_SH_IDENTIFIER, SCE_SH_SCALAR, 0 };
 
-LexicalClass lexicalClasses[] = {
+const LexicalClass lexicalClasses[] = {
 	// Lexer Bash SCLEX_BASH SCE_SH_:
 	0, "SCE_SH_DEFAULT", "default", "White space",
 	1, "SCE_SH_ERROR", "error", "Error",
@@ -196,7 +197,7 @@ LexicalClass lexicalClasses[] = {
 
 }
 
-class LexerBash : public DefaultLexer {
+class LexerBash final : public DefaultLexer {
 	WordList keywords;
 	OptionsBash options;
 	OptionSetBash osBash;
@@ -206,8 +207,6 @@ public:
 	LexerBash() :
 		DefaultLexer("bash", SCLEX_BASH, lexicalClasses, ELEMENTS(lexicalClasses)),
 		subStyles(styleSubable, 0x80, 0x40, 0) {
-	}
-	virtual ~LexerBash() {
 	}
 	void SCI_METHOD Release() override {
 		delete this;
@@ -236,7 +235,7 @@ public:
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
 	void * SCI_METHOD PrivateCall(int, void *) override {
-		return 0;
+		return nullptr;
 	}
 
 	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override {
@@ -281,7 +280,7 @@ Sci_Position SCI_METHOD LexerBash::PropertySet(const char *key, const char *val)
 }
 
 Sci_Position SCI_METHOD LexerBash::WordListSet(int n, const char *wl) {
-	WordList *wordListN = 0;
+	WordList *wordListN = nullptr;
 	switch (n) {
 	case 0:
 		wordListN = &keywords;
@@ -300,22 +299,24 @@ Sci_Position SCI_METHOD LexerBash::WordListSet(int n, const char *wl) {
 }
 
 void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
-	WordList cmdDelimiter, bashStruct, bashStruct_in;
+	WordList cmdDelimiter;
+	WordList bashStruct;
+	WordList bashStruct_in;
 	cmdDelimiter.Set("| || |& & && ; ;; ( ) { }");
 	bashStruct.Set("if elif fi while until else then do done esac eval");
 	bashStruct_in.Set("for case select");
 
-	CharacterSet setWordStart(CharacterSet::setAlpha, "_");
+	const CharacterSet setWordStart(CharacterSet::setAlpha, "_");
 	// note that [+-] are often parts of identifiers in shell scripts
-	CharacterSet setWord(CharacterSet::setAlphaNum, "._+-");
+	const CharacterSet setWord(CharacterSet::setAlphaNum, "._+-");
 	CharacterSet setMetaCharacter(CharacterSet::setNone, "|&;()<> \t\r\n");
 	setMetaCharacter.Add(0);
-	CharacterSet setBashOperator(CharacterSet::setNone, "^&%()-+=|{}[]:;>,*/<?!.~@");
-	CharacterSet setSingleCharOp(CharacterSet::setNone, "rwxoRWXOezsfdlpSbctugkTBMACahGLNn");
-	CharacterSet setParam(CharacterSet::setAlphaNum, "$_");
-	CharacterSet setHereDoc(CharacterSet::setAlpha, "_\\-+!%*,./:?@[]^`{}~");
-	CharacterSet setHereDoc2(CharacterSet::setAlphaNum, "_-+!%*,./:=?@[]^`{}~");
-	CharacterSet setLeftShift(CharacterSet::setDigits, "$");
+	const CharacterSet setBashOperator(CharacterSet::setNone, "^&%()-+=|{}[]:;>,*/<?!.~@");
+	const CharacterSet setSingleCharOp(CharacterSet::setNone, "rwxoRWXOezsfdlpSbctugkTBMACahGLNn");
+	const CharacterSet setParam(CharacterSet::setAlphaNum, "$_");
+	const CharacterSet setHereDoc(CharacterSet::setAlpha, "_\\-+!%*,./:?@[]^`{}~");
+	const CharacterSet setHereDoc2(CharacterSet::setAlphaNum, "_-+!%*,./:=?@[]^`{}~");
+	const CharacterSet setLeftShift(CharacterSet::setDigits, "$");
 
 	class HereDocCls {	// Class to manage HERE document elements
 	public:
@@ -329,17 +330,15 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		char Delimiter[HERE_DELIM_MAX];	// the Delimiter
 		HereDocCls() {
 			State = 0;
-			Quote = 0;
+			Quote = '\0';
 			Quoted = false;
-			Indent = 0;
+			Indent = false;
 			DelimiterLength = 0;
 			Delimiter[0] = '\0';
 		}
 		void Append(int ch) {
 			Delimiter[DelimiterLength++] = static_cast<char>(ch);
 			Delimiter[DelimiterLength] = '\0';
-		}
-		~HereDocCls() {
 		}
 	};
 	HereDocCls HereDoc;
@@ -408,8 +407,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			Style = StyleStack[Depth];
 			Down  = opposite(Up);
 		}
-		~QuoteStackCls() {
-		}
 	};
 	QuoteStackCls QuoteStack;
 
@@ -418,7 +415,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	int numBase = 0;
 	int digit;
-	Sci_PositionU endPos = startPos + length;
+	const Sci_PositionU endPos = startPos + length;
 	int cmdState = BASH_CMD_START;
 	int testExprType = 0;
 	LexAccessor styler(pAccess);
@@ -469,7 +466,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		int cmdStateNew = BASH_CMD_BODY;
 		if (cmdState == BASH_CMD_TEST || cmdState == BASH_CMD_ARITH || cmdState == BASH_CMD_WORD)
 			cmdStateNew = cmdState;
-		int stylePrev = sc.state;
+		const int stylePrev = sc.state;
 
 		// Determine if the current state should terminate.
 		switch (sc.state) {
@@ -487,14 +484,14 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					char s2[10];
 					sc.GetCurrent(s, sizeof(s));
 					int identifierStyle = SCE_SH_IDENTIFIER;
-					int subStyle = classifierIdentifiers.ValueFor(s);
+					const int subStyle = classifierIdentifiers.ValueFor(s);
 					if (subStyle >= 0) {
 						identifierStyle = subStyle;
 					}
 					// allow keywords ending in a whitespace or command delimiter
 					s2[0] = static_cast<char>(sc.ch);
 					s2[1] = '\0';
-					bool keywordEnds = IsASpace(sc.ch) || cmdDelimiter.InList(s2);
+					const bool keywordEnds = IsASpace(sc.ch) || cmdDelimiter.InList(s2);
 					// 'in' or 'do' may be construct keywords
 					if (cmdState == BASH_CMD_WORD) {
 						if (strcmp(s, "in") == 0 && keywordEnds)
@@ -546,7 +543,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					  (cmdState == BASH_CMD_ARITH && !setWordStart.Contains(sc.ch))) {
 					char s[500];
 					sc.GetCurrent(s, sizeof(s));
-					int subStyle = classifierIdentifiers.ValueFor(s);
+					const int subStyle = classifierIdentifiers.ValueFor(s);
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle);
 					}
@@ -710,7 +707,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (!setParam.Contains(sc.ch)) {
 					char s[500];
 					sc.GetCurrent(s, sizeof(s));
-					int subStyle = classifierScalars.ValueFor(&s[1]); // skip the $
+					const int subStyle = classifierScalars.ValueFor(&s[1]); // skip the $
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle);
 					}
@@ -925,7 +922,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_SH_OPERATOR);
 				// globs have no whitespace, do not appear in arithmetic expressions
 				if (cmdState != BASH_CMD_ARITH && sc.ch == '(' && sc.chNext != '(') {
-					int i = GlobScan(sc);
+					const int i = GlobScan(sc);
 					if (i > 1) {
 						sc.SetState(SCE_SH_IDENTIFIER);
 						sc.Forward(i);
@@ -1003,7 +1000,7 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 
 	LexAccessor styler(pAccess);
 
-	Sci_PositionU endPos = startPos + length;
+	const Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
 	int skipHereCh = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
@@ -1014,11 +1011,11 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 	char word[8] = { '\0' }; // we're not interested in long words anyway
 	unsigned int wordlen = 0;
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
-		char ch = chNext;
+		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		int style = styleNext;
+		const int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
-		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		// Comment folding
 		if (options.foldComment && atEOL && IsCommentLine(lineCurrent, styler))
 		{
@@ -1082,7 +1079,7 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 			visibleChars++;
 	}
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
-	int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
+	const int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
