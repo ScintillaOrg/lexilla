@@ -69,12 +69,14 @@ enum class TestExprType {
 
 // state constants for nested delimiter pairs, used by
 // SCE_SH_STRING and SCE_SH_BACKTICKS processing
-#define BASH_DELIM_LITERAL		0
-#define BASH_DELIM_STRING		1
-#define BASH_DELIM_CSTRING		2
-#define BASH_DELIM_LSTRING		3
-#define BASH_DELIM_COMMAND		4
-#define BASH_DELIM_BACKTICK		5
+enum class QuoteStyle {
+	Literal,		// ''
+	CString,		// $''
+	String,			// ""
+	LString,		// $""
+	Backtick,		// ``, $``
+	Command,		// $()
+};
 
 #define BASH_QUOTE_STACK_MAX	7
 
@@ -376,25 +378,25 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		public:
 		int Count;
 		int Up, Down;
-		int Style;
+		QuoteStyle Style;
 		int Depth;			// levels pushed
 		int CountStack[BASH_QUOTE_STACK_MAX];
 		int UpStack   [BASH_QUOTE_STACK_MAX];
-		int StyleStack[BASH_QUOTE_STACK_MAX];
+		QuoteStyle StyleStack[BASH_QUOTE_STACK_MAX];
 		QuoteStackCls() {
 			Count = 0;
 			Up    = '\0';
 			Down  = '\0';
-			Style = 0;
+			Style = QuoteStyle::Literal;
 			Depth = 0;
 		}
-		void Start(int u, int s) {
+		void Start(int u, QuoteStyle s) {
 			Count = 1;
 			Up    = u;
 			Down  = opposite(Up);
 			Style = s;
 		}
-		void Push(int u, int s) {
+		void Push(int u, QuoteStyle s) {
 			if (Depth >= BASH_QUOTE_STACK_MAX)
 				return;
 			CountStack[Depth] = Count;
@@ -730,7 +732,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_STRING:	// delimited styles, can nest
 			case SCE_SH_BACKTICKS:
 				if (sc.ch == '\\' && QuoteStack.Up != '\\') {
-					if (QuoteStack.Style != BASH_DELIM_LITERAL)
+					if (QuoteStack.Style != QuoteStyle::Literal)
 						sc.Forward();
 				} else if (sc.ch == QuoteStack.Down) {
 					QuoteStack.Count--;
@@ -743,34 +745,34 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (sc.ch == QuoteStack.Up) {
 					QuoteStack.Count++;
 				} else {
-					if (QuoteStack.Style == BASH_DELIM_STRING ||
-						QuoteStack.Style == BASH_DELIM_LSTRING
+					if (QuoteStack.Style == QuoteStyle::String ||
+						QuoteStack.Style == QuoteStyle::LString
 					) {	// do nesting for "string", $"locale-string"
 						if (sc.ch == '`') {
-							QuoteStack.Push(sc.ch, BASH_DELIM_BACKTICK);
+							QuoteStack.Push(sc.ch, QuoteStyle::Backtick);
 						} else if (sc.ch == '$' && sc.chNext == '(') {
 							sc.Forward();
-							QuoteStack.Push(sc.ch, BASH_DELIM_COMMAND);
+							QuoteStack.Push(sc.ch, QuoteStyle::Command);
 						}
-					} else if (QuoteStack.Style == BASH_DELIM_COMMAND ||
-							   QuoteStack.Style == BASH_DELIM_BACKTICK
+					} else if (QuoteStack.Style == QuoteStyle::Command ||
+							   QuoteStack.Style == QuoteStyle::Backtick
 					) {	// do nesting for $(command), `command`
 						if (sc.ch == '\'') {
-							QuoteStack.Push(sc.ch, BASH_DELIM_LITERAL);
+							QuoteStack.Push(sc.ch, QuoteStyle::Literal);
 						} else if (sc.ch == '\"') {
-							QuoteStack.Push(sc.ch, BASH_DELIM_STRING);
+							QuoteStack.Push(sc.ch, QuoteStyle::String);
 						} else if (sc.ch == '`') {
-							QuoteStack.Push(sc.ch, BASH_DELIM_BACKTICK);
+							QuoteStack.Push(sc.ch, QuoteStyle::Backtick);
 						} else if (sc.ch == '$') {
 							if (sc.chNext == '\'') {
 								sc.Forward();
-								QuoteStack.Push(sc.ch, BASH_DELIM_CSTRING);
+								QuoteStack.Push(sc.ch, QuoteStyle::CString);
 							} else if (sc.chNext == '\"') {
 								sc.Forward();
-								QuoteStack.Push(sc.ch, BASH_DELIM_LSTRING);
+								QuoteStack.Push(sc.ch, QuoteStyle::LString);
 							} else if (sc.chNext == '(') {
 								sc.Forward();
-								QuoteStack.Push(sc.ch, BASH_DELIM_COMMAND);
+								QuoteStack.Push(sc.ch, QuoteStyle::Command);
 							}
 						}
 					}
@@ -877,13 +879,13 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 			} else if (sc.ch == '\"') {
 				sc.SetState(SCE_SH_STRING);
-				QuoteStack.Start(sc.ch, BASH_DELIM_STRING);
+				QuoteStack.Start(sc.ch, QuoteStyle::String);
 			} else if (sc.ch == '\'') {
 				sc.SetState(SCE_SH_CHARACTER);
 				Quote.Start(sc.ch);
 			} else if (sc.ch == '`') {
 				sc.SetState(SCE_SH_BACKTICKS);
-				QuoteStack.Start(sc.ch, BASH_DELIM_BACKTICK);
+				QuoteStack.Start(sc.ch, QuoteStyle::Backtick);
 			} else if (sc.ch == '$') {
 				if (sc.Match("$((")) {
 					sc.SetState(SCE_SH_OPERATOR);	// handle '((' later
@@ -896,16 +898,16 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					Quote.Start(sc.ch);
 				} else if (sc.ch == '\'') {
 					sc.ChangeState(SCE_SH_STRING);
-					QuoteStack.Start(sc.ch, BASH_DELIM_CSTRING);
+					QuoteStack.Start(sc.ch, QuoteStyle::CString);
 				} else if (sc.ch == '"') {
 					sc.ChangeState(SCE_SH_STRING);
-					QuoteStack.Start(sc.ch, BASH_DELIM_LSTRING);
+					QuoteStack.Start(sc.ch, QuoteStyle::LString);
 				} else if (sc.ch == '(') {
 					sc.ChangeState(SCE_SH_BACKTICKS);
-					QuoteStack.Start(sc.ch, BASH_DELIM_COMMAND);
+					QuoteStack.Start(sc.ch, QuoteStyle::Command);
 				} else if (sc.ch == '`') {	// $` seen in a configure script, valid?
 					sc.ChangeState(SCE_SH_BACKTICKS);
-					QuoteStack.Start(sc.ch, BASH_DELIM_BACKTICK);
+					QuoteStack.Start(sc.ch, QuoteStyle::Backtick);
 				} else {
 					continue;	// scalar has no delimiter pair
 				}
