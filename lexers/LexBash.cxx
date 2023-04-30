@@ -35,6 +35,8 @@
 using namespace Scintilla;
 using namespace Lexilla;
 
+namespace {
+
 #define HERE_DELIM_MAX			256
 
 // define this if you want 'invalid octals' to be marked as errors
@@ -57,6 +59,12 @@ using namespace Lexilla;
 #define BASH_CMD_ARITH			4
 #define BASH_CMD_DELIM			5
 
+enum class TestExprType {
+	Test,			// test
+	DoubleBracket,	// [[]]
+	SingleBracket,	// []
+};
+
 // state constants for nested delimiter pairs, used by
 // SCE_SH_STRING and SCE_SH_BACKTICKS processing
 #define BASH_DELIM_LITERAL		0
@@ -67,8 +75,6 @@ using namespace Lexilla;
 #define BASH_DELIM_BACKTICK		5
 
 #define BASH_QUOTE_STACK_MAX	7
-
-namespace {
 
 constexpr int translateBashDigit(int ch) noexcept {
 	if (ch >= '0' && ch <= '9') {
@@ -417,7 +423,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	int digit;
 	const Sci_PositionU endPos = startPos + length;
 	int cmdState = BASH_CMD_START;
-	int testExprType = 0;
+	TestExprType testExprType = TestExprType::Test;
 	LexAccessor styler(pAccess);
 
 	// Always backtracks to the start of a line that is not a continuation
@@ -507,7 +513,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					if (strcmp(s, "test") == 0) {
 						if (cmdState == BASH_CMD_START && keywordEnds) {
 							cmdStateNew = BASH_CMD_TEST;
-							testExprType = 0;
+							testExprType = TestExprType::Test;
 						} else
 							sc.ChangeState(identifierStyle);
 					}
@@ -937,11 +943,11 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						sc.Forward();
 					} else if (sc.Match('[', '[') && IsASpace(sc.GetRelative(2))) {
 						cmdState = BASH_CMD_TEST;
-						testExprType = 1;
+						testExprType = TestExprType::DoubleBracket;
 						sc.Forward();
 					} else if (sc.ch == '[' && IsASpace(sc.chNext)) {
 						cmdState = BASH_CMD_TEST;
-						testExprType = 2;
+						testExprType = TestExprType::SingleBracket;
 					}
 				}
 				// special state -- for ((x;y;z)) in ... looping
@@ -954,7 +960,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (cmdState == BASH_CMD_START
 				 || cmdState == BASH_CMD_BODY
 				 || cmdState == BASH_CMD_WORD
-				 || (cmdState == BASH_CMD_TEST && testExprType == 0)) {
+				 || (cmdState == BASH_CMD_TEST && testExprType == TestExprType::Test)) {
 					s[0] = static_cast<char>(sc.ch);
 					if (setBashOperator.Contains(sc.chNext)) {
 						s[1] = static_cast<char>(sc.chNext);
@@ -977,10 +983,10 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					cmdState = BASH_CMD_BODY;
 					sc.Forward();
 				} else if (cmdState == BASH_CMD_TEST && IsASpace(sc.chPrev)) {
-					if (sc.Match(']', ']') && testExprType == 1) {
+					if (sc.Match(']', ']') && testExprType == TestExprType::DoubleBracket) {
 						sc.Forward();
 						cmdState = BASH_CMD_BODY;
-					} else if (sc.ch == ']' && testExprType == 2) {
+					} else if (sc.ch == ']' && testExprType == TestExprType::SingleBracket) {
 						cmdState = BASH_CMD_BODY;
 					}
 				}
