@@ -1,0 +1,43 @@
+{2}# Nested elements and other complex cases{0}
+
+{2}# String with backtick inclusion{0}
+{5}"x`ls`"{0}
+{2}# Nested string{0}
+{5}"x`ls "*.c"`"{0}
+{2}# Not terminated at first "{0}
+{5}"x`ls" # "`"{0} {2}#{0}
+
+{2}# String with command inclusion{0}
+{5}"x$(ls)"{0}
+
+{2}# Nested command{0}
+{11}$(ls -la$(ls *.c)){0}
+
+{2}# Check strings and backticks in command{0}
+{4}echo{0} {11}$('ls' "." `ls` $'.' $"."){0}
+
+{2}# $( not terminated by ) if contains unterminated string{0}
+{11}$('x) # '){0} {2}#{0}
+{11}$("x) # "){0} {2}#{0}
+{11}$(`x) # `){0} {2}# Bash doesn't like this{0}
+{11}$($'x) # '){0} {2}#{0}
+{11}$($"x) # "){0} {2}#{0}
+
+{2}# Parameter expansion{0}
+{8}var{7}={8}abcdef{0}
+{8}sub{7}={8}abc{0}
+{8}rep{7}={6}'& '{0}
+{4}echo{0} {10}${var/$sub/"${rep}}{5}"} #"{8}#{0}
+
+{2}# Multi-line{0}
+{11}$(ls |
+more){0}
+
+{11}$(
+`x`
+"x"
+`ls`
+$'x'
+$"x"
+){0}
+{2}#end -- checks termination of previous{0}
