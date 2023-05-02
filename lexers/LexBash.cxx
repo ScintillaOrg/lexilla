@@ -373,7 +373,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			Open(u);
 		}
 	};
-	QuoteCls Quote;
 
 	class QuoteStackCls {	// Class to manage quote pairs that nest
 		public:
@@ -785,11 +784,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				break;
 			case SCE_SH_CHARACTER: // singly-quoted strings
-				if (sc.ch == Quote.Down) {
-					Quote.Count--;
-					if (Quote.Count == 0) {
-						sc.ForwardSetState(SCE_SH_DEFAULT);
-					}
+				if (sc.ch == '\'') {
+					sc.ForwardSetState(SCE_SH_DEFAULT);
 				}
 				break;
 		}
@@ -876,7 +872,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				QuoteStack.Start(sc.ch, QuoteStyle::String);
 			} else if (sc.ch == '\'') {
 				sc.SetState(SCE_SH_CHARACTER);
-				Quote.Start(sc.ch);
 			} else if (sc.ch == '`') {
 				sc.SetState(SCE_SH_BACKTICKS);
 				QuoteStack.Start(sc.ch, QuoteStyle::Backtick);
