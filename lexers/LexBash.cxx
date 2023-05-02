@@ -68,13 +68,14 @@ enum class TestExprType {
 };
 
 // state constants for nested delimiter pairs, used by
-// SCE_SH_STRING and SCE_SH_BACKTICKS processing
+// SCE_SH_STRING, SCE_SH_PARAM and SCE_SH_BACKTICKS processing
 enum class QuoteStyle {
 	Literal,		// ''
 	CString,		// $''
 	String,			// ""
 	LString,		// $""
 	Backtick,		// ``, $``
+	Parameter,		// ${}
 	Command,		// $()
 };
 
@@ -730,6 +731,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				break;
 			case SCE_SH_STRING:	// delimited styles, can nest
+			case SCE_SH_PARAM: // ${parameter}
 			case SCE_SH_BACKTICKS:
 				if (sc.ch == '\\' && QuoteStack.Up != '\\') {
 					if (QuoteStack.Style != QuoteStyle::Literal)
@@ -755,8 +757,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							QuoteStack.Push(sc.ch, QuoteStyle::Command);
 						}
 					} else if (QuoteStack.Style == QuoteStyle::Command ||
+							   QuoteStack.Style == QuoteStyle::Parameter ||
 							   QuoteStack.Style == QuoteStyle::Backtick
-					) {	// do nesting for $(command), `command`
+					) {	// do nesting for $(command), `command`, ${parameter}
 						if (sc.ch == '\'') {
 							QuoteStack.Push(sc.ch, QuoteStyle::Literal);
 						} else if (sc.ch == '\"') {
@@ -770,24 +773,15 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							} else if (sc.chNext == '\"') {
 								sc.Forward();
 								QuoteStack.Push(sc.ch, QuoteStyle::LString);
+							} else if (sc.chNext == '{') {
+								sc.Forward();
+								QuoteStack.Push(sc.ch, QuoteStyle::Parameter);
 							} else if (sc.chNext == '(') {
 								sc.Forward();
 								QuoteStack.Push(sc.ch, QuoteStyle::Command);
 							}
 						}
 					}
-				}
-				break;
-			case SCE_SH_PARAM: // ${parameter}
-				if (sc.ch == '\\' && Quote.Up != '\\') {
-					sc.Forward();
-				} else if (sc.ch == Quote.Down) {
-					Quote.Count--;
-					if (Quote.Count == 0) {
-						sc.ForwardSetState(SCE_SH_DEFAULT);
-					}
-				} else if (sc.ch == Quote.Up) {
-					Quote.Count++;
 				}
 				break;
 			case SCE_SH_CHARACTER: // singly-quoted strings
@@ -895,7 +889,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.Forward();
 				if (sc.ch == '{') {
 					sc.ChangeState(SCE_SH_PARAM);
-					Quote.Start(sc.ch);
+					QuoteStack.Start(sc.ch, QuoteStyle::Parameter);
 				} else if (sc.ch == '\'') {
 					sc.ChangeState(SCE_SH_STRING);
 					QuoteStack.Start(sc.ch, QuoteStyle::CString);

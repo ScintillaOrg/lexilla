@@ -27,7 +27,7 @@ $($"x) # ") #
 var=abcdef
 sub=abc
 rep='& '
-echo ${var/$sub/"${rep}}"} #"#
+echo ${var/$sub/"${rep}}"} #
 
 # Multi-line
 $(ls |
