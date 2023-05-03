@@ -186,6 +186,45 @@ struct OptionSetBash : public OptionSet<OptionsBash> {
 	}
 };
 
+class QuoteCls {	// Class to manage quote pairs (simplified vs LexPerl)
+public:
+	int Count = 0;
+	int Up = '\0';
+	int Down = '\0';
+	QuoteStyle Style = QuoteStyle::Literal;
+	void Start(int u, QuoteStyle s) noexcept {
+		Count = 1;
+		Up    = u;
+		Down  = opposite(Up);
+		Style = s;
+	}
+};
+
+class QuoteStackCls {	// Class to manage quote pairs that nest
+public:
+	int Depth = 0;
+	QuoteCls Current;
+	QuoteCls Stack[BASH_QUOTE_STACK_MAX];
+	void Start(int u, QuoteStyle s) noexcept {
+		Current.Start(u, s);
+	}
+	void Push(int u, QuoteStyle s) noexcept {
+		if (Depth >= BASH_QUOTE_STACK_MAX) {
+			return;
+		}
+		Stack[Depth] = Current;
+		Depth++;
+		Current.Start(u, s);
+	}
+	void Pop() noexcept {
+		if (Depth <= 0) {
+			return;
+		}
+		Depth--;
+		Current = Stack[Depth];
+	}
+};
+
 const char styleSubable[] = { SCE_SH_IDENTIFIER, SCE_SH_SCALAR, 0 };
 
 const LexicalClass lexicalClasses[] = {
@@ -354,70 +393,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	};
 	HereDocCls HereDoc;
 
-	class QuoteCls {	// Class to manage quote pairs (simplified vs LexPerl)
-		public:
-		int Count;
-		int Up, Down;
-		QuoteCls() {
-			Count = 0;
-			Up    = '\0';
-			Down  = '\0';
-		}
-		void Open(int u) {
-			Count++;
-			Up    = u;
-			Down  = opposite(Up);
-		}
-		void Start(int u) {
-			Count = 0;
-			Open(u);
-		}
-	};
-
-	class QuoteStackCls {	// Class to manage quote pairs that nest
-		public:
-		int Count;
-		int Up, Down;
-		QuoteStyle Style;
-		int Depth;			// levels pushed
-		int CountStack[BASH_QUOTE_STACK_MAX];
-		int UpStack   [BASH_QUOTE_STACK_MAX];
-		QuoteStyle StyleStack[BASH_QUOTE_STACK_MAX];
-		QuoteStackCls() {
-			Count = 0;
-			Up    = '\0';
-			Down  = '\0';
-			Style = QuoteStyle::Literal;
-			Depth = 0;
-		}
-		void Start(int u, QuoteStyle s) {
-			Count = 1;
-			Up    = u;
-			Down  = opposite(Up);
-			Style = s;
-		}
-		void Push(int u, QuoteStyle s) {
-			if (Depth >= BASH_QUOTE_STACK_MAX)
-				return;
-			CountStack[Depth] = Count;
-			UpStack   [Depth] = Up;
-			StyleStack[Depth] = Style;
-			Depth++;
-			Count = 1;
-			Up    = u;
-			Down  = opposite(Up);
-			Style = s;
-		}
-		void Pop(void) {
-			if (Depth <= 0)
-				return;
-			Depth--;
-			Count = CountStack[Depth];
-			Up    = UpStack   [Depth];
-			Style = StyleStack[Depth];
-			Down  = opposite(Up);
-		}
-	};
 	QuoteStackCls QuoteStack;
 
 	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_SH_IDENTIFIER);
@@ -733,21 +708,21 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_PARAM: // ${parameter}
 			case SCE_SH_BACKTICKS:
 				if (sc.ch == '\\') {
-					if (QuoteStack.Style != QuoteStyle::Literal)
+					if (QuoteStack.Current.Style != QuoteStyle::Literal)
 						sc.Forward();
-				} else if (sc.ch == QuoteStack.Down) {
-					QuoteStack.Count--;
-					if (QuoteStack.Count == 0) {
+				} else if (sc.ch == QuoteStack.Current.Down) {
+					QuoteStack.Current.Count--;
+					if (QuoteStack.Current.Count == 0) {
 						if (QuoteStack.Depth > 0) {
 							QuoteStack.Pop();
 						} else
 							sc.ForwardSetState(SCE_SH_DEFAULT);
 					}
-				} else if (sc.ch == QuoteStack.Up) {
-					QuoteStack.Count++;
+				} else if (sc.ch == QuoteStack.Current.Up) {
+					QuoteStack.Current.Count++;
 				} else {
-					if (QuoteStack.Style == QuoteStyle::String ||
-						QuoteStack.Style == QuoteStyle::LString
+					if (QuoteStack.Current.Style == QuoteStyle::String ||
+						QuoteStack.Current.Style == QuoteStyle::LString
 					) {	// do nesting for "string", $"locale-string"
 						if (sc.ch == '`') {
 							QuoteStack.Push(sc.ch, QuoteStyle::Backtick);
@@ -755,9 +730,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							sc.Forward();
 							QuoteStack.Push(sc.ch, QuoteStyle::Command);
 						}
-					} else if (QuoteStack.Style == QuoteStyle::Command ||
-							   QuoteStack.Style == QuoteStyle::Parameter ||
-							   QuoteStack.Style == QuoteStyle::Backtick
+					} else if (QuoteStack.Current.Style == QuoteStyle::Command ||
+							   QuoteStack.Current.Style == QuoteStyle::Parameter ||
+							   QuoteStack.Current.Style == QuoteStyle::Backtick
 					) {	// do nesting for $(command), `command`, ${parameter}
 						if (sc.ch == '\'') {
 							QuoteStack.Push(sc.ch, QuoteStyle::Literal);
