@@ -732,7 +732,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_STRING:	// delimited styles, can nest
 			case SCE_SH_PARAM: // ${parameter}
 			case SCE_SH_BACKTICKS:
-				if (sc.ch == '\\' && QuoteStack.Up != '\\') {
+				if (sc.ch == '\\') {
 					if (QuoteStack.Style != QuoteStyle::Literal)
 						sc.Forward();
 				} else if (sc.ch == QuoteStack.Down) {
