@@ -29,6 +29,9 @@ sub=abc
 rep='& '
 echo ${var/$sub/"${rep}}"} #
 
+# Multiple nesting levels
+$(ls -la$(ls $(c) $'*.c' ` $(${s})`))
+
 # Multi-line
 $(ls |
 more)
