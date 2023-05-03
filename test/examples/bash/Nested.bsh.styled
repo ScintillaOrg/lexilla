@@ -29,6 +29,9 @@
 {8}rep{7}={6}'& '{0}
 {4}echo{0} {10}${var/$sub/"${rep}}"}{0} {2}#{0}
 
+{2}# Multiple nesting levels{0}
+{11}$(ls -la$(ls $(c) $'*.c' ` $(${s})`)){0}
+
 {2}# Multi-line{0}
 {11}$(ls |
 more){0}
