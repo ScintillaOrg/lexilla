@@ -28,6 +28,7 @@
  1 400   0   
  0 400   0   # scalar=9
  0 400   0   $scalar
+ 0 400   0   $?Status
  1 400   0   
  0 400   0   # parameter-expansion=10
  0 400   0   ${parameter}

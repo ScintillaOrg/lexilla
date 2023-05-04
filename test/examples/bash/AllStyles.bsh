@@ -28,6 +28,7 @@ identifier
 
 # scalar=9
 $scalar
+$?Status
 
 # parameter-expansion=10
 ${parameter}

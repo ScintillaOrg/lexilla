@@ -28,6 +28,7 @@
 
 {2}# scalar=9{0}
 {9}$scalar{0}
+{9}$?Status{0}
 
 {2}# parameter-expansion=10{0}
 {10}${parameter}{0}
