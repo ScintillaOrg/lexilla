@@ -420,7 +420,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	StyleContext sc(startPos, endPos - startPos, initStyle, styler);
 
-	for (; sc.More(); sc.Forward()) {
+	while (sc.More()) {
 
 		// handle line continuation, updates per-line stored state
 		if (sc.atLineStart) {
@@ -853,6 +853,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (sc.ch == '$') {
 				if (sc.Match("$((")) {
 					sc.SetState(SCE_SH_OPERATOR);	// handle '((' later
+					sc.Forward();
 					continue;
 				}
 				sc.SetState(SCE_SH_SCALAR);
@@ -899,7 +900,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					const int i = GlobScan(sc);
 					if (i > 1) {
 						sc.SetState(SCE_SH_IDENTIFIER);
-						sc.Forward(i);
+						sc.Forward(i + 1);
 						continue;
 					}
 				}
@@ -921,7 +922,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				// special state -- for ((x;y;z)) in ... looping
 				if (cmdState == CmdState::Word && sc.Match('(', '(')) {
 					cmdState = CmdState::Arithmetic;
-					sc.Forward();
+					sc.Forward(2);
 					continue;
 				}
 				// handle command delimiters in command Start|Body|Word state, also Test if 'test'
@@ -943,6 +944,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					}
 					if (isCmdDelim) {
 						cmdState = CmdState::Delimiter;
+						sc.Forward();
 						continue;
 					}
 				}
@@ -960,6 +962,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 			}
 		}// sc.state
+
+		sc.Forward();
 	}
 	sc.Complete();
 	if (sc.state == SCE_SH_HERE_Q) {
