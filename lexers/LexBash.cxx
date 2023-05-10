@@ -363,7 +363,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	setMetaCharacter.Add(0);
 	const CharacterSet setBashOperator(CharacterSet::setNone, "^&%()-+=|{}[]:;>,*/<?!.~@");
 	const CharacterSet setSingleCharOp(CharacterSet::setNone, "rwxoRWXOezsfdlpSbctugkTBMACahGLNn");
-	const CharacterSet setParam(CharacterSet::setAlphaNum, "$_");
+	const CharacterSet setParam(CharacterSet::setAlphaNum, "_");
 	const CharacterSet setHereDoc(CharacterSet::setAlpha, "_\\-+!%*,./:?@[]^`{}~");
 	const CharacterSet setHereDoc2(CharacterSet::setAlphaNum, "_-+!%*,./:=?@[]^`{}~");
 	const CharacterSet setLeftShift(CharacterSet::setDigits, "$");

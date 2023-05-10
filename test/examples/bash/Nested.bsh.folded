@@ -29,6 +29,10 @@
  0 400   0   rep='& '
  0 400   0   echo ${var/$sub/"${rep}}"} #
  1 400   0   
+ 0 400   0   # '$' in variable
+ 0 400   0   echo $$PID
+ 0 400   0   echo $var${var}
+ 1 400   0   
  0 400   0   # Multiple nesting levels
  0 400   0   $(ls -la$(ls $(c) $'*.c' ` $(${s})`))
  1 400   0   

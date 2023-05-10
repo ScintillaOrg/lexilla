@@ -29,6 +29,10 @@ sub=abc
 rep='& '
 echo ${var/$sub/"${rep}}"} #
 
+# '$' in variable
+echo $$PID
+echo $var${var}
+
 # Multiple nesting levels
 $(ls -la$(ls $(c) $'*.c' ` $(${s})`))
 
