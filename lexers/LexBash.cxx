@@ -421,7 +421,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		// handle line continuation, updates per-line stored state
 		if (sc.atLineStart) {
-			ln = styler.GetLine(sc.currentPos);
 			if (sc.state == SCE_SH_STRING
 			 || sc.state == SCE_SH_BACKTICKS
 			 || sc.state == SCE_SH_CHARACTER
@@ -429,16 +428,16 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			 || sc.state == SCE_SH_COMMENTLINE
 			 || sc.state == SCE_SH_PARAM) {
 				// force backtrack while retaining cmdState
-				styler.SetLineState(ln, static_cast<int>(CmdState::Body));
+				styler.SetLineState(sc.currentLine, static_cast<int>(CmdState::Body));
 			} else {
-				if (ln > 0) {
+				if (sc.currentLine > 0) {
 					if ((sc.GetRelative(-3) == '\\' && sc.GetRelative(-2) == '\r' && sc.chPrev == '\n')
 					 || sc.GetRelative(-2) == '\\') {	// handle '\' line continuation
 						// retain last line's state
 					} else
 						cmdState = CmdState::Start;
 				}
-				styler.SetLineState(ln, static_cast<int>(cmdState));
+				styler.SetLineState(sc.currentLine, static_cast<int>(cmdState));
 			}
 		}
 
