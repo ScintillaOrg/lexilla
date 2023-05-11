@@ -249,6 +249,9 @@ const LexicalClass lexicalClasses[] = {
 
 class LexerBash final : public DefaultLexer {
 	WordList keywords;
+	WordList cmdDelimiter;
+	WordList bashStruct;
+	WordList bashStruct_in;
 	OptionsBash options;
 	OptionSetBash osBash;
 	enum { ssIdentifier, ssScalar };
@@ -257,6 +260,9 @@ public:
 	LexerBash() :
 		DefaultLexer("bash", SCLEX_BASH, lexicalClasses, ELEMENTS(lexicalClasses)),
 		subStyles(styleSubable, 0x80, 0x40, 0) {
+		cmdDelimiter.Set("| || |& & && ; ;; ( ) { }");
+		bashStruct.Set("if elif fi while until else then do done esac eval");
+		bashStruct_in.Set("for case select");
 	}
 	void SCI_METHOD Release() override {
 		delete this;
@@ -346,13 +352,6 @@ Sci_Position SCI_METHOD LexerBash::WordListSet(int n, const char *wl) {
 }
 
 void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
-	WordList cmdDelimiter;
-	WordList bashStruct;
-	WordList bashStruct_in;
-	cmdDelimiter.Set("| || |& & && ; ;; ( ) { }");
-	bashStruct.Set("if elif fi while until else then do done esac eval");
-	bashStruct_in.Set("for case select");
-
 	const CharacterSet setWordStart(CharacterSet::setAlpha, "_");
 	// note that [+-] are often parts of identifiers in shell scripts
 	const CharacterSet setWord(CharacterSet::setAlphaNum, "._+-");
