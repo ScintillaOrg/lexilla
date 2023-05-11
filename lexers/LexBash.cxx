@@ -876,7 +876,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					continue;	// scalar has no delimiter pair
 				}
-			} else if (sc.Match('<', '<')) {
+			} else if (cmdState != CmdState::Arithmetic && sc.Match('<', '<')) {
 				sc.SetState(SCE_SH_HERE_DELIM);
 				HereDoc.State = 0;
 				if (sc.GetRelative(2) == '-') {	// <<- indent case
