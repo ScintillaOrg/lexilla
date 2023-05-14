@@ -158,15 +158,9 @@ bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 }
 
 struct OptionsBash {
-	bool fold;
-	bool foldComment;
-	bool foldCompact;
-
-	OptionsBash() {
-		fold = false;
-		foldComment = false;
-		foldCompact = true;
-	}
+	bool fold = false;
+	bool foldComment = false;
+	bool foldCompact = true;
 };
 
 const char * const bashWordListDesc[] = {
