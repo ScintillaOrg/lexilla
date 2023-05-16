@@ -756,32 +756,18 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				// HereDoc.State == 2
 				if (sc.atLineStart) {
 					sc.SetState(SCE_SH_HERE_Q);
-					int prefixws = 0;
-					while (sc.ch == '\t' && !sc.MatchLineEnd()) {	// tabulation prefix
-						sc.Forward();
-						prefixws++;
-					}
-					if (prefixws > 0)
-						sc.SetState(SCE_SH_HERE_Q);
-					while (!sc.MatchLineEnd()) {
-						sc.Forward();
-					}
-					char s[HERE_DELIM_MAX];
-					sc.GetCurrent(s, sizeof(s));
-					if (sc.LengthCurrent() == 0) {  // '' or "" delimiters
-						if ((prefixws == 0 || HereDoc.Indent) &&
-							HereDoc.Quoted && HereDoc.DelimiterLength == 0)
-							sc.SetState(SCE_SH_DEFAULT);
-						break;
-					}
-					if (s[strlen(s) - 1] == '\r')
-						s[strlen(s) - 1] = '\0';
-					if (strcmp(HereDoc.Delimiter, s) == 0) {
-						if ((prefixws == 0) ||	// indentation rule
-							(prefixws > 0 && HereDoc.Indent)) {
-							sc.SetState(SCE_SH_DEFAULT);
-							break;
+					if (HereDoc.Indent) { // tabulation prefix
+						while (sc.ch == '\t') {
+							sc.Forward();
 						}
+					}
+					if ((static_cast<Sci_Position>(sc.currentPos + HereDoc.DelimiterLength) == sc.lineEnd) &&
+						(HereDoc.DelimiterLength == 0 || sc.Match(HereDoc.Delimiter))) {
+						while (!sc.MatchLineEnd()) {
+							sc.Forward();
+						}
+						sc.SetState(SCE_SH_DEFAULT);
+						break;
 					}
 				}
 				break;
