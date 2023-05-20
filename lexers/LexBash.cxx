@@ -122,7 +122,7 @@ constexpr int opposite(int ch) noexcept {
 int GlobScan(StyleContext &sc) {
 	// forward scan for zsh globs, disambiguate versus bash arrays
 	// complex expressions may still fail, e.g. unbalanced () '' "" etc
-	int c;
+	int c = 0;
 	int sLen = 0;
 	int pCount = 0;
 	int hash = 0;
@@ -473,24 +473,16 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	class HereDocCls {	// Class to manage HERE document elements
 	public:
-		int State;		// 0: '<<' encountered
+		int State = 0;			// 0: '<<' encountered
 		// 1: collect the delimiter
 		// 2: here doc text (lines after the delimiter)
-		int Quote;		// the char after '<<'
-		bool Quoted;		// true if Quote in ('\'','"','`')
-		bool Escaped;		// backslash in delimiter, common in configure script
-		bool Indent;		// indented delimiter (for <<-)
-		int DelimiterLength;	// strlen(Delimiter)
-		char Delimiter[HERE_DELIM_MAX];	// the Delimiter
-		HereDocCls() noexcept {
-			State = 0;
-			Quote = '\0';
-			Quoted = false;
-			Escaped = false;
-			Indent = false;
-			DelimiterLength = 0;
-			Delimiter[0] = '\0';
-		}
+		int Quote = '\0';		// the char after '<<'
+		bool Quoted = false;		// true if Quote in ('\'','"','`')
+		bool Escaped = false;		// backslash in delimiter, common in configure script
+		bool Indent = false;		// indented delimiter (for <<-)
+		int DelimiterLength = 0;	// strlen(Delimiter)
+		char Delimiter[HERE_DELIM_MAX]{};	// the Delimiter
+		HereDocCls() noexcept = default;
 		void Append(int ch) {
 			Delimiter[DelimiterLength++] = static_cast<char>(ch);
 			Delimiter[DelimiterLength] = '\0';
@@ -504,7 +496,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	const WordClassifier &classifierScalars = subStyles.Classifier(SCE_SH_SCALAR);
 
 	int numBase = 0;
-	int digit;
+	int digit = 0;
 	const Sci_PositionU endPos = startPos + length;
 	CmdState cmdState = CmdState::Start;
 	TestExprType testExprType = TestExprType::Test;
@@ -572,7 +564,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				// "." never used in Bash variable names but used in file names
 				if (!setWord.Contains(sc.ch)) {
 					char s[500];
-					char s2[10];
 					sc.GetCurrent(s, sizeof(s));
 					int identifierStyle = SCE_SH_IDENTIFIER;
 					const int subStyle = classifierIdentifiers.ValueFor(s);
@@ -580,6 +571,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						identifierStyle = subStyle;
 					}
 					// allow keywords ending in a whitespace or command delimiter
+					char s2[10];
 					s2[0] = static_cast<char>(sc.ch);
 					s2[1] = '\0';
 					const bool keywordEnds = IsASpace(sc.ch) || cmdDelimiter.InList(s2);
@@ -974,7 +966,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_SH_WORD);
 				sc.Forward();
 			} else if (setBashOperator.Contains(sc.ch)) {
-				char s[10];
 				bool isCmdDelim = false;
 				sc.SetState(SCE_SH_OPERATOR);
 				// arithmetic expansion
@@ -1022,6 +1013,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				 || cmdState == CmdState::Body
 				 || cmdState == CmdState::Word
 				 || (cmdState == CmdState::Test && testExprType == TestExprType::Test)) {
+					char s[10];
 					s[0] = static_cast<char>(sc.ch);
 					if (setBashOperator.Contains(sc.chNext)) {
 						s[1] = static_cast<char>(sc.chNext);
