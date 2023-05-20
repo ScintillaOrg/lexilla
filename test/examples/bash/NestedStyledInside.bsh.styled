@@ -33,6 +33,29 @@
 {4}echo{0} {9}$${8}PID{0}
 {4}echo{0} {9}$var{10}${var}{0}
 
+{2}# Here-doc with internal elements{0}
+{4}cat{0} {12}<<EOF{13}
+	{9}$scalar{13}
+	{10}${var}{13}
+	{7}$(({3}1{7}+{3}2{7})){13}
+	{11}$(pwd){13}
+	{11}`pwd`{13}
+EOF{0}
+
+{2}# Quoted delimiter treats here-doc as simple string{0}
+{4}cat{0} {12}<<"EOF"{13}
+	$scalar
+	${var}
+	$((1+2))
+	$(pwd)
+	`pwd`
+EOF{0}
+
+{2}# Escaped same as quoted{0}
+{4}cat{0} {12}<<\EOF{13}
+	$scalar
+EOF{0}
+
 {2}# Nesting{0}
 {4}echo{0} {5}"{7}$(({3}1{0} {7}+{0} {3}2{7})){5}"{0} {2}#{0}
 {4}echo{0} {5}"{7}$[{3}1{0} {7}+{0} {3}2{7}]{5}"{0} {2}#{0}

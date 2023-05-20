@@ -74,6 +74,7 @@ enum class QuoteStyle {
 	CString,		// $''
 	String,			// ""
 	LString,		// $""
+	HereDoc,		// here document
 	Backtick,		// ``, $``
 	Parameter,		// ${}
 	Command,		// $()
@@ -165,6 +166,7 @@ struct OptionsBash {
 	bool stylingInsideString = false;
 	bool stylingInsideBackticks = false;
 	bool stylingInsideParameter = false;
+	bool stylingInsideHeredoc = false;
 
 	[[nodiscard]] bool stylingInside(int state) const noexcept {
 		switch (state) {
@@ -174,6 +176,8 @@ struct OptionsBash {
 			return stylingInsideBackticks;
 		case SCE_SH_PARAM:
 			return stylingInsideParameter;
+		case SCE_SH_HERE_Q:
+			return stylingInsideHeredoc;
 		default:
 			return false;
 		}
@@ -201,6 +205,9 @@ struct OptionSetBash : public OptionSet<OptionsBash> {
 
 		DefineProperty("lexer.bash.styling.inside.parameter", &OptionsBash::stylingInsideParameter,
 			"Set this property to 1 to highlight shell expansions inside ${} parameter expansion.");
+
+		DefineProperty("lexer.bash.styling.inside.heredoc", &OptionsBash::stylingInsideHeredoc,
+			"Set this property to 1 to highlight shell expansions inside here document.");
 
 		DefineWordListSets(bashWordListDesc);
 	}
@@ -235,8 +242,11 @@ public:
 	int State = SCE_SH_DEFAULT;
 	QuoteCls Current;
 	QuoteCls Stack[BASH_QUOTE_STACK_MAX];
+	[[nodiscard]] bool Empty() const noexcept {
+		return Current.Up == '\0';
+	}
 	void Start(int u, QuoteStyle s, int outer) noexcept {
-		if (Current.Up == '\0') {
+		if (Empty()) {
 			Current.Start(u, s, outer);
 		} else {
 			Push(u, s, outer);
@@ -251,7 +261,8 @@ public:
 		Current.Start(u, s, outer);
 	}
 	void Pop() noexcept {
-		if (Depth <= 0) {
+		if (Depth == 0) {
+			Clear();
 			return;
 		}
 		Depth--;
@@ -271,11 +282,7 @@ public:
 		if (Current.Count == 0) {
 			cmdState = CmdState::Body;
 			const int outer = Current.Outer;
-			if (Depth > 0) {
-				Pop();
-			} else {
-				Clear();
-			}
+			Pop();
 			sc.ForwardSetState(outer);
 			return true;
 		}
@@ -471,13 +478,15 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		// 2: here doc text (lines after the delimiter)
 		int Quote;		// the char after '<<'
 		bool Quoted;		// true if Quote in ('\'','"','`')
+		bool Escaped;		// backslash in delimiter, common in configure script
 		bool Indent;		// indented delimiter (for <<-)
 		int DelimiterLength;	// strlen(Delimiter)
 		char Delimiter[HERE_DELIM_MAX];	// the Delimiter
-		HereDocCls() {
+		HereDocCls() noexcept {
 			State = 0;
 			Quote = '\0';
 			Quoted = false;
+			Escaped = false;
 			Indent = false;
 			DelimiterLength = 0;
 			Delimiter[0] = '\0';
@@ -537,7 +546,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						cmdState = CmdState::Start;
 				}
 				// force backtrack when nesting
-				const CmdState state = (QuoteStack.Depth == 0) ? cmdState : CmdState::Body;
+				const CmdState state = QuoteStack.Empty() ? cmdState : CmdState::Body;
 				styler.SetLineState(sc.currentLine, static_cast<int>(state));
 			}
 		}
@@ -702,6 +711,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (HereDoc.State == 0) { // '<<' encountered
 					HereDoc.Quote = sc.chNext;
 					HereDoc.Quoted = false;
+					HereDoc.Escaped = false;
 					HereDoc.DelimiterLength = 0;
 					HereDoc.Delimiter[HereDoc.DelimiterLength] = '\0';
 					if (sc.chNext == '\'' || sc.chNext == '\"') {	// a quoted here-doc delimiter (' or ")
@@ -737,6 +747,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					} else if (HereDoc.Quoted && sc.ch == HereDoc.Quote) {	// closing quote => end of delimiter
 						sc.ForwardSetState(SCE_SH_DEFAULT);
 					} else if (sc.ch == '\\') {
+						HereDoc.Escaped = true;
 						if (HereDoc.Quoted && sc.chNext != HereDoc.Quote && sc.chNext != '\\') {
 							// in quoted prefixes only \ and the quote eat the escape
 							HereDoc.Append(sc.ch);
@@ -749,25 +760,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					if (HereDoc.DelimiterLength >= HERE_DELIM_MAX - 1) {	// force blowup
 						sc.SetState(SCE_SH_ERROR);
 						HereDoc.State = 0;
-					}
-				}
-				break;
-			case SCE_SH_HERE_Q:
-				// HereDoc.State == 2
-				if (sc.atLineStart) {
-					sc.SetState(SCE_SH_HERE_Q);
-					if (HereDoc.Indent) { // tabulation prefix
-						while (sc.ch == '\t') {
-							sc.Forward();
-						}
-					}
-					if ((static_cast<Sci_Position>(sc.currentPos + HereDoc.DelimiterLength) == sc.lineEnd) &&
-						(HereDoc.DelimiterLength == 0 || sc.Match(HereDoc.Delimiter))) {
-						while (!sc.MatchLineEnd()) {
-							sc.Forward();
-						}
-						sc.SetState(SCE_SH_DEFAULT);
-						break;
 					}
 				}
 				break;
@@ -787,6 +779,30 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					continue;
 				}
 				break;
+			case SCE_SH_HERE_Q:
+				// HereDoc.State == 2
+				if (sc.atLineStart && QuoteStack.Current.Style == QuoteStyle::HereDoc) {
+					sc.SetState(SCE_SH_HERE_Q);
+					if (HereDoc.Indent) { // tabulation prefix
+						while (sc.ch == '\t') {
+							sc.Forward();
+						}
+					}
+					if ((static_cast<Sci_Position>(sc.currentPos + HereDoc.DelimiterLength) == sc.lineEnd) &&
+						(HereDoc.DelimiterLength == 0 || sc.Match(HereDoc.Delimiter))) {
+						while (!sc.MatchLineEnd()) {
+							sc.Forward();
+						}
+						QuoteStack.Pop();
+						sc.SetState(SCE_SH_DEFAULT);
+						break;
+					}
+				}
+				if (HereDoc.Quoted || HereDoc.Escaped) {
+					break;
+				}
+				// fall through to handle nested shell expansions
+				[[fallthrough]];
 			case SCE_SH_STRING:	// delimited styles, can nest
 			case SCE_SH_PARAM: // ${parameter}
 			case SCE_SH_BACKTICKS:
@@ -801,8 +817,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					QuoteStack.Current.Count++;
 				} else {
 					if (QuoteStack.Current.Style == QuoteStyle::String ||
+						QuoteStack.Current.Style == QuoteStyle::HereDoc ||
 						QuoteStack.Current.Style == QuoteStyle::LString
-					) {	// do nesting for "string", $"locale-string"
+					) {	// do nesting for "string", $"locale-string", heredoc
 						const bool stylingInside = options.stylingInside(sc.state);
 						if (sc.ch == '`') {
 							QuoteStack.Push(sc.ch, QuoteStyle::Backtick, sc.state);
@@ -865,6 +882,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					// HereDoc.Quote always == '\''
 					sc.SetState(SCE_SH_HERE_Q);
+					QuoteStack.Start(-1, QuoteStyle::HereDoc, SCE_SH_DEFAULT);
 				}
 			} else if (HereDoc.DelimiterLength == 0) {
 				// no delimiter, illegal (but '' and "" are legal)
@@ -872,6 +890,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_SH_DEFAULT);
 			} else {
 				sc.SetState(SCE_SH_HERE_Q);
+				QuoteStack.Start(-1, QuoteStyle::HereDoc, SCE_SH_DEFAULT);
 			}
 		}
 
