@@ -67,6 +67,11 @@ enum class TestExprType {
 	SingleBracket,	// []
 };
 
+enum class CommandSubstitution {
+	Backtick,
+	Inside,
+};
+
 // state constants for nested delimiter pairs, used by
 // SCE_SH_STRING, SCE_SH_PARAM and SCE_SH_BACKTICKS processing
 enum class QuoteStyle {
@@ -167,6 +172,7 @@ struct OptionsBash {
 	bool stylingInsideBackticks = false;
 	bool stylingInsideParameter = false;
 	bool stylingInsideHeredoc = false;
+	int commandSubstitution = static_cast<int>(CommandSubstitution::Backtick);
 
 	[[nodiscard]] bool stylingInside(int state) const noexcept {
 		switch (state) {
@@ -209,6 +215,11 @@ struct OptionSetBash : public OptionSet<OptionsBash> {
 		DefineProperty("lexer.bash.styling.inside.heredoc", &OptionsBash::stylingInsideHeredoc,
 			"Set this property to 1 to highlight shell expansions inside here document.");
 
+		DefineProperty("lexer.bash.command.substitution", &OptionsBash::commandSubstitution,
+			"Set how to highlight $() command substitution. "
+			"0 (the default) highlighted as backticks. "
+			"1 highlighted inside.");
+
 		DefineWordListSets(bashWordListDesc);
 	}
 };
@@ -240,6 +251,7 @@ class QuoteStackCls {	// Class to manage quote pairs that nest
 public:
 	int Depth = 0;
 	int State = SCE_SH_DEFAULT;
+	CommandSubstitution commandSubstitution = CommandSubstitution::Backtick;
 	QuoteCls Current;
 	QuoteCls Stack[BASH_QUOTE_STACK_MAX];
 	[[nodiscard]] bool Empty() const noexcept {
@@ -310,7 +322,12 @@ public:
 				sc.ChangeState(SCE_SH_OPERATOR);
 			} else {
 				style = QuoteStyle::Command;
-				sc.ChangeState(SCE_SH_BACKTICKS);
+				if (stylingInside && commandSubstitution == CommandSubstitution::Inside) {
+					cmdState = CmdState::Delimiter;
+					sc.ChangeState(SCE_SH_OPERATOR);
+				} else {
+					sc.ChangeState(SCE_SH_BACKTICKS);
+				}
 			}
 			if (sc.Match('(', '(') && state == SCE_SH_DEFAULT && Depth == 0) {
 				// optimized to avoid track nested delimiter pairs
@@ -491,6 +508,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	HereDocCls HereDoc;
 
 	QuoteStackCls QuoteStack;
+	QuoteStack.commandSubstitution = static_cast<CommandSubstitution>(options.commandSubstitution);
 
 	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_SH_IDENTIFIER);
 	const WordClassifier &classifierScalars = subStyles.Classifier(SCE_SH_SCALAR);
@@ -968,8 +986,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (setBashOperator.Contains(sc.ch)) {
 				bool isCmdDelim = false;
 				sc.SetState(SCE_SH_OPERATOR);
-				// arithmetic expansion
-				if (QuoteStack.Current.Style == QuoteStyle::Arithmetic) {
+				// arithmetic expansion and command substitution
+				if (QuoteStack.Current.Style == QuoteStyle::Arithmetic || QuoteStack.Current.Style == QuoteStyle::Command) {
 					if (sc.ch == QuoteStack.Current.Down) {
 						if (QuoteStack.CountDown(sc, cmdState)) {
 							continue;
