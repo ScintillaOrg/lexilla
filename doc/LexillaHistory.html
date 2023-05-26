@@ -606,9 +606,11 @@
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1033/">Feature #1033</a>.
 	</li>
 	<li>
-	Bash: add choice to style command substitutions with surrounding "$(" and ")" as operators
-	and interior styled as bash code.
-	Controlled with property lexer.bash.command.substitution.
+	Bash: add property lexer.bash.command.substitution to choose how to style command substitutions.
+	0 &rarr; SCE_SH_BACKTICKS;
+	1 &rarr; surrounding "$(" and ")" as operators and contents styled as bash code;
+	2 &rarr; use distinct styles (base style + 64) for contents.
+	Choice (2) is a provisional feature and details may change before it is finalized.
 	<a href="https://github.com/ScintillaOrg/lexilla/issues/153">Issue #153</a>.
 	</li>
 	<li>
