@@ -2,6 +2,7 @@
  ** Unit Tests for Lexilla internal data structures
  **/
 
+#include <cstdlib>
 #include <cassert>
 
 #include "CharacterSet.h"
