@@ -3,7 +3,6 @@
  **/
 
 #include <cassert>
-#include <cstring>
 
 #include "CharacterSet.h"
 
