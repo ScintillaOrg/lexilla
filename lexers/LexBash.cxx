@@ -1099,7 +1099,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	sc.Complete();
 }
 
-void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int, IDocument *pAccess) {
+void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	if(!options.fold)
 		return;
 
@@ -1107,18 +1107,19 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 
 	const Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
-	int skipHereCh = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	int styleNext = MaskCommand(styler.StyleIndexAt(startPos));
+	int style = MaskCommand(initStyle);
 	char word[8] = { '\0' }; // we're not interested in long words anyway
 	unsigned int wordlen = 0;
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		const int style = styleNext;
+		const int stylePrev = style;
+		style = styleNext;
 		styleNext = MaskCommand(styler.StyleIndexAt(i + 1));
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		// Comment folding
@@ -1153,18 +1154,14 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 		}
 		// Here Document folding
 		if (style == SCE_SH_HERE_DELIM) {
-			if (ch == '<' && chNext == '<') {
-				if (styler.SafeGetCharAt(i + 2) == '<') {
-					skipHereCh = 1;
-				} else {
-					if (skipHereCh == 0) {
+			if (stylePrev != SCE_SH_HERE_DELIM) {
+				if (ch == '<' && chNext == '<') {
+					if (styler.SafeGetCharAt(i + 2) != '<') {
 						levelCurrent++;
-					} else {
-						skipHereCh = 0;
 					}
 				}
 			}
-		} else if (style == SCE_SH_HERE_Q && styler.StyleAt(i+1) == SCE_SH_DEFAULT) {
+		} else if (style == SCE_SH_HERE_Q && styleNext == SCE_SH_DEFAULT) {
 			levelCurrent--;
 		}
 		if (atEOL) {
