@@ -825,8 +825,11 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					}
 					if ((static_cast<Sci_Position>(sc.currentPos + HereDoc.DelimiterLength) == sc.lineEnd) &&
 						(HereDoc.DelimiterLength == 0 || sc.Match(HereDoc.Delimiter))) {
-						while (!sc.MatchLineEnd()) {
-							sc.Forward();
+						if (HereDoc.DelimiterLength != 0) {
+							sc.SetState(SCE_SH_HERE_DELIM | insideCommand);
+							while (!sc.MatchLineEnd()) {
+								sc.Forward();
+							}
 						}
 						QuoteStack.Pop();
 						sc.SetState(SCE_SH_DEFAULT | QuoteStack.insideCommand);
@@ -1154,7 +1157,9 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 		}
 		// Here Document folding
 		if (style == SCE_SH_HERE_DELIM) {
-			if (stylePrev != SCE_SH_HERE_DELIM) {
+			if (stylePrev == SCE_SH_HERE_Q) {
+				levelCurrent--;
+			} else if (stylePrev != SCE_SH_HERE_DELIM) {
 				if (ch == '<' && chNext == '<') {
 					if (styler.SafeGetCharAt(i + 2) != '<') {
 						levelCurrent++;
