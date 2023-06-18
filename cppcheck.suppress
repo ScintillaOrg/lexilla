@@ -110,6 +110,7 @@ shadowVariable:lexilla/lexers/LexVHDL.cxx
 unreadVariable:lexilla/lexers/LexVHDL.cxx
 variableScope:lexilla/lexers/LexVHDL.cxx
 unreadVariable:lexilla/lexers/LexVisualProlog.cxx
+shiftTooManyBitsSigned:lexilla/lexers/LexVisualProlog.cxx
 unreadVariable:lexilla/lexers/LexX12.cxx
 constVariable:lexilla/lexers/LexX12.cxx
 uselessCallsSubstr:lexilla/lexers/LexX12.cxx
