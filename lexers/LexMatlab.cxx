@@ -193,12 +193,19 @@ static void ColouriseMatlabOctaveDoc(
 			funcDeclarationLine = false;
 		}
 
+		// Semicolon ends function declaration
+		// This condition is for one line functions support
+		if (sc.chPrev == ';') {
+			funcDeclarationLine = false;
+		}
+
 		// Only comments allowed between the function declaration and the
 		// arguments code block
 		if (expectingArgumentsBlock && !(funcDeclarationLine || inArgumentsScope)) {
 			if ((sc.state != SCE_MATLAB_KEYWORD) &&
 					(sc.state != SCE_MATLAB_COMMENT) &&
-					(sc.state != SCE_MATLAB_DEFAULT)) {
+					(sc.state != SCE_MATLAB_DEFAULT) &&
+					!(sc.state == SCE_MATLAB_OPERATOR && sc.chPrev == ';')) {
 				expectingArgumentsBlock = 0;
 				styler.SetLineState(curLine, ComposeLineState(
 					commentDepth, foldingLevel, expectingArgumentsBlock, inClassScope, inArgumentsScope));

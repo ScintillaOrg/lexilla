@@ -59,6 +59,15 @@
 {7}y{0} {6}={0} {7}x{0} {6}+{0} {7}arguments{6};{0}
 {4}end{0}
 
+{1}% Semicolon is equivalent to a comment{0}
+{4}function{0} {7}y{0} {6}={0} {7}foo{6}({7}x{6}){0}
+{6};;;;;;;{0}
+{4}arguments{0}
+    {7}x{0}
+{4}end{0}
+{7}y{0} {6}={0} {7}x{0} {6}+{0} {3}2{6};{0}
+{4}end{0}
+
 {1}% Arguments block is illegal in nested functions,{0}
 {1}% but lexer should process it anyway{0}
 {4}function{0} {7}y{0} {6}={0} {7}foo{0} {6}({7}x{6}){0}
@@ -121,3 +130,8 @@
 {6}[{7}a{6},{0} {7}b{6}]{0} {6}={0} {7}bar{6}({7}x{6},{0} {7}y{6},{0} {7}arguments{6});{0}
 
 {4}end{0}
+
+{1}% One line function with arguments block.{0}
+{1}% This code style is rarely used (if at all), but the{0}
+{1}% lexer shouldn't break{0}
+{4}function{0} {7}y{0} {6}={0} {7}foo{6}({7}x{6});{0} {4}arguments{6};{0} {7}x{6};{0} {4}end{6};{0} {7}y{0} {6}={0} {7}bar{6}({7}x{6});{0} {4}end{0}
