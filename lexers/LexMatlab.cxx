@@ -249,7 +249,7 @@ static void ColouriseMatlabOctaveDoc(
 					expectingArgumentsBlock = funcDeclarationLine ? expectingArgumentsBlock : 0;
 				} else {
 					// "arguments" is a keyword here, despite not being in the keywords list
-					if (expectingArgumentsBlock && (strcmp("arguments", s) == 0)) {
+					if (expectingArgumentsBlock && !funcDeclarationLine && (strcmp("arguments", s) == 0)) {
 						// No need to expect another arguments block
 						expectingArgumentsBlock = 0;
 					} else {

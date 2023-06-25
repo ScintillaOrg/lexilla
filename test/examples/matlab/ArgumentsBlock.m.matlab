@@ -87,3 +87,12 @@ arguments
 end
 y = x;
 end
+
+% "arguments" is an argument name too
+function r = foo(x, arguments)
+arguments
+    x
+    arguments
+end
+r = bar(x, arguments{:});
+end
