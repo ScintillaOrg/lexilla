@@ -87,3 +87,13 @@
  0 401 400 | end
  0 400 400   y = x;
  0 400 3ff   end
+ 1 3ff 3ff   
+ 0 3ff 3ff   % "arguments" is an argument name too
+ 2 3ff 400 + function r = foo(x, arguments)
+ 2 400 401 + arguments
+ 0 401 401 |     x
+ 0 401 401 |     arguments
+ 0 401 400 | end
+ 0 400 400   r = bar(x, arguments{:});
+ 0 400 3ff   end
+ 1 3ff 3ff   
