@@ -70,6 +70,7 @@ end
     arguments
         x (1,2) {mustBeReal(x)}
     end
+    var = 0;
     arguments = 5;
     y = arguments + x;
     end
@@ -95,4 +96,28 @@ arguments
     arguments
 end
 r = bar(x, arguments{:});
+end
+
+% Multiple arguments blocks
+function [a, b] = foo(x, y, varargin)
+
+arguments(Input)
+    x (1,4) {mustBeReal}
+    y (1,:) {mustBeInteger} = x(2:end);
+end
+
+arguments(Input, Repeating)
+    varargin
+end
+
+arguments(Output)
+    a (1,1) {mustBeReal}
+    b (1,1) {mustBeNonNegative}
+end
+
+var = 10;
+arguments = {"now", "it's", "variable"};
+
+[a, b] = bar(x, y, arguments);
+
 end
