@@ -211,7 +211,7 @@ static void ColouriseMatlabOctaveDoc(
 					commentDepth, foldingLevel, expectingArgumentsBlock, inClassScope, inArgumentsScope));
 			}
 		}
-		
+
 		// We've just left the class scope
 		if ((foldingLevel ==0) && inClassScope) {
 			inClassScope = 0;
@@ -274,7 +274,7 @@ static void ColouriseMatlabOctaveDoc(
 						// Found an identifier or a keyword after the function declaration
 						// No need to wait for the arguments block anymore
 						expectingArgumentsBlock = (funcDeclarationLine || inArgumentsScope) ? expectingArgumentsBlock : 0;
-						
+
 						// "properties", "methods" and "events" are not keywords if they're declared
 						// inside some function in methods block
 						// To avoid tracking possible nested functions scopes, lexer considers everything
@@ -283,7 +283,7 @@ static void ColouriseMatlabOctaveDoc(
 						// a separate file, function - only in methods block. However, in case of the invalid
 						// syntax lexer may erroneously ignore a keyword.
 						if (!((inClassScope) && (foldingLevel <= 2) && (
-								strcmp("properties", s) == 0 || 
+								strcmp("properties", s) == 0 ||
 								strcmp("methods",    s) == 0 ||
 								strcmp("events",     s) == 0 ))) {
 							sc.ChangeState(SCE_MATLAB_IDENTIFIER);
@@ -292,13 +292,13 @@ static void ColouriseMatlabOctaveDoc(
 						}
 					}
 				}
-				
+
 				sc.SetState(SCE_MATLAB_DEFAULT);
 				if (!notKeyword) {
 					foldingLevel += CheckKeywordFoldPoint(s);
 				}
 			}
-			
+
 			styler.SetLineState(curLine, ComposeLineState(
 				commentDepth, foldingLevel, expectingArgumentsBlock, inClassScope, inArgumentsScope));
 		} else if (sc.state == SCE_MATLAB_NUMBER) {
