@@ -864,7 +864,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							if (stylingInside) {
 								sc.SetState(SCE_SH_BACKTICKS | insideCommand);
 							}
-						} else if (sc.ch == '$') {
+						} else if (sc.ch == '$' && !AnyOf(sc.chNext, '\"', '\'')) {
 							QuoteStack.Expand(sc, cmdState, stylingInside);
 							continue;
 						}
