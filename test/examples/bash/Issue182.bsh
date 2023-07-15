@@ -1,2 +1,5 @@
 if [ -n "$eth" -o -n "$wlan" ]; then
 fi
+
+test $((1 + 1)) -eq 2 && echo yes
+[ $((1 + 1)) -eq 2 ] && echo yes
