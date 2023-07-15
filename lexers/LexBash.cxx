@@ -405,6 +405,7 @@ class LexerBash final : public DefaultLexer {
 	WordList cmdDelimiter;
 	WordList bashStruct;
 	WordList bashStruct_in;
+	WordList testOperator;
 	OptionsBash options;
 	OptionSetBash osBash;
 	enum { ssIdentifier, ssScalar };
@@ -416,6 +417,7 @@ public:
 		cmdDelimiter.Set("| || |& & && ; ;; ( ) { }");
 		bashStruct.Set("if elif fi while until else then do done esac eval");
 		bashStruct_in.Set("for case select");
+		testOperator.Set("eq ge gt le lt ne ef nt ot");
 	}
 	void SCI_METHOD Release() override {
 		delete this;
@@ -474,6 +476,11 @@ public:
 	}
 	const char *SCI_METHOD GetSubStyleBases() override {
 		return styleSubable;
+	}
+
+	bool IsTestOperator(const char *s, const CharacterSet &setSingleCharOp) const noexcept {
+		return (s[2] == '\0' && setSingleCharOp.Contains(s[1]))
+			|| testOperator.InList(s + 1);
 	}
 
 	static ILexer5 *LexerFactoryBash() {
@@ -658,7 +665,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					}
 					// disambiguate option items and file test operators
 					else if (s[0] == '-') {
-						if (cmdState != CmdState::Test)
+						if (cmdState != CmdState::Test || !IsTestOperator(s, setSingleCharOp))
 							sc.ChangeState(identifierStyle);
 					}
 					// disambiguate keywords and identifiers
@@ -1009,9 +1016,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					HereDoc.Indent = false;
 				}
-			} else if (sc.ch == '-'	&&	// one-char file test operators
-					   setSingleCharOp.Contains(sc.chNext) &&
-					   !setWord.Contains(sc.GetRelative(2)) &&
+			} else if (sc.ch == '-' && // test operator or short and long option
+					   (IsUpperOrLowerCase(sc.chNext) || sc.chNext == '-') &&
 					   IsASpace(sc.chPrev)) {
 				sc.SetState(SCE_SH_WORD | insideCommand);
 				sc.Forward();
