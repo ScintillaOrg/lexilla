@@ -3,3 +3,5 @@ fi
 
 test $((1 + 1)) -eq 2 && echo yes
 [ $((1 + 1)) -eq 2 ] && echo yes
+
+ls -a --directory

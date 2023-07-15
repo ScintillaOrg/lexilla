@@ -95,10 +95,6 @@ constexpr int MaskCommand(int state) noexcept {
 	return state & ~commandSubstitutionFlag;
 }
 
-constexpr bool IsAlpha(int ch) noexcept {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
-}
-
 constexpr int translateBashDigit(int ch) noexcept {
 	if (ch >= '0' && ch <= '9') {
 		return ch - '0';
@@ -1021,7 +1017,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					HereDoc.Indent = false;
 				}
 			} else if (sc.ch == '-' && // test operator or short and long option
-					   (IsAlpha(sc.chNext) || sc.chNext == '-') &&
+					   (IsUpperOrLowerCase(sc.chNext) || sc.chNext == '-') &&
 					   IsASpace(sc.chPrev)) {
 				sc.SetState(SCE_SH_WORD | insideCommand);
 				sc.Forward();

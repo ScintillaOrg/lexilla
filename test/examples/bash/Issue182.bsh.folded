@@ -3,4 +3,6 @@
  1 400   0   
  0 400   0   test $((1 + 1)) -eq 2 && echo yes
  0 400   0   [ $((1 + 1)) -eq 2 ] && echo yes
+ 1 400   0   
+ 0 400   0   ls -a --directory
  0 400   0   
