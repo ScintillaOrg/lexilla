@@ -89,6 +89,7 @@ enum class QuoteStyle {
 };
 
 #define BASH_QUOTE_STACK_MAX	7
+#define BASH_SPECIAL_PARAMETER	"*@#?-$!"
 
 constexpr int commandSubstitutionFlag = 0x40;
 constexpr int MaskCommand(int state) noexcept {
@@ -180,6 +181,7 @@ struct OptionsBash {
 	bool stylingInsideParameter = false;
 	bool stylingInsideHeredoc = false;
 	int commandSubstitution = static_cast<int>(CommandSubstitution::Backtick);
+	std::string specialParameter = BASH_SPECIAL_PARAMETER;
 
 	[[nodiscard]] bool stylingInside(int state) const noexcept {
 		switch (state) {
@@ -228,6 +230,9 @@ struct OptionSetBash : public OptionSet<OptionsBash> {
 			"1 highlighted inside. "
 			"2 highlighted inside with extra scope tracking.");
 
+		DefineProperty("lexer.bash.special.parameter", &OptionsBash::specialParameter,
+			"Set shell (default is Bash) special parameters.");
+
 		DefineWordListSets(bashWordListDesc);
 	}
 };
@@ -266,6 +271,8 @@ public:
 	int insideCommand = 0;
 	QuoteCls Current;
 	QuoteCls Stack[BASH_QUOTE_STACK_MAX];
+	const CharacterSet &setParamStart;
+	QuoteStackCls(const CharacterSet &setParamStart_) noexcept : setParamStart{setParamStart_} {}
 	[[nodiscard]] bool Empty() const noexcept {
 		return Current.Up == '\0';
 	}
@@ -365,6 +372,9 @@ public:
 			sc.ChangeState(SCE_SH_BACKTICKS);
 		} else {
 			// scalar has no delimiter pair
+			if (!setParamStart.Contains(sc.ch)) {
+				stylingInside = false; // not scalar
+			}
 		}
 		if (!stylingInside) {
 			sc.ChangeState(state);
@@ -408,11 +418,13 @@ class LexerBash final : public DefaultLexer {
 	WordList testOperator;
 	OptionsBash options;
 	OptionSetBash osBash;
+	CharacterSet setParamStart;
 	enum { ssIdentifier, ssScalar };
 	SubStyles subStyles;
 public:
 	LexerBash() :
 		DefaultLexer("bash", SCLEX_BASH, lexicalClasses, ELEMENTS(lexicalClasses)),
+		setParamStart(CharacterSet::setAlphaNum, "_" BASH_SPECIAL_PARAMETER),
 		subStyles(styleSubable, 0x80, 0x40, 0) {
 		cmdDelimiter.Set("| || |& & && ; ;; ( ) { }");
 		bashStruct.Set("if elif fi while until else then do done esac eval");
@@ -490,6 +502,10 @@ public:
 
 Sci_Position SCI_METHOD LexerBash::PropertySet(const char *key, const char *val) {
 	if (osBash.PropertySet(&options, key, val)) {
+		if (strcmp(key, "lexer.bash.special.parameter") == 0) {
+			setParamStart = CharacterSet(CharacterSet::setAlphaNum, "_");
+			setParamStart.AddString(options.specialParameter.empty() ? BASH_SPECIAL_PARAMETER : options.specialParameter.c_str());
+		}
 		return 0;
 	}
 	return -1;
@@ -543,7 +559,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	};
 	HereDocCls HereDoc;
 
-	QuoteStackCls QuoteStack;
+	QuoteStackCls QuoteStack(setParamStart);
 	QuoteStack.commandSubstitution = static_cast<CommandSubstitution>(options.commandSubstitution);
 
 	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_SH_IDENTIFIER);
@@ -818,7 +834,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						sc.ChangeState(subStyle | insideCommand);
 					}
 					if (sc.LengthCurrent() == 1) {
-						// Special variable: $(, $_ etc.
+						// Special variable
 						sc.Forward();
 					}
 					sc.SetState(QuoteStack.State | insideCommand);
