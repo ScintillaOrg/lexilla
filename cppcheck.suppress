@@ -67,6 +67,7 @@ variableScope:lexilla/lexers/LexECL.cxx
 constParameterPointer:lexilla/lexers/LexEDIFACT.cxx
 knownConditionTrueFalse:lexilla/lexers/LexEiffel.cxx
 variableScope:lexilla/lexers/LexErlang.cxx
+knownConditionTrueFalse:lexilla/lexers/LexErrorList.cxx
 knownConditionTrueFalse:lexilla/lexers/LexEScript.cxx
 constParameter:lexilla/lexers/LexFortran.cxx
 constParameterReference:lexilla/lexers/LexFortran.cxx
