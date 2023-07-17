@@ -455,7 +455,7 @@ public:
 	}
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
-	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
 	void * SCI_METHOD PrivateCall(int, void *) override {
 		return nullptr;
@@ -1128,13 +1128,14 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	sc.Complete();
 }
 
-void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle, IDocument *pAccess) {
 	if(!options.fold)
 		return;
 
 	LexAccessor styler(pAccess);
 
-	const Sci_PositionU endPos = startPos + length;
+	const Sci_Position startPos = startPos_;
+	const Sci_Position endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -1143,8 +1144,8 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos, Sci_Position length, int
 	int styleNext = MaskCommand(styler.StyleIndexAt(startPos));
 	int style = MaskCommand(initStyle);
 	char word[8] = { '\0' }; // we're not interested in long words anyway
-	unsigned int wordlen = 0;
-	for (Sci_PositionU i = startPos; i < endPos; i++) {
+	size_t wordlen = 0;
+	for (Sci_Position i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int stylePrev = style;
