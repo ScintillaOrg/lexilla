@@ -641,11 +641,11 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					if (subStyle >= 0) {
 						identifierStyle = subStyle | insideCommand;
 					}
-					// allow keywords ending in a whitespace or command delimiter
+					// allow keywords ending in a whitespace, meta character or command delimiter
 					char s2[10];
 					s2[0] = static_cast<char>(sc.ch);
 					s2[1] = '\0';
-					const bool keywordEnds = IsASpace(sc.ch) || cmdDelimiter.InList(s2);
+					const bool keywordEnds = IsASpace(sc.ch) || setMetaCharacter.Contains(sc.ch) || cmdDelimiter.InList(s2);
 					// 'in' or 'do' may be construct keywords
 					if (cmdState == CmdState::Word) {
 						if (strcmp(s, "in") == 0 && keywordEnds)
