@@ -1,0 +1,22 @@
+ 0 400   0   <!DOCTYPE html>
+ 2 400   0 + <html>
+ 0 401   0 | <%@language=VBScript%>
+ 0 401   0 | <%-- comment --%>
+ 2 400   0 + <script type="text/vbscript">
+ 0 401   0 | '1%>2
+ 0 401   0 | '1?>2
+ 0 401   0 | '%>
+ 0 401   0 | '?>
+ 0 401   0 | </script>
+ 2 400   0 + <script type="text/vbscript">
+ 0 401   0 | dim e="%>"
+ 0 401   0 | dim f="?>"
+ 0 401   0 | </script>
+ 0 400   0   Start
+ 0 400   0   <%response.write("1")%>
+ 0 400   0   <% 'comment%>
+ 0 400   0   <%dim x="2"'comment%>
+ 0 400   0   <%response.write(x)%>
+ 0 400   0   End
+ 0 400   0   </html>
+ 0 3ff   0   

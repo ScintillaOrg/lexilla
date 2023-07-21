@@ -220,7 +220,6 @@ inline bool stateAllowsTermination(int state) {
 	bool allowTermination = !isStringState(state);
 	if (allowTermination) {
 		switch (state) {
-		case SCE_HB_COMMENTLINE:
 		case SCE_HPHP_COMMENT:
 		case SCE_HP_COMMENTLINE:
 		case SCE_HPA_COMMENTLINE:
@@ -228,6 +227,17 @@ inline bool stateAllowsTermination(int state) {
 		}
 	}
 	return allowTermination;
+}
+
+inline bool isPreProcessorEndTag(int state, int ch) {
+	const script_type type = ScriptOfState(state);
+	if (AnyOf(state, SCE_H_ASP, SCE_H_ASPAT, SCE_H_XCCOMMENT) || AnyOf(type, eScriptVBS, eScriptJS, eScriptPython)) {
+		return ch == '%';
+	}
+	if (type == eScriptPHP) {
+		return ch == '%' || ch == '?';
+	}
+	return ch == '?';
 }
 
 // not really well done, since it's only comments that should lex the %> and <%
@@ -1327,7 +1337,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_HJ_COMMENTDOC:
 			//case SCE_HJ_COMMENTLINE: // removed as this is a common thing done to hide
 			// the end of script marker from some JS interpreters.
-			case SCE_HB_COMMENTLINE:
+			//case SCE_HB_COMMENTLINE:
 			case SCE_HBA_COMMENTLINE:
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
@@ -1345,7 +1355,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			default :
 				// check if the closing tag is a script tag
 				if (const char *tag =
-						state == SCE_HJ_COMMENTLINE || isXml ? "script" :
+						(state == SCE_HJ_COMMENTLINE || state == SCE_HB_COMMENTLINE || isXml) ? "script" :
 						state == SCE_H_COMMENT ? "comment" : 0) {
 					Sci_Position j = i + 2;
 					int chr;
@@ -1635,7 +1645,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		// handle the end of a pre-processor = Non-HTML
 		else if ((!isMako && !isDjango && ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) &&
 				  (((scriptLanguage != eScriptNone) && stateAllowsTermination(state))) &&
-				  (((ch == '%') || (ch == '?')) && (chNext == '>'))) ||
+				  ((chNext == '>') && isPreProcessorEndTag(state, ch))) ||
 		         ((scriptLanguage == eScriptSGML) && (ch == '>') && (state != SCE_H_SGML_COMMENT))) {
 			if (state == SCE_H_ASPAT) {
 				aspScript = segIsScriptingIndicator(styler,
