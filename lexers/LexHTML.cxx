@@ -1522,7 +1522,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				inScriptType = eNonHtmlScriptPreProc;
 			else
 				inScriptType = eNonHtmlPreProc;
-
+			// fold whole script
+			if (foldHTMLPreprocessor)
+				levelCurrent++;
 			if (chNext2 == '@') {
 				i += 2; // place as if it was the second next char treated
 				visibleChars += 2;
@@ -1546,9 +1548,6 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				scriptLanguage = aspScript;
 			}
 			styler.ColourTo(i, SCE_H_ASP);
-			// fold whole script
-			if (foldHTMLPreprocessor)
-				levelCurrent++;
 			// should be better
 			ch = static_cast<unsigned char>(styler.SafeGetCharAt(i));
 			continue;
