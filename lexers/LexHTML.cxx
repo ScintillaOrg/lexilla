@@ -809,7 +809,7 @@ LexicalClass lexicalClassesHTML[] = {
 	17, "SCE_H_CDATA", "literal", "CDATA",
 	18, "SCE_H_QUESTION", "preprocessor", "PHP",
 	19, "SCE_H_VALUE", "literal string", "Unquoted values",
-	20, "SCE_H_XCCOMMENT", "comment", "JSP Comment <%-- ... --%>",
+	20, "SCE_H_XCCOMMENT", "comment", "ASP.NET, JSP Comment <%-- ... --%>",
 	21, "SCE_H_SGML_DEFAULT", "default", "SGML tags <! ... >",
 	22, "SCE_H_SGML_COMMAND", "preprocessor", "SGML command",
 	23, "SCE_H_SGML_1ST_PARAM", "preprocessor", "SGML 1st param",
