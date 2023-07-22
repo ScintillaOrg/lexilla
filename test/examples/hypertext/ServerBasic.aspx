@@ -1,3 +1,6 @@
+<%@ register tagprefix="uc1" 
+    tagname="CalendarUserControl" 
+    src="~/CalendarUserControl.ascx" %>
 <!DOCTYPE html>
 <html>
 <%@language=VBScript%>

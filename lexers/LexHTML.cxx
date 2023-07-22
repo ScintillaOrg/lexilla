@@ -134,11 +134,11 @@ int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, Sci_Pos
 script_type ScriptOfState(int state) {
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
 		return eScriptPython;
-	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
+	} else if ((state >= SCE_HB_START && state <= SCE_HB_STRINGEOL) || (state == SCE_H_ASPAT || state == SCE_H_XCCOMMENT)) {
 		return eScriptVBS;
 	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
 		return eScriptJS;
-	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_COMMENTLINE)) {
+	} else if ((state >= SCE_HPHP_DEFAULT && state <= SCE_HPHP_COMMENTLINE) || (state == SCE_HPHP_COMPLEX_VARIABLE)) {
 		return eScriptPHP;
 	} else if ((state >= SCE_H_SGML_DEFAULT) && (state < SCE_H_SGML_BLOCK_DEFAULT)) {
 		return eScriptSGML;
@@ -231,7 +231,7 @@ inline bool stateAllowsTermination(int state) {
 
 inline bool isPreProcessorEndTag(int state, int ch) {
 	const script_type type = ScriptOfState(state);
-	if (AnyOf(state, SCE_H_ASP, SCE_H_ASPAT, SCE_H_XCCOMMENT) || AnyOf(type, eScriptVBS, eScriptJS, eScriptPython)) {
+	if (state == SCE_H_ASP || AnyOf(type, eScriptVBS, eScriptJS, eScriptPython)) {
 		return ch == '%';
 	}
 	if (type == eScriptPHP) {
