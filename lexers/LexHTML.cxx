@@ -1162,6 +1162,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	const CharacterSet setAttributeContinue(CharacterSet::setAlphaNum, ".-_:!#/", true);
 	// TODO: also handle + and - (except if they're part of ++ or --) and return keywords
 	const CharacterSet setOKBeforeJSRE(CharacterSet::setNone, "([{=,:;!%^&*|?~");
+	// Only allow [A-Za-z0-9.#-_:] in entities
+	const CharacterSet setEntity(CharacterSet::setAlphaNum, ".#-_:");
 
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
@@ -1872,14 +1874,15 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if (ch == ';') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
-			}
-			if (ch != '#' && !(IsASCII(ch) && isalnum(ch))	// Should check that '#' follows '&', but it is unlikely anyway...
-				&& ch != '.' && ch != '-' && ch != '_' && ch != ':') { // valid in XML
-				if (!IsASCII(ch))	// Possibly start of a multibyte character so don't allow this byte to be in entity style
-					styler.ColourTo(i-1, SCE_H_TAGUNKNOWN);
-				else
-					styler.ColourTo(i, SCE_H_TAGUNKNOWN);
+			} else if (!setEntity.Contains(ch)) {
+				styler.ColourTo(i-1, SCE_H_TAGUNKNOWN);
 				state = SCE_H_DEFAULT;
+				if (!isLineEnd(ch)) {
+					// Retreat one byte so the character that is invalid inside entity
+					// may start something else like a tag.
+					--i;
+					continue;
+				}
 			}
 			break;
 		case SCE_H_TAGUNKNOWN:
