@@ -1171,7 +1171,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
-	int visibleChars = 0;
+	Sci_Position visibleChars = 0;
 	int lineStartVisibleChars = 0;
 
 	int chPrev = ' ';
@@ -1453,7 +1453,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			styler.ColourTo(i, SCE_H_ASP);
 			if (ch != '%' && ch != '$' && ch != '/') {
 				i += makoBlockType.length();
-				visibleChars += static_cast<int>(makoBlockType.length());
+				visibleChars += makoBlockType.length();
 				if (keywords4.InList(makoBlockType.c_str()))
 					styler.ColourTo(i, SCE_HP_WORD);
 				else
@@ -1796,7 +1796,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					styler.ColourTo(i - 1, SCE_H_SGML_DEFAULT);
 				}
 				// find the length of the word
-				int size = 1;
+				Sci_Position size = 1;
 				while (setHTMLWord.Contains(SafeGetUnsignedCharAt(styler, i + size)))
 					size++;
 				styler.ColourTo(i + size - 1, StateToPrint);
