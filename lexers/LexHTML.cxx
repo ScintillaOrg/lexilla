@@ -42,16 +42,16 @@ namespace {
 enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock, eScriptComment };
 enum script_mode { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
 
-bool IsAWordChar(const int ch) noexcept {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+constexpr bool IsAWordChar(int ch) noexcept {
+	return IsAlphaNumeric(ch) || ch == '.' || ch == '_';
 }
 
-bool IsAWordStart(const int ch) noexcept {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+constexpr bool IsAWordStart(int ch) noexcept {
+	return IsAlphaNumeric(ch) || ch == '_';
 }
 
 bool IsOperator(int ch) noexcept {
-	if (IsASCII(ch) && isalnum(ch))
+	if (IsAlphaNumeric(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
 	if (ch == '%' || ch == '^' || ch == '&' || ch == '*' ||
@@ -476,16 +476,16 @@ int StateForScript(script_type scriptLanguage) noexcept {
 	return Result;
 }
 
-bool issgmlwordchar(int ch) noexcept {
+constexpr bool issgmlwordchar(int ch) noexcept {
 	return !IsASCII(ch) ||
-		(isalnum(ch) || ch == '.' || ch == '_' || ch == ':' || ch == '!' || ch == '#' || ch == '[');
+		(IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == ':' || ch == '!' || ch == '#' || ch == '[');
 }
 
-bool IsPhpWordStart(int ch) noexcept {
-	return (IsASCII(ch) && (isalpha(ch) || (ch == '_'))) || (ch >= 0x7f);
+constexpr bool IsPhpWordStart(int ch) noexcept {
+	return (IsUpperOrLowerCase(ch) || (ch == '_')) || (ch >= 0x7f);
 }
 
-bool IsPhpWordChar(int ch) noexcept {
+constexpr bool IsPhpWordChar(int ch) noexcept {
 	return IsADigit(ch) || IsPhpWordStart(ch);
 }
 
@@ -506,7 +506,7 @@ bool IsScriptCommentState(const int state) noexcept {
 		   state == SCE_HJA_COMMENTLINE || state == SCE_HB_COMMENTLINE || state == SCE_HBA_COMMENTLINE;
 }
 
-bool isLineEnd(int ch) noexcept {
+constexpr bool isLineEnd(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
 
@@ -1737,7 +1737,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					styler.ColourTo(i - 2, StateToPrint);
 				}
 				state = SCE_H_SGML_COMMENT;
-			} else if (IsASCII(ch) && isalpha(ch) && (chPrev == '%')) {
+			} else if (IsUpperOrLowerCase(ch) && (chPrev == '%')) {
 				styler.ColourTo(i - 2, StateToPrint);
 				state = SCE_H_SGML_ENTITY;
 			} else if (ch == '#') {
@@ -1856,9 +1856,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_H_SGML_SPECIAL:
-			if (!(IsASCII(ch) && isupper(ch))) {
+			if (!IsUpperCase(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
-				if (isalnum(ch)) {
+				if (IsAlphaNumeric(ch)) {
 					state = SCE_H_SGML_ERROR;
 				} else {
 					state = SCE_H_SGML_DEFAULT;
@@ -1869,7 +1869,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if (ch == ';') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_SGML_DEFAULT;
-			} else if (!(IsASCII(ch) && isalnum(ch)) && ch != '-' && ch != '.') {
+			} else if (!(IsAlphaNumeric(ch)) && ch != '-' && ch != '.') {
 				styler.ColourTo(i, SCE_H_SGML_ERROR);
 				state = SCE_H_SGML_DEFAULT;
 			}
@@ -2204,7 +2204,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_HJ_REGEX:
 			if (ch == '\r' || ch == '\n' || ch == '/') {
 				if (ch == '/') {
-					while (IsASCII(chNext) && islower(chNext)) {   // gobble regex flags
+					while (IsLowerCase(chNext)) {   // gobble regex flags
 						i++;
 						ch = chNext;
 						chNext = SafeGetUnsignedCharAt(styler, i + 1);
