@@ -173,7 +173,7 @@ bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 }
 
 constexpr bool StyleForceBacktrack(int state) noexcept {
-	return AnyOf(state, SCE_SH_CHARACTER, SCE_SH_STRING, SCE_SH_BACKTICKS, SCE_SH_HERE_Q, SCE_SH_PARAM, SCE_SH_COMMENTLINE);
+	return AnyOf(state, SCE_SH_CHARACTER, SCE_SH_STRING, SCE_SH_BACKTICKS, SCE_SH_HERE_Q, SCE_SH_PARAM);
 }
 
 struct OptionsBash {
@@ -770,7 +770,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_SH_DEFAULT | insideCommand);
 				break;
 			case SCE_SH_COMMENTLINE:
-				if (sc.MatchLineEnd() && sc.chPrev != '\\') {
+				if (sc.MatchLineEnd()) {
 					sc.SetState(SCE_SH_DEFAULT | insideCommand);
 				}
 				break;
