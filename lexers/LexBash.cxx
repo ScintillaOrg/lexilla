@@ -172,6 +172,10 @@ bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 	return false;
 }
 
+constexpr bool StyleForceBacktrack(int state) noexcept {
+	return AnyOf(state, SCE_SH_CHARACTER, SCE_SH_STRING, SCE_SH_BACKTICKS, SCE_SH_HERE_Q, SCE_SH_PARAM, SCE_SH_COMMENTLINE);
+}
+
 struct OptionsBash {
 	bool fold = false;
 	bool foldComment = false;
@@ -267,6 +271,7 @@ class QuoteStackCls {	// Class to manage quote pairs that nest
 public:
 	int Depth = 0;
 	int State = SCE_SH_DEFAULT;
+	bool lineContinuation = false;
 	CommandSubstitution commandSubstitution = CommandSubstitution::Backtick;
 	int insideCommand = 0;
 	QuoteCls Current;
@@ -383,6 +388,24 @@ public:
 		}
 		if (style != QuoteStyle::Literal) {
 			Start(sc.ch, style, state, current);
+			sc.Forward();
+		}
+	}
+	void Escape(StyleContext &sc) {
+		int count = 1;
+		while (sc.chNext == '\\') {
+			++count;
+			sc.Forward();
+		}
+		bool escaped = count & 1; // odd backslash escape next character
+		if (escaped && (sc.chNext == '\r' || sc.chNext == '\n')) {
+			lineContinuation = true;
+			if (sc.state == SCE_SH_IDENTIFIER) {
+				sc.SetState(SCE_SH_OPERATOR | insideCommand);
+			}
+			return;
+		}
+		if (escaped) {
 			sc.Forward();
 		}
 	}
@@ -591,26 +614,17 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		// handle line continuation, updates per-line stored state
 		if (sc.atLineStart) {
-			if (MaskCommand(sc.state) == SCE_SH_STRING
-			 || MaskCommand(sc.state) == SCE_SH_BACKTICKS
-			 || MaskCommand(sc.state) == SCE_SH_CHARACTER
-			 || MaskCommand(sc.state) == SCE_SH_HERE_Q
-			 || MaskCommand(sc.state) == SCE_SH_COMMENTLINE
-			 || MaskCommand(sc.state) == SCE_SH_PARAM) {
-				// force backtrack while retaining cmdState
-				styler.SetLineState(sc.currentLine, static_cast<int>(CmdState::Body));
-			} else {
-				if (sc.currentLine > 0) {
-					if ((sc.GetRelative(-3) == '\\' && sc.GetRelative(-2) == '\r' && sc.chPrev == '\n')
-					 || sc.GetRelative(-2) == '\\') {	// handle '\' line continuation
-						// retain last line's state
-					} else
-						cmdState = CmdState::Start;
+			CmdState state = CmdState::Body;	// force backtrack while retaining cmdState
+			if (!StyleForceBacktrack(MaskCommand(sc.state))) {
+				if (!QuoteStack.lineContinuation) {	// retain last line's state
+					cmdState = CmdState::Start;
 				}
-				// force backtrack when nesting
-				const CmdState state = QuoteStack.Empty() ? cmdState : CmdState::Body;
-				styler.SetLineState(sc.currentLine, static_cast<int>(state));
+				if (QuoteStack.Empty()) {	// force backtrack when nesting
+					state = cmdState;
+				}
 			}
+			QuoteStack.lineContinuation = false;
+			styler.SetLineState(sc.currentLine, static_cast<int>(state));
 		}
 
 		// controls change of cmdState at the end of a non-whitespace element
@@ -693,16 +707,13 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				break;
 			case SCE_SH_IDENTIFIER:
-				if (sc.chPrev == '\\' || !setWord.Contains(sc.ch) ||
+				if (!setWord.Contains(sc.ch) ||
 					  (cmdState == CmdState::Arithmetic && !setWordStart.Contains(sc.ch))) {
 					char s[500];
 					sc.GetCurrent(s, sizeof(s));
 					const int subStyle = classifierIdentifiers.ValueFor(s);
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle | insideCommand);
-					}
-					if (sc.chPrev == '\\') {	// for escaped chars
-						sc.Forward();
 					}
 					sc.SetState(SCE_SH_DEFAULT | insideCommand);
 				}
@@ -873,7 +884,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_BACKTICKS:
 				if (sc.ch == '\\') {
 					if (QuoteStack.Current.Style != QuoteStyle::Literal)
-						sc.Forward();
+						QuoteStack.Escape(sc);
 				} else if (sc.ch == QuoteStack.Current.Down) {
 					if (QuoteStack.CountDown(sc, cmdState)) {
 						continue;
@@ -968,8 +979,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if (sc.ch == '\\') {
 				// Bash can escape any non-newline as a literal
 				sc.SetState(SCE_SH_IDENTIFIER | insideCommand);
-				if (sc.chNext == '\r' || sc.chNext == '\n')
-					sc.SetState(SCE_SH_OPERATOR | insideCommand);
+				QuoteStack.Escape(sc);
 			} else if (IsADigit(sc.ch)) {
 				sc.SetState(SCE_SH_NUMBER | insideCommand);
 				numBase = BASH_BASE_DECIMAL;
