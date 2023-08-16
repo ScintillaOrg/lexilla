@@ -30,13 +30,13 @@ class OptionSet {
 		Option() :
 			opType(SC_TYPE_BOOLEAN), pb(nullptr) {
 		}
-		Option(plcob pb_, std::string description_="") :
+		Option(plcob pb_, std::string_view description_="") :
 			opType(SC_TYPE_BOOLEAN), pb(pb_), description(description_) {
 		}
-		Option(plcoi pi_, std::string description_) :
+		Option(plcoi pi_, std::string_view description_) :
 			opType(SC_TYPE_INTEGER), pi(pi_), description(description_) {
 		}
-		Option(plcos ps_, std::string description_) :
+		Option(plcos ps_, std::string_view description_) :
 			opType(SC_TYPE_STRING), ps(ps_), description(description_) {
 		}
 		bool Set(T *base, const char *val) {
@@ -85,15 +85,15 @@ class OptionSet {
 		names += name;
 	}
 public:
-	void DefineProperty(const char *name, plcob pb, std::string description="") {
+	void DefineProperty(const char *name, plcob pb, std::string_view description="") {
 		nameToDef[name] = Option(pb, description);
 		AppendName(name);
 	}
-	void DefineProperty(const char *name, plcoi pi, std::string description="") {
+	void DefineProperty(const char *name, plcoi pi, std::string_view description="") {
 		nameToDef[name] = Option(pi, description);
 		AppendName(name);
 	}
-	void DefineProperty(const char *name, plcos ps, std::string description="") {
+	void DefineProperty(const char *name, plcos ps, std::string_view description="") {
 		nameToDef[name] = Option(ps, description);
 		AppendName(name);
 	}
