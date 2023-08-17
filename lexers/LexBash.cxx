@@ -647,7 +647,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				break;
 			case SCE_SH_WORD:
 				// "." never used in Bash variable names but used in file names
-				if (!setWord.Contains(sc.ch)) {
+				if (!setWord.Contains(sc.ch) || sc.Match('+', '=')) {
 					char s[500];
 					sc.GetCurrent(s, sizeof(s));
 					int identifierStyle = SCE_SH_IDENTIFIER | insideCommand;
@@ -996,7 +996,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					}
 				}
 			} else if (setWordStart.Contains(sc.ch)) {
-				sc.SetState(SCE_SH_WORD | insideCommand);
+				sc.SetState(((cmdState == CmdState::Arithmetic)? SCE_SH_IDENTIFIER : SCE_SH_WORD) | insideCommand);
 			} else if (sc.ch == '#') {
 				if (stylePrev != SCE_SH_WORD && stylePrev != SCE_SH_IDENTIFIER &&
 					(sc.currentPos == 0 || setMetaCharacter.Contains(sc.chPrev))) {
@@ -1043,6 +1043,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					HereDoc.Indent = false;
 				}
 			} else if (sc.ch == '-' && // test operator or short and long option
+					   cmdState != CmdState::Arithmetic &&
 					   (IsUpperOrLowerCase(sc.chNext) || sc.chNext == '-') &&
 					   IsASpace(sc.chPrev)) {
 				sc.SetState(SCE_SH_WORD | insideCommand);

@@ -19,7 +19,7 @@
 {4}print{0} {7}$(({0} {8}##T{7}+{3}0{0} {7})){0}
 {4}print{0} {7}$(({0} {8}##^G{7}+{3}0{0} {7})){0}
 {2}# Failure: does not work when - included for bindkey syntax. \M-\C-x means Meta+Ctrl+x.{0}
-{4}print{0} {7}$(({0} {8}##\M{7}-{8}\C{7}-{8}x+0{0} {7})){0}
+{4}print{0} {7}$(({0} {8}##\M{7}-{8}\C{7}-{8}x{7}+{3}0{0} {7})){0}
 
 {2}# Value of first character of variable in expression{0}
 {8}var{7}={8}Tree{0}
