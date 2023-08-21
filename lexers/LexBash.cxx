@@ -81,7 +81,7 @@ enum class QuoteStyle {
 	String,			// ""
 	LString,		// $""
 	HereDoc,		// here document
-	Backtick,		// ``, $``
+	Backtick,		// ``
 	Parameter,		// ${}
 	Command,		// $()
 	CommandInside,	// $() with styling inside
@@ -388,9 +388,6 @@ public:
 				// optimized to avoid track nested delimiter pairs
 				style = QuoteStyle::Literal;
 			}
-		} else if (sc.ch == '`') {	// $` seen in a configure script, valid?
-			style = QuoteStyle::Backtick;
-			sc.ChangeState(SCE_SH_BACKTICKS);
 		} else {
 			// scalar has no delimiter pair
 			if (!setParamStart.Contains(sc.ch)) {

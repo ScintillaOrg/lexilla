@@ -43,4 +43,10 @@ END
 echo "foo `echo foo \\" bar` bar"
 echo "xinput set-prop bla \"blub\" `grep bla $WRITE_APPENDIX/var/lib/path.txt | cut -d \\" -f 4`" >/some_file.sh
 
+# Issue 194, $ before end of backticks is literal
+echo `echo \$`
+echo `echo \$bar\$`
+echo `echo $`
+echo `echo $bar$`
+
 INVALID_NUMBER=0#0000
