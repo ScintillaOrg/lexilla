@@ -1,4 +1,4 @@
-name: "Build and check Lexilla"
+name: "Build and check Lexilla on Linux"
 
 on: [push]
 
