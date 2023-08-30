@@ -23,8 +23,8 @@ jobs:
           run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}})
         - uses: actions/upload-artifact@v3
           with:
-              name: lexilla.dylib
-              path: bin/lexilla.dylib
+              name: liblexilla.dylib
+              path: bin/liblexilla.dylib
         - name: Test lexing and folding
           run: (cd test && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
         - name: CheckLexilla C Example
