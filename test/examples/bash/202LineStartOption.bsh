@@ -1,0 +1,9 @@
+-a
+#
+-b
+#
+case $1 in
+	-h|--help)
+		echo help
+		;;
+esac
