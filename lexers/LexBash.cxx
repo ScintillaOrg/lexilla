@@ -1094,7 +1094,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (sc.ch == '-' && // test operator or short and long option
 					   cmdState != CmdState::Arithmetic &&
 					   (IsUpperOrLowerCase(sc.chNext) || sc.chNext == '-') &&
-					   ((sc.chPrev == 0) || IsASpace(sc.chPrev) || setMetaCharacter.Contains(sc.chPrev))) {
+					   (IsASpace(sc.chPrev) || setMetaCharacter.Contains(sc.chPrev))) {
 				sc.SetState(SCE_SH_WORD | insideCommand);
 				sc.Forward();
 			} else if (setBashOperator.Contains(sc.ch)) {
