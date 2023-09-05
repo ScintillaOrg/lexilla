@@ -20,6 +20,14 @@
  0 400   0   declare -i a=1+1; echo $a
  0 400   0   [[ $a == [0-9] ]] && echo 1
  1 400   0   
+ 0 400   0   # Brace expansion
+ 1 400   0   
+ 2 400   0 + for i in {1..10..2}; do
+ 0 401   0 | 	echo $i
+ 0 401   0 | done
+ 2 400   0 + for a in {A..Z..2}; do
+ 0 401   0 | 	echo $a
+ 0 401   0 | done
  1 400   0   
  0 400   0   # From Kein-Hong Man
  1 400   0   

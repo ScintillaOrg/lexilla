@@ -20,6 +20,14 @@ git log --no-walk rel-5-2-4-97-g7405d4e7
 declare -i a=1+1; echo $a
 [[ $a == [0-9] ]] && echo 1
 
+# Brace expansion
+
+for i in {1..10..2}; do
+	echo $i
+done
+for a in {A..Z..2}; do
+	echo $a
+done
 
 # From Kein-Hong Man
 

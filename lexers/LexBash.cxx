@@ -694,7 +694,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				break;
 			case SCE_SH_WORD:
 				// "." never used in Bash variable names but used in file names
-				if (!setWord.Contains(sc.ch) || sc.Match('+', '=')) {
+				if (!setWord.Contains(sc.ch) || sc.Match('+', '=') || sc.Match('.', '.')) {
 					char s[500];
 					sc.GetCurrent(s, sizeof(s));
 					int identifierStyle = SCE_SH_IDENTIFIER | insideCommand;
@@ -813,7 +813,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 #endif
 				) {
 					sc.ChangeState(SCE_SH_ERROR | insideCommand);
-				} else if (digit < 62 || digit == 63 || (cmdState != CmdState::Arithmetic && AnyOf(sc.ch, '-', '.'))) {
+				} else if (digit < 62 || digit == 63 || (cmdState != CmdState::Arithmetic &&
+					(sc.ch == '-' || (sc.ch == '.' && sc.chNext != '.')))) {
 					// current character is alpha numeric, underscore, hyphen or dot
 					sc.ChangeState(SCE_SH_IDENTIFIER | insideCommand);
 					break;
