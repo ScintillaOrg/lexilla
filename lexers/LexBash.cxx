@@ -1094,10 +1094,12 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 			} else if (sc.ch == '-' && // test operator or short and long option
 					   cmdState != CmdState::Arithmetic &&
-					   (IsUpperOrLowerCase(sc.chNext) || sc.chNext == '-') &&
-					   (IsASpace(sc.chPrev) || setMetaCharacter.Contains(sc.chPrev))) {
-				sc.SetState(SCE_SH_WORD | insideCommand);
-				sc.Forward();
+					   sc.chPrev != '~' && !IsADigit(sc.chNext)) {
+				if (IsASpace(sc.chPrev) || setMetaCharacter.Contains(sc.chPrev)) {
+					sc.SetState(SCE_SH_WORD | insideCommand);
+				} else {
+					sc.SetState(SCE_SH_IDENTIFIER | insideCommand);
+				}
 			} else if (setBashOperator.Contains(sc.ch)) {
 				bool isCmdDelim = false;
 				sc.SetState(SCE_SH_OPERATOR | insideCommand);
