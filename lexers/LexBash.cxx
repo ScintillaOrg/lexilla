@@ -56,15 +56,11 @@ enum class CmdState {
 	Body,
 	Start,
 	Word,
-	Test,
+	Test,			// test
+	SingleBracket,	// []
+	DoubleBracket,	// [[]]
 	Arithmetic,
 	Delimiter,
-};
-
-enum class TestExprType {
-	Test,			// test
-	DoubleBracket,	// [[]]
-	SingleBracket,	// []
 };
 
 enum class CommandSubstitution {
@@ -639,7 +635,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	int digit = 0;
 	const Sci_PositionU endPos = startPos + length;
 	CmdState cmdState = CmdState::Start;
-	TestExprType testExprType = TestExprType::Test;
 	LexAccessor styler(pAccess);
 
 	// Always backtracks to the start of a line that is not a continuation
@@ -663,7 +658,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		if (sc.atLineStart) {
 			CmdState state = CmdState::Body;	// force backtrack while retaining cmdState
 			if (!StyleForceBacktrack(MaskCommand(sc.state))) {
-				if (!QuoteStack.lineContinuation) {	// retain last line's state
+				// retain last line's state
+				// arithmetic expression and double bracket test can span multiline without line continuation
+				if (!QuoteStack.lineContinuation && !AnyOf(cmdState, CmdState::DoubleBracket, CmdState::Arithmetic)) {
 					cmdState = CmdState::Start;
 				}
 				if (QuoteStack.Empty()) {	// force backtrack when nesting
@@ -678,7 +675,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		// states Body|Test|Arithmetic persist until the end of a command segment
 		// state Word persist, but ends with 'in' or 'do' construct keywords
 		CmdState cmdStateNew = CmdState::Body;
-		if (cmdState == CmdState::Test || cmdState == CmdState::Arithmetic || cmdState == CmdState::Word)
+		if (cmdState >= CmdState::Word && cmdState <= CmdState::Arithmetic)
 			cmdStateNew = cmdState;
 		const int stylePrev = MaskCommand(sc.state);
 		const int insideCommand = QuoteStack.insideCommand;
@@ -722,7 +719,6 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					if (strcmp(s, "test") == 0) {
 						if (cmdState == CmdState::Start && keywordEnds) {
 							cmdStateNew = CmdState::Test;
-							testExprType = TestExprType::Test;
 						} else
 							sc.ChangeState(identifierStyle);
 					}
@@ -742,7 +738,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					}
 					// disambiguate option items and file test operators
 					else if (s[0] == '-') {
-						if (cmdState != CmdState::Test || !IsTestOperator(s, setSingleCharOp))
+						if (!AnyOf(cmdState, CmdState::Test, CmdState::SingleBracket, CmdState::DoubleBracket)
+							  || !keywordEnds || !IsTestOperator(s, setSingleCharOp))
 							sc.ChangeState(identifierStyle);
 					}
 					// disambiguate keywords and identifiers
@@ -1129,12 +1126,10 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						cmdState = CmdState::Arithmetic;
 						sc.Forward();
 					} else if (sc.Match('[', '[') && IsASpace(sc.GetRelative(2))) {
-						cmdState = CmdState::Test;
-						testExprType = TestExprType::DoubleBracket;
+						cmdState = CmdState::DoubleBracket;
 						sc.Forward();
 					} else if (sc.ch == '[' && IsASpace(sc.chNext)) {
-						cmdState = CmdState::Test;
-						testExprType = TestExprType::SingleBracket;
+						cmdState = CmdState::SingleBracket;
 					}
 				}
 				// special state -- for ((x;y;z)) in ... looping
@@ -1143,11 +1138,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					sc.Forward(2);
 					continue;
 				}
-				// handle command delimiters in command Start|Body|Word state, also Test if 'test'
-				if (cmdState == CmdState::Start
-				 || cmdState == CmdState::Body
-				 || cmdState == CmdState::Word
-				 || (cmdState == CmdState::Test && testExprType == TestExprType::Test)) {
+				// handle command delimiters in command Start|Body|Word state, also Test if 'test' or '[]'
+				if (cmdState < CmdState::DoubleBracket) {
 					char s[10];
 					s[0] = static_cast<char>(sc.ch);
 					if (setBashOperator.Contains(sc.chNext)) {
@@ -1171,12 +1163,12 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (cmdState == CmdState::Arithmetic && sc.Match(')', ')')) {
 					cmdState = CmdState::Body;
 					sc.Forward();
-				} else if (cmdState == CmdState::Test && IsASpace(sc.chPrev)) {
-					if (sc.Match(']', ']') && testExprType == TestExprType::DoubleBracket) {
+				} else if (sc.ch == ']' && IsASpace(sc.chPrev)) {
+					if (cmdState == CmdState::SingleBracket) {
+						cmdState = CmdState::Body;
+					} else if (cmdState == CmdState::DoubleBracket && sc.chNext == ']') {
+						cmdState = CmdState::Body;
 						sc.Forward();
-						cmdState = CmdState::Body;
-					} else if (sc.ch == ']' && testExprType == TestExprType::SingleBracket) {
-						cmdState = CmdState::Body;
 					}
 				}
 			}
