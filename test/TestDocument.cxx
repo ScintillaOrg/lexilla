@@ -123,7 +123,7 @@ void TestDocument::Set(std::string_view sv) {
 	if (lineStarts.back() != Length()) {
 		lineStarts.push_back(Length());
 	}
-	lineStates.resize(lineStarts.size());
+	lineStates.resize(lineStarts.size() + 1);
 	lineLevels.resize(lineStarts.size(), 0x400);
 }
 
