@@ -83,14 +83,17 @@ knownConditionTrueFalse:lexilla/lexers/LexHex.cxx
 constParameterReference:lexilla/lexers/LexHTML.cxx
 constVariable:lexilla/lexers/LexHollywood.cxx
 variableScope:lexilla/lexers/LexInno.cxx
+constParameterPointer:lexilla/lexers/LexJulia.cxx
 constParameterReference:lexilla/lexers/LexJulia.cxx
 knownConditionTrueFalse:lexilla/lexers/LexJulia.cxx
 unreadVariable:lexilla/lexers/LexJulia.cxx
 variableScope:lexilla/lexers/LexJulia.cxx
 variableScope:lexilla/lexers/LexLaTeX.cxx
 constParameterReference:lexilla/lexers/LexLaTeX.cxx
+constParameterPointer:lexilla/lexers/LexMagik.cxx
 constParameterReference:lexilla/lexers/LexMagik.cxx
 constParameterReference:lexilla/lexers/LexMarkdown.cxx
+constParameterPointer:lexilla/lexers/LexMatlab.cxx
 constParameterReference:lexilla/lexers/LexMatlab.cxx
 unreadVariable:lexilla/lexers/LexMatlab.cxx
 variableScope:lexilla/lexers/LexMatlab.cxx
