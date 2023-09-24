@@ -281,6 +281,7 @@ struct OptionsPython {
 	bool unicodeIdentifiers = true;
 	int identifierAttributes = 0;
 	int decoratorAttributes = 0;
+	bool pep701StringsF = true;
 
 	literalsAllowed AllowedLiterals() const noexcept {
 		literalsAllowed allowedLiterals = stringsU ? litU : litNone;
@@ -320,6 +321,9 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 
 		DefineProperty("lexer.python.strings.f", &OptionsPython::stringsF,
 			       "Set to 0 to not recognise Python 3.6 f-string literals f\"var={var}\".");
+
+		DefineProperty("lexer.python.strings.f.pep.701", &OptionsPython::stringsF,
+			       "Set to 0 to use pre-PEP 701 / Python 3.12 f-string lexing.");
 
 		DefineProperty("lexer.python.strings.over.newline", &OptionsPython::stringsOverNewline,
 			       "Set to 1 to allow strings to span newline characters.");
@@ -495,20 +499,26 @@ void LexerPython::ProcessLineEnd(StyleContext &sc, std::vector<SingleFStringExpS
 	long deepestSingleStateIndex = -1;
 	unsigned long i;
 
-	// Find the deepest single quote state because that string will end; no \ continuation in f-string
-	for (i = 0; i < fstringStateStack.size(); i++) {
-		if (IsPySingleQuoteStringState(fstringStateStack[i].state)) {
-			deepestSingleStateIndex = i;
-			break;
+	// Before pep 701 single quote f-string's could not continue to a 2nd+ line
+	// Post pep 701, they can continue both with a trailing \ and if a { field is
+	// not ended with a }
+	if (!options.pep701StringsF) {
+		// Find the deepest single quote state because that string will end; no \ continuation in f-string
+		for (i = 0; i < fstringStateStack.size(); i++) {
+			if (IsPySingleQuoteStringState(fstringStateStack[i].state)) {
+				deepestSingleStateIndex = i;
+				break;
+			}
+		}
+	
+		if (deepestSingleStateIndex != -1) {
+			sc.SetState(fstringStateStack[deepestSingleStateIndex].state);
+			while (fstringStateStack.size() > static_cast<unsigned long>(deepestSingleStateIndex)) {
+				PopFromStateStack(fstringStateStack, currentFStringExp);
+			}
 		}
 	}
 
-	if (deepestSingleStateIndex != -1) {
-		sc.SetState(fstringStateStack[deepestSingleStateIndex].state);
-		while (fstringStateStack.size() > static_cast<unsigned long>(deepestSingleStateIndex)) {
-			PopFromStateStack(fstringStateStack, currentFStringExp);
-		}
-	}
 	if (!fstringStateStack.empty()) {
 		std::pair<Sci_Position, std::vector<SingleFStringExpState> > val;
 		val.first = sc.currentLine;
@@ -795,10 +805,12 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 			needEOLCheck = true;
 		}
 
-		// If in an f-string expression, check for the ending quote(s)
-		// and end f-string to handle syntactically incorrect cases like
-		// f'{' and f"""{"""
-		if (!fstringStateStack.empty() && (sc.ch == '\'' || sc.ch == '"')) {
+		// If in an f-string expression and pre pep 701 lexing is used,
+		// check for the ending quote(s) and end f-string to handle 
+		// syntactically incorrect cases like f'{' and f"""{""". Post
+		// pep 701, a quote may appear in a { } field so cases like
+		// f"n = {":".join(seq)}" is valid
+		if (!options.pep701StringsF && !fstringStateStack.empty() && (sc.ch == '\'' || sc.ch == '"')) {
 			long matching_stack_i = -1;
 			for (unsigned long stack_i = 0; stack_i < fstringStateStack.size() && matching_stack_i == -1; stack_i++) {
 				const int stack_state = fstringStateStack[stack_i].state;
