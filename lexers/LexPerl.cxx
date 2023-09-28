@@ -34,6 +34,8 @@
 using namespace Scintilla;
 using namespace Lexilla;
 
+namespace {
+
 // Info for HERE document handling from perldata.pod (reformatted):
 // ----------------------------------------------------------------
 // A line-oriented form of quoting is based on the shell ``here-doc'' syntax.
@@ -91,7 +93,7 @@ using namespace Lexilla;
 // we also assume SCE_PL_STRING_VAR is the interpolated style with the smallest value
 #define	INTERPOLATE_SHIFT	(SCE_PL_STRING_VAR - SCE_PL_STRING)
 
-static bool isPerlKeyword(Sci_PositionU start, Sci_PositionU end, WordList &keywords, LexAccessor &styler) {
+bool isPerlKeyword(Sci_PositionU start, Sci_PositionU end, WordList &keywords, LexAccessor &styler) {
 	// old-style keyword matcher; needed because GetCurrent() needs
 	// current segment to be committed, but we may abandon early...
 	char s[100];
@@ -102,7 +104,7 @@ static bool isPerlKeyword(Sci_PositionU start, Sci_PositionU end, WordList &keyw
 	return keywords.InList(s);
 }
 
-static int disambiguateBareword(LexAccessor &styler, Sci_PositionU bk, Sci_PositionU fw,
+int disambiguateBareword(LexAccessor &styler, Sci_PositionU bk, Sci_PositionU fw,
         int backFlag, Sci_PositionU backPos, Sci_PositionU endPos) {
 	// identifiers are recognized by Perl as barewords under some
 	// conditions, the following attempts to do the disambiguation
@@ -152,7 +154,7 @@ static int disambiguateBareword(LexAccessor &styler, Sci_PositionU bk, Sci_Posit
 	return result;
 }
 
-static void skipWhitespaceComment(LexAccessor &styler, Sci_PositionU &p) {
+void skipWhitespaceComment(LexAccessor &styler, Sci_PositionU &p) {
 	// when backtracking, we need to skip whitespace and comments
 	while (p > 0) {
 		const int style = styler.StyleAt(p);
@@ -162,7 +164,7 @@ static void skipWhitespaceComment(LexAccessor &styler, Sci_PositionU &p) {
 	}
 }
 
-static int findPrevLexeme(LexAccessor &styler, Sci_PositionU &bk, int &style) {
+int findPrevLexeme(LexAccessor &styler, Sci_PositionU &bk, int &style) {
 	// scan backward past whitespace and comments to find a lexeme
 	skipWhitespaceComment(styler, bk);
 	if (bk == 0)
@@ -178,7 +180,7 @@ static int findPrevLexeme(LexAccessor &styler, Sci_PositionU &bk, int &style) {
 	return sz;
 }
 
-static int styleBeforeBracePair(LexAccessor &styler, Sci_PositionU bk) {
+int styleBeforeBracePair(LexAccessor &styler, Sci_PositionU bk) {
 	// backtrack to find open '{' corresponding to a '}', balanced
 	// return significant style to be tested for '/' disambiguation
 	int braceCount = 1;
@@ -205,7 +207,7 @@ static int styleBeforeBracePair(LexAccessor &styler, Sci_PositionU bk) {
 	return SCE_PL_DEFAULT;
 }
 
-static int styleCheckIdentifier(LexAccessor &styler, Sci_PositionU bk) {
+int styleCheckIdentifier(LexAccessor &styler, Sci_PositionU bk) {
 	// backtrack to classify sub-styles of identifier under test
 	// return sub-style to be tested for '/' disambiguation
 	if (styler.SafeGetCharAt(bk) == '>')	// inputsymbol, like <foo>
@@ -230,7 +232,7 @@ static int styleCheckIdentifier(LexAccessor &styler, Sci_PositionU bk) {
 	return 0;
 }
 
-static int podLineScan(LexAccessor &styler, Sci_PositionU &pos, Sci_PositionU endPos) {
+int podLineScan(LexAccessor &styler, Sci_PositionU &pos, Sci_PositionU endPos) {
 	// forward scan the current line to classify line for POD style
 	int state = -1;
 	while (pos < endPos) {
@@ -254,7 +256,7 @@ static int podLineScan(LexAccessor &styler, Sci_PositionU &pos, Sci_PositionU en
 	return state;
 }
 
-static bool styleCheckSubPrototype(LexAccessor &styler, Sci_PositionU bk) {
+bool styleCheckSubPrototype(LexAccessor &styler, Sci_PositionU bk) {
 	// backtrack to identify if we're starting a subroutine prototype
 	// we also need to ignore whitespace/comments, format is like:
 	//     sub abc::pqr :const :prototype(...)
@@ -311,7 +313,7 @@ static bool styleCheckSubPrototype(LexAccessor &styler, Sci_PositionU bk) {
 	return (state == SUB_HAS_SUB);
 }
 
-static int actualNumStyle(int numberStyle) {
+int actualNumStyle(int numberStyle) {
 	if (numberStyle == PERLNUM_VECTOR || numberStyle == PERLNUM_V_VECTOR) {
 		return SCE_PL_STRING;
 	} else if (numberStyle == PERLNUM_BAD) {
@@ -320,7 +322,7 @@ static int actualNumStyle(int numberStyle) {
 	return SCE_PL_NUMBER;
 }
 
-static int opposite(int ch) {
+int opposite(int ch) {
 	if (ch == '(') return ')';
 	if (ch == '[') return ']';
 	if (ch == '{') return '}';
@@ -328,7 +330,7 @@ static int opposite(int ch) {
 	return ch;
 }
 
-static bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
+bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 	Sci_Position pos = styler.LineStart(line);
 	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
@@ -342,7 +344,7 @@ static bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 	return false;
 }
 
-static bool IsPackageLine(Sci_Position line, LexAccessor &styler) {
+bool IsPackageLine(Sci_Position line, LexAccessor &styler) {
 	Sci_Position pos = styler.LineStart(line);
 	int style = styler.StyleAt(pos);
 	if (style == SCE_PL_WORD && styler.Match(pos, "package")) {
@@ -351,7 +353,7 @@ static bool IsPackageLine(Sci_Position line, LexAccessor &styler) {
 	return false;
 }
 
-static int PodHeadingLevel(Sci_Position pos, LexAccessor &styler) {
+int PodHeadingLevel(Sci_Position pos, LexAccessor &styler) {
 	int lvl = static_cast<unsigned char>(styler.SafeGetCharAt(pos + 5));
 	if (lvl >= '1' && lvl <= '4') {
 		return lvl - '0';
@@ -387,7 +389,7 @@ struct OptionsPerl {
 	}
 };
 
-static const char *const perlWordListDesc[] = {
+const char *const perlWordListDesc[] = {
 	"Keywords",
 	0
 };
@@ -1846,6 +1848,8 @@ void SCI_METHOD LexerPerl::Fold(Sci_PositionU startPos, Sci_Position length, int
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
 	int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
+}
+
 }
 
 LexerModule lmPerl(SCLEX_PERL, LexerPerl::LexerFactoryPerl, "perl", perlWordListDesc);
