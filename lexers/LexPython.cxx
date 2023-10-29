@@ -185,7 +185,7 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 	}
 }
 
-inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
+bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
 		return (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
 
@@ -196,7 +196,7 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	return IsXidContinue(ch);
 }
 
-inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
+bool IsAWordStart(int ch, bool unicodeIdentifiers) {
 	if (IsASCII(ch))
 		return (IsUpperOrLowerCase(ch) || ch == '_');
 
@@ -283,7 +283,7 @@ struct OptionsPython {
 	int decoratorAttributes = 0;
 	bool pep701StringsF = true;
 
-	literalsAllowed AllowedLiterals() const noexcept {
+	[[nodiscard]] literalsAllowed AllowedLiterals() const noexcept {
 		literalsAllowed allowedLiterals = stringsU ? litU : litNone;
 		if (stringsB)
 			allowedLiterals = static_cast<literalsAllowed>(allowedLiterals | litB);
@@ -394,8 +394,7 @@ public:
 		DefaultLexer("python", SCLEX_PYTHON, lexicalClasses, ELEMENTS(lexicalClasses)),
 		subStyles(styleSubable, 0x80, 0x40, 0) {
 	}
-	~LexerPython() override {
-	}
+	~LexerPython() override = default;
 	void SCI_METHOD Release() override {
 		delete this;
 	}
