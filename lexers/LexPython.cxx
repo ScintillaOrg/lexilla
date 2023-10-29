@@ -584,7 +584,6 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 
 	const literalsAllowed allowedLiterals = options.AllowedLiterals();
 
-	initStyle = initStyle & 31;
 	if (initStyle == SCE_P_STRINGEOL) {
 		initStyle = SCE_P_DEFAULT;
 	}
@@ -937,7 +936,7 @@ static bool IsCommentLine(Sci_Position line, Accessor &styler) {
 }
 
 static bool IsQuoteLine(Sci_Position line, const Accessor &styler) {
-	const int style = styler.StyleAt(styler.LineStart(line)) & 31;
+	const int style = styler.StyleAt(styler.LineStart(line));
 	return IsPyTripleQuoteStringState(style);
 }
 
@@ -971,9 +970,9 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 
 	// Set up initial loop state
 	startPos = styler.LineStart(lineCurrent);
-	int prev_state = SCE_P_DEFAULT & 31;
+	int prev_state = SCE_P_DEFAULT;
 	if (lineCurrent >= 1)
-		prev_state = styler.StyleAt(startPos - 1) & 31;
+		prev_state = styler.StyleAt(startPos - 1);
 	int prevQuote = options.foldQuotes && IsPyTripleQuoteStringState(prev_state);
 
 	// Process all characters to end of requested range or end of any triple quote
@@ -990,7 +989,7 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 			// Information about next line is only available if not at end of document
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, nullptr);
 			const Sci_Position lookAtPos = (styler.LineStart(lineNext) == styler.Length()) ? styler.Length() - 1 : styler.LineStart(lineNext);
-			const int style = styler.StyleAt(lookAtPos) & 31;
+			const int style = styler.StyleAt(lookAtPos);
 			quote = options.foldQuotes && IsPyTripleQuoteStringState(style);
 		}
 		const bool quote_start = (quote && !prevQuote);
