@@ -220,7 +220,7 @@ bool IsFirstNonWhitespace(Sci_Position pos, Accessor &styler) {
 	const Sci_Position start_pos = styler.LineStart(line);
 	for (Sci_Position i = start_pos; i < pos; i++) {
 		const char ch = styler[i];
-		if (!(ch == ' ' || ch == '\t'))
+		if (!IsASpaceOrTab(ch))
 			return false;
 	}
 	return true;
@@ -229,7 +229,7 @@ bool IsFirstNonWhitespace(Sci_Position pos, Accessor &styler) {
 unsigned char GetNextNonWhitespaceChar(Accessor &styler, Sci_PositionU pos, Sci_PositionU maxPos, Sci_PositionU *charPosPtr = nullptr) {
 	while (pos < maxPos) {
 		const unsigned char ch = styler.SafeGetCharAt(pos, '\0');
-		if (!(ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')) {
+		if (!AnyOf(ch, ' ', '\t', '\n', '\r')) {
 			if (charPosPtr != nullptr) {
 				*charPosPtr = pos;
 			}
@@ -722,7 +722,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 								if (attrCh == '#')
 									isComment = true;
 								// Detect if this attribute belongs to a decorator
-								if (!(ch == ' ' || ch == '\t'))
+								if (!IsASpaceOrTab(ch))
 									break;
 							}
 							if (((isDecoratorAttribute) && (!isComment)) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))){
