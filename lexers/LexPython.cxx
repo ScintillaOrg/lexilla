@@ -78,16 +78,24 @@ constexpr bool IsPyStringTypeChar(int ch, literalsAllowed allowed) noexcept {
 		((allowed & litF) && (ch == 'f' || ch == 'F'));
 }
 
+constexpr bool IsQuote(int ch) {
+	return AnyOf(ch, '"', '\'');
+}
+
+constexpr bool IsRawPrefix(int ch) {
+	return AnyOf(ch, 'r', 'R');
+}
+
 bool IsPyStringStart(int ch, int chNext, int chNext2, literalsAllowed allowed) noexcept {
-	if (ch == '\'' || ch == '"')
+	if (IsQuote(ch))
 		return true;
 	if (IsPyStringTypeChar(ch, allowed)) {
-		if (chNext == '"' || chNext == '\'')
+		if (IsQuote(chNext))
 			return true;
-		if ((chNext == 'r' || chNext == 'R') && (chNext2 == '"' || chNext2 == '\''))
+		if (IsRawPrefix(chNext) && IsQuote(chNext2))
 			return true;
 	}
-	if ((ch == 'r' || ch == 'R') && (chNext == '"' || chNext == '\''))
+	if (IsRawPrefix(ch) && IsQuote(chNext))
 		return true;
 
 	return false;
@@ -150,12 +158,12 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 	const int firstIsF = (ch == 'f' || ch == 'F');
 
 	// Advance beyond r, u, or ur prefix (or r, b, or br in Python 2.7+ and r, f, or fr in Python 3.6+), but bail if there are any unexpected chars
-	if (ch == 'r' || ch == 'R') {
+	if (IsRawPrefix(ch)) {
 		i++;
 		ch = styler.SafeGetCharAt(i);
 		chNext = styler.SafeGetCharAt(i + 1);
 	} else if (IsPyStringTypeChar(ch, allowed)) {
-		if (chNext == 'r' || chNext == 'R')
+		if (IsRawPrefix(chNext))
 			i += 2;
 		else
 			i += 1;
@@ -163,7 +171,7 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 		chNext = styler.SafeGetCharAt(i + 1);
 	}
 
-	if (ch != '"' && ch != '\'') {
+	if (!IsQuote(ch)) {
 		*nextIndex = i + 1;
 		return SCE_P_DEFAULT;
 	}
@@ -809,7 +817,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 		// syntactically incorrect cases like f'{' and f"""{""". Post
 		// pep 701, a quote may appear in a { } field so cases like
 		// f"n = {":".join(seq)}" is valid
-		if (!options.pep701StringsF && !fstringStateStack.empty() && (sc.ch == '\'' || sc.ch == '"')) {
+		if (!options.pep701StringsF && !fstringStateStack.empty() && IsQuote(sc.ch)) {
 			long matching_stack_i = -1;
 			for (unsigned long stack_i = 0; stack_i < fstringStateStack.size() && matching_stack_i == -1; stack_i++) {
 				const int stack_state = fstringStateStack[stack_i].state;
