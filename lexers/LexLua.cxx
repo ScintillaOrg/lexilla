@@ -7,15 +7,13 @@
  ** Modified by Marcos E. Wurzius & Philippe Lhoste
  **/
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
 
 #include <string>
 #include <string_view>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -28,13 +26,18 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
+
+namespace {
 
 // Test for [=[ ... ]=] delimiters, returns 0 if it's only a [ or ],
 // return 1 for [[ or ]], returns >=2 for [=[ or ]=] and so on.
 // The maximum number of '=' characters allowed is 254.
-static int LongDelimCheck(StyleContext &sc) {
+int LongDelimCheck(StyleContext &sc) {
 	int sep = 1;
 	while (sc.GetRelative(sep) == '=' && sep < 0xFF)
 		sep++;
@@ -43,21 +46,151 @@ static int LongDelimCheck(StyleContext &sc) {
 	return 0;
 }
 
-static void ColouriseLuaDoc(
-	Sci_PositionU startPos,
-	Sci_Position length,
-	int initStyle,
-	WordList *keywordlists[],
-	Accessor &styler) {
+const char * const luaWordListDesc[] = {
+	"Keywords",
+	"Basic functions",
+	"String, (table) & math functions",
+	"(coroutines), I/O & system facilities",
+	"user1",
+	"user2",
+	"user3",
+	"user4",
+	0
+};
 
-	const WordList &keywords = *keywordlists[0];
-	const WordList &keywords2 = *keywordlists[1];
-	const WordList &keywords3 = *keywordlists[2];
-	const WordList &keywords4 = *keywordlists[3];
-	const WordList &keywords5 = *keywordlists[4];
-	const WordList &keywords6 = *keywordlists[5];
-	const WordList &keywords7 = *keywordlists[6];
-	const WordList &keywords8 = *keywordlists[7];
+LexicalClass lexicalClasses[] = {
+	// Lexer Lua SCLEX_LUA SCE_LUA_:
+	0, "SCE_LUA_DEFAULT", "default", "White space: Visible only in View Whitespace mode (or if it has a back colour)",
+	1, "SCE_LUA_COMMENT", "comment", "Block comment (Lua 5.0)",
+	2, "SCE_LUA_COMMENTLINE", "comment line", "Line comment",
+	3, "SCE_LUA_COMMENTDOC", "comment documentation", "Doc comment -- Not used in Lua (yet?)",
+	4, "SCE_LUA_NUMBER", "literal numeric", "Number",
+	5, "SCE_LUA_WORD", "keyword", "Keyword",
+	6, "SCE_LUA_STRING", "literal string", "(Double quoted) String",
+	7, "SCE_LUA_CHARACTER", "literal string character", "Character (Single quoted string)",
+	8, "SCE_LUA_LITERALSTRING", "literal string", "Literal string",
+	9, "SCE_LUA_PREPROCESSOR", "preprocessor", "Preprocessor (obsolete in Lua 4.0 and up)",
+	10, "SCE_LUA_OPERATOR", "operator", "Operators",
+	11, "SCE_LUA_IDENTIFIER", "identifier", "Identifier (everything else...)",
+	12, "SCE_LUA_STRINGEOL", "error literal string", "End of line where string is not closed",
+	13, "SCE_LUA_WORD2", "identifier", "Other keywords",
+	14, "SCE_LUA_WORD3", "identifier", "Other keywords",
+	15, "SCE_LUA_WORD4", "identifier", "Other keywords",
+	16, "SCE_LUA_WORD5", "identifier", "Other keywords",
+	17, "SCE_LUA_WORD6", "identifier", "Other keywords",
+	18, "SCE_LUA_WORD7", "identifier", "Other keywords",
+	19, "SCE_LUA_WORD8", "identifier", "Other keywords",
+	20, "SCE_LUA_LABEL", "label", "Labels",
+};
+
+// Options used for LexerLua
+struct OptionsLua {
+	bool foldCompact = true;
+};
+
+struct OptionSetLua : public OptionSet<OptionsLua> {
+	OptionSetLua() {
+		DefineProperty("fold.compact", &OptionsLua::foldCompact);
+
+		DefineWordListSets(luaWordListDesc);
+	}
+};
+
+class LexerLua : public DefaultLexer {
+	WordList keywords;
+	WordList keywords2;
+	WordList keywords3;
+	WordList keywords4;
+	WordList keywords5;
+	WordList keywords6;
+	WordList keywords7;
+	WordList keywords8;
+	OptionsLua options;
+	OptionSetLua osLua;
+public:
+	explicit LexerLua() :
+		DefaultLexer("lua", SCLEX_LUA, lexicalClasses, ELEMENTS(lexicalClasses)) {
+	}
+	~LexerLua() override = default;
+	void SCI_METHOD Release() override {
+		delete this;
+	}
+	int SCI_METHOD Version() const override {
+		return lvRelease5;
+	}
+	const char *SCI_METHOD PropertyNames() override {
+		return osLua.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osLua.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osLua.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osLua.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osLua.DescribeWordListSets();
+	}
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	static ILexer5 *LexerFactoryLua() {
+		return new LexerLua();
+	}
+};
+
+Sci_Position SCI_METHOD LexerLua::PropertySet(const char *key, const char *val) {
+	if (osLua.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
+
+Sci_Position SCI_METHOD LexerLua::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywords;
+		break;
+	case 1:
+		wordListN = &keywords2;
+		break;
+	case 2:
+		wordListN = &keywords3;
+		break;
+	case 3:
+		wordListN = &keywords4;
+		break;
+	case 4:
+		wordListN = &keywords5;
+		break;
+	case 5:
+		wordListN = &keywords6;
+		break;
+	case 6:
+		wordListN = &keywords7;
+		break;
+	case 7:
+		wordListN = &keywords8;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN) {
+		if (wordListN->Set(wl)) {
+			firstModification = 0;
+		}
+	}
+	return firstModification;
+}
+
+void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+	LexAccessor styler(pAccess);
 
 	// Accepts accented characters
 	CharacterSet setWordStart(CharacterSet::setAlpha, "_", true);
@@ -367,15 +500,15 @@ static void ColouriseLuaDoc(
 	sc.Complete();
 }
 
-static void FoldLuaDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[],
-                       Accessor &styler) {
+void LexerLua::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+	LexAccessor styler(pAccess);
 	const Sci_PositionU lengthDoc = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
-	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+	const bool foldCompact = options.foldCompact;
 	int style = initStyle;
 	int styleNext = styler.StyleAt(startPos);
 
@@ -443,45 +576,6 @@ static void FoldLuaDoc(Sci_PositionU startPos, Sci_Position length, int initStyl
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-static const char * const luaWordListDesc[] = {
-	"Keywords",
-	"Basic functions",
-	"String, (table) & math functions",
-	"(coroutines), I/O & system facilities",
-	"user1",
-	"user2",
-	"user3",
-	"user4",
-	0
-};
-
-namespace {
-
-LexicalClass lexicalClasses[] = {
-	// Lexer Lua SCLEX_LUA SCE_LUA_:
-	0, "SCE_LUA_DEFAULT", "default", "White space: Visible only in View Whitespace mode (or if it has a back colour)",
-	1, "SCE_LUA_COMMENT", "comment", "Block comment (Lua 5.0)",
-	2, "SCE_LUA_COMMENTLINE", "comment line", "Line comment",
-	3, "SCE_LUA_COMMENTDOC", "comment documentation", "Doc comment -- Not used in Lua (yet?)",
-	4, "SCE_LUA_NUMBER", "literal numeric", "Number",
-	5, "SCE_LUA_WORD", "keyword", "Keyword",
-	6, "SCE_LUA_STRING", "literal string", "(Double quoted) String",
-	7, "SCE_LUA_CHARACTER", "literal string character", "Character (Single quoted string)",
-	8, "SCE_LUA_LITERALSTRING", "literal string", "Literal string",
-	9, "SCE_LUA_PREPROCESSOR", "preprocessor", "Preprocessor (obsolete in Lua 4.0 and up)",
-	10, "SCE_LUA_OPERATOR", "operator", "Operators",
-	11, "SCE_LUA_IDENTIFIER", "identifier", "Identifier (everything else...)",
-	12, "SCE_LUA_STRINGEOL", "error literal string", "End of line where string is not closed",
-	13, "SCE_LUA_WORD2", "identifier", "Other keywords",
-	14, "SCE_LUA_WORD3", "identifier", "Other keywords",
-	15, "SCE_LUA_WORD4", "identifier", "Other keywords",
-	16, "SCE_LUA_WORD5", "identifier", "Other keywords",
-	17, "SCE_LUA_WORD6", "identifier", "Other keywords",
-	18, "SCE_LUA_WORD7", "identifier", "Other keywords",
-	19, "SCE_LUA_WORD8", "identifier", "Other keywords",
-	20, "SCE_LUA_LABEL", "label", "Labels",
-};
-
 }
 
-LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc, "lua", FoldLuaDoc, luaWordListDesc, lexicalClasses, ELEMENTS(lexicalClasses));
+LexerModule lmLua(SCLEX_LUA, LexerLua::LexerFactoryLua, "lua", luaWordListDesc);
