@@ -935,7 +935,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						continue;
 					}
 				} else if (sc.ch == QuoteStack.Current.Up) {
-					QuoteStack.Current.Count++;
+					if (QuoteStack.Current.Style != QuoteStyle::Parameter) {
+						QuoteStack.Current.Count++;
+					}
 				} else {
 					if (QuoteStack.Current.Style == QuoteStyle::String ||
 						QuoteStack.Current.Style == QuoteStyle::HereDoc ||
