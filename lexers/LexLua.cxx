@@ -189,6 +189,9 @@ Sci_Position SCI_METHOD LexerLua::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
+constexpr int maskSeparator = 0xFF;
+constexpr int maskStringWs = 0x100;
+
 void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
@@ -209,11 +212,11 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 	// Continuation of a string (\z whitespace escaping) is controlled by stringWs.
 	int sepCount = 0;
 	int stringWs = 0;
-	if (initStyle == SCE_LUA_LITERALSTRING || initStyle == SCE_LUA_COMMENT ||
-		initStyle == SCE_LUA_STRING || initStyle == SCE_LUA_CHARACTER) {
+	if ((currentLine > 0) &&
+		AnyOf(initStyle, SCE_LUA_LITERALSTRING, SCE_LUA_COMMENT, SCE_LUA_STRING, SCE_LUA_CHARACTER)) {
 		const int lineState = styler.GetLineState(currentLine - 1);
-		sepCount = lineState & 0xFF;
-		stringWs = lineState & 0x100;
+		sepCount = lineState & maskSeparator;
+		stringWs = lineState & maskStringWs;
 	}
 
 	// results of identifier/keyword matching
@@ -223,7 +226,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 	bool foundGoto = false;
 
 	// Do not leak onto next line
-	if (initStyle == SCE_LUA_STRINGEOL || initStyle == SCE_LUA_COMMENTLINE || initStyle == SCE_LUA_PREPROCESSOR) {
+	if (AnyOf(initStyle, SCE_LUA_STRINGEOL, SCE_LUA_COMMENTLINE, SCE_LUA_PREPROCESSOR)) {
 		initStyle = SCE_LUA_DEFAULT;
 	}
 
@@ -362,7 +365,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					sc.Forward();
 				} else if (sc.chNext == 'z') {
 					sc.Forward();
-					stringWs = 0x100;
+					stringWs = maskStringWs;
 				}
 			} else if (sc.ch == '\"') {
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
@@ -380,7 +383,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					sc.Forward();
 				} else if (sc.chNext == 'z') {
 					sc.Forward();
-					stringWs = 0x100;
+					stringWs = maskStringWs;
 				}
 			} else if (sc.ch == '\'') {
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
