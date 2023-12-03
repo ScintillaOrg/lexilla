@@ -515,9 +515,10 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 	sc.Complete();
 }
 
-void LexerLua::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+void LexerLua::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
-	const Sci_PositionU lengthDoc = startPos + length;
+	const Sci_Position startPos = startPos_;
+	const Sci_Position lengthDoc = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -527,7 +528,7 @@ void LexerLua::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 	int style = initStyle;
 	int styleNext = styler.StyleIndexAt(startPos);
 
-	for (Sci_PositionU i = startPos; i < lengthDoc; i++) {
+	for (Sci_Position i = startPos; i < lengthDoc; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int stylePrev = style;
@@ -537,7 +538,7 @@ void LexerLua::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 		if (style == SCE_LUA_WORD) {
 			if (ch == 'i' || ch == 'd' || ch == 'f' || ch == 'e' || ch == 'r' || ch == 'u') {
 				char s[10] = "";
-				for (Sci_PositionU j = 0; j < 8; j++) {
+				for (Sci_Position j = 0; j < 8; j++) {
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}
