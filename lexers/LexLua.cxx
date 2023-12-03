@@ -63,7 +63,7 @@ const LexicalClass lexicalClasses[] = {
 	0, "SCE_LUA_DEFAULT", "default", "White space: Visible only in View Whitespace mode (or if it has a back colour)",
 	1, "SCE_LUA_COMMENT", "comment", "Block comment (Lua 5.0)",
 	2, "SCE_LUA_COMMENTLINE", "comment line", "Line comment",
-	3, "SCE_LUA_COMMENTDOC", "comment documentation", "Doc comment -- Not used in Lua (yet?)",
+	3, "SCE_LUA_COMMENTDOC", "comment documentation", "Doc comment",
 	4, "SCE_LUA_NUMBER", "literal numeric", "Number",
 	5, "SCE_LUA_WORD", "keyword", "Keyword",
 	6, "SCE_LUA_STRING", "literal string", "(Double quoted) String",
@@ -191,6 +191,7 @@ Sci_Position SCI_METHOD LexerLua::WordListSet(int n, const char *wl) {
 
 constexpr int maskSeparator = 0xFF;
 constexpr int maskStringWs = 0x100;
+constexpr int maskDocComment = 0x200;
 
 void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
@@ -212,11 +213,13 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 	// Continuation of a string (\z whitespace escaping) is controlled by stringWs.
 	int sepCount = 0;
 	int stringWs = 0;
+	int lastLineDocComment = 0;
 	if ((currentLine > 0) &&
-		AnyOf(initStyle, SCE_LUA_LITERALSTRING, SCE_LUA_COMMENT, SCE_LUA_STRING, SCE_LUA_CHARACTER)) {
+		AnyOf(initStyle, SCE_LUA_DEFAULT, SCE_LUA_LITERALSTRING, SCE_LUA_COMMENT, SCE_LUA_COMMENTDOC, SCE_LUA_STRING, SCE_LUA_CHARACTER)) {
 		const int lineState = styler.GetLineState(currentLine - 1);
 		sepCount = lineState & maskSeparator;
 		stringWs = lineState & maskStringWs;
+		lastLineDocComment = lineState & maskDocComment;
 	}
 
 	// results of identifier/keyword matching
@@ -226,7 +229,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 	bool foundGoto = false;
 
 	// Do not leak onto next line
-	if (AnyOf(initStyle, SCE_LUA_STRINGEOL, SCE_LUA_COMMENTLINE, SCE_LUA_PREPROCESSOR)) {
+	if (AnyOf(initStyle, SCE_LUA_STRINGEOL, SCE_LUA_COMMENTLINE, SCE_LUA_COMMENTDOC, SCE_LUA_PREPROCESSOR)) {
 		initStyle = SCE_LUA_DEFAULT;
 	}
 
@@ -240,12 +243,14 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 			// Update the line state, so it can be seen by next line
 			currentLine = styler.GetLine(sc.currentPos);
 			switch (sc.state) {
+			case SCE_LUA_DEFAULT:
 			case SCE_LUA_LITERALSTRING:
 			case SCE_LUA_COMMENT:
+			case SCE_LUA_COMMENTDOC:
 			case SCE_LUA_STRING:
 			case SCE_LUA_CHARACTER:
 				// Inside a literal string, block comment or string, we set the line state
-				styler.SetLineState(currentLine, stringWs | sepCount);
+				styler.SetLineState(currentLine, lastLineDocComment | stringWs | sepCount);
 				break;
 			default:
 				// Reset the line state
@@ -351,7 +356,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 				}
 				sc.SetState(SCE_LUA_DEFAULT);
 			}
-		} else if (sc.state == SCE_LUA_COMMENTLINE || sc.state == SCE_LUA_PREPROCESSOR) {
+		} else if (AnyOf(sc.state, SCE_LUA_COMMENTLINE, SCE_LUA_COMMENTDOC, SCE_LUA_PREPROCESSOR)) {
 			if (sc.atLineEnd) {
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
 			}
@@ -482,7 +487,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					sc.Forward(sepCount);
 				}
 			} else if (sc.Match('-', '-')) {
-				sc.SetState(SCE_LUA_COMMENTLINE);
+				sc.SetState(lastLineDocComment ? SCE_LUA_COMMENTDOC : SCE_LUA_COMMENTLINE);
 				if (sc.Match("--[")) {
 					sc.Forward(2);
 					sepCount = LongDelimCheck(sc);
@@ -490,6 +495,9 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 						sc.ChangeState(SCE_LUA_COMMENT);
 						sc.Forward(sepCount);
 					}
+				} else if (sc.Match("---")) {
+					sc.SetState(SCE_LUA_COMMENTDOC);
+					lastLineDocComment = maskDocComment;
 				} else {
 					sc.Forward();
 				}
@@ -497,6 +505,9 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 				sc.SetState(SCE_LUA_PREPROCESSOR);	// Obsolete since Lua 4.0, but still in old code
 			} else if (setLuaOperator.Contains(sc.ch)) {
 				sc.SetState(SCE_LUA_OPERATOR);
+			}
+			if (!AnyOf(sc.state, SCE_LUA_DEFAULT, SCE_LUA_COMMENTDOC)) {
+				lastLineDocComment = 0;
 			}
 		}
 	}

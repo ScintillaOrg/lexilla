@@ -8,7 +8,11 @@
  1 400   0   
  0 400   0   -- comment line=2
  1 400   0   
- 0 400   0   --- unused comment doc=3
+ 0 400   0   --- comment doc=3
+ 0 400   0   -- still comment doc
+ 1 400   0   
+ 0 400   0   -- still comment doc
+ 0 400   0   3	-- comment doc broken only by code
  1 400   0   
  0 400   0   -- number=4
  0 400   0   37

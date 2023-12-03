@@ -8,7 +8,11 @@
 {0}
 {2}-- comment line=2
 {0}
-{2}--- unused comment doc=3
+{3}--- comment doc=3
+-- still comment doc
+{0}
+{3}-- still comment doc
+{4}3{0}	{2}-- comment doc broken only by code
 {0}
 {2}-- number=4
 {4}37{0}

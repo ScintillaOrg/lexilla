@@ -8,7 +8,11 @@
 
 -- comment line=2
 
---- unused comment doc=3
+--- comment doc=3
+-- still comment doc
+
+-- still comment doc
+3	-- comment doc broken only by code
 
 -- number=4
 37
