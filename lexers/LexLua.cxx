@@ -533,9 +533,9 @@ void LexerLua::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle,
 		styleNext = styler.StyleIndexAt(i + 1);
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_LUA_WORD) {
-			// Fixed list of folding words: if, do, function, repeat, end, elseif, until
+			// Fixed list of folding words: if, do, function, repeat, end, until
 			// Must fix up next line with initial characters if any new words added.
-			if (ch == 'i' || ch == 'd' || ch == 'f' || ch == 'e' || ch == 'r' || ch == 'u') {
+			if ((style != stylePrev) && AnyOf(ch, 'i', 'd', 'f', 'e', 'r', 'u')) {
 				std::string s;
 				for (Sci_Position j = 0; j < 8; j++) {	// 8 is length of longest: function
 					if (!iswordchar(styler[i + j])) {
@@ -547,7 +547,7 @@ void LexerLua::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle,
 				if (s == "if" || s == "do" || s == "function" || s == "repeat") {
 					levelCurrent++;
 				}
-				if (s == "end" || s == "elseif" || s == "until") {
+				if (s == "end" || s == "until") {
 					levelCurrent--;
 				}
 			}
