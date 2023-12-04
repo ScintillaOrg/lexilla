@@ -285,14 +285,11 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 				const Sci_Position ws1 = ln;
 				if (setWordStart.Contains(sc.GetRelative(ln))) {
 					int c = 0;
-					int i = 0;
-					char s[100];
+					std::string s;
 					while (setWord.Contains(c = sc.GetRelative(ln))) {	// get potential label
-						if (i < 90)
-							s[i++] = static_cast<char>(c);
+						s.push_back(static_cast<char>(c));
 						ln++;
 					}
-					s[i] = '\0';
 					const Sci_Position lbl = ln;
 					if (!keywords.InList(s)) {
 						while (IsASpaceOrTab(sc.GetRelative(ln)))	// skip over spaces/tabs
@@ -349,8 +346,8 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					sc.Forward();
 					while (setWord.Contains(sc.ch))
 						sc.Forward();
-					char s[100];
-					sc.GetCurrent(s, sizeof(s));
+					std::string s;
+					sc.GetCurrentString(s, StyleContext::Transform::none);
 					if (keywords.InList(s))		// labels cannot be keywords
 						sc.ChangeState(SCE_LUA_WORD);
 				}
@@ -536,20 +533,21 @@ void LexerLua::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle,
 		styleNext = styler.StyleIndexAt(i + 1);
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_LUA_WORD) {
+			// Fixed list of folding words: if, do, function, repeat, end, elseif, until
+			// Must fix up next line with initial characters if any new words added.
 			if (ch == 'i' || ch == 'd' || ch == 'f' || ch == 'e' || ch == 'r' || ch == 'u') {
-				char s[10] = "";
-				for (Sci_Position j = 0; j < 8; j++) {
+				std::string s;
+				for (Sci_Position j = 0; j < 8; j++) {	// 8 is length of longest: function
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}
-					s[j] = styler[i + j];
-					s[j + 1] = '\0';
+					s.push_back(styler[i + j]);
 				}
 
-				if ((strcmp(s, "if") == 0) || (strcmp(s, "do") == 0) || (strcmp(s, "function") == 0) || (strcmp(s, "repeat") == 0)) {
+				if (s == "if" || s == "do" || s == "function" || s == "repeat") {
 					levelCurrent++;
 				}
-				if ((strcmp(s, "end") == 0) || (strcmp(s, "elseif") == 0) || (strcmp(s, "until") == 0)) {
+				if (s == "end" || s == "elseif" || s == "until") {
 					levelCurrent--;
 				}
 			}
