@@ -40,14 +40,14 @@ DEL = rm -f
 EXE = unitTest
 endif
 
-INCLUDEDIRS = -I ../../include -I ../../src -I../../lexlib -I../../../scintilla/include
+INCLUDEDIRS = -I ../../include -I../../lexlib -I../../../scintilla/include
 
 CPPFLAGS += $(INCLUDEDIRS)
 CXXFLAGS += -Wall -Wextra
 
 # Files in this directory containing tests
 TESTSRC=test*.cxx
-# Files being tested from scintilla/src directory
+# Files being tested from lexilla/lexlib directory
 TESTEDSRC=\
  ../../lexlib/Accessor.cxx \
  ../../lexlib/CharacterSet.cxx \
