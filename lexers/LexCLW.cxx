@@ -67,7 +67,7 @@ inline bool IsALabelCharacter(const int iChar) {
 	return(isalnum(iChar) || iChar == '_' || iChar == ':');
 }
 
-// Is the character is a ! and the the next character is not a !
+// Is the character is a ! and the next character is not a !
 inline bool IsACommentStart(const int iChar) {
 
 	return(iChar == '!');

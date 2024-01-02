@@ -324,7 +324,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					sc.SetState(SCE_LUA_DEFAULT);
 			}
 		} else if (sc.state == SCE_LUA_IDENTIFIER) {
-			idenPos--;			// commit already-scanned identitier/word parts
+			idenPos--;			// commit already-scanned identifier/word parts
 			if (idenWordPos > 0) {
 				idenWordPos--;
 				sc.ChangeState(idenStyle);

@@ -6,7 +6,7 @@
  **/
 // The License.txt file describes the conditions under which this software may be distributed.
 
-// Code folding copyied and modified from LexBasic.cxx
+// Code folding copied and modified from LexBasic.cxx
 
 #include <stdlib.h>
 #include <string.h>
@@ -264,7 +264,7 @@ static void ColouriseABAQUSDoc(Sci_PositionU startPos, Sci_Position length, int 
 }
 
 //------------------------------------------------------------------------------
-// This copyied and modified from LexBasic.cxx
+// This copied and modified from LexBasic.cxx
 //------------------------------------------------------------------------------
 
 /* Bits:

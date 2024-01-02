@@ -8,7 +8,7 @@
 //             2. Own colors for PB constants and Inline Assembler SCE_B_CONSTANT and SCE_B_ASM
 //             3. Several smaller syntax coloring improvements and speed optimizations
 // 12.07.2004: 1. Toggling for macros added
-//             2. Further folding speed optimitations (for people dealing with very large listings)
+//             2. Further folding speed optimisations (for people dealing with very large listings)
 //
 // Necessary changes for the PB lexer in Scintilla project:
 //  - In SciLexer.h and Scintilla.iface:

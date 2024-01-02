@@ -14,7 +14,7 @@
 	20050515 Refined numeric token recognition logic.
 	20051125 Added 2nd "optional" keywords class.
 	20051129 Support "magic" (read-only) comments for RCaml.
-	20051204 Swtich to using StyleContext infrastructure.
+	20051204 Switch to using StyleContext infrastructure.
 	20090629 Add full Standard ML '97 support.
 */
 

@@ -135,7 +135,7 @@ static void ColouriseA68kDoc (Sci_PositionU startPos, Sci_Position length, int i
     WordList &doxygenKeyword = *keywordlists[5];
 
 
-    // Instanciate a context for our source
+    // Instantiate a context for our source
     StyleContext sc(startPos, length, initStyle, styler);
 
 

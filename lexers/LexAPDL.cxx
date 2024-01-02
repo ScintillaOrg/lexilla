@@ -133,7 +133,7 @@ static void ColouriseAPDLDoc(Sci_PositionU startPos, Sci_Position length, int in
 //------------------------------------------------------------------------------
 // 06-27-07 Sergio Lucato
 // - Included code folding for Ansys APDL lexer
-// - Copyied from LexBasic.cxx and modified for APDL
+// - Copied from LexBasic.cxx and modified for APDL
 //------------------------------------------------------------------------------
 
 /* Bits:

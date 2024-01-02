@@ -390,7 +390,7 @@ static int ClassifyDataFlexPreprocessorFoldPoint(int &levelCurrent, int &lineFol
 
 	if (strcmp(s, "command") == 0 ||
 		// The #if/#ifdef etcetera commands are not currently foldable as it is easy to write code that
-		// breaks the collaps logic, so we keep things simple and not include that for now.
+		// breaks the collapse logic, so we keep things simple and not include that for now.
 		strcmp(s, "header") == 0) {
 		nestLevel++;
 		SetFoldInPreprocessorLevelFlag(lineFoldStateCurrent, nestLevel);

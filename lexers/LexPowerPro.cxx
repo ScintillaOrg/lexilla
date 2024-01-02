@@ -115,7 +115,7 @@ static bool IsFunction(Accessor &styler, Sci_PositionU currentPos) {
 	//make sure that there are only spaces (or tabs) between the beginning
 	//of the line and the function declaration
 	position = currentPos - numberOfCharacters - 1; 		//-1 to move to char before 'function'
-	for (Sci_PositionU j = 0; j < 16; j++) {					//check up to 16 preceeding characters
+	for (Sci_PositionU j = 0; j < 16; j++) {					//check up to 16 preceding characters
 		char c = styler.SafeGetCharAt(position--, '\0');	//if can't read char, return NUL (past beginning of document)
 		if (c <= 0)	//reached beginning of document
 			return true;
@@ -166,7 +166,7 @@ static void ColourisePowerProDoc(Sci_PositionU startPos, Sci_Position length, in
 		if (sc.atLineStart) {
 			if (sc.state == SCE_POWERPRO_DOUBLEQUOTEDSTRING) {
 				// Prevent SCE_POWERPRO_STRINGEOL from leaking back to previous line which
-				// ends with a line continuation by locking in the state upto this position.
+				// ends with a line continuation by locking in the state up to this position.
 				sc.SetState(SCE_POWERPRO_DOUBLEQUOTEDSTRING);
 			}
 		}
@@ -500,7 +500,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 				&& chPrev != '+' && chPrevPrev != ';' && chPrevPrevPrev !=';'
 				&& (!IsStreamCommentStyle(style) || foldInComment) ) {
 
-				// only fold "if" last keyword is "then"  (else its a one line if)
+				// only fold "if" last keyword is "then"  (else it's a one line if)
 				if (strcmp(szFirstWord, "if") == 0  && isDoLastWord)
 						levelNext++;
 

@@ -8,7 +8,7 @@
 
 // This tries to be a unified Lexer/Folder for all the BlitzBasic/BlitzMax/PurBasic basics
 // and derivatives. Once they diverge enough, might want to split it into multiple
-// lexers for more code clearity.
+// lexers for more code clarity.
 //
 // Mail me (elias <at> users <dot> sf <dot> net) for any bugs.
 

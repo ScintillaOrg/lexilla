@@ -911,7 +911,7 @@ static void FoldIHexDoc(Sci_PositionU startPos, Sci_Position length, int, WordLi
 
 		// search for specific lines
 		if (style == SCE_HEX_EXTENDEDADDRESS) {
-			// extended addres record
+			// extended address record
 			levelNext = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
 		} else if (style == SCE_HEX_DATAADDRESS
 			|| (style == SCE_HEX_DEFAULT

@@ -669,7 +669,7 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                     sc.SetState(SCE_NIM_STRING);
                 }
             }
-            // Charecter and triple literal
+            // Character and triple literal
             else if (sc.ch == '\'') {
                 if (sc.Match("'''")) {
                     sc.SetState(SCE_NIM_TRIPLE);
