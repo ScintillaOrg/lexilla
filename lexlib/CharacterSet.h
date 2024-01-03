@@ -187,6 +187,7 @@ constexpr T MakeLowerCase(T ch) noexcept {
 }
 
 int CompareCaseInsensitive(const char *a, const char *b) noexcept;
+bool EqualCaseInsensitive(const char *a, const char *b) noexcept;
 int CompareNCaseInsensitive(const char *a, const char *b, size_t len) noexcept;
 
 }

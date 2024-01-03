@@ -264,9 +264,9 @@ int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci
 					for (Sci_PositionU j = i + numstep; j < lengthLine && IsAlphabetic(lineBuffer[j]) && chPos < sizeof(word) - 1; j++)
 						word[chPos++] = lineBuffer[j];
 					word[chPos] = 0;
-					if (!CompareCaseInsensitive(word, "error") || !CompareCaseInsensitive(word, "warning") ||
-						!CompareCaseInsensitive(word, "fatal") || !CompareCaseInsensitive(word, "catastrophic") ||
-						!CompareCaseInsensitive(word, "note") || !CompareCaseInsensitive(word, "remark")) {
+					if (EqualCaseInsensitive(word, "error") || EqualCaseInsensitive(word, "warning") ||
+						EqualCaseInsensitive(word, "fatal") || EqualCaseInsensitive(word, "catastrophic") ||
+						EqualCaseInsensitive(word, "note") || EqualCaseInsensitive(word, "remark")) {
 						state = stMsVc;
 					} else {
 						state = stUnrecognized;
