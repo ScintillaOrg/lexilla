@@ -576,7 +576,7 @@ void ColouriseBatchDoc(
 							isNotAssigned=false;
 						}
 						// Colorize Other Operators
-						// Do not Colorize Paranthesis, quoted text and escaped operators
+						// Do not Colorize Parenthesis, quoted text and escaped operators
 						if (((wordBuffer[0] != ')') && (wordBuffer[0] != '(')
 						&& !textQuoted(lineBuffer, offset - wbl)  && !IsEscaped(lineBuffer,offset - wbl + wbo))
 						&& !((wordBuffer[0] == '=') && !isNotAssigned ))
