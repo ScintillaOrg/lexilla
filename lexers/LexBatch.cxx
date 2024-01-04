@@ -290,6 +290,11 @@ void ColouriseBatchDoc(
 							(isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
+						// Check if call is followed by a label
+						if ((lineBuffer[cmdLoc] == ':') &&
+							(CompareCaseInsensitive(wordBuffer, "call") == 0)) {
+							continueProcessing = false;
+						}
 					}
 					// Colorize Regular keyword
 					styler.ColourTo(startLine + offset - 1, SCE_BAT_WORD);
@@ -317,7 +322,11 @@ void ColouriseBatchDoc(
 						// Check for Special Keyword in list
 						if ((keywords.InList(sKeywordBuffer)) &&
 							((IsBOperator(wordBuffer[wbo])) ||
-							(IsBSeparator(wordBuffer[wbo])))) {
+							(IsBSeparator(wordBuffer[wbo])) ||
+							(wordBuffer[wbo] == ':' &&
+							((CompareCaseInsensitive(sKeywordBuffer, "call") == 0) ||
+							(CompareCaseInsensitive(sKeywordBuffer, "echo") == 0) ||
+							(CompareCaseInsensitive(sKeywordBuffer, "goto") == 0) )))) {
 							sKeywordFound = true;
 							// ECHO requires no further Regular Keyword Checking
 							if (CompareCaseInsensitive(sKeywordBuffer, "echo") == 0) {
