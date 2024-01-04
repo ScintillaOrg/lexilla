@@ -30,6 +30,10 @@ int CompareCaseInsensitive(const char *a, const char *b) noexcept {
 	return *a - *b;
 }
 
+bool EqualCaseInsensitive(const char *a, const char *b) noexcept {
+	return CompareCaseInsensitive(a, b) == 0;
+}
+
 int CompareNCaseInsensitive(const char *a, const char *b, size_t len) noexcept {
 	while (*a && *b && len) {
 		if (*a != *b) {
