@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <cassert>
 
+#include <string_view>
+
 #include "CharacterSet.h"
 
 using namespace Lexilla;
@@ -30,8 +32,16 @@ int CompareCaseInsensitive(const char *a, const char *b) noexcept {
 	return *a - *b;
 }
 
-bool EqualCaseInsensitive(const char *a, const char *b) noexcept {
-	return CompareCaseInsensitive(a, b) == 0;
+bool EqualCaseInsensitive(std::string_view a, std::string_view b) noexcept {
+	if (a.length() != b.length()) {
+		return false;
+	}
+	for (size_t i = 0; i < a.length(); i++) {
+		if (MakeUpperCase(a[i]) != MakeUpperCase(b[i])) {
+			return false;
+		}
+	}
+	return true;
 }
 
 int CompareNCaseInsensitive(const char *a, const char *b, size_t len) noexcept {
