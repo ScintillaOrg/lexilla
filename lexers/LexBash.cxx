@@ -16,6 +16,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <initializer_list>
 #include <functional>
 
 #include "ILexer.h"
@@ -23,6 +24,7 @@
 #include "SciLexer.h"
 
 #include "StringCopy.h"
+#include "InList.h"
 #include "WordList.h"
 #include "LexAccessor.h"
 #include "StyleContext.h"
@@ -1221,9 +1223,9 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 			if (styleNext != style) {
 				word[wordlen] = '\0';
 				wordlen = 0;
-				if (strcmp(word, "if") == 0 || strcmp(word, "case") == 0 || strcmp(word, "do") == 0) {
+				if (InList(word, {"if", "case", "do"})) {
 					levelCurrent++;
-				} else if (strcmp(word, "fi") == 0 || strcmp(word, "esac") == 0 || strcmp(word, "done") == 0) {
+				} else if (InList(word, {"fi", "esac", "done"})) {
 					levelCurrent--;
 				}
 			}

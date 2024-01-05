@@ -13,11 +13,13 @@
 
 #include <string>
 #include <string_view>
+#include <initializer_list>
 
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#include "InList.h"
 #include "WordList.h"
 #include "LexAccessor.h"
 #include "Accessor.h"
@@ -259,9 +261,7 @@ int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci
 					for (Sci_PositionU j = i + numstep; j < lengthLine && IsUpperOrLowerCase(lineBuffer[j]) && chPos < sizeof(word) - 1; j++)
 						word[chPos++] = lineBuffer[j];
 					word[chPos] = 0;
-					if (EqualCaseInsensitive(word, "error") || EqualCaseInsensitive(word, "warning") ||
-						EqualCaseInsensitive(word, "fatal") || EqualCaseInsensitive(word, "catastrophic") ||
-						EqualCaseInsensitive(word, "note") || EqualCaseInsensitive(word, "remark")) {
+					if (InListCaseInsensitive(word, {"error", "warning", "fatal", "catastrophic", "note", "remark"})) {
 						state = stMsVc;
 					} else {
 						state = stUnrecognized;
