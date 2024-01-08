@@ -167,9 +167,11 @@ class EscapeSequence {
 	const CharacterSet *escapeSetValid = nullptr;
 	int digitsLeft = 0;
 public:
+	int outerState = SCE_C_DEFAULT;
 	EscapeSequence() = default;
-	void resetEscapeState(int nextChar) noexcept {
+	void resetEscapeState(int state, int nextChar) noexcept {
 		digitsLeft = 0;
+		outerState = state;
 		escapeSetValid = &setNoneNumeric;
 		if (nextChar == 'U') {
 			digitsLeft = 9;
@@ -322,6 +324,18 @@ public:
 	}
 };
 
+enum class BackQuotedString {
+	None,
+	RawString,
+	TemplateLiteral,
+};
+
+// string interpolating state
+struct InterpolatingState {
+	int state;
+	int braceCount;
+};
+
 // An individual named option for use in an OptionSet
 
 // Options used for LexerCPP
@@ -333,7 +347,7 @@ struct OptionsCPP {
 	bool verbatimStringsAllowEscapes = false;
 	bool triplequotedStrings = false;
 	bool hashquotedStrings = false;
-	bool backQuotedStrings = false;
+	int backQuotedStrings = static_cast<int>(BackQuotedString::None);
 	bool escapeSequence = false;
 	bool fold = false;
 	bool foldSyntaxBased = true;
@@ -385,7 +399,10 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 			"Set to 1 to enable highlighting of hash-quoted strings.");
 
 		DefineProperty("lexer.cpp.backquoted.strings", &OptionsCPP::backQuotedStrings,
-			"Set to 1 to enable highlighting of back-quoted raw strings .");
+			"Set how to highlighting back-quoted strings. "
+			"0 (the default) no highlighting. "
+			"1 highlighted as Go raw string. "
+			"2 highlighted as JavaScript template literal.");
 
 		DefineProperty("lexer.cpp.escape.sequence", &OptionsCPP::escapeSequence,
 			"Set to 1 to enable highlighting of escape sequences in strings");
@@ -480,6 +497,7 @@ class LexerCPP : public ILexer5 {
 	CharacterSet setWordStart;
 	PPStates vlls;
 	std::vector<PPDefinition> ppDefineHistory;
+	std::map<Sci_Position, std::vector<InterpolatingState>> interpolatingAtEol;
 	WordList keywords;
 	WordList keywords2;
 	WordList keywords3;
@@ -771,7 +789,21 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	bool inRERange = false;
 	bool seenDocKeyBrace = false;
 
+	std::vector<InterpolatingState> interpolatingStack;
+
 	Sci_Position lineCurrent = styler.GetLine(startPos);
+	if (options.backQuotedStrings == static_cast<int>(BackQuotedString::TemplateLiteral)) {
+		// code copied from LexPython
+		auto it = interpolatingAtEol.find(lineCurrent - 1);
+		if (it != interpolatingAtEol.end()) {
+			interpolatingStack = it->second;
+		}
+		it = interpolatingAtEol.lower_bound(lineCurrent);
+		if (it != interpolatingAtEol.end()) {
+			interpolatingAtEol.erase(it, interpolatingAtEol.end());
+		}
+	}
+
 	if ((MaskActive(initStyle) == SCE_C_PREPROCESSOR) ||
       (MaskActive(initStyle) == SCE_C_COMMENTLINE) ||
       (MaskActive(initStyle) == SCE_C_COMMENTLINEDOC)) {
@@ -863,6 +895,9 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			vlls.Add(lineCurrent, preproc);
 			if (!rawStringTerminator.empty()) {
 				rawSTNew.Set(lineCurrent-1, rawStringTerminator);
+			}
+			if (!interpolatingStack.empty()) {
+				interpolatingAtEol[sc.currentLine] = interpolatingStack;
 			}
 		}
 
@@ -1087,8 +1122,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					}
 				} else if (sc.ch == '\\') {
 					if (options.escapeSequence) {
+						escapeSeq.resetEscapeState(sc.state, sc.chNext);
 						sc.SetState(SCE_C_ESCAPESEQUENCE|activitySet);
-						escapeSeq.resetEscapeState(sc.chNext);
 					}
 					sc.Forward(); // Skip all characters after the backslash
 				} else if (sc.ch == '\"') {
@@ -1101,20 +1136,9 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				break;
 			case SCE_C_ESCAPESEQUENCE:
 				escapeSeq.consumeDigit();
-				if (!escapeSeq.atEscapeEnd(sc.ch)) {
-					break;
-				}
-				if (sc.ch == '"') {
-					sc.SetState(SCE_C_STRING|activitySet);
-					sc.ForwardSetState(SCE_C_DEFAULT|activitySet);
-				} else if (sc.ch == '\\') {
-					escapeSeq.resetEscapeState(sc.chNext);
-					sc.Forward();
-				} else {
-					sc.SetState(SCE_C_STRING|activitySet);
-					if (sc.atLineEnd) {
-						sc.ChangeState(SCE_C_STRINGEOL|activitySet);
-					}
+				if (escapeSeq.atEscapeEnd(sc.ch)) {
+					sc.SetState(escapeSeq.outerState);
+					continue;
 				}
 				break;
 			case SCE_C_HASHQUOTEDSTRING:
@@ -1131,7 +1155,21 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					for (size_t termPos=rawStringTerminator.size(); termPos; termPos--)
 						sc.Forward();
 					sc.SetState(SCE_C_DEFAULT|activitySet);
-					rawStringTerminator.clear();
+					if (interpolatingStack.empty()) {
+						rawStringTerminator.clear();
+					}
+				} else if (options.backQuotedStrings == static_cast<int>(BackQuotedString::TemplateLiteral)) {
+					if (sc.ch == '\\') {
+						if (options.escapeSequence) {
+							escapeSeq.resetEscapeState(sc.state, sc.chNext);
+							sc.SetState(SCE_C_ESCAPESEQUENCE|activitySet);
+						}
+						sc.Forward(); // Skip all characters after the backslash
+					} else if (sc.Match('$', '{')) {
+						interpolatingStack.push_back({sc.state, 1});
+						sc.SetState(SCE_C_OPERATOR|activitySet);
+						sc.Forward();
+					}
 				}
 				break;
 			case SCE_C_CHARACTER:
@@ -1410,6 +1448,19 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				}
 			} else if (isoperator(sc.ch)) {
 				sc.SetState(SCE_C_OPERATOR|activitySet);
+				if (!interpolatingStack.empty() && AnyOf(sc.ch, '{', '}')) {
+					InterpolatingState &current = interpolatingStack.back();
+					if (sc.ch == '{') {
+						current.braceCount += 1;
+					} else {
+						current.braceCount -= 1;
+						if (current.braceCount == 0) {
+							sc.ForwardSetState(current.state);
+							interpolatingStack.pop_back();
+							continue;
+						}
+					}
+				}
 			}
 		}
 
