@@ -65,7 +65,7 @@ enum class CmdState {
 	Delimiter,
 };
 
-enum class CommandSubstitution {
+enum class CommandSubstitution : int {
 	Backtick,
 	Inside,
 	InsideTrack,
@@ -183,7 +183,7 @@ struct OptionsBash {
 	bool stylingInsideParameter = false;
 	bool stylingInsideHeredoc = false;
 	bool nestedBackticks = true;
-	int commandSubstitution = static_cast<int>(CommandSubstitution::Backtick);
+	CommandSubstitution commandSubstitution = CommandSubstitution::Backtick;
 	std::string specialParameter = BASH_SPECIAL_PARAMETER;
 
 	[[nodiscard]] bool stylingInside(int state) const noexcept {
@@ -624,7 +624,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	QuoteStackCls QuoteStack(setParamStart);
 	QuoteStack.nestedBackticks = options.nestedBackticks;
-	QuoteStack.commandSubstitution = static_cast<CommandSubstitution>(options.commandSubstitution);
+	QuoteStack.commandSubstitution = options.commandSubstitution;
 
 	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_SH_IDENTIFIER);
 	const WordClassifier &classifierScalars = subStyles.Classifier(SCE_SH_SCALAR);

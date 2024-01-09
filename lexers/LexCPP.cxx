@@ -324,7 +324,7 @@ public:
 	}
 };
 
-enum class BackQuotedString {
+enum class BackQuotedString : int {
 	None,
 	RawString,
 	TemplateLiteral,
@@ -347,7 +347,7 @@ struct OptionsCPP {
 	bool verbatimStringsAllowEscapes = false;
 	bool triplequotedStrings = false;
 	bool hashquotedStrings = false;
-	int backQuotedStrings = static_cast<int>(BackQuotedString::None);
+	BackQuotedString backQuotedStrings = BackQuotedString::None;
 	bool escapeSequence = false;
 	bool fold = false;
 	bool foldSyntaxBased = true;
@@ -792,7 +792,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	std::vector<InterpolatingState> interpolatingStack;
 
 	Sci_Position lineCurrent = styler.GetLine(startPos);
-	if (options.backQuotedStrings == static_cast<int>(BackQuotedString::TemplateLiteral)) {
+	if (options.backQuotedStrings == BackQuotedString::TemplateLiteral) {
 		// code copied from LexPython
 		auto it = interpolatingAtEol.find(lineCurrent - 1);
 		if (it != interpolatingAtEol.end()) {
@@ -1158,7 +1158,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					if (interpolatingStack.empty()) {
 						rawStringTerminator.clear();
 					}
-				} else if (options.backQuotedStrings == static_cast<int>(BackQuotedString::TemplateLiteral)) {
+				} else if (options.backQuotedStrings == BackQuotedString::TemplateLiteral) {
 					if (sc.ch == '\\') {
 						if (options.escapeSequence) {
 							escapeSeq.resetEscapeState(sc.state, sc.chNext);
@@ -1260,7 +1260,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			} else if (options.hashquotedStrings && sc.Match('#', '\"')) {
 				sc.SetState(SCE_C_HASHQUOTEDSTRING|activitySet);
 				sc.Forward();
-			} else if (options.backQuotedStrings && sc.Match('`')) {
+			} else if ((options.backQuotedStrings != BackQuotedString::None) && sc.Match('`')) {
 				sc.SetState(SCE_C_STRINGRAW|activitySet);
 				rawStringTerminator = "`";
 			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
