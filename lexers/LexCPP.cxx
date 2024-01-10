@@ -187,7 +187,7 @@ public:
 			escapeSetValid = &setOctDigits;
 		}
 	}
-	bool atEscapeEnd(int currChar) const noexcept {
+	[[nodiscard]] bool atEscapeEnd(int currChar) const noexcept {
 		return (digitsLeft <= 0) || !escapeSetValid->Contains(currChar);
 	}
 	void consumeDigit() noexcept {
@@ -256,28 +256,27 @@ class LinePPState {
 	// level is the nesting level of #if constructs
 	int level = -1;
 	static const int maximumNestingLevel = 31;
-	int maskLevel() const noexcept {
+	[[nodiscard]] int maskLevel() const noexcept {
 		if (level >= 0) {
 			return 1 << level;
-		} else {
-			return 1;
 		}
+		return 1;
 	}
 public:
 	LinePPState() noexcept = default;
-	bool ValidLevel() const noexcept {
+	[[nodiscard]] bool ValidLevel() const noexcept {
 		return level >= 0 && level < maximumNestingLevel;
 	}
-	bool IsActive() const noexcept {
+	[[nodiscard]] bool IsActive() const noexcept {
 		return state == 0;
 	}
-	bool IsInactive() const noexcept {
+	[[nodiscard]] bool IsInactive() const noexcept {
 		return state != 0;
 	}
-	int ActiveState() const noexcept {
+	[[nodiscard]] int ActiveState() const noexcept {
 		return state ? inactiveFlag : 0;
 	}
-	bool CurrentIfTaken() const noexcept {
+	[[nodiscard]] bool CurrentIfTaken() const noexcept {
 		return (ifTaken & maskLevel()) != 0;
 	}
 	void StartSection(bool on) noexcept {
@@ -312,7 +311,7 @@ public:
 class PPStates {
 	std::vector<LinePPState> vlls;
 public:
-	LinePPState ForLine(Sci_Position line) const noexcept {
+	[[nodiscard]] LinePPState ForLine(Sci_Position line) const noexcept {
 		if ((line > 0) && (vlls.size() > static_cast<size_t>(line))) {
 			return vlls[line];
 		}
@@ -515,11 +514,11 @@ class LexerCPP : public ILexer5 {
 			arguments.clear();
 			return *this;
 		}
-		bool IsMacro() const noexcept {
+		[[nodiscard]] bool IsMacro() const noexcept {
 			return !arguments.empty();
 		}
 	};
-	typedef std::map<std::string, SymbolValue> SymbolTable;
+	using SymbolTable = std::map<std::string, SymbolValue>;
 	SymbolTable preprocessorDefinitionsStart;
 	OptionsCPP options;
 	OptionSetCPP osCPP;
@@ -544,8 +543,7 @@ public:
 	LexerCPP(LexerCPP &&) = delete;
 	void operator=(const LexerCPP &) = delete;
 	void operator=(LexerCPP &&) = delete;
-	virtual ~LexerCPP() {
-	}
+	virtual ~LexerCPP() = default;
 	void SCI_METHOD Release() noexcept override {
 		delete this;
 	}
@@ -679,7 +677,7 @@ public:
 		return style & ~inactiveFlag;
 	}
 	void EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDefinitions);
-	Tokens Tokenize(const std::string &expr) const;
+	[[nodiscard]] Tokens Tokenize(const std::string &expr) const;
 	bool EvaluateExpression(const std::string &expr, const SymbolTable &preprocessorDefinitions);
 };
 
@@ -736,21 +734,19 @@ Sci_Position SCI_METHOD LexerCPP::WordListSet(int n, const char *wl) {
 					const char *cpEquals = strchr(cpDefinition, '=');
 					if (cpEquals) {
 						std::string name(cpDefinition, cpEquals - cpDefinition);
-						std::string val(cpEquals+1);
+						const std::string val(cpEquals+1);
 						const size_t bracket = name.find('(');
 						const size_t bracketEnd = name.find(')');
 						if ((bracket != std::string::npos) && (bracketEnd != std::string::npos)) {
 							// Macro
-							std::string args = name.substr(bracket + 1, bracketEnd - bracket - 1);
+							const std::string args = name.substr(bracket + 1, bracketEnd - bracket - 1);
 							name = name.substr(0, bracket);
 							preprocessorDefinitionsStart[name] = SymbolValue(val, args);
 						} else {
 							preprocessorDefinitionsStart[name] = val;
 						}
 					} else {
-						std::string name(cpDefinition);
-						std::string val("1");
-						preprocessorDefinitionsStart[name] = val;
+						preprocessorDefinitionsStart[std::string(cpDefinition)] = std::string("1");
 					}
 				}
 			}
@@ -1086,7 +1082,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					} else {
 						sc.GetCurrentString(currentText, transform);
 						assert(!currentText.empty());
-						std::string currentSuffix = currentText.substr(1);
+						const std::string currentSuffix = currentText.substr(1);
 						if (!keywords3.InList(currentSuffix) && !keywords3.InList(currentText)) {
 							const int subStyleCDKW = classifierDocKeyWords.ValueFor(currentSuffix);
 							if (subStyleCDKW >= 0) {
@@ -1374,7 +1370,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									// Inactive, if expression true then may become active if parent scope active
 									assert(sc.state == (SCE_C_PREPROCESSOR | inactiveFlag));
 									// Similar to #if
-									std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 4, true);
+									const std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 4, true);
 									const bool ifGood = EvaluateExpression(restOfLine, preprocessorDefinitions);
 									if (ifGood) {
 										preproc.InvertCurrentLevel();
@@ -1403,13 +1399,13 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 								size_t endName = startName;
 								while ((endName < restOfLine.length()) && setWord.Contains(restOfLine[endName]))
 									endName++;
-								std::string key = restOfLine.substr(startName, endName-startName);
+								const std::string key = restOfLine.substr(startName, endName-startName);
 								if ((endName < restOfLine.length()) && (restOfLine.at(endName) == '(')) {
 									// Macro
 									size_t endArgs = endName;
 									while ((endArgs < restOfLine.length()) && (restOfLine[endArgs] != ')'))
 										endArgs++;
-									std::string args = restOfLine.substr(endName + 1, endArgs - endName - 1);
+									const std::string args = restOfLine.substr(endName + 1, endArgs - endName - 1);
 									size_t startValue = endArgs+1;
 									while ((startValue < restOfLine.length()) && IsSpaceOrTab(restOfLine[startValue]))
 										startValue++;
