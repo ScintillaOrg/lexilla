@@ -1189,10 +1189,17 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 
 	LexAccessor styler(pAccess);
 
-	const Sci_Position startPos = startPos_;
+	Sci_Position startPos = startPos_;
 	const Sci_Position endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
+	// Backtrack to previous line in case need to fix its fold status
+	if (lineCurrent > 0) {
+		lineCurrent--;
+		startPos = styler.LineStart(lineCurrent);
+		initStyle = (startPos > 0) ? styler.StyleIndexAt(startPos - 1) : 0;
+	}
+
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
