@@ -1217,7 +1217,9 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 					 && !IsCommentLine(lineCurrent + 1, styler))
 				levelCurrent--;
 		}
-		if (style == SCE_SH_WORD) {
+
+		switch (style) {
+		case SCE_SH_WORD:
 			if ((wordlen + 1) < sizeof(word))
 				word[wordlen++] = ch;
 			if (styleNext != style) {
@@ -1229,16 +1231,18 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 					levelCurrent--;
 				}
 			}
-		}
-		if (style == SCE_SH_OPERATOR) {
+			break;
+
+		case SCE_SH_OPERATOR:
 			if (ch == '{') {
 				levelCurrent++;
 			} else if (ch == '}') {
 				levelCurrent--;
 			}
-		}
+			break;
+
 		// Here Document folding
-		if (style == SCE_SH_HERE_DELIM) {
+		case SCE_SH_HERE_DELIM:
 			if (stylePrev == SCE_SH_HERE_Q) {
 				levelCurrent--;
 			} else if (stylePrev != SCE_SH_HERE_DELIM) {
@@ -1248,9 +1252,14 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 					}
 				}
 			}
-		} else if (style == SCE_SH_HERE_Q && styleNext == SCE_SH_DEFAULT) {
-			levelCurrent--;
+			break;
+		case SCE_SH_HERE_Q:
+			if (styleNext == SCE_SH_DEFAULT) {
+				levelCurrent--;
+			}
+			break;
 		}
+
 		if (atEOL) {
 			int lev = levelPrev;
 			if (visibleChars == 0 && options.foldCompact)
