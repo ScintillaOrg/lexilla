@@ -861,7 +861,6 @@ $(DIR_O)/LexLua.o: \
 	../../scintilla/include/Sci_Position.h \
 	../../scintilla/include/Scintilla.h \
 	../include/SciLexer.h \
-	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h \
@@ -1219,7 +1218,6 @@ $(DIR_O)/LexPython.o: \
 	../../scintilla/include/Sci_Position.h \
 	../../scintilla/include/Scintilla.h \
 	../include/SciLexer.h \
-	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h \
