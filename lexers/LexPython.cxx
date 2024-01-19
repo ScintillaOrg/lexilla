@@ -652,12 +652,12 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 			}
 		} else if (sc.state == SCE_P_IDENTIFIER) {
 			if ((sc.ch == '.') || (!IsAWordChar(sc.ch, options.unicodeIdentifiers))) {
-				char s[100];
-				sc.GetCurrent(s, sizeof(s));
+				char identifier[100];
+				sc.GetCurrent(identifier, sizeof(identifier));
 				int style = SCE_P_IDENTIFIER;
-				if ((kwLast == kwImport) && (strcmp(s, "as") == 0)) {
+				if ((kwLast == kwImport) && (strcmp(identifier, "as") == 0)) {
 					style = SCE_P_WORD;
-				} else if (keywords.InList(s) && !IsMatchOrCaseIdentifier(sc, styler, s)) {
+				} else if (keywords.InList(identifier) && !IsMatchOrCaseIdentifier(sc, styler, identifier)) {
 					style = SCE_P_WORD;
 				} else if (kwLast == kwClass) {
 					style = SCE_P_CLASSNAME;
@@ -680,7 +680,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 							break;
 						}
 					}
-				} else if (keywords2.InList(s)) {
+				} else if (keywords2.InList(identifier)) {
 					if (options.keywords2NoSubIdentifiers) {
 						// We don't want to highlight keywords2
 						// that are used as a sub-identifier,
@@ -692,7 +692,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 						style = SCE_P_WORD2;
 					}
 				} else {
-					const int subStyle = classifierIdentifiers.ValueFor(s);
+					const int subStyle = classifierIdentifiers.ValueFor(identifier);
 					if (subStyle >= 0) {
 						style = subStyle;
 					}
@@ -737,17 +737,17 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				sc.ChangeState(style);
 				sc.SetState(SCE_P_DEFAULT);
 				if (style == SCE_P_WORD) {
-					if (0 == strcmp(s, "class"))
+					if (0 == strcmp(identifier, "class"))
 						kwLast = kwClass;
-					else if (0 == strcmp(s, "def"))
+					else if (0 == strcmp(identifier, "def"))
 						kwLast = kwDef;
-					else if (0 == strcmp(s, "import"))
+					else if (0 == strcmp(identifier, "import"))
 						kwLast = kwImport;
-					else if (0 == strcmp(s, "cdef"))
+					else if (0 == strcmp(identifier, "cdef"))
 						kwLast = kwCDef;
-					else if (0 == strcmp(s, "cpdef"))
+					else if (0 == strcmp(identifier, "cpdef"))
 						kwLast = kwCPDef;
-					else if (0 == strcmp(s, "cimport"))
+					else if (0 == strcmp(identifier, "cimport"))
 						kwLast = kwImport;
 					else if (kwLast != kwCDef && kwLast != kwCPDef)
 						kwLast = kwOther;
