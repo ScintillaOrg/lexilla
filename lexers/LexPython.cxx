@@ -928,7 +928,7 @@ static bool IsCommentLine(Sci_Position line, Accessor &styler) {
 		const char ch = styler[i];
 		if (ch == '#')
 			return true;
-		else if (ch != ' ' && ch != '\t')
+		if (!IsASpaceOrTab(ch))
 			return false;
 	}
 	return false;
