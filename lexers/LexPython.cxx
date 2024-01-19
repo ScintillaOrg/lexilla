@@ -127,7 +127,7 @@ char GetPyStringQuoteChar(int st) noexcept {
 }
 
 void PushStateToStack(int state, std::vector<SingleFStringExpState> &stack, SingleFStringExpState *&currentFStringExp) {
-	SingleFStringExpState single = {state, 0};
+	const SingleFStringExpState single = {state, 0};
 	stack.push_back(single);
 
 	currentFStringExp = &stack.back();
@@ -361,7 +361,7 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 
 const char styleSubable[] = { SCE_P_IDENTIFIER, 0 };
 
-LexicalClass lexicalClasses[] = {
+const LexicalClass lexicalClasses[] = {
 	// Lexer Python SCLEX_PYTHON SCE_P_:
 	0, "SCE_P_DEFAULT", "default", "White space",
 	1, "SCE_P_COMMENTLINE", "comment line", "Comment",
@@ -385,8 +385,6 @@ LexicalClass lexicalClasses[] = {
 	19, "SCE_P_FTRIPLEDOUBLE", "literal string interpolated", "Triple double quoted f-string",
 	20, "SCE_P_ATTRIBUTE", "identifier", "Attribute of identifier",
 };
-
-}
 
 class LexerPython : public DefaultLexer {
 	WordList keywords;
@@ -921,7 +919,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 	sc.Complete();
 }
 
-static bool IsCommentLine(Sci_Position line, Accessor &styler) {
+bool IsCommentLine(Sci_Position line, Accessor &styler) {
 	const Sci_Position pos = styler.LineStart(line);
 	const Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
@@ -934,7 +932,7 @@ static bool IsCommentLine(Sci_Position line, Accessor &styler) {
 	return false;
 }
 
-static bool IsQuoteLine(Sci_Position line, const Accessor &styler) {
+bool IsQuoteLine(Sci_Position line, const Accessor &styler) {
 	const int style = styler.StyleAt(styler.LineStart(line));
 	return IsPyTripleQuoteStringState(style);
 }
@@ -1076,6 +1074,8 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 	// NOTE: Cannot set level of last line here because indentCurrent doesn't have
 	// header flag set; the loop above is crafted to take care of this case!
 	//styler.SetLevel(lineCurrent, indentCurrent);
+}
+
 }
 
 LexerModule lmPython(SCLEX_PYTHON, LexerPython::LexerFactoryPython, "python",
