@@ -19,7 +19,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-#include "StringCopy.h"
 #include "WordList.h"
 #include "LexAccessor.h"
 #include "Accessor.h"
@@ -109,7 +108,7 @@ class LexerLua : public DefaultLexer {
 	OptionSetLua osLua;
 public:
 	explicit LexerLua() :
-		DefaultLexer("lua", SCLEX_LUA, lexicalClasses, ELEMENTS(lexicalClasses)) {
+		DefaultLexer("lua", SCLEX_LUA, lexicalClasses, std::size(lexicalClasses)) {
 	}
 	~LexerLua() override = default;
 	void SCI_METHOD Release() noexcept override {

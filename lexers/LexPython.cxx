@@ -20,7 +20,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-#include "StringCopy.h"
 #include "WordList.h"
 #include "LexAccessor.h"
 #include "Accessor.h"
@@ -399,7 +398,7 @@ class LexerPython : public DefaultLexer {
 	std::map<Sci_Position, std::vector<SingleFStringExpState> > ftripleStateAtEol;
 public:
 	explicit LexerPython() :
-		DefaultLexer("python", SCLEX_PYTHON, lexicalClasses, ELEMENTS(lexicalClasses)),
+		DefaultLexer("python", SCLEX_PYTHON, lexicalClasses, std::size(lexicalClasses)),
 		subStyles(styleSubable, 0x80, 0x40, 0) {
 	}
 	~LexerPython() override = default;
