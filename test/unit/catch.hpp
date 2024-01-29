@@ -10806,7 +10806,7 @@ namespace Catch {
                 reportFatal(def.name);
             }
         }
-        // If its not an exception we care about, pass it along.
+        // If it's not an exception we care about, pass it along.
         // This stops us from eating debugger breaks etc.
         return EXCEPTION_CONTINUE_SEARCH;
     }

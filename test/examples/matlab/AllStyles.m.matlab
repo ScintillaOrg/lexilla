@@ -16,7 +16,7 @@ Block comment.
 % Command=2
 
 %{
-Omitted as this places a style transiton between \r and \n
+Omitted as this places a style transition between \r and \n
 !rmdir oldtests
 %}
 

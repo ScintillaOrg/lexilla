@@ -117,7 +117,7 @@ inline bool SetNumericConstantState(StyleContext &scDoc) {
 	int iPoints = 0;			// Point counter
 	char cNumericString[512];	// Numeric string buffer
 
-	// Buffer the current numberic string
+	// Buffer the current numeric string
 	scDoc.GetCurrent(cNumericString, sizeof(cNumericString));
 	// Loop through the string until end of string (NULL termination)
 	for (int iIndex = 0; cNumericString[iIndex] != '\0'; iIndex++) {
@@ -177,7 +177,7 @@ inline bool GetNextWordUpper(Accessor &styler, Sci_PositionU uiStartPos, Sci_Pos
 // Clarion Language Colouring Procedure
 static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler, bool bCaseSensitive) {
 
-	int iParenthesesLevel = 0;		// Parenthese Level
+	int iParenthesesLevel = 0;		// Parentheses Level
 	int iColumn1Label = false;		// Label starts in Column 1
 
 	WordList &wlClarionKeywords = *wlKeywords[0];			// Clarion Keywords
@@ -367,22 +367,22 @@ static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, 
 		}
 		// Picture String State Handling
 		else if (scDoc.state == SCE_CLW_PICTURE_STRING) {
-			// If the character is an ( (open parenthese)
+			// If the character is an ( (open parenthesis)
 			if (scDoc.ch == '(') {
-				// Increment the parenthese level
+				// Increment the parentheses level
 				iParenthesesLevel++;
 			}
-			// Else if the character is a ) (close parenthese)
+			// Else if the character is a ) (close parenthesis)
 			else if (scDoc.ch == ')') {
-				// If the parenthese level is set to zero
+				// If the parentheses level is set to zero
 				// parentheses matched
 				if (!iParenthesesLevel) {
 					scDoc.SetState(SCE_CLW_DEFAULT);
 				}
-				// Else parenthese level is greater than zero
+				// Else parentheses level is greater than zero
 				// still looking for matching parentheses
 				else {
-					// Decrement the parenthese level
+					// Decrement the parentheses level
 					iParenthesesLevel--;
 				}
 			}
@@ -396,9 +396,9 @@ static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, 
 		// Integer Constant State Handling
 		else if (scDoc.state == SCE_CLW_INTEGER_CONSTANT) {
 			// If the character is not a digit (0-9)
-			// or character is not a hexidecimal character (A-F)
+			// or character is not a hexadecimal character (A-F)
 			// or character is not a . (point)
-			// or character is not a numberic base character (B,O,H)
+			// or character is not a numeric base character (B,O,H)
 			if (!(isdigit(scDoc.ch)
 			|| IsAHexCharacter(scDoc.ch, bCaseSensitive)
 			|| scDoc.ch == '.'

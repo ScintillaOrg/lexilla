@@ -124,7 +124,7 @@ asn1_default:
 				// A number ends here
 				sc.SetState(SCE_ASN1_DEFAULT);
 			break;
-		case SCE_ASN1_OPERATOR:		// The affectation operator ::= and wath follows (eg: ::= { org 6 } OID or ::= 12 trap)
+		case SCE_ASN1_OPERATOR:		// The affectation operator ::= and what follows (eg: ::= { org 6 } OID or ::= 12 trap)
 			if (sc.ch == '{')
 			{
 				// An OID definition starts here: enter the sub loop

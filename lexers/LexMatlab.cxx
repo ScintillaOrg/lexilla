@@ -156,7 +156,7 @@ static void ColouriseMatlabOctaveDoc(
     int inArgumentsScope = 0;
 	// Current line's folding level
 	int foldingLevel = 0;
-	// Current line in in class scope
+	// Current line is in class scope
 	int inClassScope = 0;
 
 	// use the line state of each line to store the block comment depth

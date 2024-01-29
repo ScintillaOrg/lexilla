@@ -436,7 +436,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 		if ((ch > 0) && setWord.Contains(ch))
 			visibleChars++;
 
-		// get the syle for the current character neede to check in comment
+		// get the style for the current character needed to check in comment
 		int stylech = styler.StyleAt(i);
 
 		// start the capture of the first word
@@ -513,7 +513,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 				//	1. functions/labels end at the start of another function
 				//	2. functions/labels end at the end of the file
 				if ((strcmp(szFirstWord, "function") == 0) || (firstWordLen > 0 && szFirstWord[0] == '@')) {
-					if (isFoldingAll) { //if we're folding the whole document (recursivly by lua script)
+					if (isFoldingAll) { //if we're folding the whole document (recursively by lua script)
 
 						if (functionCount > 0) {
 							levelCurrent--;

@@ -12,7 +12,7 @@
  * TADS program listing consists of strings.
  *
  * TADS has two types of strings, those enclosed in single quotes (') and those
- * enclosed in double quotes (").  These strings have different symantics and
+ * enclosed in double quotes (").  These strings have different semantics and
  * can be given different highlighting if desired.
  *
  * There can be embedded within both types of strings html tags

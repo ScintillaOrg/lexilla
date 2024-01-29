@@ -6,7 +6,7 @@
 {1}% Comment=1{0}
 {1}% Line comment{0}
 
-{1}% Next line is comment in Ocatve but not Matlab{0}
+{1}% Next line is comment in Octave but not Matlab{0}
 # {7}Octave{0} {7}comment{0}
 
 {1}%{
@@ -16,7 +16,7 @@ Block comment.
 {1}% Command=2{0}
 
 {1}%{
-Omitted as this places a style transiton between \r and \n
+Omitted as this places a style transition between \r and \n
 !rmdir oldtests
 %}{0}
 

@@ -340,7 +340,7 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
 							sc.SetState(SCE_AU3_DEFAULT);
 							if (strcmp(s, "#include")== 0)
 							{
-								si = 3;   // use to determine string start for #inlude <>
+								si = 3;   // use to determine string start for #include <>
 							}
 						}
 						else if (keywords6.InList(s)) {
@@ -727,7 +727,7 @@ static void FoldAU3Doc(Sci_PositionU startPos, Sci_Position length, int, WordLis
 		if (IsAWordChar(ch)) {
 			visibleChars++;
 		}
-		// get the syle for the current character neede to check in comment
+		// get the style for the current character needed to check in comment
 		int stylech = styler.StyleAt(i);
 		// get first word for the line for indent check max 9 characters
 		if (FirstWordStart && (!(FirstWordEnd))) {
