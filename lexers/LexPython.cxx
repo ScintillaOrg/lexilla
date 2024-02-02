@@ -86,6 +86,9 @@ constexpr bool IsRawPrefix(int ch) {
 }
 
 bool IsPyStringStart(int ch, int chNext, int chNext2, literalsAllowed allowed) noexcept {
+	// To cover both python2 and python3 lex character prefixes as --
+	// ur'' is a string, but ru'' is not
+	// fr'', rf'', br'', rb'' are all strings
 	if (IsQuote(ch))
 		return true;
 	if (IsPyStringTypeChar(ch, allowed)) {
@@ -94,8 +97,12 @@ bool IsPyStringStart(int ch, int chNext, int chNext2, literalsAllowed allowed) n
 		if (IsRawPrefix(chNext) && IsQuote(chNext2))
 			return true;
 	}
-	if (IsRawPrefix(ch) && IsQuote(chNext))
-		return true;
+	if (IsRawPrefix(ch)) {
+		if (IsQuote(chNext))
+			return true;
+		if (IsPyStringTypeChar(chNext, allowed) && !AnyOf(chNext, 'u', 'U') && IsQuote(chNext2))
+			return true;
+	}
 
 	return false;
 }
@@ -149,14 +156,22 @@ int PopFromStateStack(std::vector<SingleFStringExpState> &stack, SingleFStringEx
 int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex, literalsAllowed allowed) {
 	char ch = styler.SafeGetCharAt(i);
 	char chNext = styler.SafeGetCharAt(i + 1);
-	const int firstIsF = (ch == 'f' || ch == 'F');
+	bool isFString = false;
 
-	// Advance beyond r, u, or ur prefix (or r, b, or br in Python 2.7+ and r, f, or fr in Python 3.6+), but bail if there are any unexpected chars
+	// Advance beyond r, a type char, or both (in either order)
+	// Note that this depends on IsPyStringStart to enforce ru'' not being a string
 	if (IsRawPrefix(ch)) {
 		i++;
+		if (IsPyStringTypeChar(chNext, allowed)) {
+			if (AnyOf(chNext, 'f', 'F'))
+				isFString = true;
+			i++;
+		}
 		ch = styler.SafeGetCharAt(i);
 		chNext = styler.SafeGetCharAt(i + 1);
 	} else if (IsPyStringTypeChar(ch, allowed)) {
+		if (AnyOf(ch, 'f', 'F'))
+			isFString = true;
 		if (IsRawPrefix(chNext))
 			i += 2;
 		else
@@ -165,6 +180,7 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 		chNext = styler.SafeGetCharAt(i + 1);
 	}
 
+	// ch and i will be the first quote
 	if (!IsQuote(ch)) {
 		*nextIndex = i + 1;
 		return SCE_P_DEFAULT;
@@ -174,16 +190,16 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 		*nextIndex = i + 3;
 
 		if (ch == '"')
-			return (firstIsF ? SCE_P_FTRIPLEDOUBLE : SCE_P_TRIPLEDOUBLE);
+			return (isFString ? SCE_P_FTRIPLEDOUBLE : SCE_P_TRIPLEDOUBLE);
 		else
-			return (firstIsF ? SCE_P_FTRIPLE : SCE_P_TRIPLE);
+			return (isFString ? SCE_P_FTRIPLE : SCE_P_TRIPLE);
 	} else {
 		*nextIndex = i + 1;
 
 		if (ch == '"')
-			return (firstIsF ? SCE_P_FSTRING : SCE_P_STRING);
+			return (isFString ? SCE_P_FSTRING : SCE_P_STRING);
 		else
-			return (firstIsF ? SCE_P_FCHARACTER : SCE_P_CHARACTER);
+			return (isFString ? SCE_P_FCHARACTER : SCE_P_CHARACTER);
 	}
 }
 
