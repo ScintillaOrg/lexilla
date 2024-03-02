@@ -172,7 +172,7 @@ void LexerEDIFACT::Lex(Sci_PositionU startPos, Sci_Position length, int, IDocume
 		if (posCurrent >= posFinish)
 			break;
 
-		// Does is start with 3 charaters? ie, UNH
+		// Does is start with 3 characters? ie, UNH
 		char SegmentHeader[4] = { 0 };
 		pAccess->GetCharRange(SegmentHeader, posCurrent, 3);
 

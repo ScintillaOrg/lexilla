@@ -6,7 +6,7 @@
 // members to initialize or the initialization is complex or has comments.
 useInitializationList
 
-// These may be interesting but its not clear without examining each instance closely
+// These may be interesting but it's not clear without examining each instance closely
 // Would have to ensure that any_of/all_of has same early/late exits as current code and
 // produces same result on empty collections
 useStlAlgorithm

@@ -79,7 +79,7 @@ LexicalClass lexicalClasses[] = {
     SCE_VISUALPROLOG_DEFAULT, "SCE_VISUALPROLOG_DEFAULT", "default", "Default style",
     SCE_VISUALPROLOG_KEY_MAJOR, "SCE_VISUALPROLOG_KEY_MAJOR", "keyword major", "Major keyword",
     SCE_VISUALPROLOG_KEY_MINOR, "SCE_VISUALPROLOG_KEY_MINOR", "keyword minor", "Minor keyword",
-    SCE_VISUALPROLOG_KEY_DIRECTIVE, "SCE_VISUALPROLOG_KEY_DIRECTIVE", "keyword preprocessor", "Directove keyword",
+    SCE_VISUALPROLOG_KEY_DIRECTIVE, "SCE_VISUALPROLOG_KEY_DIRECTIVE", "keyword preprocessor", "Directive keyword",
     SCE_VISUALPROLOG_COMMENT_BLOCK, "SCE_VISUALPROLOG_COMMENT_BLOCK", "comment", "Multiline comment /* */",
     SCE_VISUALPROLOG_COMMENT_LINE, "SCE_VISUALPROLOG_COMMENT_LINE", "comment line", "Line comment % ...",
     SCE_VISUALPROLOG_COMMENT_KEY, "SCE_VISUALPROLOG_COMMENT_KEY", "comment documentation keyword", "Doc keyword in comment % @short ...",

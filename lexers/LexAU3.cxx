@@ -142,7 +142,7 @@ static int GetSendKey(const char *szLine, char *szKey)
 			{
 				// Save second portion into var...
 				szSpecial[nSpecPos++] = cTemp;
-				// check if Second portion is all numbers for repeat fuction
+				// check if Second portion is all numbers for repeat function
 				if (isdigit(cTemp) == false) {nSpecNum = 0;}
 			}
 		}
@@ -169,7 +169,7 @@ static int GetSendKey(const char *szLine, char *szKey)
 } // GetSendKey()
 
 //
-// Routine to check the last "none comment" character on a line to see if its a continuation
+// Routine to check the last "none comment" character on a line to see if it's a continuation
 //
 static bool IsContinuationLine(Sci_PositionU szLine, Accessor &styler)
 {
@@ -296,7 +296,7 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
             }
             case SCE_AU3_OPERATOR:
             {
-                // check if its a COMobject
+                // check if it's a COMobject
 				if (sc.chPrev == '.' && IsAWordChar(sc.ch)) {
 					sc.SetState(SCE_AU3_COMOBJ);
 				}
@@ -340,7 +340,7 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
 							sc.SetState(SCE_AU3_DEFAULT);
 							if (strcmp(s, "#include")== 0)
 							{
-								si = 3;   // use to determine string start for #inlude <>
+								si = 3;   // use to determine string start for #include <>
 							}
 						}
 						else if (keywords6.InList(s)) {
@@ -418,7 +418,7 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
 			}
 			case SCE_AU3_VARIABLE:
 			{
-				// Check if its a COMObject
+				// Check if it's a COMObject
 				if (sc.ch == '.' && !IsADigit(sc.chNext)) {
 					sc.SetState(SCE_AU3_OPERATOR);
 				}
@@ -436,8 +436,8 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
             }
             case SCE_AU3_STRING:
             {
-				// check for " to end a double qouted string or
-				// check for ' to end a single qouted string
+				// check for " to end a double quoted string or
+				// check for ' to end a single quoted string
 	            if ((si == 1 && sc.ch == '\"') || (si == 2 && sc.ch == '\'') || (si == 3 && sc.ch == '>'))
 				{
 					sc.ForwardSetState(SCE_AU3_DEFAULT);
@@ -513,7 +513,7 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
 						sc.ChangeState(SCE_AU3_STRING);
 						sc.SetState(SCE_AU3_STRING);
 					}
-					// If invalid character found then assume its a regular string
+					// If invalid character found then assume it's a regular string
 					if (nState == 0) {
 						sc.ChangeState(SCE_AU3_STRING);
 						sc.SetState(SCE_AU3_STRING);
@@ -727,7 +727,7 @@ static void FoldAU3Doc(Sci_PositionU startPos, Sci_Position length, int, WordLis
 		if (IsAWordChar(ch)) {
 			visibleChars++;
 		}
-		// get the syle for the current character neede to check in comment
+		// get the style for the current character needed to check in comment
 		int stylech = styler.StyleAt(i);
 		// get first word for the line for indent check max 9 characters
 		if (FirstWordStart && (!(FirstWordEnd))) {
@@ -784,7 +784,7 @@ static void FoldAU3Doc(Sci_PositionU startPos, Sci_Position length, int, WordLis
 			if (szKeywordlen > 0 && (!(chPrev == '_')) &&
 				((!(IsStreamCommentStyle(style)) || foldInComment)) ) {
 				szKeyword[szKeywordlen] = '\0';
-				// only fold "if" last keyword is "then"  (else its a one line if)
+				// only fold "if" last keyword is "then"  (else it's a one line if)
 				if (strcmp(szKeyword,"if") == 0  && ThenFoundLast) {
 						levelNext++;
 				}

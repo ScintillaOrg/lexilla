@@ -104,7 +104,7 @@ static bool IsDocCommentStart(StyleContext &sc) {
 // Checks if the current line starts with the preprocessor directive that
 // is complementary to the #ifdef DOC start: #endif. This method is supposed
 // to be called if the current state point to the documentation comment.
-// QUESTIONAL ASSUMPTION: The complete #endif directive is not checked; just
+// QUESTIONABLE ASSUMPTION: The complete #endif directive is not checked; just
 // the starting #e. However, there is no other preprocessor directive with
 // the same starting letter and thus this optimization should always work.
 static bool IsDocCommentEnd(StyleContext &sc) {

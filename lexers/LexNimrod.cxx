@@ -237,7 +237,7 @@ static void ColouriseNimrodDoc(Sci_PositionU startPos, Sci_Position length, int 
         styler.ColourTo(pos, SCE_P_CHARACTER);
         pos++;
       break;
-      default: // identifers, numbers, operators, whitespace
+      default: // identifiers, numbers, operators, whitespace
         if (ch >= '0' && ch <= '9') {
           pos = scanNumber(styler, pos);
         } else if (IsAWordChar(ch)) {

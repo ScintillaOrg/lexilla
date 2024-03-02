@@ -81,7 +81,7 @@ static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, W
 	bool isCommentRound = (curLineState & bitCommentRound);
 	bool isCommentSlash = false;
 
-	// Continue Pascal multline comment state
+	// Continue Pascal multiline comment state
 	if (isCommentCurly || isCommentRound)
 		state = SCE_INNO_COMMENT_PASCAL;
 

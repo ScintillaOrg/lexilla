@@ -120,10 +120,10 @@ static void ColouriseEclDoc(Sci_PositionU startPos, Sci_Position length, int ini
 		if (sc.atLineStart) {
 			if (sc.state == SCE_ECL_STRING) {
 				// Prevent SCE_ECL_STRINGEOL from leaking back to previous line which
-				// ends with a line continuation by locking in the state upto this position.
+				// ends with a line continuation by locking in the state up to this position.
 				sc.SetState(SCE_ECL_STRING);
 			}
-			// Reset states to begining of colourise so no surprises
+			// Reset states to beginning of colourise so no surprises
 			// if different sets of lines lexed.
 			visibleChars = 0;
 			lastWordWasUUID = false;

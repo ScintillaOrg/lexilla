@@ -81,7 +81,7 @@ static void ColouriseKVIrcDoc(Sci_PositionU startPos, Sci_Position length,
                  * its length...
                  * Going for a compromise where single line comments not
                  * starting on a newline are allowed in all cases except
-                 * when they are preceeded with an opening bracket or comma
+                 * when they are preceded with an opening bracket or comma
                  * (this will probably be the most common style a valid
                  * string-less channel name will be used with), with the
                  * array length case included
@@ -361,7 +361,7 @@ static void FoldKVIrcDoc(Sci_PositionU startPos, Sci_Position length, int /*init
 {
     /* Based on CMake's folder */
 
-    /* Exiting if folding isnt enabled */
+    /* Exiting if folding isn't enabled */
     if ( styler.GetPropertyInt("fold") == 0 )
         return;
 

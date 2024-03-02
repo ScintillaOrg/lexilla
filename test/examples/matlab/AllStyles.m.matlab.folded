@@ -6,7 +6,7 @@
  0 400 400   % Comment=1
  0 400 400   % Line comment
  1 400 400   
- 0 400 400   % Next line is comment in Ocatve but not Matlab
+ 0 400 400   % Next line is comment in Octave but not Matlab
  0 400 400   # Octave comment
  1 400 400   
  0 400 400   %{
@@ -16,7 +16,7 @@
  0 400 400   % Command=2
  1 400 400   
  0 400 400   %{
- 0 400 400   Omitted as this places a style transiton between \r and \n
+ 0 400 400   Omitted as this places a style transition between \r and \n
  0 400 400   !rmdir oldtests
  0 400 400   %}
  1 400 400   

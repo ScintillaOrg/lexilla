@@ -188,7 +188,7 @@ namespace {
 							ch = '}';
 
 						// We have reached the parameter value
-						// In case the open character was a alnum char, skip until , is found
+						// In case the open character was an alnum char, skip until , is found
 						// otherwise until skipped == 0
 						while (sc.More() && (skipped > 0 || (!ch && !(sc.ch == ',' || sc.ch == closing_brace)))) {
 							// Make sure the character isn't escaped
