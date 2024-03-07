@@ -45,7 +45,7 @@ int LongDelimCheck(StyleContext &sc) {
 	return 0;
 }
 
-const char * const luaWordListDesc[] = {
+const char *const luaWordListDesc[] = {
 	"Keywords",
 	"Basic functions",
 	"String, (table) & math functions",
@@ -54,7 +54,7 @@ const char * const luaWordListDesc[] = {
 	"user2",
 	"user3",
 	"user4",
-    nullptr
+	nullptr
 };
 
 const LexicalClass lexicalClasses[] = {
@@ -464,7 +464,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 						cNext = 0;
 					}
 				} while (cNext);
-                if ((idenStyle == SCE_LUA_WORD) && (ident == "goto")) {
+				if ((idenStyle == SCE_LUA_WORD) && (ident == "goto")) {
 					foundGoto = true;
 				}
 				sc.SetState(SCE_LUA_IDENTIFIER);

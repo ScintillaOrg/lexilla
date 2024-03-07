@@ -141,7 +141,7 @@ BracketPair FindBracketPair(Tokens &tokens) {
 }
 
 void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
-		int activity, const WordList &markerList, bool caseSensitive){
+		int activity, const WordList &markerList, bool caseSensitive) {
 	if (IsOperatorOrSpace(sc.chPrev) && !IsOperatorOrSpace(sc.ch) && markerList.Length()) {
 		std::string marker;
 		for (Sci_PositionU currPos = sc.currentPos; true; currPos++) {
@@ -550,24 +550,24 @@ public:
 	int SCI_METHOD Version() const noexcept override {
 		return lvRelease5;
 	}
-	const char * SCI_METHOD PropertyNames() override {
+	const char *SCI_METHOD PropertyNames() override {
 		return osCPP.PropertyNames();
 	}
 	int SCI_METHOD PropertyType(const char *name) override {
 		return osCPP.PropertyType(name);
 	}
-	const char * SCI_METHOD DescribeProperty(const char *name) override {
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
 		return osCPP.DescribeProperty(name);
 	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
-	const char * SCI_METHOD DescribeWordListSets() override {
+	const char *SCI_METHOD DescribeWordListSets() override {
 		return osCPP.DescribeWordListSets();
 	}
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
-	void * SCI_METHOD PrivateCall(int, void *) noexcept override {
+	void *SCI_METHOD PrivateCall(int, void *) noexcept override {
 		return nullptr;
 	}
 
@@ -601,7 +601,7 @@ public:
 	int SCI_METHOD DistanceToSecondaryStyles() noexcept override {
 		return inactiveFlag;
 	}
-	const char * SCI_METHOD GetSubStyleBases() noexcept override {
+	const char *SCI_METHOD GetSubStyleBases() noexcept override {
 		return styleSubable;
 	}
 	int SCI_METHOD NamedStyles() override {
@@ -609,7 +609,7 @@ public:
 			sizeLexicalClasses) +
 			inactiveFlag;
 	}
-	const char * SCI_METHOD NameOfStyle(int style) override {
+	const char *SCI_METHOD NameOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
 		if (style < sizeLexicalClasses)
@@ -617,7 +617,7 @@ public:
 		// TODO: inactive and substyles
 		return "";
 	}
-	const char * SCI_METHOD TagsOfStyle(int style) override {
+	const char *SCI_METHOD TagsOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "Excess";
 		returnBuffer.clear();
@@ -649,7 +649,7 @@ public:
 		}
 		return "";
 	}
-	const char * SCI_METHOD DescriptionOfStyle(int style) override {
+	const char *SCI_METHOD DescriptionOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
 		if (style < sizeLexicalClasses)
@@ -659,13 +659,13 @@ public:
 	}
 
 	// ILexer5 methods
-	const char * SCI_METHOD GetName() override {
+	const char *SCI_METHOD GetName() override {
 		return caseSensitive ? "cpp" : "cppnocase";
 	}
 	int SCI_METHOD  GetIdentifier() override {
 		return caseSensitive ? SCLEX_CPP : SCLEX_CPPNOCASE;
 	}
-	const char * SCI_METHOD PropertyGet(const char *key) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override;
 
 	static ILexer5 *LexerFactoryCPP() {
 		return new LexerCPP(true);
@@ -694,7 +694,7 @@ Sci_Position SCI_METHOD LexerCPP::PropertySet(const char *key, const char *val) 
 	return -1;
 }
 
-const char * SCI_METHOD LexerCPP::PropertyGet(const char *key) {
+const char *SCI_METHOD LexerCPP::PropertyGet(const char *key) {
 	return osCPP.PropertyGet(key);
 }
 

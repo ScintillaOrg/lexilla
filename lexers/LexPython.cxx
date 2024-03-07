@@ -427,7 +427,7 @@ public:
 		return osPython.DescribeProperty(name);
 	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
-	const char * SCI_METHOD PropertyGet(const char *key) override {
+	const char *SCI_METHOD PropertyGet(const char *key) override {
 		return osPython.PropertyGet(key);
 	}
 	const char *SCI_METHOD DescribeWordListSets() override {
@@ -730,11 +730,11 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 								if (!IsASpaceOrTab(ch))
 									break;
 							}
-							if (((isDecoratorAttribute) && (!isComment)) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))){
+							if (((isDecoratorAttribute) && (!isComment)) && (((options.decoratorAttributes == 1)  && (style == SCE_P_IDENTIFIER)) || (options.decoratorAttributes == 2))) {
 								// Style decorator attributes as decorators but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_DECORATOR;
 							}
-							if (((!isDecoratorAttribute) && (!isComment)) && (((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) || (options.identifierAttributes == 2))){
+							if (((!isDecoratorAttribute) && (!isComment)) && (((options.identifierAttributes == 1) && (style == SCE_P_IDENTIFIER)) || (options.identifierAttributes == 2))) {
 								// Style attributes and ignore decorator attributes but respect already styled identifiers (unless requested to ignore already styled identifiers)
 								style = SCE_P_ATTRIBUTE;
 							}
@@ -818,7 +818,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 		}
 
 		// If in an f-string expression and pre pep 701 lexing is used,
-		// check for the ending quote(s) and end f-string to handle 
+		// check for the ending quote(s) and end f-string to handle
 		// syntactically incorrect cases like f'{' and f"""{""". Post
 		// pep 701, a quote may appear in a { } field so cases like
 		// f"n = {":".join(seq)}" is valid
