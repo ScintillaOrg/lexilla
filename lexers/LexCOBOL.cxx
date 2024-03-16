@@ -95,7 +95,7 @@ static int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList 
     s[1] = '\0';
     getRange(start, end, styler, s, sizeof(s));
 
-    char chAttr = SCE_C_IDENTIFIER;
+    int chAttr = SCE_C_IDENTIFIER;
     if (isdigit(s[0]) || (s[0] == '.') || (s[0] == 'v')) {
         chAttr = SCE_C_NUMBER;
 		char *p = s + 1;
@@ -107,7 +107,7 @@ static int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList 
 			++p;
 		}
     }
-    else {
+    if (chAttr == SCE_C_IDENTIFIER) {
         if (a_keywords.InList(s)) {
             chAttr = SCE_C_WORD;
         }
