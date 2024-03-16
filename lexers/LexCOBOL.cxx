@@ -211,7 +211,7 @@ static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int i
             if (isCOBOLwordstart(ch) || (ch == '$' && IsASCII(chNext) && isalpha(chNext))) {
                 ColourTo(styler, i-1, state);
                 state = SCE_C_IDENTIFIER;
-            } else if (column == 6 && ch == '*') {
+            } else if (column == 6 && (ch == '*' || ch == '/')) {
             // Cobol comment line: asterisk in column 7.
                 ColourTo(styler, i-1, state);
                 state = SCE_C_COMMENTLINE;
@@ -255,7 +255,9 @@ static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int i
 
                 state = SCE_C_DEFAULT;
                 chNext = styler.SafeGetCharAt(i + 1);
-                if (ch == '"') {
+                if (column == 6 && (ch == '*' || ch == '/')) {
+                    state = SCE_C_COMMENTLINE;
+                } else if (ch == '"') {
                     state = SCE_C_STRING;
                 } else if (ch == '\'') {
                     state = SCE_C_CHARACTER;
