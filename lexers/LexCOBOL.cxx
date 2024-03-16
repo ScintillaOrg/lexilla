@@ -292,6 +292,9 @@ static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int i
                 if (ch == '"') {
                     ColourTo(styler, i, state);
                     state = SCE_C_DEFAULT;
+                } else if (ch == '\r' || ch == '\n') {
+                    ColourTo(styler, i-1, state);
+                    state = SCE_C_DEFAULT;
                 }
             } else if (state == SCE_C_CHARACTER) {
                 if (ch == '\'') {
