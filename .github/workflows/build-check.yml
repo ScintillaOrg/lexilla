@@ -21,7 +21,7 @@ jobs:
           run: (cd test/unit && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
         - name: Build Lexilla
           run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}})
-        - uses: actions/upload-artifact@v3
+        - uses: actions/upload-artifact@v4
           with:
               name: liblexilla.so
               path: bin/liblexilla.so

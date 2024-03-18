@@ -31,7 +31,7 @@ jobs:
               cd src
               nmake -f lexilla.mak DEBUG=1
               cd ..
-        - uses: actions/upload-artifact@v3
+        - uses: actions/upload-artifact@v4
           with:
               name: lexilla.dll
               path: bin/lexilla.dll
