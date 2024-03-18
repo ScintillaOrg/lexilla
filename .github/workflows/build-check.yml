@@ -25,6 +25,7 @@ jobs:
           with:
               name: liblexilla.so
               path: bin/liblexilla.so
+              overwrite: true
         - name: Test lexing and folding
           run: (cd test && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
         - name: CheckLexilla C Example

@@ -25,7 +25,6 @@ jobs:
           with:
               name: liblexilla.dylib
               path: bin/liblexilla.dylib
-              overwrite: true
         - name: Test lexing and folding
           run: (cd test && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
         - name: CheckLexilla C Example
