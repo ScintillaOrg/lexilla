@@ -20,8 +20,7 @@
  0 400   0               remarks
  0 400   0   
  0 400   0         *     SCE_C_COMMENTDOC=3 not implemented
- 0 400   0         *     SCE_C_COMMENTDOC has "**" at line start
- 0 400   0         *     but changes style between \r and \n so can't include as test
+ 0 400   0   ** at line start
  0 400   0   
  0 400   0         *     SCE_C_STRING=6
  0 400   0               "string"

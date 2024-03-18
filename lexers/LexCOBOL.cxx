@@ -273,7 +273,7 @@ static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int i
                 }
             } else if (state == SCE_C_COMMENT) {
                 if (ch == '\r' || ch == '\n') {
-                    ColourTo(styler, i, state);
+                    ColourTo(styler, i-1, state);
                     state = SCE_C_DEFAULT;
                 }
             } else if (state == SCE_C_COMMENTDOC) {
@@ -281,7 +281,7 @@ static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int i
                     if (((i > styler.GetStartSegment() + 2) || (
                         (initStyle == SCE_C_COMMENTDOC) &&
                         (styler.GetStartSegment() == static_cast<Sci_PositionU>(startPos))))) {
-                            ColourTo(styler, i, state);
+                            ColourTo(styler, i-1, state);
                             state = SCE_C_DEFAULT;
                     }
                 }
