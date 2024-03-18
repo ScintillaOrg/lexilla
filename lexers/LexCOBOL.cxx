@@ -86,10 +86,6 @@ static void ColourTo(Accessor &styler, Sci_PositionU end, unsigned int attr) {
 static int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList &keywords*/WordList *keywordlists[], Accessor &styler, int nContainment, bool *bAarea) {
     int ret = 0;
 
-    WordList& a_keywords = *keywordlists[0];
-    WordList& b_keywords = *keywordlists[1];
-    WordList& c_keywords = *keywordlists[2];
-
     char s[100];
     s[0] = '\0';
     s[1] = '\0';
@@ -108,6 +104,10 @@ static int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList 
         }
     }
     if (chAttr == SCE_C_IDENTIFIER) {
+        WordList& a_keywords = *keywordlists[0];
+        WordList& b_keywords = *keywordlists[1];
+        WordList& c_keywords = *keywordlists[2];
+
         if (a_keywords.InList(s)) {
             chAttr = SCE_C_WORD;
         }
