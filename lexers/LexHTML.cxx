@@ -1572,6 +1572,18 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_H_COMMENT; // wait for a pending command
 				styler.ColourTo(i + 2, SCE_H_COMMENT);
 				i += 2; // follow styling after the --
+				if (!isXml) {
+					// handle empty comment: <!-->, <!--->
+					// https://html.spec.whatwg.org/multipage/parsing.html#parse-error-abrupt-closing-of-empty-comment
+					chNext = SafeGetUnsignedCharAt(styler, i + 1);
+					if ((chNext == '>') || (chNext == '-' && SafeGetUnsignedCharAt(styler, i + 2) == '>')) {
+						if (chNext == '-') {
+							i += 1;
+						}
+						chPrev = '-';
+						ch = '-';
+					}
+				}
 			} else if (isWordCdata(i + 1, i + 7, styler)) {
 				state = SCE_H_CDATA;
 			} else {
@@ -1843,7 +1855,12 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_H_COMMENT:
-			if ((scriptLanguage != eScriptComment) && (chPrev2 == '-') && (chPrev == '-') && (ch == '>')) {
+			if ((scriptLanguage != eScriptComment) && (chPrev2 == '-') && (chPrev == '-') && (ch == '>' || (!isXml && ch == '!' && chNext == '>'))) {
+				// close HTML comment with --!>
+				// https://html.spec.whatwg.org/multipage/parsing.html#parse-error-incorrectly-closed-comment
+				if (ch == '!') {
+					i += 1;
+				}
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
 				levelCurrent--;
