@@ -24,7 +24,7 @@ jobs:
         - uses: actions/upload-artifact@v4
           with:
               name: liblexilla.so
-              path: bin/liblexilla.so
+              path: bin/liblexilla-${{matrix.cpp_compiler}}.so
               overwrite: true
         - name: Test lexing and folding
           run: (cd test && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
