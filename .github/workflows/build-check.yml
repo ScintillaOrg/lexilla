@@ -23,8 +23,8 @@ jobs:
           run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}})
         - uses: actions/upload-artifact@v4
           with:
-              name: liblexilla.so
-              path: bin/liblexilla-${{matrix.cpp_compiler}}.so
+              name: liblexilla-${{matrix.cpp_compiler}}.so
+              path: bin/liblexilla.so
               overwrite: true
         - name: Test lexing and folding
           run: (cd test && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
