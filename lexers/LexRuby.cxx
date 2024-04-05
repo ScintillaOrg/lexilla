@@ -881,7 +881,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                 styler.ColourTo(i - 1, state);
                 state = SCE_RB_NUMBER;
                 is_real_number = true;
-            } else if (isHighBitChar(ch) || iswordstart(ch)) {
+            } else if (isSafeAlphaOrHigh(ch)) {
                 styler.ColourTo(i - 1, state);
                 state = SCE_RB_WORD;
             } else if (ch == '#') {
