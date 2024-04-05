@@ -48,6 +48,10 @@ inline bool isSafeAlpha(char ch) noexcept {
     return (isSafeASCII(ch) && isalpha(ch)) || ch == '_';
 }
 
+inline bool isSafeAlphaOrHigh(char ch) noexcept {
+	return isHighBitChar(ch) || isalpha(ch) || ch == '_';
+}
+
 inline bool isSafeAlnum(char ch) noexcept {
     return (isSafeASCII(ch) && isalnum(ch)) || ch == '_';
 }
@@ -613,7 +617,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
         j += 1;
     }
 
-    if (isSafeAlnum(styler[j])) {
+    if (isSafeAlnumOrHigh(styler[j])) {
         // Init target_end because some compilers think it won't
         // be initialized by the time it's used
         target_start = target_end = j;
@@ -622,7 +626,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
         return definitely_not_a_here_doc;
     }
     for (; j < lengthDoc; j++) {
-        if (!isSafeAlnum(styler[j])) {
+        if (!isSafeAlnumOrHigh(styler[j])) {
             if (target_quote && styler[j] != target_quote) {
                 // unquoted end
                 return definitely_not_a_here_doc;
@@ -945,7 +949,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                 chNext = chNext2;
                 styler.ColourTo(i, SCE_RB_OPERATOR);
 
-                if (!(strchr("\"\'`_-~", chNext2) || isSafeAlpha(chNext2))) {
+                if (!(strchr("\"\'`_-~", chNext2) || isSafeAlphaOrHigh(chNext2))) {
                     // It's definitely not a here-doc,
                     // based on Ruby's lexer/parser in the
                     // heredoc_identifier routine.
