@@ -403,12 +403,11 @@ class LexerPython : public DefaultLexer {
 	OptionsPython options;
 	OptionSetPython osPython;
 	enum { ssIdentifier };
-	SubStyles subStyles;
+	SubStyles subStyles{styleSubable};
 	std::map<Sci_Position, std::vector<SingleFStringExpState> > ftripleStateAtEol;
 public:
 	explicit LexerPython() :
-		DefaultLexer("python", SCLEX_PYTHON, lexicalClasses, std::size(lexicalClasses)),
-		subStyles(styleSubable, 0x80, 0x40, 0) {
+		DefaultLexer("python", SCLEX_PYTHON, lexicalClasses, std::size(lexicalClasses)) {
 	}
 	~LexerPython() override = default;
 	void SCI_METHOD Release() override {

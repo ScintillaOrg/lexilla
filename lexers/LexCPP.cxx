@@ -525,7 +525,7 @@ class LexerCPP : public ILexer5 {
 	EscapeSequence escapeSeq;
 	SparseState<std::string> rawStringTerminators;
 	enum { ssIdentifier, ssDocKeyword };
-	SubStyles subStyles;
+	SubStyles subStyles{ styleSubable, SubStylesFirst, SubStylesAvailable, inactiveFlag };
 	std::string returnBuffer;
 public:
 	explicit LexerCPP(bool caseSensitive_) :
@@ -535,8 +535,7 @@ public:
 		setAddOp("+-"),
 		setMultOp("*/%"),
 		setRelOp("=!<>"),
-		setLogicalOp("|&"),
-		subStyles(styleSubable, 0x80, 0x40, inactiveFlag) {
+		setLogicalOp("|&") {
 	}
 	// Deleted so LexerCPP objects can not be copied.
 	LexerCPP(const LexerCPP &) = delete;
