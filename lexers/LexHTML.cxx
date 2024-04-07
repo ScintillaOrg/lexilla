@@ -28,6 +28,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "SubStyles.h"
 #include "DefaultLexer.h"
 
 using namespace Scintilla;
@@ -265,15 +266,22 @@ bool isCommentASPState(int state) noexcept {
 	return bResult;
 }
 
-bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
+bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler) {
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
 	bool isLanguageType = false;
 	if (IsNumberChar(styler[start])) {
 		chAttr = SCE_H_NUMBER;
 	} else {
 		const std::string s = GetStringSegment(styler, start, end);
-		if (keywords.InList(s.c_str()))
+		if (keywords.InList(s.c_str())) {
 			chAttr = SCE_H_ATTRIBUTE;
+		} else {
+			const int subStyle = classifier.ValueFor(s);
+			if (subStyle >= 0) {
+				chAttr = subStyle;
+			}
+		}
+
 		if (inScriptType == eNonHtmlScript) {
 			// see https://html.spec.whatwg.org/multipage/scripting.html#script-processing-model
 			if (s == "type" || s == "language") {
@@ -302,7 +310,7 @@ bool isHTMLCustomElement(const std::string &tag) {
 }
 
 int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
-                           const WordList &keywords, Accessor &styler, bool &tagDontFold,
+                           const WordList &keywords, const WordClassifier &classifier, Accessor &styler, bool &tagDontFold,
                     bool caseSensitive, bool isXml, bool allowScripts,
                     const std::set<std::string> &nonFoldingTags) {
 	std::string tag;
@@ -328,6 +336,11 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 		chAttr = SCE_H_TAG;
 	} else if (!isXml && isHTMLCustomElement(tag)) {
 		chAttr = SCE_H_TAG;
+	} else {
+		const int subStyle = classifier.ValueFor(tag);
+		if (subStyle >= 0) {
+			chAttr = subStyle;
+		}
 	}
 	if (chAttr != SCE_H_TAGUNKNOWN) {
 		styler.ColourTo(end, chAttr);
@@ -357,7 +370,7 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 }
 
 void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
-                             const WordList &keywords, Accessor &styler, script_mode inScriptType) {
+                             const WordList &keywords, const WordClassifier &classifier, const WordClassifier &classifierServer, Accessor &styler, script_mode inScriptType) {
 	char s[30 + 1];
 	Sci_PositionU i = 0;
 	for (; i < end - start + 1 && i < 30; i++) {
@@ -371,11 +384,17 @@ void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
 		chAttr = SCE_HJ_NUMBER;
 	} else if (keywords.InList(s)) {
 		chAttr = SCE_HJ_KEYWORD;
+	} else {
+		const int subStyle = (inScriptType == eNonHtmlScript) ? classifier.ValueFor(s) : classifierServer.ValueFor(s);
+		if (subStyle >= 0) {
+			chAttr = subStyle;
+		}
 	}
+
 	styler.ColourTo(end, statePrintForState(chAttr, inScriptType));
 }
 
-int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler, script_mode inScriptType) {
+int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, script_mode inScriptType) {
 	char chAttr = SCE_HB_IDENTIFIER;
 	const bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.');
 	if (wordIsNumber) {
@@ -386,6 +405,11 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &key
 			chAttr = SCE_HB_WORD;
 			if (s == "rem")
 				chAttr = SCE_HB_COMMENTLINE;
+		} else {
+			const int subStyle = classifier.ValueFor(s);
+			if (subStyle >= 0) {
+				chAttr = subStyle;
+			}
 		}
 	}
 	styler.ColourTo(end, statePrintForState(chAttr, inScriptType));
@@ -395,7 +419,7 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &key
 		return SCE_HB_DEFAULT;
 }
 
-void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler, std::string &prevWord, script_mode inScriptType, bool isMako) {
+void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, std::string &prevWord, script_mode inScriptType, bool isMako) {
 	const bool wordIsNumber = IsADigit(styler[start]);
 	std::string s;
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
@@ -412,21 +436,33 @@ void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &ke
 		chAttr = SCE_HP_WORD;
 	else if (isMako && (s == "block"))
 		chAttr = SCE_HP_WORD;
+	else {
+		const int subStyle = classifier.ValueFor(s);
+		if (subStyle >= 0) {
+			chAttr = subStyle;
+		}
+	}
 	styler.ColourTo(end, statePrintForState(chAttr, inScriptType));
 	prevWord = s;
 }
 
 // Update the word colour to default or keyword
 // Called when in a PHP word
-void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
+void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler) {
 	char chAttr = SCE_HPHP_DEFAULT;
 	const bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
 	if (wordIsNumber) {
 		chAttr = SCE_HPHP_NUMBER;
 	} else {
 		std::string s = GetStringSegment(styler, start, end);
-		if (keywords.InList(s.c_str()))
+		if (keywords.InList(s.c_str())) {
 			chAttr = SCE_HPHP_WORD;
+		} else {
+			const int subStyle = classifier.ValueFor(s);
+			if (subStyle >= 0) {
+				chAttr = subStyle;
+			}
+		}
 	}
 	styler.ColourTo(end, chAttr);
 }
@@ -789,6 +825,10 @@ struct OptionSetHTML : public OptionSet<OptionsHTML> {
 	}
 };
 
+constexpr char styleSubable[] = { SCE_H_TAG, SCE_H_ATTRIBUTE, SCE_HJ_WORD, SCE_HJA_WORD, SCE_HB_WORD, SCE_HP_WORD, SCE_HPHP_WORD, 0 };
+// Allow normal styles to be contiguous using 0x80 to 0xBF by assigning sub-styles from 0xC0 to 0xFF
+constexpr int SubStylesHTML = 0xC0;
+
 const LexicalClass lexicalClassesHTML[] = {
 	// Lexer HTML SCLEX_HTML SCE_H_ SCE_HJ_ SCE_HJA_ SCE_HB_ SCE_HBA_ SCE_HP_ SCE_HPHP_ SCE_HPA_:
 	0, "SCE_H_DEFAULT", "default", "Text",
@@ -993,6 +1033,7 @@ class LexerHTML : public DefaultLexer {
 	OptionsHTML options;
 	OptionSetHTML osHTML;
 	std::set<std::string> nonFoldingTags;
+	SubStyles subStyles{styleSubable,SubStylesHTML,SubStylesAvailable,0};
 public:
 	explicit LexerHTML(bool isXml_, bool isPHPScript_) :
 		DefaultLexer(
@@ -1029,6 +1070,35 @@ public:
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	// No Fold as all folding performs in Lex.
+
+	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override {
+		return subStyles.Allocate(styleBase, numberStyles);
+	}
+	int SCI_METHOD SubStylesStart(int styleBase) override {
+		return subStyles.Start(styleBase);
+	}
+	int SCI_METHOD SubStylesLength(int styleBase) override {
+		return subStyles.Length(styleBase);
+	}
+	int SCI_METHOD StyleFromSubStyle(int subStyle) override {
+		const int styleBase = subStyles.BaseStyle(subStyle);
+		return styleBase;
+	}
+	int SCI_METHOD PrimaryStyleFromStyle(int style) override {
+		return style;
+	}
+	void SCI_METHOD FreeSubStyles() override {
+		subStyles.Free();
+	}
+	void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override {
+		subStyles.SetIdentifiers(style, identifiers);
+	}
+	int SCI_METHOD DistanceToSecondaryStyles() override {
+		return 0;
+	}
+	const char *SCI_METHOD GetSubStyleBases() override {
+		return styleSubable;
+	}
 
 	static ILexer5 *LexerFactoryHTML() {
 		return new LexerHTML(false, false);
@@ -1081,6 +1151,15 @@ Sci_Position SCI_METHOD LexerHTML::WordListSet(int n, const char *wl) {
 
 void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	Accessor styler(pAccess, nullptr);
+
+	const WordClassifier &classifierTags = subStyles.Classifier(SCE_H_TAG);
+	const WordClassifier &classifierAttributes = subStyles.Classifier(SCE_H_ATTRIBUTE);
+	const WordClassifier &classifierJavaScript = subStyles.Classifier(SCE_HJ_WORD);
+	const WordClassifier &classifierJavaScriptServer = subStyles.Classifier(SCE_HJA_WORD);
+	const WordClassifier &classifierBasic = subStyles.Classifier(SCE_HB_WORD);
+	const WordClassifier &classifierPython = subStyles.Classifier(SCE_HP_WORD);
+	const WordClassifier &classifierPHP = subStyles.Classifier(SCE_HPHP_WORD);
+
 	if (isPHPScript && (startPos == 0)) {
 		initStyle = SCE_HPHP_DEFAULT;
 	}
@@ -1607,7 +1686,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				                                    styler.GetStartSegment(), i - 1, aspScript);
 			}
 			if (state == SCE_HP_WORD) {
-				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, styler, prevWord, inScriptType, isMako);
+				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, classifierPython, styler, prevWord, inScriptType, isMako);
 			} else {
 				styler.ColourTo(i - 1, StateToPrint);
 			}
@@ -1641,7 +1720,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				                                    styler.GetStartSegment(), i - 1, aspScript);
 			}
 			if (state == SCE_HP_WORD) {
-				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, styler, prevWord, inScriptType, isMako);
+				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, classifierPython, styler, prevWord, inScriptType, isMako);
 			} else {
 				styler.ColourTo(i - 1, StateToPrint);
 			}
@@ -1669,16 +1748,16 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			// Bounce out of any ASP mode
 			switch (state) {
 			case SCE_HJ_WORD:
-				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywords2, styler, inScriptType);
+				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywords2, classifierJavaScript, classifierJavaScriptServer, styler, inScriptType);
 				break;
 			case SCE_HB_WORD:
-				classifyWordHTVB(styler.GetStartSegment(), i - 1, keywords3, styler, inScriptType);
+				classifyWordHTVB(styler.GetStartSegment(), i - 1, keywords3, classifierBasic, styler, inScriptType);
 				break;
 			case SCE_HP_WORD:
-				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, styler, prevWord, inScriptType, isMako);
+				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, classifierPython, styler, prevWord, inScriptType, isMako);
 				break;
 			case SCE_HPHP_WORD:
-				classifyWordHTPHP(styler.GetStartSegment(), i - 1, keywords5, styler);
+				classifyWordHTPHP(styler.GetStartSegment(), i - 1, keywords5, classifierPHP, styler);
 				break;
 			case SCE_H_XCCOMMENT:
 				styler.ColourTo(i - 1, state);
@@ -1909,7 +1988,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_TAGUNKNOWN:
 			if (!setTagContinue.Contains(ch) && !((ch == '/') && (chPrev == '<'))) {
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
-					i - 1, keywords, styler, tagDontFold, caseSensitive, isXml, allowScripts, nonFoldingTags);
+					i - 1, keywords, classifierTags, styler, tagDontFold, caseSensitive, isXml, allowScripts, nonFoldingTags);
 				if (eClass == SCE_H_SCRIPT || eClass == SCE_H_COMMENT) {
 					if (!tagClosing) {
 						inScriptType = eNonHtmlScript;
@@ -1963,7 +2042,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_H_ATTRIBUTE:
 			if (!setAttributeContinue.Contains(ch)) {
-				isLanguageType = classifyAttribHTML(inScriptType, styler.GetStartSegment(), i - 1, keywords, styler);
+				isLanguageType = classifyAttribHTML(inScriptType, styler.GetStartSegment(), i - 1, keywords, classifierAttributes, styler);
 				if (ch == '>') {
 					styler.ColourTo(i, SCE_H_TAG);
 					if (inScriptType == eNonHtmlScript) {
@@ -2142,7 +2221,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_HJ_WORD:
 			if (!IsAWordChar(ch)) {
-				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywords2, styler, inScriptType);
+				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywords2,
+					classifierJavaScript, classifierJavaScriptServer, styler, inScriptType);
 				//styler.ColourTo(i - 1, eHTJSKeyword);
 				state = SCE_HJ_DEFAULT;
 				if (ch == '/' && chNext == '*') {
@@ -2268,7 +2348,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_HB_WORD:
 			if (!IsAWordChar(ch)) {
-				state = classifyWordHTVB(styler.GetStartSegment(), i - 1, keywords3, styler, inScriptType);
+				state = classifyWordHTVB(styler.GetStartSegment(), i - 1, keywords3, classifierBasic, styler, inScriptType);
 				if (state == SCE_HB_DEFAULT) {
 					if (ch == '\"') {
 						state = SCE_HB_STRING;
@@ -2352,7 +2432,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_HP_WORD:
 			if (!IsAWordChar(ch)) {
-				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, styler, prevWord, inScriptType, isMako);
+				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, classifierPython, styler, prevWord, inScriptType, isMako);
 				state = SCE_HP_DEFAULT;
 				if (ch == '#') {
 					state = SCE_HP_COMMENTLINE;
@@ -2426,7 +2506,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			///////////// start - PHP state handling
 		case SCE_HPHP_WORD:
 			if (!IsPhpWordChar(ch)) {
-				classifyWordHTPHP(styler.GetStartSegment(), i - 1, keywords5, styler);
+				classifyWordHTPHP(styler.GetStartSegment(), i - 1, keywords5, classifierPHP, styler);
 				if (ch == '/' && chNext == '*') {
 					i++;
 					state = SCE_HPHP_COMMENT;
@@ -2628,16 +2708,17 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	switch (state) {
 	case SCE_HJ_WORD:
-		classifyWordHTJS(styler.GetStartSegment(), lengthDoc - 1, keywords2, styler, inScriptType);
+		classifyWordHTJS(styler.GetStartSegment(), lengthDoc - 1, keywords2,
+			classifierJavaScript, classifierJavaScriptServer, styler, inScriptType);
 		break;
 	case SCE_HB_WORD:
-		classifyWordHTVB(styler.GetStartSegment(), lengthDoc - 1, keywords3, styler, inScriptType);
+		classifyWordHTVB(styler.GetStartSegment(), lengthDoc - 1, keywords3, classifierBasic, styler, inScriptType);
 		break;
 	case SCE_HP_WORD:
-		classifyWordHTPy(styler.GetStartSegment(), lengthDoc - 1, keywords4, styler, prevWord, inScriptType, isMako);
+		classifyWordHTPy(styler.GetStartSegment(), lengthDoc - 1, keywords4, classifierPython, styler, prevWord, inScriptType, isMako);
 		break;
 	case SCE_HPHP_WORD:
-		classifyWordHTPHP(styler.GetStartSegment(), lengthDoc - 1, keywords5, styler);
+		classifyWordHTPHP(styler.GetStartSegment(), lengthDoc - 1, keywords5, classifierPHP, styler);
 		break;
 	default:
 		StateToPrint = statePrintForState(state, inScriptType);
