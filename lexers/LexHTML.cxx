@@ -131,7 +131,7 @@ script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_P
 
 int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
 	int iResult = 0;
-	std::string s = GetStringSegment(styler, start, end);
+	const std::string s = GetStringSegment(styler, start, end);
 	if (0 == strncmp(s.c_str(), "php", 3)) {
 		iResult = 3;
 	}
@@ -156,7 +156,7 @@ script_type ScriptOfState(int state) noexcept {
 	}
 }
 
-int statePrintForState(int state, script_mode inScriptType) noexcept {
+constexpr int statePrintForState(int state, script_mode inScriptType) noexcept {
 	int StateToPrint = state;
 
 	if (state >= SCE_HJ_START) {
@@ -172,8 +172,8 @@ int statePrintForState(int state, script_mode inScriptType) noexcept {
 	return StateToPrint;
 }
 
-int stateForPrintState(int StateToPrint) noexcept {
-	int state;
+constexpr int stateForPrintState(int StateToPrint) noexcept {
+	int state = StateToPrint;
 
 	if ((StateToPrint >= SCE_HPA_START) && (StateToPrint <= SCE_HPA_IDENTIFIER)) {
 		state = StateToPrint - SCE_HA_PYTHON;
@@ -181,8 +181,6 @@ int stateForPrintState(int StateToPrint) noexcept {
 		state = StateToPrint - SCE_HA_VBS;
 	} else if ((StateToPrint >= SCE_HJA_START) && (StateToPrint <= SCE_HJA_REGEX)) {
 		state = StateToPrint - SCE_HA_JS;
-	} else {
-		state = StateToPrint;
 	}
 
 	return state;
@@ -192,8 +190,8 @@ constexpr bool IsNumberChar(char ch) noexcept {
 	return IsADigit(ch) || ch == '.' || ch == '-' || ch == '#';
 }
 
-bool isStringState(int state) noexcept {
-	bool bResult;
+constexpr bool isStringState(int state) noexcept {
+	bool bResult = false;
 
 	switch (state) {
 	case SCE_HJ_DOUBLESTRING:
@@ -217,13 +215,12 @@ bool isStringState(int state) noexcept {
 		bResult = true;
 		break;
 	default :
-		bResult = false;
 		break;
 	}
 	return bResult;
 }
 
-bool stateAllowsTermination(int state) noexcept {
+constexpr bool stateAllowsTermination(int state) noexcept {
 	bool allowTermination = !isStringState(state);
 	if (allowTermination) {
 		switch (state) {
@@ -231,12 +228,15 @@ bool stateAllowsTermination(int state) noexcept {
 		case SCE_HP_COMMENTLINE:
 		case SCE_HPA_COMMENTLINE:
 			allowTermination = false;
+			break;
+		default:
+			break;
 		}
 	}
 	return allowTermination;
 }
 
-bool isPreProcessorEndTag(int state, int ch) {
+bool isPreProcessorEndTag(int state, int ch) noexcept {
 	const script_type type = ScriptOfState(state);
 	if (state == SCE_H_ASP || AnyOf(type, eScriptVBS, eScriptJS, eScriptPython)) {
 		return ch == '%';
@@ -248,8 +248,8 @@ bool isPreProcessorEndTag(int state, int ch) {
 }
 
 // not really well done, since it's only comments that should lex the %> and <%
-bool isCommentASPState(int state) noexcept {
-	bool bResult;
+constexpr bool isCommentASPState(int state) noexcept {
+	bool bResult = false;
 
 	switch (state) {
 	case SCE_HJ_COMMENT:
@@ -262,7 +262,6 @@ bool isCommentASPState(int state) noexcept {
 		bResult = true;
 		break;
 	default :
-		bResult = false;
 		break;
 	}
 	return bResult;
@@ -275,7 +274,7 @@ bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_Posit
 		chAttr = SCE_H_NUMBER;
 	} else {
 		const std::string s = GetStringSegment(styler, start, end);
-		if (keywords.InList(s.c_str())) {
+		if (keywords.InList(s)) {
 			chAttr = SCE_H_ATTRIBUTE;
 		} else {
 			const int subStyle = classifier.ValueFor(s);
@@ -299,7 +298,7 @@ bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_Posit
 }
 
 // https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-core-concepts
-bool isHTMLCustomElement(const std::string &tag) {
+bool isHTMLCustomElement(const std::string &tag) noexcept {
 	// check valid HTML custom element name: starts with an ASCII lower alpha and contains hyphen.
 	// IsUpperOrLowerCase() is used for `html.tags.case.sensitive=1`.
 	if (tag.length() < 2 || !IsUpperOrLowerCase(tag[0])) {
@@ -334,7 +333,7 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (!tag.empty() && (tag[0] == '!')) {
 		chAttr = SCE_H_SGML_DEFAULT;
-	} else if (!keywords || keywords.InList(tag.c_str())) {
+	} else if (!keywords || keywords.InList(tag)) {
 		chAttr = SCE_H_TAG;
 	} else if (!isXml && isHTMLCustomElement(tag)) {
 		chAttr = SCE_H_TAG;
@@ -396,8 +395,8 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &key
 	if (wordIsNumber) {
 		chAttr = SCE_HB_NUMBER;
 	} else {
-		std::string s = GetStringSegment(styler, start, end);
-		if (keywords.InList(s.c_str())) {
+		const std::string s = GetStringSegment(styler, start, end);
+		if (keywords.InList(s)) {
 			chAttr = SCE_HB_WORD;
 			if (s == "rem")
 				chAttr = SCE_HB_COMMENTLINE;
@@ -428,7 +427,7 @@ void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &ke
 		chAttr = SCE_HP_DEFNAME;
 	else if (wordIsNumber)
 		chAttr = SCE_HP_NUMBER;
-	else if (keywords.InList(s.c_str()))
+	else if (keywords.InList(s))
 		chAttr = SCE_HP_WORD;
 	else if (isMako && (s == "block"))
 		chAttr = SCE_HP_WORD;
@@ -450,8 +449,8 @@ void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &k
 	if (wordIsNumber) {
 		chAttr = SCE_HPHP_NUMBER;
 	} else {
-		std::string s = GetStringSegment(styler, start, end);
-		if (keywords.InList(s.c_str())) {
+		const std::string s = GetStringSegment(styler, start, end);
+		if (keywords.InList(s)) {
 			chAttr = SCE_HPHP_WORD;
 		} else {
 			const int subStyle = classifier.ValueFor(s);
@@ -468,7 +467,7 @@ bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keyword
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
 		s.push_back(styler[start + i]);
 	}
-	return keywords.InList(s.c_str());
+	return keywords.InList(s);
 }
 
 bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
@@ -480,8 +479,8 @@ bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
 }
 
 // Return the first state to reach when entering a scripting language
-int StateForScript(script_type scriptLanguage) noexcept {
-	int Result;
+constexpr int StateForScript(script_type scriptLanguage) noexcept {
+	int Result = SCE_HJ_START;
 	switch (scriptLanguage) {
 	case eScriptVBS:
 		Result = SCE_HB_START;
@@ -502,7 +501,6 @@ int StateForScript(script_type scriptLanguage) noexcept {
 		Result = SCE_H_COMMENT;
 		break;
 	default :
-		Result = SCE_HJ_START;
 		break;
 	}
 	return Result;
@@ -558,7 +556,7 @@ bool isMakoBlockEnd(const int ch, const int chNext, const std::string &blockType
 	}
 }
 
-bool isDjangoBlockEnd(const int ch, const int chNext, const std::string &blockType) {
+bool isDjangoBlockEnd(const int ch, const int chNext, const std::string &blockType) noexcept {
 	if (blockType.empty()) {
 		return false;
 	} else if (blockType == "%") {
@@ -591,7 +589,7 @@ public:
 	[[nodiscard]] bool isInvalid() const noexcept { return invalid; }
 	[[nodiscard]] bool isFinished() const noexcept { return finished; }
 
-	bool init(int ch, int chPlus1, int chPlus2) {
+	bool init(int ch, int chPlus1, int chPlus2) noexcept {
 		base = BASE_10;
 		decimalPart = false;
 		exponentPart = false;
@@ -628,7 +626,7 @@ public:
 		return true;
 	}
 
-	bool check(int ch, int chPlus1) {
+	bool check(int ch, int chPlus1) noexcept {
 		if (strchr(digitList[base] + !betweenDigits, ch) != nullptr) {
 			if (leadingZero) {
 				invalidBase8 = invalidBase8 || strchr(digitList[BASE_8] + !betweenDigits, ch) == nullptr;
@@ -683,7 +681,7 @@ public:
 	}
 };
 
-bool isPHPStringState(int state) noexcept {
+constexpr bool isPHPStringState(int state) noexcept {
 	return
 	    (state == SCE_HPHP_HSTRING) ||
 	    (state == SCE_HPHP_SIMPLESTRING) ||
@@ -692,7 +690,6 @@ bool isPHPStringState(int state) noexcept {
 }
 
 Sci_Position FindPhpStringDelimiter(std::string &phpStringDelimiter, Sci_Position i, const Sci_Position lengthDoc, Accessor &styler, bool &isSimpleString) {
-	Sci_Position j;
 	const Sci_Position beginning = i - 1;
 	bool isQuoted = false;
 
@@ -713,7 +710,8 @@ Sci_Position FindPhpStringDelimiter(std::string &phpStringDelimiter, Sci_Positio
 	}
 	phpStringDelimiter.push_back(ch);
 	i++;
-	for (j = i; j < lengthDoc && !isLineEnd(styler[j]); j++) {
+	Sci_Position j = i;
+	for (; j < lengthDoc && !isLineEnd(styler[j]); j++) {
 		if (!IsPhpWordChar(styler[j]) && isQuoted) {
 			if (((isSimpleString && styler[j] == '\'') || (!isSimpleString && styler[j] == '\"')) && isLineEnd(styler.SafeGetCharAt(j + 1))) {
 				isQuoted = false;
@@ -770,7 +768,7 @@ const char * const phpscriptWordListDesc[] = {
 };
 
 struct OptionSetHTML : public OptionSet<OptionsHTML> {
-	OptionSetHTML(bool isPHPScript_) {
+	explicit OptionSetHTML(bool isPHPScript_) {
 
 		DefineProperty("asp.default.language", &OptionsHTML::aspDefaultLanguage,
 			"Script in ASP code is initially assumed to be in JavaScript. "
@@ -1131,6 +1129,8 @@ Sci_Position SCI_METHOD LexerHTML::WordListSet(int n, const char *wl) {
 	case 5:
 		wordListN = &keywords6;
 		break;
+	default:
+		break;
 	}
 	Sci_Position firstModification = -1;
 	if (wordListN) {
@@ -1193,6 +1193,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_XMLEND:
 		case SCE_H_ASP:
 			state = SCE_H_DEFAULT;
+			break;
+		default:
 			break;
 	}
 
@@ -1524,7 +1526,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if (ch != '%' && ch != '$' && ch != '/') {
 				i += makoBlockType.length();
 				visibleChars += makoBlockType.length();
-				if (keywords4.InList(makoBlockType.c_str()))
+				if (keywords4.InList(makoBlockType))
 					styler.ColourTo(i, SCE_HP_WORD);
 				else
 					styler.ColourTo(i, SCE_H_TAGUNKNOWN);
