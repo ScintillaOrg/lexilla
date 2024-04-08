@@ -372,13 +372,7 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 
 void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
                              const WordList &keywords, const WordClassifier &classifier, const WordClassifier &classifierServer, Accessor &styler, script_mode inScriptType) {
-	char s[30 + 1];
-	Sci_PositionU i = 0;
-	for (; i < end - start + 1 && i < 30; i++) {
-		s[i] = styler[start + i];
-	}
-	s[i] = '\0';
-
+	const std::string s = styler.GetRange(start, end+1);
 	char chAttr = SCE_HJ_WORD;
 	const bool wordIsNumber = IsADigit(s[0]) || ((s[0] == '.') && IsADigit(s[1]));
 	if (wordIsNumber) {
