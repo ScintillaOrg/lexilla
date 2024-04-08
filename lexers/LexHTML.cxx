@@ -22,6 +22,7 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+#include "InList.h"
 #include "WordList.h"
 #include "LexAccessor.h"
 #include "Accessor.h"
@@ -520,34 +521,30 @@ constexpr bool IsPhpWordChar(int ch) noexcept {
 	return IsADigit(ch) || IsPhpWordStart(ch);
 }
 
-bool InTagState(int state) noexcept {
-	return state == SCE_H_TAG || state == SCE_H_TAGUNKNOWN ||
-	       state == SCE_H_SCRIPT ||
-	       state == SCE_H_ATTRIBUTE || state == SCE_H_ATTRIBUTEUNKNOWN ||
-	       state == SCE_H_NUMBER || state == SCE_H_OTHER ||
-	       state == SCE_H_DOUBLESTRING || state == SCE_H_SINGLESTRING;
+constexpr bool InTagState(int state) noexcept {
+	return AnyOf(state, SCE_H_TAG, SCE_H_TAGUNKNOWN, SCE_H_SCRIPT,
+	       SCE_H_ATTRIBUTE, SCE_H_ATTRIBUTEUNKNOWN,
+	       SCE_H_NUMBER, SCE_H_OTHER,
+	       SCE_H_DOUBLESTRING, SCE_H_SINGLESTRING);
 }
 
-bool IsCommentState(const int state) noexcept {
+constexpr bool IsCommentState(const int state) noexcept {
 	return state == SCE_H_COMMENT || state == SCE_H_SGML_COMMENT;
 }
 
-bool IsScriptCommentState(const int state) noexcept {
-	return state == SCE_HJ_COMMENT || state == SCE_HJ_COMMENTLINE || state == SCE_HJA_COMMENT ||
-		   state == SCE_HJA_COMMENTLINE || state == SCE_HB_COMMENTLINE || state == SCE_HBA_COMMENTLINE;
+constexpr bool IsScriptCommentState(const int state) noexcept {
+	return AnyOf(state, SCE_HJ_COMMENT, SCE_HJ_COMMENTLINE, SCE_HJA_COMMENT,
+		   SCE_HJA_COMMENTLINE, SCE_HB_COMMENTLINE, SCE_HBA_COMMENTLINE);
 }
 
 constexpr bool isLineEnd(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
 
-bool isMakoBlockEnd(const int ch, const int chNext, const std::string &blockType) {
+bool isMakoBlockEnd(const int ch, const int chNext, const std::string &blockType) noexcept {
 	if (blockType.empty()) {
 		return ((ch == '%') && (chNext == '>'));
-	} else if ((blockType == "inherit") ||
-			   (blockType == "namespace") ||
-			   (blockType == "include") ||
-			   (blockType == "page")) {
+	} else if (InList(blockType, { "inherit", "namespace", "include", "page" })) {
 		return ((ch == '/') && (chNext == '>'));
 	} else if (blockType == "%") {
 		if (ch == '/' && isLineEnd(chNext))
@@ -1300,8 +1297,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case eScriptPHP:
 				//not currently supported				case eScriptVBS:
 
-				if (!(state == SCE_HPHP_COMMENT || state == SCE_HPHP_COMMENTLINE) &&
-				    !(state == SCE_HJ_REGEX || state == SCE_HJ_COMMENT || state == SCE_HJ_COMMENTLINE || state == SCE_HJ_COMMENTDOC) &&
+				if (!AnyOf(state, SCE_HPHP_COMMENT, SCE_HPHP_COMMENTLINE, SCE_HJ_REGEX, SCE_HJ_COMMENT, SCE_HJ_COMMENTLINE, SCE_HJ_COMMENTDOC) &&
 				    !isStringState(state)) {
 				//Platform::DebugPrintf("state=%d, StateToPrint=%d, initStyle=%d\n", state, StateToPrint, initStyle);
 				//if ((state == SCE_HPHP_OPERATOR) || (state == SCE_HPHP_DEFAULT) || (state == SCE_HJ_SYMBOLS) || (state == SCE_HJ_START) || (state == SCE_HJ_DEFAULT)) {
@@ -1793,7 +1789,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				// in HTML, fold on tag open and unfold on tag close
 				tagOpened = true;
 				tagClosing = (chNext == '/');
-				if (foldXmlAtTagOpen && !(chNext == '/' || chNext == '?' || chNext == '!' || chNext == '-' || chNext == '%')) {
+				if (foldXmlAtTagOpen && !AnyOf(chNext, '/', '?', '!', '-', '%')) {
 					levelCurrent++;
 				}
 				if (foldXmlAtTagOpen && chNext == '/') {
