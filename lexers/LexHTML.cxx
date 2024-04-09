@@ -267,7 +267,7 @@ constexpr bool isCommentASPState(int state) noexcept {
 	return bResult;
 }
 
-bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler) {
+bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, const std::string &tag) {
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
 	bool isLanguageType = false;
 	if (IsNumberChar(styler[start])) {
@@ -277,7 +277,12 @@ bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_Posit
 		if (keywords.InList(s)) {
 			chAttr = SCE_H_ATTRIBUTE;
 		} else {
-			const int subStyle = classifier.ValueFor(s);
+			int subStyle = classifier.ValueFor(s);
+			if (subStyle < 0) {
+				// Didn't find attribute, check for tag.attribute
+				const std::string tagAttribute = tag + "." + s;
+				subStyle = classifier.ValueFor(tagAttribute);
+			}
 			if (subStyle >= 0) {
 				chAttr = subStyle;
 			}
@@ -311,10 +316,11 @@ bool isHTMLCustomElement(const std::string &tag) noexcept {
 }
 
 int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
-                           const WordList &keywords, const WordClassifier &classifier, Accessor &styler, bool &tagDontFold,
+                    const WordList &keywords, const WordClassifier &classifier, Accessor &styler, bool &tagDontFold,
                     bool caseSensitive, bool isXml, bool allowScripts,
-                    const std::set<std::string> &nonFoldingTags) {
-	std::string tag;
+                    const std::set<std::string> &nonFoldingTags,
+                    std::string &tag) {
+	tag.clear();
 	// Copy after the '<' and stop before ' '
 	for (Sci_PositionU cPos = start; cPos <= end; cPos++) {
 		const char ch = styler[cPos];
@@ -1156,6 +1162,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		initStyle = SCE_HPHP_DEFAULT;
 	}
 	styler.StartAt(startPos);
+	std::string lastTag;
 	std::string prevWord;
 	PhpNumberState phpNumber;
 	std::string phpStringDelimiter;
@@ -1981,7 +1988,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_TAGUNKNOWN:
 			if (!setTagContinue.Contains(ch) && !((ch == '/') && (chPrev == '<'))) {
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
-					i - 1, keywords, classifierTags, styler, tagDontFold, caseSensitive, isXml, allowScripts, nonFoldingTags);
+					i - 1, keywords, classifierTags, styler, tagDontFold, caseSensitive, isXml, allowScripts, nonFoldingTags, lastTag);
 				if (eClass == SCE_H_SCRIPT || eClass == SCE_H_COMMENT) {
 					if (!tagClosing) {
 						inScriptType = eNonHtmlScript;
@@ -2035,7 +2042,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_H_ATTRIBUTE:
 			if (!setAttributeContinue.Contains(ch)) {
-				isLanguageType = classifyAttribHTML(inScriptType, styler.GetStartSegment(), i - 1, keywords, classifierAttributes, styler);
+				isLanguageType = classifyAttribHTML(inScriptType, styler.GetStartSegment(), i - 1, keywords, classifierAttributes, styler, lastTag);
 				if (ch == '>') {
 					styler.ColourTo(i, SCE_H_TAG);
 					if (inScriptType == eNonHtmlScript) {
