@@ -645,7 +645,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
                 return definitely_not_a_here_doc;
             } else {
                 const char ch = styler[j];
-                if (ch == '#' || isEOLChar(ch) || ch == '.' || ch == ',') {
+                if (ch == '#' || isEOLChar(ch) || ch == '.' || ch == ',' || IsLowerCase(ch)) {
                     // This is OK, so break and continue;
                     break;
                 } else {
