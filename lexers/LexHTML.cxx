@@ -1166,7 +1166,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	std::string djangoBlockType;
 	// If inside a tag, it may be a script tag, so reread from the start of line starting tag to ensure any language tags are seen
 	if (InTagState(state)) {
-		while ((startPos > 0) && (InTagState(styler.StyleAt(startPos - 1)))) {
+		while ((startPos > 0) && (InTagState(styler.StyleIndexAt(startPos - 1)))) {
 			const Sci_Position backLineStart = styler.LineStart(styler.GetLine(startPos-1));
 			length += startPos - backLineStart;
 			startPos = backLineStart;
@@ -1178,7 +1178,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		while (startPos > 0 && (isPHPStringState(state) || !isLineEnd(styler[startPos - 1]))) {
 			startPos--;
 			length++;
-			state = styler.StyleAt(startPos);
+			state = styler.StyleIndexAt(startPos);
 		}
 		if (startPos == 0)
 			state = SCE_H_DEFAULT;
@@ -1255,7 +1255,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		Sci_Position back = startPos;
 		int style = 0;
 		while (--back) {
-			style = styler.StyleAt(back);
+			style = styler.StyleIndexAt(back);
 			if (style < SCE_HJ_DEFAULT || style > SCE_HJ_COMMENTDOC)
 				// includes SCE_HJ_COMMENT & SCE_HJ_COMMENTLINE
 				break;
