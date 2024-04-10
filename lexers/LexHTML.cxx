@@ -71,23 +71,6 @@ unsigned char SafeGetUnsignedCharAt(Accessor &styler, Sci_Position position, cha
 	return styler.SafeGetCharAt(position, chDefault);
 }
 
-void GetTextSegment(Accessor &styler, Sci_PositionU start, Sci_PositionU end, char *s, size_t len) {
-	Sci_PositionU i = 0;
-	for (; (i < end - start + 1) && (i < len-1); i++) {
-		s[i] = MakeLowerCase(styler[start + i]);
-	}
-	s[i] = '\0';
-}
-
-std::string GetStringSegment(Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
-	std::string s;
-	Sci_PositionU i = 0;
-	for (; (i < end - start + 1); i++) {
-		s.push_back(MakeLowerCase(styler[start + i]));
-	}
-	return s;
-}
-
 std::string GetNextWord(Accessor &styler, Sci_PositionU start) {
 	std::string ret;
 	Sci_PositionU i = 0;
@@ -102,25 +85,29 @@ std::string GetNextWord(Accessor &styler, Sci_PositionU start) {
 	return ret;
 }
 
+bool Contains(const std::string &s, std::string_view search) noexcept {
+	return s.find(search) != std::string::npos;
+}
+
 script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_PositionU end, script_type prevValue) {
-	char s[100];
-	GetTextSegment(styler, start, end, s, sizeof(s));
-	//Platform::DebugPrintf("Scripting indicator [%s]\n", s);
-	if (strstr(s, "vbs"))
+	const std::string s = styler.GetRangeLowered(start, end+1);
+	if (Contains(s, "vbs"))
 		return eScriptVBS;
-	if (strstr(s, "pyth"))
+	if (Contains(s, "pyth"))
 		return eScriptPython;
 	// https://html.spec.whatwg.org/multipage/scripting.html#attr-script-type
 	// https://mimesniff.spec.whatwg.org/#javascript-mime-type
-	if (strstr(s, "javas") || strstr(s, "ecmas") || strstr(s, "module") || strstr(s, "jscr"))
+	if (Contains(s, "javas") || Contains(s, "ecmas") || Contains(s, "module") || Contains(s, "jscr"))
 		return eScriptJS;
-	if (strstr(s, "php"))
+	if (Contains(s, "php"))
 		return eScriptPHP;
-	if (strstr(s, "xml")) {
-		const char *xml = strstr(s, "xml");
-		for (const char *t=s; t<xml; t++) {
-			if (!IsASpace(*t)) {
-				return prevValue;
+	if (Contains(s, "xml")) {
+		const size_t xml = s.find("xml");
+		if (xml != std::string::npos) {
+			for (size_t t = 0; t < xml; t++) {
+				if (!IsASpace(s[t])) {
+					return prevValue;
+				}
 			}
 		}
 		return eScriptXML;
@@ -131,7 +118,7 @@ script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_P
 
 int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
 	int iResult = 0;
-	const std::string s = GetStringSegment(styler, start, end);
+	const std::string s = styler.GetRangeLowered(start, end+1);
 	if (0 == strncmp(s.c_str(), "php", 3)) {
 		iResult = 3;
 	}
@@ -273,7 +260,7 @@ bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_Posit
 	if (IsNumberChar(styler[start])) {
 		chAttr = SCE_H_NUMBER;
 	} else {
-		const std::string s = GetStringSegment(styler, start, end);
+		const std::string s = styler.GetRangeLowered(start, end+1);
 		if (keywords.InList(s)) {
 			chAttr = SCE_H_ATTRIBUTE;
 		} else {
@@ -401,7 +388,7 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &key
 	if (wordIsNumber) {
 		chAttr = SCE_HB_NUMBER;
 	} else {
-		const std::string s = GetStringSegment(styler, start, end);
+		const std::string s = styler.GetRangeLowered(start, end+1);
 		if (keywords.InList(s)) {
 			chAttr = SCE_HB_WORD;
 			if (s == "rem")
@@ -455,7 +442,7 @@ void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &k
 	if (wordIsNumber) {
 		chAttr = SCE_HPHP_NUMBER;
 	} else {
-		const std::string s = GetStringSegment(styler, start, end);
+		const std::string s = styler.GetRangeLowered(start, end+1);;
 		if (keywords.InList(s)) {
 			chAttr = SCE_HPHP_WORD;
 		} else {
