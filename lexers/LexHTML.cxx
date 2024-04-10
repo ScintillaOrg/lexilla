@@ -255,7 +255,7 @@ constexpr bool isCommentASPState(int state) noexcept {
 }
 
 bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, const std::string &tag) {
-	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
+	int chAttr = SCE_H_ATTRIBUTEUNKNOWN;
 	bool isLanguageType = false;
 	if (IsNumberChar(styler[start])) {
 		chAttr = SCE_H_NUMBER;
@@ -323,7 +323,7 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 	//...to find it in the list of no-container-tags
 	tagDontFold = (!isXml) && (nonFoldingTags.count(tag) > 0);
 	// No keywords -> all are known
-	char chAttr = SCE_H_TAGUNKNOWN;
+	int chAttr = SCE_H_TAGUNKNOWN;
 	if (!tag.empty() && (tag[0] == '!')) {
 		chAttr = SCE_H_SGML_DEFAULT;
 	} else if (!keywords || keywords.InList(tag)) {
@@ -366,7 +366,7 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
                              const WordList &keywords, const WordClassifier &classifier, const WordClassifier &classifierServer, Accessor &styler, script_mode inScriptType) {
 	const std::string s = styler.GetRange(start, end+1);
-	char chAttr = SCE_HJ_WORD;
+	int chAttr = SCE_HJ_WORD;
 	const bool wordIsNumber = IsADigit(s[0]) || ((s[0] == '.') && IsADigit(s[1]));
 	if (wordIsNumber) {
 		chAttr = SCE_HJ_NUMBER;
@@ -383,7 +383,7 @@ void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
 }
 
 int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, script_mode inScriptType) {
-	char chAttr = SCE_HB_IDENTIFIER;
+	int chAttr = SCE_HB_IDENTIFIER;
 	const bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.');
 	if (wordIsNumber) {
 		chAttr = SCE_HB_NUMBER;
@@ -413,7 +413,7 @@ void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &ke
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
 		s.push_back(styler[start + i]);
 	}
-	char chAttr = SCE_HP_IDENTIFIER;
+	int chAttr = SCE_HP_IDENTIFIER;
 	if (prevWord == "class")
 		chAttr = SCE_HP_CLASSNAME;
 	else if (prevWord == "def")
@@ -437,7 +437,7 @@ void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &ke
 // Update the word colour to default or keyword
 // Called when in a PHP word
 void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler) {
-	char chAttr = SCE_HPHP_DEFAULT;
+	int chAttr = SCE_HPHP_DEFAULT;
 	const bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
 	if (wordIsNumber) {
 		chAttr = SCE_HPHP_NUMBER;
