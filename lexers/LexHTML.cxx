@@ -71,10 +71,12 @@ unsigned char SafeGetUnsignedCharAt(Accessor &styler, Sci_Position position, cha
 	return styler.SafeGetCharAt(position, chDefault);
 }
 
+// Put an upper limit to bound time taken for unexpected text.
+constexpr Sci_PositionU maxLengthCheck = 200;
+
 std::string GetNextWord(Accessor &styler, Sci_PositionU start) {
 	std::string ret;
-	Sci_PositionU i = 0;
-	for (; i < 200; i++) {	// Put an upper limit to bound time taken for unexpected text.
+	for (Sci_PositionU i = 0; i < maxLengthCheck; i++) {
 		const char ch = styler.SafeGetCharAt(start + i);
 		if ((i == 0) && !IsAWordStart(ch))
 			break;
@@ -343,11 +345,11 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 		if (allowScripts && (tag == "script")) {
 			// check to see if this is a self-closing tag by sniffing ahead
 			bool isSelfClose = false;
-			for (Sci_PositionU cPos = end; cPos <= end + 200; cPos++) {
+			for (Sci_PositionU cPos = end; cPos <= end + maxLengthCheck; cPos++) {
 				const char ch = styler.SafeGetCharAt(cPos, '\0');
 				if (ch == '\0' || ch == '>')
 					break;
-				else if (ch == '/' && styler.SafeGetCharAt(cPos + 1, '\0') == '>') {
+				if (ch == '/' && styler.SafeGetCharAt(cPos + 1, '\0') == '>') {
 					isSelfClose = true;
 					break;
 				}
@@ -1497,9 +1499,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			else if (ch == '$')
 				makoBlockType = "{";
 			else if (chNext == '/')
-				makoBlockType = GetNextWord(styler, i+3);
+				makoBlockType = GetNextWord(styler, i+3);	// Tag end: </%tag>
 			else
-				makoBlockType = GetNextWord(styler, i+2);
+				makoBlockType = GetNextWord(styler, i+2);	// Tag: <%tag...>
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
@@ -1680,8 +1682,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if ((makoBlockType != "%") && (makoBlockType != "{") && ch != '>') {
 				i++;
 				visibleChars++;
-		    }
-			else if ((makoBlockType == "%") && ch == '/') {
+			} else if ((makoBlockType == "%") && ch == '/') {
 				i++;
 				visibleChars++;
 			}
