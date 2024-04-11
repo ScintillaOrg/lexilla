@@ -1411,7 +1411,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									if (startValue < restOfLine.length())
 										value = restOfLine.substr(startValue);
 									preprocessorDefinitions[key] = SymbolValue(value, args);
-									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value, false, args));
+									ppDefineHistory.emplace_back(lineCurrent, key, value, false, args);
 									definitionsChanged = true;
 								} else {
 									// Value
@@ -1422,7 +1422,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									if (OnlySpaceOrTab(value))
 										value = "1";	// No value defaults to 1
 									preprocessorDefinitions[key] = value;
-									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value));
+									ppDefineHistory.emplace_back(lineCurrent, key, value);
 									definitionsChanged = true;
 								}
 							}
@@ -1433,7 +1433,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 								if (!tokens.empty()) {
 									const std::string key = tokens[0];
 									preprocessorDefinitions.erase(key);
-									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, "", true));
+									ppDefineHistory.emplace_back(lineCurrent, key, "", true);
 									definitionsChanged = true;
 								}
 							}
