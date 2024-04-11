@@ -929,8 +929,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					sc.ChangeState(SCE_C_USERLITERAL|activitySet);
 				} else if (!(setWord.Contains(sc.ch)
 				   || (sc.ch == '\'')
-				   || ((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E' ||
-				                                          sc.chPrev == 'p' || sc.chPrev == 'P')))) {
+				   || (AnyOf(sc.chPrev, 'e', 'E', 'p', 'P') && AnyOf(sc.ch, '+', '-')))) {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
 				}
 				break;
@@ -1075,7 +1074,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				} else if (sc.ch == '[' || sc.ch == '{') {
 					seenDocKeyBrace = true;
 				} else if (!setDoxygen.Contains(sc.ch)
-				           && !(seenDocKeyBrace && (sc.ch == ',' || sc.ch == '.'))) {
+				           && !(seenDocKeyBrace && AnyOf(sc.ch, ',', '.'))) {
 					if (!(IsASpace(sc.ch) || (sc.ch == 0))) {
 						sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
 					} else {
