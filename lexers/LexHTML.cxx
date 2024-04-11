@@ -411,10 +411,7 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &key
 
 void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, std::string &prevWord, script_mode inScriptType, bool isMako) {
 	const bool wordIsNumber = IsADigit(styler[start]);
-	std::string s;
-	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
-		s.push_back(styler[start + i]);
-	}
+	const std::string s = styler.GetRange(start, end + 1);
 	int chAttr = SCE_HP_IDENTIFIER;
 	if (prevWord == "class")
 		chAttr = SCE_HP_CLASSNAME;
@@ -458,18 +455,12 @@ void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &k
 }
 
 bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
-	std::string s;
-	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
-		s.push_back(styler[start + i]);
-	}
+	const std::string s = styler.GetRange(start, end + 1);
 	return keywords.InList(s);
 }
 
 bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
-	std::string s;
-	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
-		s.push_back(styler[start + i]);
-	}
+	const std::string s = styler.GetRange(start, end + 1);
 	return s == "[CDATA[";
 }
 
