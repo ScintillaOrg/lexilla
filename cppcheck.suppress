@@ -90,7 +90,6 @@ variableScope:lexilla/lexers/LexGui4Cli.cxx
 constParameterReference:lexilla/lexers/LexHaskell.cxx
 constParameterReference:lexilla/lexers/LexHex.cxx
 knownConditionTrueFalse:lexilla/lexers/LexHex.cxx
-constParameterReference:lexilla/lexers/LexHTML.cxx
 constVariable:lexilla/lexers/LexHollywood.cxx
 variableScope:lexilla/lexers/LexInno.cxx
 constVariableReference:lexilla/lexers/LexInno.cxx

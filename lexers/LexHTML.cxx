@@ -1313,11 +1313,12 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						levelCurrent++;
 					} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
 						// check if the number of tabs is lower than the level
-						int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
+						constexpr int tabWidth = 8;
+						int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * tabWidth;
 						for (Sci_Position j = 0; Findlevel > 0; j++) {
 							const char chTmp = styler.SafeGetCharAt(i + j + 1);
 							if (chTmp == '\t') {
-								Findlevel -= 8;
+								Findlevel -= tabWidth;
 							} else if (chTmp == ' ') {
 								Findlevel--;
 							} else {
@@ -1326,8 +1327,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						}
 
 						if (Findlevel > 0) {
-							levelCurrent -= Findlevel / 8;
-							if (Findlevel % 8)
+							levelCurrent -= Findlevel / tabWidth;
+							if (Findlevel % tabWidth)
 								levelCurrent--;
 						}
 					}
