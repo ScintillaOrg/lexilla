@@ -87,17 +87,13 @@ bool followsReturnKeyword(const StyleContext &sc, LexAccessor &styler) {
 	return !*s;
 }
 
-constexpr bool IsSpaceOrTab(int ch) noexcept {
-	return ch == ' ' || ch == '\t';
-}
-
 constexpr bool IsOperatorOrSpace(int ch) noexcept {
 	return isoperator(ch) || IsASpace(ch);
 }
 
 bool OnlySpaceOrTab(const std::string &s) noexcept {
 	for (const char ch : s) {
-		if (!IsSpaceOrTab(ch))
+		if (!IsASpaceOrTab(ch))
 			return false;
 	}
 	return true;
@@ -1392,7 +1388,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 							if (options.updatePreprocessor && preproc.IsActive()) {
 								std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 6, true);
 								size_t startName = 0;
-								while ((startName < restOfLine.length()) && IsSpaceOrTab(restOfLine[startName]))
+								while ((startName < restOfLine.length()) && IsASpaceOrTab(restOfLine[startName]))
 									startName++;
 								size_t endName = startName;
 								while ((endName < restOfLine.length()) && setWord.Contains(restOfLine[endName]))
@@ -1405,7 +1401,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 										endArgs++;
 									const std::string args = restOfLine.substr(endName + 1, endArgs - endName - 1);
 									size_t startValue = endArgs+1;
-									while ((startValue < restOfLine.length()) && IsSpaceOrTab(restOfLine[startValue]))
+									while ((startValue < restOfLine.length()) && IsASpaceOrTab(restOfLine[startValue]))
 										startValue++;
 									std::string value;
 									if (startValue < restOfLine.length())
@@ -1416,7 +1412,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 								} else {
 									// Value
 									size_t startValue = endName;
-									while ((startValue < restOfLine.length()) && IsSpaceOrTab(restOfLine[startValue]))
+									while ((startValue < restOfLine.length()) && IsASpaceOrTab(restOfLine[startValue]))
 										startValue++;
 									std::string value = restOfLine.substr(startValue);
 									if (OnlySpaceOrTab(value))
@@ -1794,8 +1790,8 @@ Tokens LexerCPP::Tokenize(const std::string &expr) const {
 				word += *cp;
 				cp++;
 			}
-		} else if (IsSpaceOrTab(*cp)) {
-			while (IsSpaceOrTab(*cp)) {
+		} else if (IsASpaceOrTab(*cp)) {
+			while (IsASpaceOrTab(*cp)) {
 				word += *cp;
 				cp++;
 			}
