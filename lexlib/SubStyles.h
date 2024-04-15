@@ -22,7 +22,7 @@ public:
 	explicit WordClassifier(int baseStyle_) : baseStyle(baseStyle_), firstStyle(0), lenStyles(0) {
 	}
 
-	void Allocate(int firstStyle_, int lenStyles_) {
+	void Allocate(int firstStyle_, int lenStyles_) noexcept {
 		firstStyle = firstStyle_;
 		lenStyles = lenStyles_;
 		wordToStyle.clear();
@@ -138,7 +138,7 @@ public:
 		}
 	}
 
-	int Allocate(int styleBase, int numberStyles) {
+	int Allocate(int styleBase, int numberStyles) noexcept {
 		const int block = BlockFromBaseStyle(styleBase);
 		if (block >= 0) {
 			if ((allocated + numberStyles) > stylesAvailable)
