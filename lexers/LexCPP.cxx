@@ -156,10 +156,11 @@ void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 	}
 }
 
+const CharacterSet setHexDigits(CharacterSet::setDigits, "ABCDEFabcdef");
+const CharacterSet setOctDigits("01234567");
+const CharacterSet setNoneNumeric;
+
 class EscapeSequence {
-	const CharacterSet setHexDigits = CharacterSet(CharacterSet::setDigits, "ABCDEFabcdef");
-	const CharacterSet setOctDigits = CharacterSet("01234567");
-	const CharacterSet setNoneNumeric;
 	const CharacterSet *escapeSetValid = nullptr;
 	int digitsLeft = 0;
 public:
