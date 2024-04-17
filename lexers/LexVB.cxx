@@ -29,29 +29,28 @@ using namespace Lexilla;
 namespace {
 
 // Internal state, highlighted as number
-#define SCE_B_FILENUMBER SCE_B_DEFAULT+100
-
+constexpr int SCE_B_FILENUMBER = SCE_B_DEFAULT + 100;
 
 bool IsVBComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 	return len > 0 && styler[pos] == '\'';
 }
 
-bool IsTypeCharacter(int ch) {
+constexpr bool IsTypeCharacter(int ch) noexcept {
 	return ch == '%' || ch == '&' || ch == '@' || ch == '!' || ch == '#' || ch == '$';
 }
 
 // Extended to accept accented characters
-bool IsAWordChar(int ch) {
+bool IsAWordChar(int ch) noexcept {
 	return ch >= 0x80 ||
 	       (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-bool IsAWordStart(int ch) {
+bool IsAWordStart(int ch) noexcept {
 	return ch >= 0x80 ||
 	       (isalpha(ch) || ch == '_');
 }
 
-bool IsANumberChar(int ch) {
+bool IsANumberChar(int ch) noexcept {
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases.
 	return (ch < 0x80) &&
@@ -62,10 +61,10 @@ bool IsANumberChar(int ch) {
 void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler, bool vbScriptSyntax) {
 
-	WordList &keywords = *keywordlists[0];
-	WordList &keywords2 = *keywordlists[1];
-	WordList &keywords3 = *keywordlists[2];
-	WordList &keywords4 = *keywordlists[3];
+	const WordList &keywords = *keywordlists[0];
+	const WordList &keywords2 = *keywordlists[1];
+	const WordList &keywords3 = *keywordlists[2];
+	const WordList &keywords4 = *keywordlists[3];
 
 	styler.StartAt(startPos);
 
@@ -74,7 +73,7 @@ void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 
 	// property lexer.vb.strings.multiline
 	//  Set to 1 to allow strings to continue over line ends.
-	bool allowMultilineStr = styler.GetPropertyInt("lexer.vb.strings.multiline", 0) != 0;
+	const bool allowMultilineStr = styler.GetPropertyInt("lexer.vb.strings.multiline", 0) != 0;
 
 	// Do not leak onto next line
 	if (initStyle == SCE_B_STRINGEOL || initStyle == SCE_B_COMMENT || initStyle == SCE_B_PREPROCESSOR) {
@@ -214,7 +213,7 @@ void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 				sc.SetState(SCE_B_NUMBER);
 			} else if (IsAWordStart(sc.ch) || (sc.ch == '[')) {
 				sc.SetState(SCE_B_IDENTIFIER);
-			} else if (isoperator(static_cast<char>(sc.ch)) || (sc.ch == '\\')) {	// Integer division
+			} else if (isoperator(sc.ch) || (sc.ch == '\\')) {	// Integer division
 				sc.SetState(SCE_B_OPERATOR);
 			}
 		}
@@ -265,7 +264,7 @@ void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 
 void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 						   WordList *[], Accessor &styler) {
-	Sci_Position endPos = startPos + length;
+	const Sci_Position endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its fold status
 	Sci_Position lineCurrent = styler.GetLine(startPos);
@@ -279,12 +278,12 @@ void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsVBComment);
 	char chNext = styler[startPos];
 	for (Sci_Position i = startPos; i < endPos; i++) {
-		char ch = chNext;
+		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == endPos)) {
 			int lev = indentCurrent;
-			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsVBComment);
+			const int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsVBComment);
 			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
 				// Only non whitespace lines can be headers
 				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK)) {
@@ -292,7 +291,7 @@ void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 				} else if (indentNext & SC_FOLDLEVELWHITEFLAG) {
 					// Line after is blank so check the next - maybe should continue further?
 					int spaceFlags2 = 0;
-					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsVBComment);
+					const int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsVBComment);
 					if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext2 & SC_FOLDLEVELNUMBERMASK)) {
 						lev |= SC_FOLDLEVELHEADERFLAG;
 					}
