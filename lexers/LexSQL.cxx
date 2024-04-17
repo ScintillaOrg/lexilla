@@ -7,12 +7,10 @@
 // Copyright 1998-2012 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
 
 #include <string>
 #include <string_view>
@@ -38,25 +36,27 @@
 using namespace Scintilla;
 using namespace Lexilla;
 
-static inline bool IsAWordChar(int ch, bool sqlAllowDottedWord) {
+namespace {
+
+bool IsAWordChar(int ch, bool sqlAllowDottedWord) {
 	if (!sqlAllowDottedWord)
 		return (ch < 0x80) && (isalnum(ch) || ch == '_');
 	else
 		return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
 }
 
-static inline bool IsAWordStart(int ch) {
+bool IsAWordStart(int ch) {
 	return (ch < 0x80) && (isalpha(ch) || ch == '_');
 }
 
-static inline bool IsADoxygenChar(int ch) {
+bool IsADoxygenChar(int ch) {
 	return (islower(ch) || ch == '$' || ch == '@' ||
 	        ch == '\\' || ch == '&' || ch == '<' ||
 	        ch == '>' || ch == '#' || ch == '{' ||
 	        ch == '}' || ch == '[' || ch == ']');
 }
 
-static inline bool IsANumberChar(int ch, int chPrev) {
+bool IsANumberChar(int ch, int chPrev) {
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases.
 	return (ch < 0x80) &&
@@ -263,7 +263,7 @@ struct OptionsSQL {
 	}
 };
 
-static const char * const sqlWordListDesc[] = {
+const char * const sqlWordListDesc[] = {
 	"Keywords",
 	"Database Objects",
 	"PLDoc",
@@ -272,7 +272,7 @@ static const char * const sqlWordListDesc[] = {
 	"User Keywords 2",
 	"User Keywords 3",
 	"User Keywords 4",
-	0
+	nullptr
 };
 
 struct OptionSetSQL : public OptionSet<OptionsSQL> {
@@ -967,6 +967,8 @@ void SCI_METHOD LexerSQL::Fold(Sci_PositionU startPos, Sci_Position length, int 
 			visibleChars++;
 		}
 	}
+}
+
 }
 
 LexerModule lmSQL(SCLEX_SQL, LexerSQL::LexerFactorySQL, "sql", sqlWordListDesc);
