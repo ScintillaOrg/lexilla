@@ -31,7 +31,7 @@ bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
-bool isassignchar(unsigned char ch) {
+constexpr bool isAssignChar(char ch) noexcept {
 	return (ch == '=') || (ch == ':');
 }
 
@@ -59,14 +59,14 @@ void ColourisePropsLine(
 			styler.ColourTo(endPos, SCE_PROPS_SECTION);
 		} else if (lineBuffer[i] == '@') {
 			styler.ColourTo(startLine + i, SCE_PROPS_DEFVAL);
-			if (isassignchar(lineBuffer[i++]))
+			if (isAssignChar(lineBuffer[i++]))
 				styler.ColourTo(startLine + i, SCE_PROPS_ASSIGNMENT);
 			styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 		} else {
 			// Search for the '=' character
-			while ((i < lengthLine) && !isassignchar(lineBuffer[i]))
+			while ((i < lengthLine) && !isAssignChar(lineBuffer[i]))
 				i++;
-			if ((i < lengthLine) && isassignchar(lineBuffer[i])) {
+			if ((i < lengthLine) && isAssignChar(lineBuffer[i])) {
 				styler.ColourTo(startLine + i - 1, SCE_PROPS_KEY);
 				styler.ColourTo(startLine + i, SCE_PROPS_ASSIGNMENT);
 				styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
@@ -115,7 +115,6 @@ void FoldPropsDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[]
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 
 	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
 	bool headerPoint = false;
 	int levelPrevious = (lineCurrent > 0) ? styler.LevelAt(lineCurrent - 1) : SC_FOLDLEVELBASE;
 
@@ -123,8 +122,7 @@ void FoldPropsDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[]
 		const char ch = chNext;
 		chNext = styler[i+1];
 
-		const int style = styleNext;
-		styleNext = styler.StyleAt(i + 1);
+		const int style = styler.StyleIndexAt(i);
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
 		if (style == SCE_PROPS_SECTION) {
@@ -162,7 +160,7 @@ void FoldPropsDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[]
 	if (levelPrevious & SC_FOLDLEVELHEADERFLAG) {
 		level += 1;
 	}
-	int flagsNext = styler.LevelAt(lineCurrent);
+	const int flagsNext = styler.LevelAt(lineCurrent);
 	styler.SetLevel(lineCurrent, level | (flagsNext & ~SC_FOLDLEVELNUMBERMASK));
 }
 
