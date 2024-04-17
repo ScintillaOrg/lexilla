@@ -203,7 +203,7 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 	}
 }
 
-bool IsAWordChar(int ch, bool unicodeIdentifiers) {
+bool IsAWordChar(int ch, bool unicodeIdentifiers) noexcept {
 	if (IsASCII(ch))
 		return (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
 
@@ -214,7 +214,7 @@ bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	return IsXidContinue(ch);
 }
 
-bool IsAWordStart(int ch, bool unicodeIdentifiers) {
+bool IsAWordStart(int ch, bool unicodeIdentifiers) noexcept {
 	if (IsASCII(ch))
 		return (IsUpperOrLowerCase(ch) || ch == '_');
 
