@@ -5,12 +5,10 @@
 // Copyright 1998-2005 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
 
 #include <string>
 #include <string_view>
@@ -28,30 +26,32 @@
 
 using namespace Lexilla;
 
+namespace {
+
 // Internal state, highlighted as number
 #define SCE_B_FILENUMBER SCE_B_DEFAULT+100
 
 
-static bool IsVBComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
+bool IsVBComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 	return len > 0 && styler[pos] == '\'';
 }
 
-static inline bool IsTypeCharacter(int ch) {
+bool IsTypeCharacter(int ch) {
 	return ch == '%' || ch == '&' || ch == '@' || ch == '!' || ch == '#' || ch == '$';
 }
 
 // Extended to accept accented characters
-static inline bool IsAWordChar(int ch) {
+bool IsAWordChar(int ch) {
 	return ch >= 0x80 ||
 	       (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-static inline bool IsAWordStart(int ch) {
+bool IsAWordStart(int ch) {
 	return ch >= 0x80 ||
 	       (isalpha(ch) || ch == '_');
 }
 
-static inline bool IsANumberChar(int ch) {
+bool IsANumberChar(int ch) {
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases.
 	return (ch < 0x80) &&
@@ -59,7 +59,7 @@ static inline bool IsANumberChar(int ch) {
              ch == '.' || ch == '-' || ch == '+' || ch == '_');
 }
 
-static void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
+void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler, bool vbScriptSyntax) {
 
 	WordList &keywords = *keywordlists[0];
@@ -263,7 +263,7 @@ static void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int init
 	sc.Complete();
 }
 
-static void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
+void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 						   WordList *[], Accessor &styler) {
 	Sci_Position endPos = startPos + length;
 
@@ -305,23 +305,25 @@ static void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 	}
 }
 
-static void ColouriseVBNetDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
+void ColouriseVBNetDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, false);
 }
 
-static void ColouriseVBScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
+void ColouriseVBScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, true);
 }
 
-static const char * const vbWordListDesc[] = {
+const char * const vbWordListDesc[] = {
 	"Keywords",
 	"user1",
 	"user2",
 	"user3",
-	0
+	nullptr
 };
+
+}
 
 LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc, vbWordListDesc);
 LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc, vbWordListDesc);
