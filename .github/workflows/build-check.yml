@@ -20,7 +20,7 @@ jobs:
         - name: Unit Test
           run: (cd test/unit && make DEBUG=1 CXX=${{matrix.cpp_compiler}} test)
         - name: Build Lexilla
-          run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}})
+          run: (cd src && make DEBUG=1 CXX=${{matrix.cpp_compiler}} --jobs=$(getconf _NPROCESSORS_ONLN))
         - uses: actions/upload-artifact@v4
           with:
               name: liblexilla-${{matrix.cpp_compiler}}.so
