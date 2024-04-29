@@ -2,7 +2,7 @@
 
 INCLUDES = -I ../../../scintilla/include -I ../../include -I ../../lexlib
 
-BASE_FLAGS += --std=c++17 -shared
+BASE_FLAGS += --std=c++17
 
 ifdef windir
     SHAREDEXTENSION = dll
@@ -23,7 +23,14 @@ ifdef windir
 endif
 
 LIBRARY = SimpleLexer.$(SHAREDEXTENSION)
-LEXLIB = ../../lexlib/*.cxx
+
+vpath %.cxx ../../lexlib
+ 
+LEXLIB_SOURCES := $(sort $(wildcard ../../lexlib/*.cxx))
+LEXLIB = $(LEXLIB_SOURCES:.cxx=.o)
+
+%.o: %.cxx
+	$(CXX) $(INCLUDES) $(BASE_FLAGS) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 all: $(LIBRARY)
 
@@ -34,5 +41,5 @@ check: $(LIBRARY)
 clean:
 	$(RM) *.o *obj *.lib *.exp $(LIBRARY)
 
-$(LIBRARY): *.cxx
-	$(CXX) $(INCLUDES) $(BASE_FLAGS) $(CPPFLAGS) $(CXXFLAGS) $^ $(LEXLIB) $(LIBS) $(LDLIBS) -o $@
+$(LIBRARY): $(LEXLIB) *.cxx
+	$(CXX) $(INCLUDES) $(BASE_FLAGS) -shared $(CPPFLAGS) $(CXXFLAGS) $^ $(LIBS) $(LDLIBS) -o $@
