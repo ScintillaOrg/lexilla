@@ -10,7 +10,7 @@ CXXFLAGS = /MP /EHsc /std:c++17 /D_HAS_AUTO_PTR_ETC=1 /wd 4805 $(INCLUDEDIRS)
 
 # Files in this directory containing tests
 TESTSRC=test*.cxx
-# Files being tested from scintilla/src directory
+# Files being tested from lexilla/lexlib directory
 TESTEDSRC=\
  ../../lexlib/Accessor.cxx \
  ../../lexlib/CharacterSet.cxx \
