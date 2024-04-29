@@ -9,7 +9,8 @@ ifdef windir
 else
     ifeq ($(shell uname),Darwin)
         SHAREDEXTENSION = dylib
-        BASE_FLAGS += -dynamiclib -arch arm64 -arch x86_64
+        BASE_FLAGS += -arch arm64 -arch x86_64
+        LINK_FLAGS += -dynamiclib
     else
         BASE_FLAGS += -fPIC
         SHAREDEXTENSION = so
@@ -26,7 +27,7 @@ LIBRARY = SimpleLexer.$(SHAREDEXTENSION)
 
 vpath %.cxx ../../lexlib
  
-LEXLIB_SOURCES := $(sort $(wildcard ../../lexlib/*.cxx))
+LEXLIB_SOURCES := $(sort $(notdir $(wildcard ../../lexlib/*.cxx)))
 LEXLIB = $(LEXLIB_SOURCES:.cxx=.o)
 
 %.o: %.cxx
@@ -42,4 +43,4 @@ clean:
 	$(RM) *.o *obj *.lib *.exp $(LIBRARY)
 
 $(LIBRARY): $(LEXLIB) *.cxx
-	$(CXX) $(INCLUDES) $(BASE_FLAGS) -shared $(CPPFLAGS) $(CXXFLAGS) $^ $(LIBS) $(LDLIBS) -o $@
+	$(CXX) $(INCLUDES) $(LINK_FLAGS) $(BASE_FLAGS) -shared $(CPPFLAGS) $(CXXFLAGS) $^ $(LIBS) $(LDLIBS) -o $@
