@@ -31,5 +31,5 @@ test: $(TESTS)
 clean:
 	$(DEL) $(TESTS) *.o *.obj *.exe
 
-$(EXE): $(TESTSRC) $(TESTEDSRC) $(@B).obj
+$(EXE): $(TESTSRC) $(TESTEDSRC) $(@B).cxx
 	$(CXX) $(CXXFLAGS) /Fe$@ $**
