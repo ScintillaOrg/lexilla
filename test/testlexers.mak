@@ -1,5 +1,5 @@
 # Build the lexers test with Microsoft Visual C++ using nmake
-# Tested with Visual C++ 2019
+# Tested with Visual C++ 2022
 
 DEL = del /q
 EXE = TestLexers.exe
