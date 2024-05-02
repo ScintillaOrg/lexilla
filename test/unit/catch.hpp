@@ -7772,7 +7772,7 @@ namespace Catch {
                 result = -erfc_inv(2.0 * p);
                 // result *= normal distribution standard deviation (1.0) * sqrt(2)
                 result *= /*sd * */ ROOT_TWO;
-                // result += normal disttribution mean (0)
+                // result += normal distribution mean (0)
                 return result;
             }
 
@@ -8384,7 +8384,7 @@ namespace Catch {
 
     using StringMatcher = Matchers::Impl::MatcherBase<std::string>;
 
-    // This is the general overload that takes a any string matcher
+    // This is the general overload that takes any string matcher
     // There is another overload, in catch_assertionhandler.h/.cpp, that only takes a string and infers
     // the Equals matcher (so the header does not mention matchers)
     void handleExceptionMatchExpr( AssertionHandler& handler, StringMatcher const& matcher, StringRef const& matcherString  ) {
