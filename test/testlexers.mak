@@ -35,9 +35,6 @@ $(EXE): $(OBJS) $(LIBS)
 .cxx.obj::
 	$(CXX) $(CXXFLAGS) -c $<
 {..\access}.cxx.obj::
-	$(CXX) $(CXXFLAGS) -c $(NAME) $<
-
-.cxx.obj::
 	$(CXX) $(CXXFLAGS) -c $<
 
 TestLexers.obj: $*.cxx TestDocument.h
