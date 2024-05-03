@@ -28,7 +28,7 @@
 #include "LexerModule.h"
 /***************************************/
 
-#if defined(__clang__) && !defined(__APPLE__)
+#if defined(__clang__) && __has_warning("-Wunused-but-set-variable")
 // Disable warning for numNonBlank
 #pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #endif
