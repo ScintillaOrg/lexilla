@@ -7,6 +7,11 @@
 # For debug versions define DEBUG on the command line:
 #     nmake DEBUG=1 -f lexilla.mak
 # To build with GCC or Clang, run makefile
+#
+# Command line options
+#     DEBUG Debug build.
+#     QUIET Avoid most compiler invocation output and copyright info.
+#     SUPPORT_XP Build for Windows XP.
 
 .SUFFIXES: .cxx
 
