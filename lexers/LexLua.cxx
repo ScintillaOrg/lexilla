@@ -315,22 +315,22 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 			if (sc.ch == ':' && sc.chPrev == ':') {	// :: <label> :: forward scan
 				sc.Forward();
 				Sci_Position ln = 0;
-				while (IsASpaceOrTab(sc.GetRelative(ln)))	// skip over spaces/tabs
+				while (IsASpaceOrTab(sc.GetRelativeChar(ln)))	// skip over spaces/tabs
 					ln++;
 				const Sci_Position ws1 = ln;
-				if (setWordStart.Contains(sc.GetRelative(ln))) {
-					int c = 0;
+				if (setWordStart.Contains(sc.GetRelativeChar(ln))) {
+					char cLabel = 0;
 					std::string s;
-					while (setWord.Contains(c = sc.GetRelative(ln))) {	// get potential label
-						s.push_back(static_cast<char>(c));
+					while (setWord.Contains(cLabel = sc.GetRelativeChar(ln))) {	// get potential label
+						s.push_back(cLabel);
 						ln++;
 					}
 					const Sci_Position lbl = ln;
 					if (!keywords.InList(s)) {
-						while (IsASpaceOrTab(sc.GetRelative(ln)))	// skip over spaces/tabs
+						while (IsASpaceOrTab(sc.GetRelativeChar(ln)))	// skip over spaces/tabs
 							ln++;
 						const Sci_Position ws2 = ln - lbl;
-						if (sc.GetRelative(ln) == ':' && sc.GetRelative(ln + 1) == ':') {
+						if (sc.GetRelativeChar(ln) == ':' && sc.GetRelativeChar(ln + 1) == ':') {
 							// final :: found, complete valid label construct
 							sc.ChangeState(SCE_LUA_LABEL);
 							if (ws1) {
@@ -452,14 +452,14 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 				idenWordPos = 0;
 				idenStyle = SCE_LUA_IDENTIFIER;
 				foundGoto = false;
-				int cNext = 0;
+				char cNext = 0;
 				do {
-					int c = 0;
+					char cIdent = 0;
 					const Sci_Position idenPosOld = idenPos;
 					std::string identSeg;
-					identSeg += static_cast<char>(sc.GetRelative(idenPos++));
-					while (setWord.Contains(c = sc.GetRelative(idenPos))) {
-						identSeg += static_cast<char>(c);
+					identSeg += sc.GetRelativeChar(idenPos++);
+					while (setWord.Contains(cIdent = sc.GetRelativeChar(idenPos))) {
+						identSeg += cIdent;
 						idenPos++;
 					}
 					if (keywords.InList(identSeg) && (idenPosOld > 0)) {
@@ -497,9 +497,9 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					}
 					if (idenStyle == SCE_LUA_WORD)	// keywords cannot mix
 						break;
-					cNext = sc.GetRelative(idenPos + 1);
-					if ((c == '.' || c == ':') && setWordStart.Contains(cNext)) {
-						ident += static_cast<char>(c);
+					cNext = sc.GetRelativeChar(idenPos + 1);
+					if ((cIdent == '.' || cIdent == ':') && setWordStart.Contains(cNext)) {
+						ident += cIdent;
 						idenPos++;
 					} else {
 						cNext = 0;
