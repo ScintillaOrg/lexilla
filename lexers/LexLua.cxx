@@ -259,6 +259,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 
 	// results of identifier/keyword matching
 	Sci_Position idenPos = 0;
+	Sci_Position idenStartCharWidth = 0;
 	Sci_Position idenWordPos = 0;
 	int idenStyle = SCE_LUA_IDENTIFIER;
 	bool foundGoto = false;
@@ -359,7 +360,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 					sc.SetState(SCE_LUA_DEFAULT);
 			}
 		} else if (sc.state == SCE_LUA_IDENTIFIER) {
-			idenPos--;			// commit already-scanned identifier/word parts
+			idenPos -= idenStartCharWidth;			// commit already-scanned identifier/word parts
 			if (idenWordPos > 0) {
 				idenWordPos--;
 				sc.ChangeState(idenStyle);
@@ -449,6 +450,7 @@ void LexerLua::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, I
 				// set to a word style. The non-matched part is in identifier style.
 				std::string ident;
 				idenPos = 0;
+				idenStartCharWidth = sc.width;
 				idenWordPos = 0;
 				idenStyle = SCE_LUA_IDENTIFIER;
 				foundGoto = false;
