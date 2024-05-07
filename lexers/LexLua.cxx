@@ -572,7 +572,10 @@ void LexerLua::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle,
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int stylePrev = style;
 		style = styleNext;
-		styleNext = styler.StyleIndexAt(i + 1);
+		if ((i + 1) < lengthDoc) {
+			// Only read styles that have been set, otherwise treat style as continuing
+			styleNext = styler.StyleIndexAt(i + 1);
+		}
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_LUA_WORD) {
 			// Fixed list of folding words: if, do, function, repeat, end, until
