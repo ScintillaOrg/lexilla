@@ -39,8 +39,9 @@ namespace {
 // return 1 for [[ or ]], returns >=2 for [=[ or ]=] and so on.
 // The maximum number of '=' characters allowed is 254.
 int LongDelimCheck(StyleContext &sc) {
+	constexpr int maximumEqualCharacters = 254;
 	int sep = 1;
-	while (sc.GetRelative(sep) == '=' && sep < 0xFF)
+	while (sc.GetRelative(sep) == '=' && sep <= maximumEqualCharacters)
 		sep++;
 	if (sc.GetRelative(sep) == sc.ch)
 		return sep;
@@ -115,11 +116,15 @@ public:
 	explicit LexerLua() :
 		DefaultLexer("lua", SCLEX_LUA, lexicalClasses, std::size(lexicalClasses)) {
 	}
+	LexerLua(const LexerLua &) = delete;
+	LexerLua(LexerLua &&) = delete;
+	LexerLua &operator=(const LexerLua &) = delete;
+	LexerLua &operator=(LexerLua &&) = delete;
 	~LexerLua() override = default;
 	void SCI_METHOD Release() noexcept override {
 		delete this;
 	}
-	int SCI_METHOD Version() const noexcept override {
+	[[nodiscard]] int SCI_METHOD Version() const noexcept override {
 		return lvRelease5;
 	}
 	const char *SCI_METHOD PropertyNames() noexcept override {
@@ -581,8 +586,9 @@ void LexerLua::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle,
 			// Fixed list of folding words: if, do, function, repeat, end, until
 			// Must fix up next line with initial characters if any new words added.
 			if ((style != stylePrev) && AnyOf(ch, 'i', 'd', 'f', 'e', 'r', 'u')) {
+				constexpr Sci_Position maxFoldWord = 9; // "function"sv.length() + 1
 				std::string s;
-				for (Sci_Position j = 0; j < 8; j++) {	// 8 is length of longest: function
+				for (Sci_Position j = 0; j < maxFoldWord; j++) {
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}
