@@ -226,7 +226,7 @@ LEXILLA_OBJS=\
 	$(LEXLIB_OBJS) \
 	$(LEX_OBJS)
 
-$(LEXILLA): $(LEXILLA_OBJS) LexillaVersion.res
+$(LEXILLA): $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res
 	$(LD) $(LDFLAGS) -DEF:Lexilla.def -DLL -OUT:$@ $** $(LIBS)
 
 $(LIBLEXILLA): $(LEXILLA_OBJS)
@@ -241,7 +241,7 @@ $(LIBLEXILLA): $(LEXILLA_OBJS)
 {.}.cxx{$(DIR_O)}.obj::
 	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 
-.rc.res:
+.rc{$(DIR_O)}.res:
 	$(RC) -fo$@ $**
 
 # Dependencies
