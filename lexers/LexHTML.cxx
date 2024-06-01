@@ -1225,7 +1225,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", true);
 	const CharacterSet setAttributeContinue(CharacterSet::setAlphaNum, ".-_:!#/", true);
 	// TODO: also handle + and - (except if they're part of ++ or --) and return keywords
-	const CharacterSet setOKBeforeJSRE(CharacterSet::setNone, "([{=,:;!%^&*|?~");
+	const CharacterSet setOKBeforeJSRE(CharacterSet::setNone, "([{=,:;!%^&*|?~> ");
 	// Only allow [A-Za-z0-9.#-_:] in entities
 	const CharacterSet setEntity(CharacterSet::setAlphaNum, ".#-_:");
 

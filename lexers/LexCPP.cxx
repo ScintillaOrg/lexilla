@@ -791,7 +791,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	const StyleContext::Transform transform = caseSensitive ?
 		StyleContext::Transform::none : StyleContext::Transform::lower;
 
-	const CharacterSet setOKBeforeRE("([{=,:;!%^&*|?~+-");
+	const CharacterSet setOKBeforeRE("([{=,:;!%^&*|?~+-> ");
 	const CharacterSet setCouldBePostOp("+-");
 
 	const CharacterSet setDoxygen(CharacterSet::setAlpha, "$@\\&<>#{}[]");
