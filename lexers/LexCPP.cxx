@@ -890,6 +890,12 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 
 	Sci_PositionU lineEndNext = styler.LineEnd(lineCurrent);
 
+	if (sc.currentPos == 0 && sc.Match('#', '!')) {
+		// Shell Shebang at beginning of file
+		sc.SetState(SCE_C_COMMENTLINE);
+		sc.Forward();
+	}
+
 	for (; sc.More();) {
 
 		if (sc.atLineStart) {

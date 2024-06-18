@@ -1,3 +1,5 @@
+ 0 400 400   #!/usr/bin/env node
+ 1 400 400   
  0 400 400   // A demonstration program
  0 400 400   #include <stdio.h>
  2 400 401 + #if 0 /* */
