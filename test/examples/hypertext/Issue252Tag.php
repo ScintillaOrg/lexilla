@@ -12,3 +12,11 @@ echo __FILE__.__LINE__;
 <?
 echo 'short'
 ?>
+
+<!-- ASP language selection: disabled -->
+<%@language=JScript%>
+
+<!-- ASP tag: disabled -->
+<%
+Response.Write('short')
+%>

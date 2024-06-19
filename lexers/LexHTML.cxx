@@ -750,6 +750,8 @@ struct OptionsHTML {
 	AllowPHP allowPHPinHTML = AllowPHP::Question;
 	bool isMako = false;
 	bool isDjango = false;
+	bool allowASPinXML = true;
+	bool allowASPinHTML = true;
 	bool fold = false;
 	bool foldHTML = false;
 	bool foldHTMLPreprocessor = true;
@@ -806,6 +808,12 @@ struct OptionSetHTML : public OptionSet<OptionsHTML> {
 
 		DefineProperty("lexer.html.django", &OptionsHTML::isDjango,
 			"Set to 1 to enable the django template language.");
+
+		DefineProperty("lexer.xml.allow.asp", &OptionsHTML::allowASPinXML,
+			"Set to 0 to disable ASP in XML.");
+
+		DefineProperty("lexer.html.allow.asp", &OptionsHTML::allowASPinHTML,
+			"Set to 0 to disable ASP in HTML.");
 
 		DefineProperty("fold", &OptionsHTML::fold);
 
@@ -1256,6 +1264,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	const AllowPHP allowPHP = isXml ? options.allowPHPinXML : options.allowPHPinHTML;
 	const bool isMako = options.isMako;
 	const bool isDjango = options.isDjango;
+	const bool allowASP = (isXml ? options.allowASPinXML : options.allowASPinHTML) && !isMako && !isDjango;
 	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", true);
 	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", true);
 	const CharacterSet setAttributeContinue(CharacterSet::setAlphaNum, ".-_:!#/", true);
@@ -1608,7 +1617,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		}
 
 		// handle the start of ASP pre-processor = Non-HTML
-		else if (!isMako && !isDjango && !isCommentASPState(state) && (ch == '<') && (chNext == '%') && !isPHPStringState(state)) {
+		else if ((ch == '<') && (chNext == '%') && allowASP && !isCommentASPState(state) && !isPHPStringState(state)) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
