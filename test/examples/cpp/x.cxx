@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // A demonstration program
 #include <stdio.h>
 #if 0 /* */
