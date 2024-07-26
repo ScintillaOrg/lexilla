@@ -47,7 +47,7 @@
  0 400 400   
  0 400 400   DISPLAY "//line comment within string".
  0 400 400   
- 0 400 400   DISPLAY "/* //line comment within block comment within string */"
+ 0 400 400   DISPLAY "/* //line comment within block comment within string */".
  0 400 400                                                                           
  0 400 400   /* Improperly closed block comment */ */
  0 400 400   

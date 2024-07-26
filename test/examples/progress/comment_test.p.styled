@@ -47,7 +47,7 @@ DISPLAY "this is a string".
 
 {7}DISPLAY{0} {3}"//line comment within string"{6}.{0}
 
-{7}DISPLAY{0} {3}"/* //line comment within block comment within string */"{0}
+{7}DISPLAY{0} {3}"/* //line comment within block comment within string */"{6}.{0}
                                                                         
 {10}/* Improperly closed block comment */{0} {6}*/{0}
 

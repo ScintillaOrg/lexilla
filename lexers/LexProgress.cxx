@@ -48,12 +48,6 @@ using namespace Lexilla;
 namespace {
    // Use an unnamed namespace to protect the functions and classes from name conflicts
 
-   bool IsSpaceEquiv(int state) {
-      return (state == SCE_ABL_COMMENT ||
-              state == SCE_ABL_LINECOMMENT ||
-              state == SCE_ABL_DEFAULT);
-   }
-
    void highlightTaskMarker(StyleContext &sc, LexAccessor &styler, WordList &markerList){
       if ((isoperator(sc.chPrev) || IsASpace(sc.chPrev)) && markerList.Length()) {
          const int lengthMarker = 50;
@@ -268,7 +262,7 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
 
          chPrev = styler.SafeGetCharAt(back-1);
          // isSentenceStart is a non-visible state, used to identify where statements and preprocessor declerations can start
-         if (checkIsSentenceStart && st != SCE_ABL_COMMENT && st != SCE_ABL_LINECOMMENT && st != SCE_ABL_CHARACTER  && st != SCE_ABL_STRING ) {
+         if (st != SCE_ABL_COMMENT && st != SCE_ABL_LINECOMMENT && st != SCE_ABL_CHARACTER  && st != SCE_ABL_STRING ) {
             chPrev_1 = styler.SafeGetCharAt(back-2);
             chPrev_2 = styler.SafeGetCharAt(back-3);
             chPrev_3 = styler.SafeGetCharAt(back-4);

@@ -47,7 +47,7 @@ DISPLAY "this is a string".
 
 DISPLAY "//line comment within string".
 
-DISPLAY "/* //line comment within block comment within string */"
+DISPLAY "/* //line comment within block comment within string */".
                                                                         
 /* Improperly closed block comment */ */
 
