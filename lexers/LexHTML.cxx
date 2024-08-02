@@ -1109,7 +1109,9 @@ public:
 		subStyles.Free();
 	}
 	void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override {
-		subStyles.SetIdentifiers(style, identifiers);
+		const int styleBase = subStyles.BaseStyle(style);
+		const bool lowerCase = AnyOf(styleBase, SCE_H_TAG, SCE_H_ATTRIBUTE, SCE_HB_WORD);
+		subStyles.SetIdentifiers(style, identifiers, lowerCase);
 	}
 	int SCI_METHOD DistanceToSecondaryStyles() override {
 		return 0;
@@ -1138,15 +1140,18 @@ Sci_Position SCI_METHOD LexerHTML::PropertySet(const char *key, const char *val)
 
 Sci_Position SCI_METHOD LexerHTML::WordListSet(int n, const char *wl) {
 	WordList *wordListN = nullptr;
+	bool lowerCase = false;
 	switch (n) {
 	case 0:
 		wordListN = &keywordsHTML;
+		lowerCase = true;
 		break;
 	case 1:
 		wordListN = &keywordsJS;
 		break;
 	case 2:
 		wordListN = &keywordsVB;
+		lowerCase = true;
 		break;
 	case 3:
 		wordListN = &keywordsPy;
@@ -1162,7 +1167,7 @@ Sci_Position SCI_METHOD LexerHTML::WordListSet(int n, const char *wl) {
 	}
 	Sci_Position firstModification = -1;
 	if (wordListN) {
-		if (wordListN->Set(wl)) {
+		if (wordListN->Set(wl, lowerCase)) {
 			firstModification = 0;
 		}
 	}
