@@ -94,7 +94,8 @@ $(DIR_O)/StyleContext.obj: \
 	../lexlib/CharacterSet.h
 $(DIR_O)/WordList.obj: \
 	../lexlib/WordList.cxx \
-	../lexlib/WordList.h
+	../lexlib/WordList.h \
+	../lexlib/CharacterSet.h
 $(DIR_O)/LexA68k.obj: \
 	../lexers/LexA68k.cxx \
 	../../scintilla/include/ILexer.h \
