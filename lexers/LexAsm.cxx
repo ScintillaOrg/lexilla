@@ -236,7 +236,7 @@ Sci_Position SCI_METHOD LexerAsm::WordListSet(int n, const char *wl) {
 	}
 	Sci_Position firstModification = -1;
 	if (wordListN) {
-		if (wordListN->Set(wl)) {
+		if (wordListN->Set(wl, true)) {
 			firstModification = 0;
 		}
 	}
