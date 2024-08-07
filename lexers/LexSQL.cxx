@@ -437,7 +437,7 @@ Sci_Position SCI_METHOD LexerSQL::WordListSet(int n, const char *wl) {
 	}
 	Sci_Position firstModification = -1;
 	if (wordListN) {
-		if (wordListN->Set(wl)) {
+		if (wordListN->Set(wl, true)) {
 			firstModification = 0;
 		}
 	}
@@ -777,13 +777,13 @@ void SCI_METHOD LexerSQL::Fold(Sci_PositionU startPos, Sci_Position length, int 
 		// If new keyword (cannot trigger on elseif or nullif, does less tests)
 		if (style == SCE_SQL_WORD && stylePrev != SCE_SQL_WORD) {
 			constexpr int MAX_KW_LEN = 9;	// Maximum length of folding keywords
-			char s[MAX_KW_LEN + 2];
+			char s[MAX_KW_LEN + 2]{};
 			unsigned int j = 0;
 			for (; j < MAX_KW_LEN + 1; j++) {
 				if (!iswordchar(styler[i + j])) {
 					break;
 				}
-				s[j] = static_cast<char>(tolower(styler[i + j]));
+				s[j] = MakeLowerCase(styler[i + j]);
 			}
 			if (j == MAX_KW_LEN + 1) {
 				// Keyword too long, don't test it
