@@ -66,12 +66,6 @@ constexpr bool IsStreamCommentStyle(int style) noexcept {
 	return style == SCE_ASM_COMMENTDIRECTIVE || style == SCE_ASM_COMMENTBLOCK;
 }
 
-static inline int LowerCase(int c) {
-	if (c >= 'A' && c <= 'Z')
-		return 'a' + c - 'A';
-	return c;
-}
-
 // An individual named option for use in an OptionSet
 
 // Options used for LexerAsm
@@ -440,7 +434,7 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
  			}
  		}
 		if (options.foldSyntaxBased && (style == SCE_ASM_DIRECTIVE)) {
-			word[wordlen++] = static_cast<char>(LowerCase(ch));
+			word[wordlen++] = MakeLowerCase(ch);
 			if (wordlen == 100) {                   // prevent overflow
 				word[0] = '\0';
 				wordlen = 1;
