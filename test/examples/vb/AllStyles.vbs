@@ -1,5 +1,5 @@
 ' coding: utf-8
-' Enumerate all styles: 0 to 12
+' Enumerate all styles: 0 .. 12
 
 ' comment=1
 
