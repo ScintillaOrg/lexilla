@@ -561,4 +561,4 @@ void SCI_METHOD LexerABL::Fold(Sci_PositionU startPos, Sci_Position length, int 
    }
 }
 
-LexerModule lmProgress(SCLEX_PROGRESS, LexerABL::LexerFactoryABL, "abl", ablWordLists);
+extern const LexerModule lmProgress(SCLEX_PROGRESS, LexerABL::LexerFactoryABL, "abl", ablWordLists);

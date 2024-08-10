@@ -596,6 +596,11 @@
 	Released 22 July 2024.
 	</li>
 	<li>
+	Inside Lexilla, LexerModule instances are now const.
+	This will require changes to applications that modify Lexilla.cxx, which
+	may be done to add custom lexers.
+	</li>
+	<li>
 	Bash: Handle backslash in heredoc delimiter.
 	<a href="https://github.com/ScintillaOrg/lexilla/issues/257">Issue #257</a>.
 	</li>

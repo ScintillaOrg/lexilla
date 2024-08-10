@@ -406,6 +406,5 @@ void LexerVB::Fold(Sci_PositionU startPos, Sci_Position length, int, IDocument *
 
 }
 
-LexerModule lmVB(SCLEX_VB, LexerVB::LexerFactoryVB, "vb", vbWordListDesc);
-LexerModule lmVBScript(SCLEX_VBSCRIPT, LexerVB::LexerFactoryVBScript, "vbscript", vbWordListDesc);
-
+extern const LexerModule lmVB(SCLEX_VB, LexerVB::LexerFactoryVB, "vb", vbWordListDesc);
+extern const LexerModule lmVBScript(SCLEX_VBSCRIPT, LexerVB::LexerFactoryVBScript, "vbscript", vbWordListDesc);

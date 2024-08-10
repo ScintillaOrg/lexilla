@@ -1288,4 +1288,4 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmBash(SCLEX_BASH, LexerBash::LexerFactoryBash, "bash", bashWordListDesc);
+extern const LexerModule lmBash(SCLEX_BASH, LexerBash::LexerFactoryBash, "bash", bashWordListDesc);
