@@ -12,6 +12,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -23,7 +24,10 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
@@ -58,22 +62,143 @@ bool IsANumberChar(int ch) noexcept {
              ch == '.' || ch == '-' || ch == '+' || ch == '_');
 }
 
-void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-                           WordList *keywordlists[], Accessor &styler, bool vbScriptSyntax) {
+// Options used for LexerVB
+struct OptionsVB {
+	bool fold = false;
+	bool allowMultilineStr = false;
+};
 
-	const WordList &keywords = *keywordlists[0];
-	const WordList &keywords2 = *keywordlists[1];
-	const WordList &keywords3 = *keywordlists[2];
-	const WordList &keywords4 = *keywordlists[3];
+const char * const vbWordListDesc[] = {
+	"Keywords",
+	"user1",
+	"user2",
+	"user3",
+	nullptr
+};
+
+struct OptionSetVB : public OptionSet<OptionsVB> {
+	OptionSetVB() {
+		DefineProperty("fold", &OptionsVB::fold);
+
+		DefineProperty("lexer.vb.strings.multiline", &OptionsVB::allowMultilineStr,
+			"Set to 1 to allow strings to continue over line ends.");
+
+		DefineWordListSets(vbWordListDesc);
+	}
+};
+
+LexicalClass lexicalClasses[] = {
+	// Lexer vb SCLEX_VB SCE_B_:
+	0, "SCE_B_DEFAULT", "default", "White space",
+	1, "SCE_B_COMMENT", "comment", "Comment: '",
+	2, "SCE_B_NUMBER", "literal numeric", "Number",
+	3, "SCE_B_KEYWORD", "keyword", "Keyword",
+	4, "SCE_B_STRING", "literal string", "Double quoted string",
+	5, "SCE_B_PREPROCESSOR", "preprocessor", "Preprocessor",
+	6, "SCE_B_OPERATOR", "operator", "Operators",
+	7, "SCE_B_IDENTIFIER", "identifier", "Identifiers",
+	8, "SCE_B_DATE", "literal date", "Date",
+	9, "SCE_B_STRINGEOL", "error literal string", "End of line where string is not closed",
+	10, "SCE_B_KEYWORD2", "identifier", "Keywords2",
+	11, "SCE_B_KEYWORD3", "identifier", "Keywords3",
+	12, "SCE_B_KEYWORD4", "identifier", "Keywords4",
+};
+
+class LexerVB : public DefaultLexer {
+	bool vbScriptSyntax;
+	WordList keywords;
+	WordList keywords2;
+	WordList keywords3;
+	WordList keywords4;
+	OptionsVB options;
+	OptionSetVB osVB;
+public:
+	LexerVB(const char *languageName_, int language_, bool vbScriptSyntax_) :
+		DefaultLexer(languageName_, language_, lexicalClasses, std::size(lexicalClasses)),
+		vbScriptSyntax(vbScriptSyntax_) {
+	}
+	// Deleted so LexerVB objects can not be copied.
+	LexerVB(const LexerVB &) = delete;
+	LexerVB(LexerVB &&) = delete;
+	void operator=(const LexerVB &) = delete;
+	void operator=(LexerVB &&) = delete;
+	~LexerVB() override = default;
+	void SCI_METHOD Release() override {
+		delete this;
+	}
+	int SCI_METHOD Version() const override {
+		return lvRelease5;
+	}
+	const char *SCI_METHOD PropertyNames() override {
+		return osVB.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osVB.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osVB.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osVB.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osVB.DescribeWordListSets();
+	}
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	void *SCI_METHOD PrivateCall(int, void *) override {
+		return nullptr;
+	}
+	static ILexer5 *LexerFactoryVB() {
+		return new LexerVB("vb", SCLEX_VB, false);
+	}
+	static ILexer5 *LexerFactoryVBScript() {
+		return new LexerVB("vbscript", SCLEX_VBSCRIPT, true);
+	}
+};
+
+Sci_Position SCI_METHOD LexerVB::PropertySet(const char *key, const char *val) {
+	if (osVB.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
+
+Sci_Position SCI_METHOD LexerVB::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywords;
+		break;
+	case 1:
+		wordListN = &keywords2;
+		break;
+	case 2:
+		wordListN = &keywords3;
+		break;
+	case 3:
+		wordListN = &keywords4;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN && wordListN->Set(wl)) {
+		firstModification = 0;
+	}
+	return firstModification;
+}
+
+void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+	Accessor styler(pAccess, nullptr);
 
 	styler.StartAt(startPos);
 
 	int visibleChars = 0;
 	int fileNbDigits = 0;
-
-	// property lexer.vb.strings.multiline
-	//  Set to 1 to allow strings to continue over line ends.
-	const bool allowMultilineStr = styler.GetPropertyInt("lexer.vb.strings.multiline", 0) != 0;
 
 	// Do not leak onto next line
 	if (initStyle == SCE_B_STRINGEOL || initStyle == SCE_B_COMMENT || initStyle == SCE_B_PREPROCESSOR) {
@@ -137,7 +262,7 @@ void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 					}
 					sc.ForwardSetState(SCE_B_DEFAULT);
 				}
-			} else if (sc.atLineEnd && !allowMultilineStr) {
+			} else if (sc.atLineEnd && !options.allowMultilineStr) {
 				visibleChars = 0;
 				sc.ChangeState(SCE_B_STRINGEOL);
 				sc.ForwardSetState(SCE_B_DEFAULT);
@@ -262,8 +387,8 @@ void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 	sc.Complete();
 }
 
-void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
-						   WordList *[], Accessor &styler) {
+void LexerVB::Fold(Sci_PositionU startPos, Sci_Position length, int, IDocument *pAccess) {
+	Accessor styler(pAccess, nullptr);
 	const Sci_Position endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its fold status
@@ -304,26 +429,8 @@ void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 	}
 }
 
-void ColouriseVBNetDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-                           WordList *keywordlists[], Accessor &styler) {
-	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, false);
 }
 
-void ColouriseVBScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-                           WordList *keywordlists[], Accessor &styler) {
-	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, true);
-}
-
-const char * const vbWordListDesc[] = {
-	"Keywords",
-	"user1",
-	"user2",
-	"user3",
-	nullptr
-};
-
-}
-
-LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc, vbWordListDesc);
-LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc, vbWordListDesc);
+LexerModule lmVB(SCLEX_VB, LexerVB::LexerFactoryVB, "vb", vbWordListDesc);
+LexerModule lmVBScript(SCLEX_VBSCRIPT, LexerVB::LexerFactoryVBScript, "vbscript", vbWordListDesc);
 
