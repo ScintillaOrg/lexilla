@@ -1515,7 +1515,9 @@ $(DIR_O)/LexVB.obj: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexVerilog.obj: \
 	../lexers/LexVerilog.cxx \
 	../../scintilla/include/ILexer.h \
