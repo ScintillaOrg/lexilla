@@ -8,7 +8,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cctype>
 
 #include <string>
 #include <string_view>
@@ -44,22 +43,20 @@ constexpr bool IsTypeCharacter(int ch) noexcept {
 }
 
 // Extended to accept accented characters
-bool IsAWordChar(int ch) noexcept {
-	return ch >= 0x80 ||
-	       (isalnum(ch) || ch == '.' || ch == '_');
+constexpr bool IsAWordChar(int ch) noexcept {
+	return !IsASCII(ch) ||
+	       (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
 }
 
-bool IsAWordStart(int ch) noexcept {
-	return ch >= 0x80 ||
-	       (isalpha(ch) || ch == '_');
+constexpr bool IsAWordStart(int ch) noexcept {
+	return !IsASCII(ch) ||
+	       (IsUpperOrLowerCase(ch) || ch == '_');
 }
 
-bool IsANumberChar(int ch) noexcept {
+constexpr bool IsANumberChar(int ch) noexcept {
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases.
-	return (ch < 0x80) &&
-	        (isdigit(ch) || toupper(ch) == 'E' ||
-             ch == '.' || ch == '-' || ch == '+' || ch == '_');
+	return IsAHeXDigit(ch) || AnyOf(ch, '.', '-', '+', '_');
 }
 
 // Options used for LexerVB
@@ -247,7 +244,7 @@ void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, ID
 		} else if (sc.state == SCE_B_NUMBER) {
 			// We stop the number definition on non-numerical non-dot non-eE non-sign char
 			// Also accepts A-F for hex. numbers
-			if (!IsANumberChar(sc.ch) && !(tolower(sc.ch) >= 'a' && tolower(sc.ch) <= 'f')) {
+			if (!IsANumberChar(sc.ch)) {
 				sc.SetState(SCE_B_DEFAULT);
 			}
 		} else if (sc.state == SCE_B_STRING) {
@@ -257,7 +254,7 @@ void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, ID
 				if (sc.chNext == '\"') {
 					sc.Forward();
 				} else {
-					if (tolower(sc.chNext) == 'c') {
+					if (MakeLowerCase(sc.chNext) == 'c') {
 						sc.Forward();
 					}
 					sc.ForwardSetState(SCE_B_DEFAULT);
@@ -322,15 +319,15 @@ void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, ID
 				// Can be #January 1, 1993# or #1 Jan 93# or #05/11/2003#, etc.
 				// So we set the FILENUMBER state, and switch to DATE if it isn't a file number
 				sc.SetState(SCE_B_FILENUMBER);
-			} else if (sc.ch == '&' && tolower(sc.chNext) == 'h') {
+			} else if (sc.ch == '&' && MakeLowerCase(sc.chNext) == 'h') {
 				// Hexadecimal number
 				sc.SetState(SCE_B_NUMBER);
 				sc.Forward();
-			} else if (sc.ch == '&' && tolower(sc.chNext) == 'o') {
+			} else if (sc.ch == '&' && MakeLowerCase(sc.chNext) == 'o') {
 				// Octal number
 				sc.SetState(SCE_B_NUMBER);
 				sc.Forward();
-			} else if (sc.ch == '&' && tolower(sc.chNext) == 'b') {
+			} else if (sc.ch == '&' && MakeLowerCase(sc.chNext) == 'b') {
 				// Binary number
 				sc.SetState(SCE_B_NUMBER);
 				sc.Forward();
