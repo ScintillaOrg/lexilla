@@ -186,7 +186,7 @@ Sci_Position SCI_METHOD LexerVB::WordListSet(int n, const char *wl) {
 		break;
 	}
 	Sci_Position firstModification = -1;
-	if (wordListN && wordListN->Set(wl)) {
+	if (wordListN && wordListN->Set(wl, true)) {
 		firstModification = 0;
 	}
 	return firstModification;
