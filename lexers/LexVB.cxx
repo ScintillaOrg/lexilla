@@ -143,6 +143,9 @@ public:
 		return osVB.DescribeWordListSets();
 	}
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+
+	void CheckIdentifier(Lexilla::StyleContext &sc);
+
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
@@ -189,6 +192,39 @@ Sci_Position SCI_METHOD LexerVB::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
+void LexerVB::CheckIdentifier(StyleContext &sc) {
+	// In Basic (except VBScript), a variable name or a function name
+	// can end with a special character indicating the type of the value
+	// held or returned.
+	bool skipType = false;
+	if (!vbScriptSyntax && IsTypeCharacter(sc.ch)) {
+		sc.Forward();	// Skip it
+		skipType = true;
+	}
+	if (sc.ch == ']') {
+		sc.Forward();
+	}
+	char s[100];
+	sc.GetCurrentLowered(s, sizeof(s));
+	if (skipType) {
+		s[strlen(s) - 1] = '\0';
+	}
+	if (strcmp(s, "rem") == 0) {
+		sc.ChangeState(SCE_B_COMMENT);
+	} else {
+		if (keywords.InList(s)) {
+			sc.ChangeState(SCE_B_KEYWORD);
+		} else if (keywords2.InList(s)) {
+			sc.ChangeState(SCE_B_KEYWORD2);
+		} else if (keywords3.InList(s)) {
+			sc.ChangeState(SCE_B_KEYWORD3);
+		} else if (keywords4.InList(s)) {
+			sc.ChangeState(SCE_B_KEYWORD4);
+		}	// Else, it is really an identifier...
+		sc.SetState(SCE_B_DEFAULT);
+	}
+}
+
 void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	Accessor styler(pAccess, nullptr);
 
@@ -210,36 +246,7 @@ void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, ID
 			sc.SetState(SCE_B_DEFAULT);
 		} else if (sc.state == SCE_B_IDENTIFIER) {
 			if (!IsAWordChar(sc.ch)) {
-				// In Basic (except VBScript), a variable name or a function name
-				// can end with a special character indicating the type of the value
-				// held or returned.
-				bool skipType = false;
-				if (!vbScriptSyntax && IsTypeCharacter(sc.ch)) {
-					sc.Forward();	// Skip it
-					skipType = true;
-				}
-				if (sc.ch == ']') {
-					sc.Forward();
-				}
-				char s[100];
-				sc.GetCurrentLowered(s, sizeof(s));
-				if (skipType) {
-					s[strlen(s) - 1] = '\0';
-				}
-				if (strcmp(s, "rem") == 0) {
-					sc.ChangeState(SCE_B_COMMENT);
-				} else {
-					if (keywords.InList(s)) {
-						sc.ChangeState(SCE_B_KEYWORD);
-					} else if (keywords2.InList(s)) {
-						sc.ChangeState(SCE_B_KEYWORD2);
-					} else if (keywords3.InList(s)) {
-						sc.ChangeState(SCE_B_KEYWORD3);
-					} else if (keywords4.InList(s)) {
-						sc.ChangeState(SCE_B_KEYWORD4);
-					}	// Else, it is really an identifier...
-					sc.SetState(SCE_B_DEFAULT);
-				}
+				CheckIdentifier(sc);
 			}
 		} else if (sc.state == SCE_B_NUMBER) {
 			// We stop the number definition on non-numerical non-dot non-eE non-sign char
@@ -349,36 +356,7 @@ void LexerVB::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, ID
 	}
 
 	if (sc.state == SCE_B_IDENTIFIER && !IsAWordChar(sc.ch)) {
-		// In Basic (except VBScript), a variable name or a function name
-		// can end with a special character indicating the type of the value
-		// held or returned.
-		bool skipType = false;
-		if (!vbScriptSyntax && IsTypeCharacter(sc.ch)) {
-			sc.Forward();	// Skip it
-			skipType = true;
-		}
-		if (sc.ch == ']') {
-			sc.Forward();
-		}
-		char s[100];
-		sc.GetCurrentLowered(s, sizeof(s));
-		if (skipType) {
-			s[strlen(s) - 1] = '\0';
-		}
-		if (strcmp(s, "rem") == 0) {
-			sc.ChangeState(SCE_B_COMMENT);
-		} else {
-			if (keywords.InList(s)) {
-				sc.ChangeState(SCE_B_KEYWORD);
-			} else if (keywords2.InList(s)) {
-				sc.ChangeState(SCE_B_KEYWORD2);
-			} else if (keywords3.InList(s)) {
-				sc.ChangeState(SCE_B_KEYWORD3);
-			} else if (keywords4.InList(s)) {
-				sc.ChangeState(SCE_B_KEYWORD4);
-			}	// Else, it is really an identifier...
-			sc.SetState(SCE_B_DEFAULT);
-		}
+		CheckIdentifier(sc);
 	}
 
 	sc.Complete();
