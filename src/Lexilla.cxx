@@ -151,6 +151,7 @@ extern const LexerModule lmTCL;
 extern const LexerModule lmTCMD;
 extern const LexerModule lmTEHex;
 extern const LexerModule lmTeX;
+extern const LexerModule lmTOML;
 extern const LexerModule lmTxt2tags;
 extern const LexerModule lmVB;
 extern const LexerModule lmVBScript;
@@ -299,6 +300,7 @@ void AddEachLexer() {
 		&lmTCMD,
 		&lmTEHex,
 		&lmTeX,
+		&lmTOML,
 		&lmTxt2tags,
 		&lmVB,
 		&lmVBScript,
