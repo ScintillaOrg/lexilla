@@ -1,0 +1,182 @@
+{1}# This is a full-line comment
+{6}key {8}={0} {10}"value"{0}  {1}# This is a comment at the end of a line
+{6}another {8}={0} {10}"# This is not a comment"{0}
+
+{6}key {8}={0} {10}"value"{0}
+{6}bare_key {8}={0} {10}"value"{0}
+{6}bare-key {8}={0} {10}"value"{0}
+{6}1234 {8}={0} {10}"value"{0}
+
+{6}"127.0.0.1" {8}={0} {10}"value"{0}
+{6}"character encoding" {8}={0} {10}"value"{0}
+{6}"ʎǝʞ" {8}={0} {10}"value"{0}
+{6}'key2' {8}={0} {10}"value"{0}
+{6}'quoted "value"' {8}={0} {10}"value"{0}
+
+{6}name {8}={0} {10}"Orange"{0}
+{6}physical{8}.{6}color {8}={0} {10}"orange"{0}
+{6}physical{8}.{6}shape {8}={0} {10}"round"{0}
+{6}site{8}.{6}"google.com" {8}={0} {3}true{0}
+
+{6}str {8}={0} {10}"I'm a string. {13}\"{10}You can quote me{13}\"{10}. Name{13}\t{10}Jos{13}\u00E9\n{10}Location{13}\t{10}SF."{0}
+
+{6}str1 {8}={0} {12}"""
+Roses are red
+Violets are blue"""{0}
+
+{1}# The following strings are byte-for-byte equivalent:
+{6}str1 {8}={0} {10}"The quick brown fox jumps over the lazy dog."{0}
+{6}str2 {8}={0} {12}"""
+The quick brown \
+
+
+  fox jumps over \
+    the lazy dog."""{0}
+{6}str3 {8}={0} {12}"""\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """{0}
+
+{6}str4 {8}={0} {12}"""Here are two quotation marks: "". Simple enough."""{0}
+{1}# str5 = """Here are three quotation marks: """."""  # INVALID
+{6}str5 {8}={0} {12}"""Here are three quotation marks: ""{13}\"{12}."""{0}
+{6}str6 {8}={0} {12}"""Here are fifteen quotation marks: ""{13}\"{12}""{13}\"{12}""{13}\"{12}""{13}\"{12}""{13}\"{12}."""{0}
+{1}# "This," she said, "is just a pointless statement."
+{6}str7 {8}={0} {12}""""This," she said, "is just a pointless statement."""{10}"
+{0}
+{1}# What you see is what you get.
+{6}winpath  {8}={0} {9}'C:\Users\nodejs\templates'{0}
+{6}winpath2 {8}={0} {9}'\\ServerX\admin$\system32\'{0}
+{6}quoted   {8}={0} {9}'Tom "Dubs" Preston-Werner'{0}
+{6}regex    {8}={0} {9}'<\i\c*\s*>'{0}
+
+{6}regex2 {8}={0} {11}'''I [dw]on't need \d{2} apples'''{0}
+{6}lines  {8}={0} {11}'''
+The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+'''{0}
+
+{6}quot15 {8}={0} {11}'''Here are fifteen quotation marks: """""""""""""""'''{0}
+{1}# 'That,' she said, 'is still pointless.'
+{6}str {8}={0} {11}''''That,' she said, 'is still pointless.'''{9}'
+{0}
+{6}int1 {8}={0} {8}+{4}99{0}
+{6}int2 {8}={0} {4}42{0}
+{6}int3 {8}={0} {4}0{0}
+{6}int4 {8}={0} {8}-{4}17{0}
+
+{6}int5 {8}={0} {4}1_000{0}
+{6}int6 {8}={0} {4}5_349_221{0}
+{6}int7 {8}={0} {4}53_49_221{0}  {1}# Indian number system grouping
+{6}int8 {8}={0} {4}1_2_3_4_5{0}  {1}# VALID but discouraged
+{0}
+{1}# hexadecimal with prefix `0x`
+{6}hex1 {8}={0} {4}0xDEADBEEF{0}
+{6}hex2 {8}={0} {4}0xdeadbeef{0}
+{6}hex3 {8}={0} {4}0xdead_beef{0}
+
+{1}# octal with prefix `0o`
+{6}oct1 {8}={0} {4}0o01234567{0}
+{6}oct2 {8}={0} {4}0o755{0} {1}# useful for Unix file permissions
+{0}
+{1}# binary with prefix `0b`
+{6}bin1 {8}={0} {4}0b11010110{0}
+
+{1}# fractional
+{6}flt1 {8}={0} {8}+{4}1.0{0}
+{6}flt2 {8}={0} {4}3.1415{0}
+{6}flt3 {8}={0} {8}-{4}0.01{0}
+
+{1}# exponent
+{6}flt4 {8}={0} {4}5e+22{0}
+{6}flt5 {8}={0} {4}1e06{0}
+{6}flt6 {8}={0} {8}-{4}2E-2{0}
+
+{1}# both
+{6}flt7 {8}={0} {4}6.626e-34{0}
+
+{6}flt8 {8}={0} {4}224_617.445_991_228{0}
+
+{1}# infinity
+{6}sf1 {8}={0} {3}inf{0}  {1}# positive infinity
+{6}sf2 {8}={0} {8}+{3}inf{0} {1}# positive infinity
+{6}sf3 {8}={0} {8}-{3}inf{0} {1}# negative infinity
+{0}
+{1}# not a number
+{6}sf4 {8}={0} {3}nan{0}  {1}# actual sNaN/qNaN encoding is implementation-specific
+{6}sf5 {8}={0} {8}+{3}nan{0} {1}# same as `nan`
+{6}sf6 {8}={0} {8}-{3}nan{0} {1}# valid, actual encoding is implementation-specific
+{0}
+{6}bool1 {8}={0} {3}true{0}
+{6}bool2 {8}={0} {3}false{0}
+
+{6}odt1 {8}={0} {14}1979-05-27T07:32:00Z{0}
+{6}odt2 {8}={0} {14}1979-05-27T00:32:00-07:00{0}
+{6}odt3 {8}={0} {14}1979-05-27T00:32:00.999999-07:00{0}
+{6}odt4 {8}={0} {14}1979-05-27 07:32:00Z{0}
+
+{6}ldt1 {8}={0} {14}1979-05-27T07:32:00{0}
+{6}ldt2 {8}={0} {14}1979-05-27T00:32:00.999999{0}
+
+{6}ld1 {8}={0} {14}1979-05-27{0}
+
+{6}lt1 {8}={0} {14}07:32:00{0}
+{6}lt2 {8}={0} {14}00:32:00.999999{0}
+
+{6}integers {8}={0} {8}[{0} {4}1{8},{0} {4}2{8},{0} {4}3{0} {8}]{0}
+{6}colors {8}={0} {8}[{0} {10}"red"{8},{0} {10}"yellow"{8},{0} {10}"green"{0} {8}]{0}
+{6}nested_arrays_of_ints {8}={0} {8}[{0} {8}[{0} {4}1{8},{0} {4}2{0} {8}],{0} {8}[{4}3{8},{0} {4}4{8},{0} {4}5{8}]{0} {8}]{0}
+{6}nested_mixed_array {8}={0} {8}[{0} {8}[{0} {4}1{8},{0} {4}2{0} {8}],{0} {8}[{10}"a"{8},{0} {10}"b"{8},{0} {10}"c"{8}]{0} {8}]{0}
+{6}string_array {8}={0} {8}[{0} {10}"all"{8},{0} {9}'strings'{8},{0} {12}"""are the same"""{8},{0} {11}'''type'''{0} {8}]{0}
+
+{1}# Mixed-type arrays are allowed
+{6}numbers {8}={0} {8}[{0} {4}0.1{8},{0} {4}0.2{8},{0} {4}0.5{8},{0} {4}1{8},{0} {4}2{8},{0} {4}5{0} {8}]{0}
+{6}contributors {8}={0} {8}[{0}
+  {10}"Foo Bar <foo@example.com>"{8},{0}
+  {8}{{0} {6}name {8}={0} {10}"Baz Qux"{8},{0} {6}email {8}={0} {10}"bazqux@example.com"{8},{0} {6}url {8}={0} {10}"https://example.com/bazqux"{0} {8}}{0}
+{8}]{0}
+
+{6}integers2 {8}={0} {8}[{0}
+  {4}1{8},{0} {4}2{8},{0} {4}3{0}
+{8}]{0}
+
+{6}integers3 {8}={0} {8}[{0}
+  {4}1{8},{0}
+  {4}2{8},{0} {1}# this is ok
+{8}]{0}
+
+{5}[table-1]
+{6}key1 {8}={0} {10}"some string"{0}
+{6}key2 {8}={0} {4}123{0}
+
+{5}[table-2]
+{6}key1 {8}={0} {10}"another string"{0}
+{6}key2 {8}={0} {4}456{0}
+
+{5}[dog."tater.man"]
+{6}type{8}.{6}name {8}={0} {10}"pug"{0}
+
+{5}[a.b.c]{0}            {1}# this is best practice
+{5}[ d.e.f ]{0}          {1}# same as [d.e.f]
+{5}[ g .  h  . i ]{0}    {1}# same as [g.h.i]
+{5}[ j . "ʞ" . 'l' ]{0}  {1}# same as [j."ʞ".'l']
+{0}
+{5}[product]
+{6}type {8}={0} {8}{{0} {6}name {8}={0} {10}"Nail"{0} {8}}{0}
+
+{5}[[products]]
+{6}name {8}={0} {10}"Hammer"{0}
+{6}sku {8}={0} {4}738594937{0}
+
+{5}[[products]]{0}  {1}# empty table within the array
+{0}
+{5}[[products]]
+{6}name {8}={0} {10}"Nail"{0}
+{6}sku {8}={0} {4}284758393{0}
+
+{6}points {8}={0} {8}[{0} {8}{{0} {6}x {8}={0} {4}1{8},{0} {6}y {8}={0} {4}2{8},{0} {6}z {8}={0} {4}3{0} {8}},{0}
+           {8}{{0} {6}x {8}={0} {4}7{8},{0} {6}y {8}={0} {4}8{8},{0} {6}z {8}={0} {4}9{0} {8}},{0}
+           {8}{{0} {6}x {8}={0} {4}2{8},{0} {6}y {8}={0} {4}4{8},{0} {6}z {8}={0} {4}8{0} {8}}{0} {8}]{0}
