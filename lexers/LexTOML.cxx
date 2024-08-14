@@ -420,7 +420,9 @@ void FoldTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int /*initStyle
 	if (lineCurrent > 0) {
 		prevLevel = styler.LevelAt(lineCurrent - 1);
 		prevType = GetLineType(styler.GetLineState(lineCurrent - 1));
-		prev2Type = GetLineType(styler.GetLineState(lineCurrent - 2));
+		if (lineCurrent >= 2) {
+			prev2Type = GetLineType(styler.GetLineState(lineCurrent - 2));
+		}
 	}
 
 	bool commentHead = (prevType == TOMLLineType::CommentLine) && (prevLevel & SC_FOLDLEVELHEADERFLAG);
