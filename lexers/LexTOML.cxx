@@ -25,6 +25,9 @@
 
 using namespace Lexilla;
 
+namespace {
+// Use an unnamed namespace to protect the functions and classes from name conflicts
+
 constexpr bool IsEOLChar(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
@@ -97,7 +100,7 @@ constexpr bool IsWhiteSpace(int ch) noexcept {
 	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
 }
 
-static int GetDocNextChar(StyleContext& sc) noexcept {
+int GetDocNextChar(StyleContext& sc) noexcept {
 	if (!IsWhiteSpace(sc.ch)) {
 		return sc.ch;
 	}
@@ -112,7 +115,7 @@ static int GetDocNextChar(StyleContext& sc) noexcept {
 	}
 }
 
-static int GetLineNextChar(StyleContext& sc) noexcept {
+int GetLineNextChar(StyleContext& sc) noexcept {
 	if (!IsWhiteSpace(sc.ch)) {
 		return sc.ch;
 	}
@@ -131,7 +134,7 @@ static int GetLineNextChar(StyleContext& sc) noexcept {
 	return '\0';
 }
 
-static bool IsTOMLKey(StyleContext& sc, int braceCount, const WordList *kwList) {
+bool IsTOMLKey(StyleContext& sc, int braceCount, const WordList *kwList) {
 	if (braceCount) {
 		const int chNext = GetDocNextChar(sc);
 		if (chNext == '=' || chNext == '.' || chNext == '-') {
@@ -166,7 +169,7 @@ enum class TOMLKeyState {
 	End,
 };
 
-static void ColouriseTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *keywordLists[], Accessor &styler) {
+void ColouriseTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *keywordLists[], Accessor &styler) {
 	int visibleChars = 0;
 	int tableLevel = 0;
 	int braceCount = 0;
@@ -418,7 +421,7 @@ constexpr int GetTableLevel(int lineState) noexcept {
 }
 
 // code folding based on LexProps
-static void FoldTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int /*initStyle*/, WordList *[] /*keywordLists*/, Accessor &styler) {
+void FoldTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int /*initStyle*/, WordList *[] /*keywordLists*/, Accessor &styler) {
 	const Sci_Position endPos = startPos + lengthDoc;
 	const Sci_Position maxLines = styler.GetLine((endPos == styler.Length()) ? endPos : endPos - 1);
 
@@ -483,6 +486,8 @@ static void FoldTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int /*in
 		lineCurrent++;
 	}
 }
+
+}  // unnamed namespace end
 
 static const char *const tomlWordListDesc[] = {
 	"Keywords",
