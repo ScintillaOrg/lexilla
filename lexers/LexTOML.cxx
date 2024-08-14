@@ -100,7 +100,7 @@ constexpr bool IsWhiteSpace(int ch) noexcept {
 	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
 }
 
-int GetLineNextChar(StyleContext& sc) noexcept {
+int GetLineNextChar(StyleContext& sc) {
 	if (!IsWhiteSpace(sc.ch)) {
 		return sc.ch;
 	}
