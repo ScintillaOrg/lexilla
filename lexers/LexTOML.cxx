@@ -29,12 +29,6 @@ constexpr bool IsEOLChar(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
 
-constexpr bool IsHexDigit(int ch) noexcept {
-	return (ch >= '0' && ch <= '9')
-		|| (ch >= 'A' && ch <= 'F')
-		|| (ch >= 'a' && ch <= 'f');
-}
-
 constexpr bool IsIdentifierChar(int ch) noexcept {
 	return IsAlphaNumeric(ch) || ch == '_';
 }
@@ -75,7 +69,7 @@ struct EscapeSequence {
 	}
 	bool atEscapeEnd(int ch) noexcept {
 		--digitsLeft;
-		return digitsLeft <= 0 || !IsHexDigit(ch);
+		return digitsLeft <= 0 || !IsAHeXDigit(ch);
 	}
 };
 
