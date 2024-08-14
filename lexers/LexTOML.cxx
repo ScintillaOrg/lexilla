@@ -100,21 +100,6 @@ constexpr bool IsWhiteSpace(int ch) noexcept {
 	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
 }
 
-int GetDocNextChar(StyleContext& sc) noexcept {
-	if (!IsWhiteSpace(sc.ch)) {
-		return sc.ch;
-	}
-	if (!IsWhiteSpace(sc.chNext)) {
-		return sc.chNext;
-	}
-	for (Sci_Position pos = 2; ; pos++) {
-		const unsigned char chPos = sc.GetRelative(pos);
-		if (!IsWhiteSpace(chPos)) {
-			return chPos;
-		}
-	}
-}
-
 int GetLineNextChar(StyleContext& sc) noexcept {
 	if (!IsWhiteSpace(sc.ch)) {
 		return sc.ch;
@@ -136,7 +121,7 @@ int GetLineNextChar(StyleContext& sc) noexcept {
 
 bool IsTOMLKey(StyleContext& sc, int braceCount, const WordList *kwList) {
 	if (braceCount) {
-		const int chNext = GetDocNextChar(sc);
+		const int chNext = GetLineNextChar(sc);
 		if (chNext == '=' || chNext == '.' || chNext == '-') {
 			sc.ChangeState(SCE_TOML_KEY);
 			return true;
@@ -275,7 +260,9 @@ void ColouriseTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 						}
 					} else if (sc.state == SCE_TOML_KEY && !IsTOMLUnquotedKey(sc.ch)) {
 						const int chNext = GetLineNextChar(sc);
-						if (!AnyOf(chNext, '\'', '\"', '.', '=')) {
+						if (chNext == '=') {
+							sc.SetState(SCE_TOML_DEFAULT);
+						} else if (!AnyOf(chNext, '\'', '\"', '.')) {
 							sc.ChangeState(SCE_TOML_ERROR);
 							continue;
 						}
@@ -297,8 +284,8 @@ void ColouriseTOMLDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 				}
 			} else if (sc.ch == GetStringQuote(sc.state) &&
 					(!IsTripleString(sc.state) || (sc.Match(IsDoubleQuoted(sc.state) ? R"(""")" : R"(''')")))) {
-				if (IsTripleString(sc.state)) {
-					sc.Forward(2);
+				while (sc.ch == sc.chNext) {
+					sc.Forward();
 				}
 				sc.Forward();
 				if (!IsTripleString(sc.state) && IsTOMLKey(sc, braceCount, nullptr)) {
