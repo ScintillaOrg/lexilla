@@ -58,6 +58,7 @@
 **.rs text
 **.sql text
 **.tcl text
+**.toml text
 **.tsql text
 **.err text
 **.mms text
