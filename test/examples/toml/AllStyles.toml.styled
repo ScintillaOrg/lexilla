@@ -13,6 +13,10 @@
 {6}'key2'{0} {8}={0} {10}"value"{0}
 {6}'quoted "value"'{0} {8}={0} {10}"value"{0}
 
+{6}fruit{8}.{6}name{0} {8}={0} {10}"banana"{0}     {1}# this is best practice
+{6}fruit{8}.{6} color{0} {8}={0} {10}"yellow"{0}    {1}# same as fruit.color
+{6}fruit {8}.{6} flavor{0} {8}={0} {10}"banana"{0}   {1}# same as fruit.flavor
+{0}
 {6}name{0} {8}={0} {10}"Orange"{0}
 {6}physical{8}.{6}color{0} {8}={0} {10}"orange"{0}
 {6}physical{8}.{6}shape{0} {8}={0} {10}"round"{0}

@@ -13,6 +13,10 @@ bare-key = "value"
 'key2' = "value"
 'quoted "value"' = "value"
 
+fruit.name = "banana"     # this is best practice
+fruit. color = "yellow"    # same as fruit.color
+fruit . flavor = "banana"   # same as fruit.flavor
+
 name = "Orange"
 physical.color = "orange"
 physical.shape = "round"

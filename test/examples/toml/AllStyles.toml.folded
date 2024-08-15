@@ -13,6 +13,10 @@
  0 400   0   'key2' = "value"
  0 400   0   'quoted "value"' = "value"
  0 400   0   
+ 0 400   0   fruit.name = "banana"     # this is best practice
+ 0 400   0   fruit. color = "yellow"    # same as fruit.color
+ 0 400   0   fruit . flavor = "banana"   # same as fruit.flavor
+ 0 400   0   
  0 400   0   name = "Orange"
  0 400   0   physical.color = "orange"
  0 400   0   physical.shape = "round"
