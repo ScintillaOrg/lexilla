@@ -157,6 +157,7 @@
 		70BF497C8D265026B77C97DA /* LexJulia.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 315E4E969868C52C125686B2 /* LexJulia.cxx */; };
 		B32D4A2A9CEC222A5140E99F /* LexFSharp.cxx in Sources */ = {isa = PBXBuildFile; fileRef = F8E54626B22BD9493090F40B /* LexFSharp.cxx */; };
 		3D044C4CA34C6FD7E58E0091 /* LexTOML.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 42BC44CCB57D4E78DEE6E358 /* LexTOML.cxx */; };
+		0DFB4F5F94B018794ADB389D /* LexDart.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1F274010A7943C43BA265511 /* LexDart.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -312,6 +313,7 @@
 		A383409E9A994F461550FEC1 /* LexGDScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexGDScript.cxx; path = ../../lexers/LexGDScript.cxx; sourceTree = SOURCE_ROOT; };
 		F8E54626B22BD9493090F40B /* LexFSharp.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexFSharp.cxx; path = ../../lexers/LexFSharp.cxx; sourceTree = SOURCE_ROOT; };
 		42BC44CCB57D4E78DEE6E358 /* LexTOML.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTOML.cxx; path = ../../lexers/LexTOML.cxx; sourceTree = SOURCE_ROOT; };
+		1F274010A7943C43BA265511 /* LexDart.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDart.cxx; path = ../../lexers/LexDart.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -385,6 +387,7 @@
 				28BA731524E34D9500272C2D /* LexCsound.cxx */,
 				28BA732924E34D9600272C2D /* LexCSS.cxx */,
 				28BA72E024E34D9200272C2D /* LexD.cxx */,
+				1F274010A7943C43BA265511 /* LexDart.cxx */,
 				28BA732C24E34D9600272C2D /* LexDataflex.cxx */,
 				28BA72DD24E34D9200272C2D /* LexDiff.cxx */,
 				28BA732024E34D9600272C2D /* LexDMAP.cxx */,
@@ -733,6 +736,7 @@
 				510D44AFB91EE873E86ABDD4 /* LexAsciidoc.cxx in Sources */,
 				00D544CC992062D2E3CD4BF6 /* LexGDScript.cxx in Sources */,
 				3D044C4CA34C6FD7E58E0091 /* LexTOML.cxx in Sources */,
+				0DFB4F5F94B018794ADB389D /* LexDart.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
