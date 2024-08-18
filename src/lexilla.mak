@@ -196,6 +196,7 @@ LEX_OBJS=\
 	$(DIR_O)\LexTCMD.obj \
 	$(DIR_O)\LexTeX.obj \
 	$(DIR_O)\LexTOML.obj \
+	$(DIR_O)\LexTroff.obj \
 	$(DIR_O)\LexTxt2tags.obj \
 	$(DIR_O)\LexVB.obj \
 	$(DIR_O)\LexVerilog.obj \
