@@ -55,6 +55,7 @@
 **.ps1 text
 **.r text
 **.rb text
+**.roff text
 **.rs text
 **.sql text
 **.tcl text
