@@ -1,0 +1,272 @@
+{2}/// A structure for storing a timestamp, with nanosecond precision (this is a
+/// multiline doc comment).
+{11}const{0} {13}Timestamp{0} {4}={0} {11}struct{0} {4}{{0}
+    {2}/// The number of seconds since the epoch (this is also a doc comment).
+{0}    {9}seconds{4}:{0} {12}i64{4},{0} {1}// signed so we can represent pre-1970 (not a doc comment)
+{0}    {2}/// The number of nanoseconds past the second (doc comment again).
+{0}    {9}nanos{4}:{0} {12}u32{4},{0}
+
+    {2}/// Returns a `Timestamp` struct representing the Unix epoch; that is, the
+{0}    {2}/// moment of 1970 Jan 1 00:00:00 UTC (this is a doc comment too).
+{0}    {11}pub{0} {11}fn{0} {9}unixEpoch{4}(){0} {13}Timestamp{0} {4}{{0}
+        {11}return{0} {13}Timestamp{4}{{0}
+            {4}.{9}seconds{0} {4}={0} {3}0{4},{0}
+            {4}.{9}nanos{0} {4}={0} {3}0{4},{0}
+        {4}};{0}
+    {4}}{0}
+{4}};{0}
+
+{2}//! This module provides functions for retrieving the current date and
+//! time with varying degrees of precision and accuracy. It does not
+//! depend on libc, but will use functions from it if available.
+{0}
+{11}const{0} {9}S{0} {4}={0} {11}struct{0} {4}{{0}
+    {2}//! Top level comments are allowed inside a container other than a module,
+{0}    {2}//! but it is not very useful.  Currently, when producing the package
+{0}    {2}//! documentation, these comments are ignored.
+{4}};{0}
+
+{11}const{0} {9}std{0} {4}={0} {10}@import{4}({6}"std"{4});{0}
+
+{11}pub{0} {11}fn{0} {9}main{4}(){0} {4}!{12}void{0} {4}{{0}
+    {11}const{0} {9}stdout{0} {4}={0} {9}std{4}.{9}io{4}.{9}getStdOut{4}().{9}writer{4}();{0}
+    {11}try{0} {9}stdout{4}.{9}print{4}({6}"Hello, {s}!{8}\n{6}"{4},{0} {4}.{{6}"world"{4}});{0}
+{4}}{0}
+
+
+{1}// Top-level declarations are order-independent:
+{11}const{0} {9}print{0} {4}={0} {9}std{4}.{9}debug{4}.{9}print{4};{0}
+{11}const{0} {9}std{0} {4}={0} {10}@import{4}({6}"std"{4});{0}
+{11}const{0} {9}os{0} {4}={0} {9}std{4}.{9}os{4};{0}
+{11}const{0} {11}assert{0} {4}={0} {9}std{4}.{9}debug{4}.{11}assert{4};{0}
+
+{11}pub{0} {11}fn{0} {9}main{4}(){0} {12}void{0} {4}{{0}
+    {1}// integers
+{0}    {11}const{0} {9}one_plus_one{4}:{0} {12}i32{0} {4}={0} {3}1{0} {4}+{0} {3}1{4};{0}
+    {9}print{4}({6}"1 + 1 = {}{8}\n{6}"{4},{0} {4}.{{9}one_plus_one{4}});{0}
+
+    {1}// floats
+{0}    {11}const{0} {9}seven_div_three{4}:{0} {12}f32{0} {4}={0} {3}7.0{0} {4}/{0} {3}3.0{4};{0}
+    {9}print{4}({6}"7.0 / 3.0 = {}{8}\n{6}"{4},{0} {4}.{{9}seven_div_three{4}});{0}
+
+    {1}// boolean
+{0}    {9}print{4}({6}"{}{8}\n{6}{}{8}\n{6}{}{8}\n{6}"{4},{0} {4}.{{0}
+        {11}true{0} {11}and{0} {11}false{4},{0}
+        {11}true{0} {11}or{0} {11}false{4},{0}
+        {4}!{11}true{4},{0}
+    {4}});{0}
+
+    {1}// optional
+{0}    {11}var{0} {9}optional_value{4}:{0} {4}?[]{11}const{0} {12}u8{0} {4}={0} {11}null{4};{0}
+    {11}assert{4}({9}optional_value{0} {4}=={0} {11}null{4});{0}
+
+    {9}print{4}({6}"{8}\n{6}optional 1{8}\n{6}type: {}{8}\n{6}value: {?s}{8}\n{6}"{4},{0} {4}.{{0}
+        {10}@TypeOf{4}({9}optional_value{4}),{0} {9}optional_value{4},{0}
+    {4}});{0}
+
+    {9}optional_value{0} {4}={0} {6}"hi"{4};{0}
+    {11}assert{4}({9}optional_value{0} {4}!={0} {11}null{4});{0}
+
+    {9}print{4}({6}"{8}\n{6}optional 2{8}\n{6}type: {}{8}\n{6}value: {?s}{8}\n{6}"{4},{0} {4}.{{0}
+        {10}@TypeOf{4}({9}optional_value{4}),{0} {9}optional_value{4},{0}
+    {4}});{0}
+
+    {1}// error union
+{0}    {11}var{0} {9}number_or_error{4}:{0} {12}anyerror{4}!{12}i32{0} {4}={0} {11}error{4}.{9}ArgNotFound{4};{0}
+
+    {9}print{4}({6}"{8}\n{6}error union 1{8}\n{6}type: {}{8}\n{6}value: {!}{8}\n{6}"{4},{0} {4}.{{0}
+        {10}@TypeOf{4}({9}number_or_error{4}),{0}
+        {9}number_or_error{4},{0}
+    {4}});{0}
+
+    {9}number_or_error{0} {4}={0} {3}1234{4};{0}
+
+    {9}print{4}({6}"{8}\n{6}error union 2{8}\n{6}type: {}{8}\n{6}value: {!}{8}\n{6}"{4},{0} {4}.{{0}
+        {10}@TypeOf{4}({9}number_or_error{4}),{0} {9}number_or_error{4},{0}
+    {4}});{0}
+{4}}{0}
+
+{11}const{0} {9}print{0} {4}={0} {10}@import{4}({6}"std"{4}).{9}debug{4}.{9}print{4};{0}
+{11}const{0} {9}mem{0} {4}={0} {10}@import{4}({6}"std"{4}).{9}mem{4};{0} {1}// will be used to compare bytes
+{0}
+{11}pub{0} {11}fn{0} {9}main{4}(){0} {12}void{0} {4}{{0}
+    {11}const{0} {9}bytes{0} {4}={0} {6}"hello"{4};{0}
+    {9}print{4}({6}"{}{8}\n{6}"{4},{0} {4}.{{10}@TypeOf{4}({9}bytes{4})});{0} {1}// *const [5:0]u8
+{0}    {9}print{4}({6}"{d}{8}\n{6}"{4},{0} {4}.{{9}bytes{4}.{9}len{4}});{0} {1}// 5
+{0}    {9}print{4}({6}"{c}{8}\n{6}"{4},{0} {4}.{{9}bytes{4}[{3}1{4}]});{0} {1}// 'e'
+{0}    {9}print{4}({6}"{d}{8}\n{6}"{4},{0} {4}.{{9}bytes{4}[{3}5{4}]});{0} {1}// 0
+{0}    {9}print{4}({6}"{}{8}\n{6}"{4},{0} {4}.{{5}'e'{0} {4}=={0} {5}'{8}\x65{5}'{4}});{0} {1}// true
+{0}    {9}print{4}({6}"{d}{8}\n{6}"{4},{0} {4}.{{5}'{8}\u{1f4a{5}9}'{4}});{0} {1}// 128169
+{0}    {9}print{4}({6}"{d}{8}\n{6}"{4},{0} {4}.{{5}'💯'{4}});{0} {1}// 128175
+{0}    {9}print{4}({6}"{u}{8}\n{6}"{4},{0} {4}.{{5}'⚡'{4}});{0}
+    {9}print{4}({6}"{}{8}\n{6}"{4},{0} {4}.{{9}mem{4}.{9}eql{4}({12}u8{4},{0} {6}"hello"{4},{0} {6}"h{8}\x65{6}llo"{4})});{0} {1}// true
+{0}    {9}print{4}({6}"{}{8}\n{6}"{4},{0} {4}.{{9}mem{4}.{9}eql{4}({12}u8{4},{0} {6}"💯"{4},{0} {6}"{8}\xf0\x9f\x92\xaf{6}"{4})});{0} {1}// also true
+{0}    {11}const{0} {9}invalid_utf8{0} {4}={0} {6}"{8}\xff\xfe{6}"{4};{0} {1}// non-UTF-8 strings are possible with \xNN notation.
+{0}    {9}print{4}({6}"0x{x}{8}\n{6}"{4},{0} {4}.{{9}invalid_utf8{4}[{3}1{4}]});{0} {1}// indexing them returns individual bytes...
+{0}    {9}print{4}({6}"0x{x}{8}\n{6}"{4},{0} {4}.{{6}"💯"{4}[{3}1{4}]});{0} {1}// ...as does indexing part-way through non-ASCII characters
+{4}}{0}
+
+{11}const{0} {9}hello_world_in_c{0} {4}={0}
+    {7}\\#include <stdio.h>
+{0}    {7}\\
+{0}    {7}\\int main(int argc, char **argv) {
+{0}    {7}\\    printf("hello world\n");
+{0}    {7}\\    return 0;
+{0}    {7}\\}
+{4};{0}
+
+{11}const{0} {9}std{0} {4}={0} {10}@import{4}({6}"std"{4});{0}
+{11}const{0} {11}assert{0} {4}={0} {9}std{4}.{9}debug{4}.{11}assert{4};{0}
+
+{11}threadlocal{0} {11}var{0} {9}x{4}:{0} {12}i32{0} {4}={0} {3}1234{4};{0}
+
+{11}test{0} {6}"thread local storage"{0} {4}{{0}
+    {11}const{0} {9}thread1{0} {4}={0} {11}try{0} {9}std{4}.{9}Thread{4}.{9}spawn{4}(.{},{0} {9}testTls{4},{0} {4}.{});{0}
+    {11}const{0} {9}thread2{0} {4}={0} {11}try{0} {9}std{4}.{9}Thread{4}.{9}spawn{4}(.{},{0} {9}testTls{4},{0} {4}.{});{0}
+    {9}testTls{4}();{0}
+    {9}thread1{4}.{9}join{4}();{0}
+    {9}thread2{4}.{9}join{4}();{0}
+{4}}{0}
+
+{11}fn{0} {9}testTls{4}(){0} {12}void{0} {4}{{0}
+    {11}assert{4}({9}x{0} {4}=={0} {3}1234{4});{0}
+    {9}x{0} {4}+={0} {3}1{4};{0}
+    {11}assert{4}({9}x{0} {4}=={0} {3}1235{4});{0}
+{4}}{0}
+
+{11}const{0} {9}decimal_int{0} {4}={0} {3}98222{4};{0}
+{11}const{0} {9}hex_int{0} {4}={0} {3}0xff{4};{0}
+{11}const{0} {9}another_hex_int{0} {4}={0} {3}0xFF{4};{0}
+{11}const{0} {9}octal_int{0} {4}={0} {3}0o755{4};{0}
+{11}const{0} {9}binary_int{0} {4}={0} {3}0b11110000{4};{0}
+
+{1}// underscores may be placed between two digits as a visual separator
+{11}const{0} {9}one_billion{0} {4}={0} {3}1_000_000_000{4};{0}
+{11}const{0} {9}binary_mask{0} {4}={0} {3}0b1_1111_1111{4};{0}
+{11}const{0} {9}permissions{0} {4}={0} {3}0o7_5_5{4};{0}
+{11}const{0} {9}big_address{0} {4}={0} {3}0xFF80_0000_0000_0000{4};{0}
+
+
+{11}const{0} {9}floating_point{0} {4}={0} {3}123.0E+77{4};{0}
+{11}const{0} {9}another_float{0} {4}={0} {3}123.0{4};{0}
+{11}const{0} {9}yet_another{0} {4}={0} {3}123.0e+77{4};{0}
+
+{11}const{0} {9}hex_floating_point{0} {4}={0} {3}0x103.70p{4}-{3}5{4};{0}
+{11}const{0} {9}another_hex_float{0} {4}={0} {3}0x103.70{4};{0}
+{11}const{0} {9}yet_another_hex_float{0} {4}={0} {3}0x103.70P{4}-{3}5{4};{0}
+
+{1}// underscores may be placed between two digits as a visual separator
+{11}const{0} {9}lightspeed{0} {4}={0} {3}299_792_458.000_000{4};{0}
+{11}const{0} {9}nanosecond{0} {4}={0} {3}0.000_000_001{4};{0}
+{11}const{0} {9}more_hex{0} {4}={0} {3}0x1234_5678.9ABC_CDEFp{4}-{3}10{4};{0}
+
+{11}const{0} {14}Vec3{0} {4}={0} {11}struct{0} {4}{{0}
+    {9}x{4}:{0} {12}f32{4},{0}
+    {9}y{4}:{0} {12}f32{4},{0}
+    {9}z{4}:{0} {12}f32{4},{0}
+
+    {11}pub{0} {11}fn{0} {9}init{4}({9}x{4}:{0} {12}f32{4},{0} {9}y{4}:{0} {12}f32{4},{0} {9}z{4}:{0} {12}f32{4}){0} {14}Vec3{0} {4}{{0}
+        {11}return{0} {14}Vec3{4}{{0}
+            {4}.{9}x{0} {4}={0} {9}x{4},{0}
+            {4}.{9}y{0} {4}={0} {9}y{4},{0}
+            {4}.{9}z{0} {4}={0} {9}z{4},{0}
+        {4}};{0}
+    {4}}{0}
+
+    {11}pub{0} {11}fn{0} {9}dot{4}({9}self{4}:{0} {14}Vec3{4},{0} {9}other{4}:{0} {14}Vec3{4}){0} {12}f32{0} {4}{{0}
+        {11}return{0} {9}self{4}.{9}x{0} {4}*{0} {9}other{4}.{9}x{0} {4}+{0} {9}self{4}.{9}y{0} {4}*{0} {9}other{4}.{9}y{0} {4}+{0} {9}self{4}.{9}z{0} {4}*{0} {9}other{4}.{9}z{4};{0}
+    {4}}{0}
+{4}};{0}
+
+{11}fn{0} {9}LinkedList{4}({11}comptime{0} {9}T{4}:{0} {12}type{4}){0} {12}type{0} {4}{{0}
+    {11}return{0} {11}struct{0} {4}{{0}
+        {11}pub{0} {11}const{0} {9}Node{0} {4}={0} {11}struct{0} {4}{{0}
+            {9}prev{4}:{0} {4}?*{9}Node{4},{0}
+            {9}next{4}:{0} {4}?*{9}Node{4},{0}
+            {9}data{4}:{0} {9}T{4},{0}
+        {4}};{0}
+
+        {9}first{4}:{0} {4}?*{9}Node{4},{0}
+        {9}last{4}:{0} {4}?*{9}Node{4},{0}
+        {9}len{4}:{0} {12}usize{4},{0}
+    {4}};{0}
+{4}}{0}
+
+{11}const{0} {9}Point{0} {4}={0} {11}struct{0} {4}{{0}
+    {9}x{4}:{0} {12}f32{4},{0}
+    {9}y{4}:{0} {12}f32{4},{0}
+{4}};{0}
+
+{1}// Maybe we want to pass it to OpenGL so we want to be particular about
+// how the bytes are arranged.
+{11}const{0} {9}Point2{0} {4}={0} {11}packed{0} {11}struct{0} {4}{{0}
+    {9}x{4}:{0} {12}f32{4},{0}
+    {9}y{4}:{0} {12}f32{4},{0}
+{4}};{0}
+
+
+{11}const{0} {9}std{0} {4}={0} {10}@import{4}({6}"std"{4});{0}
+{11}const{0} {9}expect{0} {4}={0} {9}std{4}.{9}testing{4}.{9}expect{4};{0}
+
+{11}const{0} {9}Color{0} {4}={0} {11}enum{0} {4}{{0}
+    {9}auto{4},{0}
+    {9}off{4},{0}
+    {9}on{4},{0}
+{4}};{0}
+
+{11}const{0} {9}std{0} {4}={0} {10}@import{4}({6}"std"{4});{0}
+{11}const{0} {9}builtin{0} {4}={0} {10}@import{4}({6}"builtin"{4});{0}
+{11}const{0} {9}expect{0} {4}={0} {9}std{4}.{9}testing{4}.{9}expect{4};{0}
+
+{11}test{0} {6}"switch simple"{0} {4}{{0}
+    {11}const{0} {9}a{4}:{0} {12}u64{0} {4}={0} {3}10{4};{0}
+    {11}const{0} {9}zz{4}:{0} {12}u64{0} {4}={0} {3}103{4};{0}
+
+    {1}// All branches of a switch expression must be able to be coerced to a
+{0}    {1}// common type.
+{0}    {1}//
+{0}    {1}// Branches cannot fallthrough. If fallthrough behavior is desired, combine
+{0}    {1}// the cases and use an if.
+{0}    {11}const{0} {9}b{0} {4}={0} {11}switch{0} {4}({9}a{4}){0} {4}{{0}
+        {1}// Multiple cases can be combined via a ','
+{0}        {3}1{4},{0} {3}2{4},{0} {3}3{0} {4}=>{0} {3}0{4},{0}
+
+        {1}// Ranges can be specified using the ... syntax. These are inclusive
+{0}        {1}// of both ends.
+{0}        {3}5{4}..{3}.100{0} {4}=>{0} {3}1{4},{0}
+
+        {1}// Branches can be arbitrarily complex.
+{0}        {3}101{0} {4}=>{0} {9}blk{4}:{0} {4}{{0}
+            {11}const{0} {9}c{4}:{0} {12}u64{0} {4}={0} {3}5{4};{0}
+            {11}break{0} {4}:{9}blk{0} {9}c{0} {4}*{0} {3}2{0} {4}+{0} {3}1{4};{0}
+        {4}},{0}
+
+        {1}// Switching on arbitrary expressions is allowed as long as the
+{0}        {1}// expression is known at compile-time.
+{0}        {9}zz{0} {4}=>{0} {9}zz{4},{0}
+        {9}blk{4}:{0} {4}{{0}
+            {11}const{0} {9}d{4}:{0} {12}u32{0} {4}={0} {3}5{4};{0}
+            {11}const{0} {9}e{4}:{0} {12}u32{0} {4}={0} {3}100{4};{0}
+            {11}break{0} {4}:{9}blk{0} {9}d{0} {4}+{0} {9}e{4};{0}
+        {4}}{0} {4}=>{0} {3}107{4},{0}
+
+        {1}// The else branch catches everything not already captured.
+{0}        {1}// Else branches are mandatory unless the entire range of values
+{0}        {1}// is handled.
+{0}        {11}else{0} {4}=>{0} {3}9{4},{0}
+    {4}};{0}
+
+    {11}try{0} {9}expect{4}({9}b{0} {4}=={0} {3}1{4});{0}
+{4}}{0}
+
+{11}fn{0} {9}charToDigit{4}({9}c{4}:{0} {12}u8{4}){0} {12}u8{0} {4}{{0}
+    {11}return{0} {11}switch{0} {4}({9}c{4}){0} {4}{{0}
+        {5}'0'{4}...{5}'9'{0} {4}=>{0} {9}c{0} {4}-{0} {5}'0'{4},{0}
+        {5}'A'{4}...{5}'Z'{0} {4}=>{0} {9}c{0} {4}-{0} {5}'A'{0} {4}+{0} {3}10{4},{0}
+        {5}'a'{4}...{5}'z'{0} {4}=>{0} {9}c{0} {4}-{0} {5}'a'{0} {4}+{0} {3}10{4},{0}
+        {11}else{0} {4}=>{0} {9}maxInt{4}({12}u8{4}),{0}
+    {4}};{0}
+{4}}{0}
+
+{11}const{0} {9}optional_value{4}:{0} {4}?{12}i32{0} {4}={0} {11}null{4};{0}
+
