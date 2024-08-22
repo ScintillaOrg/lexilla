@@ -309,3 +309,8 @@ var nobleGases = {
   18: 'argon',
 };
 
+var s = """This is also a
+${foo(
+"$bar"
+)}
+multi-line string.""";

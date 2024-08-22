@@ -59,43 +59,6 @@ constexpr bool IsDecimalNumber(int chPrev, int ch, int chNext) noexcept {
 	return IsIdentifierChar(ch) || IsNumberContinue(chPrev, ch, chNext);
 }
 
-int PackLineState(const std::vector<int>& states) noexcept {
-	// 2 bits for number of states
-	constexpr int countBits = 2;
-	// 6 bits for up to 3 stored states
-	constexpr int stateBits = 6;
-	size_t index = states.size();
-	// storing at most 3 states
-	const int backCount = std::min(static_cast<int>(index), 3);
-	int lineState = 0;
-	int count = backCount;
-	while (count != 0) {
-		--count;
-		--index;
-		int state = states[index];
-		lineState = (lineState << stateBits) | state;
-	}
-	lineState = (lineState << countBits) | backCount;
-	return lineState;
-}
-
-void UnpackLineState(int lineState, std::vector<int>& states) {
-	// 2 bits for number of states
-	constexpr int countBits = 2;
-	// 6 bits for up to 3 stored states
-	constexpr int stateBits = 6;
-	constexpr int countMask = (1 << countBits) - 1;
-	constexpr int valueMask = (1 << stateBits) - 1;
-	int count = lineState & countMask;
-	lineState >>= countBits;
-	while (count != 0) {
-		int state = lineState & valueMask;
-		states.push_back(state);
-		lineState >>= stateBits;
-		--count;
-	}
-}
-
 struct EscapeSequence {
 	int outerState = SCE_DART_DEFAULT;
 	int digitsLeft = 0;
@@ -118,8 +81,9 @@ struct EscapeSequence {
 };
 
 enum {
-	DartLineStateMaskLineComment = 1,	// line comment
-	DartLineStateMaskImport = (1 << 1),	// import
+	DartLineStateMaskLineComment = 1,			// line comment
+	DartLineStateMaskImport = (1 << 1),			// import
+	DartLineStateMaskInterpolation = (1 << 2),	// string interpolation
 };
 
 enum {
@@ -184,6 +148,33 @@ constexpr int GetStringQuote(int state) noexcept {
 	return IsDoubleQuoted(state) ? '\"' : '\'';
 }
 
+// string interpolating state
+struct InterpolatingState {
+	int state;
+	int braceCount;
+};
+
+void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle) noexcept {
+	const Sci_Position currentLine = styler.GetLine(startPos);
+	if (currentLine != 0) {
+		Sci_Position line = currentLine - 1;
+		int lineState = styler.GetLineState(line);
+		while ((lineState & stateMask) != 0 && line != 0) {
+			--line;
+			lineState = styler.GetLineState(line);
+		}
+		if ((lineState & stateMask) == 0) {
+			++line;
+		}
+		if (line != currentLine) {
+			const Sci_PositionU endPos = startPos + lengthDoc;
+			startPos = (line == 0) ? 0 : styler.LineStart(line);
+			lengthDoc = endPos - startPos;
+			initStyle = (startPos == 0) ? 0 : styler.StyleAt(startPos - 1);
+		}
+	}
+}
+
 Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite) noexcept {
 	do {
 		--startPos;
@@ -201,27 +192,22 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 	int lineStateLineType = 0;
 	int commentLevel = 0;	// nested block comment level
 
-	std::vector<int> nestedState; // string interpolation "${}"
+	std::vector<InterpolatingState> interpolatingStack;
 
 	int visibleChars = 0;
 	int chBefore = 0;
 	int chPrevNonWhite = 0;
 	EscapeSequence escSeq;
 
+	if (startPos != 0) {
+		// backtrack to the line where interpolation starts
+		BacktrackToStart(styler, DartLineStateMaskInterpolation, startPos, lengthDoc, initStyle);
+	}
+
 	StyleContext sc(startPos, lengthDoc, initStyle, styler);
 	if (sc.currentLine > 0) {
-		int lineState = styler.GetLineState(sc.currentLine - 1);
-		/*
-		2: lineStateLineType - used by folding
-		6: commentLevel
-		2: nestedState count
-		6*3: nestedState
-		*/
-		commentLevel = (lineState >> 2) & 0x3f;
-		lineState >>= 8;
-		if (lineState) {
-			UnpackLineState(lineState, nestedState);
-		}
+		const int lineState = styler.GetLineState(sc.currentLine - 1);
+		commentLevel = lineState >> 4;
 	}
 	if (startPos == 0) {
 		if (sc.Match('#', '!')) {
@@ -343,7 +329,7 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 				sc.SetState(SCE_DART_OPERATOR_STRING);
 				sc.Forward();
 				if (sc.ch == '{') {
-					nestedState.push_back(escSeq.outerState);
+					interpolatingStack.push_back({escSeq.outerState, 1});
 				} else if (sc.ch != '$' && IsDartIdentifierStart(sc.ch)) {
 					sc.SetState(SCE_DART_IDENTIFIER_STRING);
 				} else { // error
@@ -431,15 +417,16 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 				sc.SetState(SCE_DART_SYMBOL_OPERATOR);
 			} else if (IsAGraphic(sc.ch)) {
 				sc.SetState(SCE_DART_OPERATOR);
-				if (!nestedState.empty()) {
+				if (!interpolatingStack.empty() && AnyOf(sc.ch, '{', '}')) {
+					InterpolatingState &current = interpolatingStack.back();
 					if (sc.ch == '{') {
-						nestedState.push_back(SCE_DART_DEFAULT);
-					} else if (sc.ch == '}') {
-						const int outerState = nestedState.back();
-						nestedState.pop_back();
-						if (outerState != SCE_DART_DEFAULT) {
+						current.braceCount += 1;
+					} else {
+						current.braceCount -= 1;
+						if (current.braceCount == 0) {
 							sc.ChangeState(SCE_DART_OPERATOR_STRING);
-							sc.ForwardSetState(outerState);
+							sc.ForwardSetState(current.state);
+							interpolatingStack.pop_back();
 							continue;
 						}
 					}
@@ -454,9 +441,9 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 			}
 		}
 		if (sc.atLineEnd) {
-			int lineState = (commentLevel << 2) | lineStateLineType;
-			if (!nestedState.empty()) {
-				lineState |= PackLineState(nestedState) << 8;
+			int lineState = (commentLevel << 4) | lineStateLineType;
+			if (!interpolatingStack.empty()) {
+				lineState |= DartLineStateMaskInterpolation;
 			}
 			styler.SetLineState(sc.currentLine, lineState);
 			lineStateLineType = 0;
