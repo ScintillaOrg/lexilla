@@ -1,3 +1,5 @@
+// coding:utf-8
+
 /// A structure for storing a timestamp, with nanosecond precision (this is a
 /// multiline doc comment).
 const Timestamp = struct {
