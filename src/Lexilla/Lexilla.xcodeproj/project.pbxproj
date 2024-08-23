@@ -157,6 +157,7 @@
 		70BF497C8D265026B77C97DA /* LexJulia.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 315E4E969868C52C125686B2 /* LexJulia.cxx */; };
 		B32D4A2A9CEC222A5140E99F /* LexFSharp.cxx in Sources */ = {isa = PBXBuildFile; fileRef = F8E54626B22BD9493090F40B /* LexFSharp.cxx */; };
 		3D044C4CA34C6FD7E58E0091 /* LexTOML.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 42BC44CCB57D4E78DEE6E358 /* LexTOML.cxx */; };
+		14314DCD945FDA90481F0A0D /* LexTroff.cxx in Sources */ = {isa = PBXBuildFile; fileRef = D2EF4913B8F91656C787F584 /* LexTroff.cxx */; };
 		0DFB4F5F94B018794ADB389D /* LexDart.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1F274010A7943C43BA265511 /* LexDart.cxx */; };
 /* End PBXBuildFile section */
 
@@ -471,6 +472,7 @@
 				28BA730324E34D9400272C2D /* LexTCMD.cxx */,
 				28BA730824E34D9400272C2D /* LexTeX.cxx */,
 				42BC44CCB57D4E78DEE6E358 /* LexTOML.cxx */,
+				D2EF4913B8F91656C787F584 /* LexTroff.cxx */,
 				28BA730F24E34D9500272C2D /* LexTxt2tags.cxx */,
 				28BA731F24E34D9600272C2D /* LexVB.cxx */,
 				28BA731A24E34D9500272C2D /* LexVerilog.cxx */,
@@ -736,6 +738,7 @@
 				510D44AFB91EE873E86ABDD4 /* LexAsciidoc.cxx in Sources */,
 				00D544CC992062D2E3CD4BF6 /* LexGDScript.cxx in Sources */,
 				3D044C4CA34C6FD7E58E0091 /* LexTOML.cxx in Sources */,
+				14314DCD945FDA90481F0A0D /* LexTroff.cxx in Sources */,
 				0DFB4F5F94B018794ADB389D /* LexDart.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -866,7 +869,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.3.3;
+				CURRENT_PROJECT_VERSION = 5.4.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 4F446KW87E;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -894,7 +897,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.3.3;
+				CURRENT_PROJECT_VERSION = 5.4.0;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 4F446KW87E;
 				DYLIB_COMPATIBILITY_VERSION = 1;
