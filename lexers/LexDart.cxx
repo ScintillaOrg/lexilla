@@ -155,7 +155,7 @@ struct InterpolatingState {
 	int braceCount;
 };
 
-void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle) noexcept {
+void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle) {
 	const Sci_Position currentLine = styler.GetLine(startPos);
 	if (currentLine != 0) {
 		Sci_Position line = currentLine - 1;
@@ -176,7 +176,7 @@ void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &s
 	}
 }
 
-Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite) noexcept {
+Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite) {
 	do {
 		--startPos;
 		const unsigned style = styler.StyleAt(startPos);
