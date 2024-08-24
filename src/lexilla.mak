@@ -113,6 +113,7 @@ LEX_OBJS=\
 	$(DIR_O)\LexCsound.obj \
 	$(DIR_O)\LexCSS.obj \
 	$(DIR_O)\LexD.obj \
+	$(DIR_O)\LexDart.obj \
 	$(DIR_O)\LexDataflex.obj \
 	$(DIR_O)\LexDiff.obj \
 	$(DIR_O)\LexDMAP.obj \
