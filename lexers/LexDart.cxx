@@ -481,7 +481,7 @@ void FoldDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, 
 	lineStartNext = std::min(lineStartNext, endPos);
 
 	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
+	int styleNext = styler.StyleIndexAt(startPos);
 	int style = initStyle;
 
 	while (startPos < endPos) {
@@ -489,7 +489,7 @@ void FoldDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, 
 		const int stylePrev = style;
 		style = styleNext;
 		chNext = styler[++startPos];
-		styleNext = styler.StyleAt(startPos);
+		styleNext = styler.StyleIndexAt(startPos);
 
 		switch (style) {
 		case SCE_DART_COMMENTBLOCKDOC:
@@ -499,7 +499,7 @@ void FoldDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, 
 				levelNext += level;
 				startPos++;
 				chNext = styler[startPos];
-				styleNext = styler.StyleAt(startPos);
+				styleNext = styler.StyleIndexAt(startPos);
 			}
 		} break;
 
