@@ -248,7 +248,7 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 						continue;
 					}
 				} else {
-					char s[128];
+					char s[64];
 					sc.GetCurrent(s, sizeof(s));
 					const int state = sc.state;
 					if (state == SCE_DART_IDENTIFIER_STRING) {
