@@ -92,7 +92,7 @@
  0 400 400   const mem = @import("std").mem; // will be used to compare bytes
  0 400 400   
  2 400 401 + pub fn main() void {
- 0 401 401 |     const bytes = "hello";
+ 0 401 401 |     const bytes = "hello\u{12345678}";
  0 401 401 |     print("{}\n", .{@TypeOf(bytes)}); // *const [5:0]u8
  0 401 401 |     print("{d}\n", .{bytes.len}); // 5
  0 401 401 |     print("{c}\n", .{bytes[1]}); // 'e'

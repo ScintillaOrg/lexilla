@@ -161,6 +161,7 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 				sc.Forward();
 				if (sc.Match('u', '{')) {
 					escSeq.brace = true;
+					escSeq.digitsLeft = 9;
 					sc.Forward();
 				}
 			} else if ((sc.ch == '\'' && sc.state == SCE_ZIG_CHARACTER) || (sc.ch == '\"' && sc.state == SCE_ZIG_STRING)) {
