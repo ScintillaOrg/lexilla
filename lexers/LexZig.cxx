@@ -188,6 +188,7 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 
 		case SCE_ZIG_COMMENTLINE:
 		case SCE_ZIG_COMMENTLINEDOC:
+		case SCE_ZIG_COMMENTLINETOP:
 			if (sc.atLineStart) {
 				sc.SetState(SCE_ZIG_DEFAULT);
 			}
@@ -200,8 +201,10 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 					lineState = ZigLineStateMaskLineComment;
 				}
 				sc.SetState(SCE_ZIG_COMMENTLINE);
-				sc.Forward();
-				if (sc.chNext == '!' || sc.chNext == '/') {
+				sc.Forward(2);
+				if (sc.ch == '!') {
+					sc.ChangeState(SCE_ZIG_COMMENTLINETOP);
+				} else if (sc.ch == '/' && sc.chNext != '/') {
 					sc.ChangeState(SCE_ZIG_COMMENTLINEDOC);
 				}
 			} else if (sc.Match('\\', '\\')) {

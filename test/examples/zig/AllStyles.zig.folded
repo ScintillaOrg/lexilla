@@ -272,4 +272,7 @@
  0 400 400   
  0 400 400   const optional_value: ?i32 = null;
  0 400 400   
+ 2 400 401 + //! This module provides functions for retrieving the current date and
+ 0 401 401 | //! time with varying degrees of precision and accuracy. It does not
+ 0 401 400 | //! depend on libc, but will use functions from it if available.
  0 400   0   

@@ -272,3 +272,6 @@ fn charToDigit(c: u8) u8 {
 
 const optional_value: ?i32 = null;
 
+//! This module provides functions for retrieving the current date and
+//! time with varying degrees of precision and accuracy. It does not
+//! depend on libc, but will use functions from it if available.
