@@ -134,7 +134,7 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 		case SCE_ZIG_BUILTIN_FUNCTION:
 			if (!IsIdentifierCharEx(sc.ch)) {
 				if (sc.state == SCE_ZIG_IDENTIFIER) {
-					char s[128];
+					char s[64];
 					sc.GetCurrent(s, sizeof(s));
 					if (keywordLists[KeywordIndex_Primary]->InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_PRIMARY);
