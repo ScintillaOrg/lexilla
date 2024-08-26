@@ -96,6 +96,11 @@ enum {
 	ZigLineStateMaskMultilineString = 1 << 1, // multiline string
 };
 
+enum class KeywordType {
+	None = SCE_ZIG_DEFAULT,
+	Function = SCE_ZIG_FUNCTION,
+};
+
 enum {
 	KeywordIndex_Primary = 0,
 	KeywordIndex_Secondary = 1,
@@ -112,6 +117,7 @@ const char *const zigWordListDesc[] = {
 };
 
 void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *keywordLists[], Accessor &styler) {
+	KeywordType kwType = KeywordType::None;
 	int visibleChars = 0;
 	int lineState = 0;
 	EscapeSequence escSeq;
@@ -136,8 +142,14 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 				if (sc.state == SCE_ZIG_IDENTIFIER) {
 					char s[64];
 					sc.GetCurrent(s, sizeof(s));
-					if (keywordLists[KeywordIndex_Primary]->InList(s)) {
+					if (kwType != KeywordType::None) {
+						sc.ChangeState(static_cast<int>(kwType));
+					} else if (keywordLists[KeywordIndex_Primary]->InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_PRIMARY);
+						kwType = KeywordType::None;
+						if (strcmp(s, "fn") == 0) {
+							kwType = KeywordType::Function;
+						}
 					} else if (keywordLists[KeywordIndex_Secondary]->InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_SECONDARY);
 					} else if (keywordLists[KeywordIndex_Tertiary]->InList(s)) {
@@ -145,6 +157,9 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 					} else if (keywordLists[KeywordIndex_Type]->InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_TYPE);
 					}
+				}
+				if (sc.state != SCE_ZIG_KW_PRIMARY) {
+					kwType = KeywordType::None;
 				}
 				sc.SetState(SCE_ZIG_DEFAULT);
 			}
@@ -230,6 +245,7 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 		if (sc.atLineEnd) {
 			styler.SetLineState(sc.currentLine, lineState);
 			lineState = 0;
+			kwType = KeywordType::None;
 			visibleChars = 0;
 		}
 		sc.Forward();
