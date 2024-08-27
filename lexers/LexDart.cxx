@@ -507,10 +507,10 @@ void FoldDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, 
 		case SCE_DART_TRIPLE_RAWSTRING_DQ:
 		case SCE_DART_TRIPLE_STRING_SQ:
 		case SCE_DART_TRIPLE_STRING_DQ:
-			if (style != stylePrev) {
+			if (style != stylePrev && !AnyOf(stylePrev, SCE_DART_ESCAPECHAR, SCE_DART_OPERATOR_STRING, SCE_DART_IDENTIFIER_STRING)) {
 				levelNext++;
 			}
-			if (style != styleNext) {
+			if (style != styleNext && !AnyOf(styleNext, SCE_DART_ESCAPECHAR, SCE_DART_OPERATOR_STRING, SCE_DART_IDENTIFIER_STRING)) {
 				levelNext--;
 			}
 			break;

@@ -316,3 +316,19 @@ ${foo(
 "$bar"
 )}
 multi-line string.""";
+
+var s1 = """multi
+line
+\n
+strings
+""";
+
+var s2 = """multi-line
+$x
+strings
+""";
+
+var s3 = """multi-line
+${x}
+strings
+""";
