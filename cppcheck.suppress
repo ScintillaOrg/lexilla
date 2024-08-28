@@ -73,6 +73,7 @@ variableScope:lexilla/lexers/LexCSS.cxx
 knownConditionTrueFalse:lexilla/lexers/LexDataflex.cxx
 constParameterReference:lexilla/lexers/LexDataflex.cxx
 variableScope:lexilla/lexers/LexDataflex.cxx
+constParameterReference:lexilla/lexers/LexDart.cxx
 knownConditionTrueFalse:lexilla/lexers/LexECL.cxx
 variableScope:lexilla/lexers/LexECL.cxx
 constParameter:lexilla/lexers/LexEDIFACT.cxx
