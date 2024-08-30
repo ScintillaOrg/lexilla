@@ -103,13 +103,12 @@ script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start,
 		return eScriptJS;
 	if (Contains(s, "php"))
 		return eScriptPHP;
-	if (Contains(s, "xml")) {
-		const size_t xml = s.find("xml");
-		if (xml != std::string::npos) {
-			for (size_t t = 0; t < xml; t++) {
-				if (!IsASpace(s[t])) {
-					return prevValue;
-				}
+
+	const size_t xml = s.find("xml");
+	if (xml != std::string::npos) {
+		for (size_t t = 0; t < xml; t++) {
+			if (!IsASpace(s[t])) {
+				return prevValue;
 			}
 		}
 		return eScriptXML;
