@@ -91,7 +91,7 @@ bool Contains(const std::string &s, std::string_view search) noexcept {
 	return s.find(search) != std::string::npos;
 }
 
-script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_PositionU end, script_type prevValue) {
+script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start, Sci_PositionU end, script_type prevValue) {
 	const std::string s = styler.GetRangeLowered(start, end+1);
 	if (Contains(s, "vbs"))
 		return eScriptVBS;
@@ -118,7 +118,7 @@ script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_P
 	return prevValue;
 }
 
-int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
+int PrintScriptingIndicatorOffset(const Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
 	int iResult = 0;
 	const std::string s = styler.GetRangeLowered(start, end+1);
 	if (0 == strncmp(s.c_str(), "php", 3)) {
@@ -454,12 +454,12 @@ void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &k
 	styler.ColourTo(end, chAttr);
 }
 
-bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
+bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const Accessor &styler) {
 	const std::string s = styler.GetRange(start, end + 1);
 	return keywords.InList(s);
 }
 
-bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
+bool isWordCdata(Sci_PositionU start, Sci_PositionU end, const Accessor &styler) {
 	const std::string s = styler.GetRange(start, end + 1);
 	return s == "[CDATA[";
 }
@@ -685,7 +685,7 @@ constexpr bool IsPHPEntryState(int state) noexcept {
 	return !(isPHPStringState(state) || IsScriptCommentState(state) || AnyOf(state, SCE_H_ASPAT, SCE_HPHP_COMMENT, SCE_HPHP_COMMENTLINE));
 }
 
-bool IsPHPStart(AllowPHP allowPHP, Accessor &styler, Sci_PositionU start) {
+bool IsPHPStart(AllowPHP allowPHP, const Accessor &styler, Sci_PositionU start) {
 	if (allowPHP == AllowPHP::None) {
 		return false;
 	}
