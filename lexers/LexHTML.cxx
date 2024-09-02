@@ -117,13 +117,8 @@ script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start,
 	return prevValue;
 }
 
-int PrintScriptingIndicatorOffset(const Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
-	int iResult = 0;
-	const std::string s = styler.GetRangeLowered(start, end+1);
-	if (0 == strncmp(s.c_str(), "php", 3)) {
-		iResult = 3;
-	}
-	return iResult;
+int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start) {
+	return styler.MatchIgnoreCase(start, "php") ? 3 : 0;
 }
 
 script_type ScriptOfState(int state) noexcept {
@@ -1503,7 +1498,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			beforePreProc = state;
 			i++;
 			visibleChars++;
-			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 6);
+			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2);
 			if (scriptLanguage == eScriptXML)
 				styler.ColourTo(i, SCE_H_XMLSTART);
 			else
