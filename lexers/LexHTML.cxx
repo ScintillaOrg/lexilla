@@ -117,6 +117,16 @@ script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start,
 	return prevValue;
 }
 
+script_type segIsScriptInstruction(Accessor &styler, Sci_PositionU start, bool isXml) {
+	if (styler.MatchIgnoreCase(start, "php")) {
+		return eScriptPHP;
+	}
+	if (isXml || styler.MatchIgnoreCase(start, "xml")) {
+		return eScriptXML;
+	}
+	return eScriptPHP;
+}
+
 int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start) {
 	return styler.MatchIgnoreCase(start, "php") ? 3 : 0;
 }
@@ -1492,7 +1502,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		// handle the start of PHP pre-processor = Non-HTML
 		else if ((ch == '<') && (chNext == '?') && IsPHPEntryState(state) && IsPHPStart(allowPHP, styler, i)) {
  			beforeLanguage = scriptLanguage;
-			scriptLanguage = segIsScriptingIndicator(styler, i + 2, i + 6, isXml ? eScriptXML : eScriptPHP);
+			scriptLanguage = segIsScriptInstruction(styler, i + 2, isXml);
 			if ((scriptLanguage != eScriptPHP) && (isStringState(state) || (state==SCE_H_COMMENT))) continue;
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
