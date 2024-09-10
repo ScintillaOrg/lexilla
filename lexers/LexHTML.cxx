@@ -189,8 +189,10 @@ constexpr bool isStringState(int state) noexcept {
 	switch (state) {
 	case SCE_HJ_DOUBLESTRING:
 	case SCE_HJ_SINGLESTRING:
+	case SCE_HJ_REGEX:
 	case SCE_HJA_DOUBLESTRING:
 	case SCE_HJA_SINGLESTRING:
+	case SCE_HJA_REGEX:
 	case SCE_HB_STRING:
 	case SCE_HBA_STRING:
 	case SCE_HP_STRING:
@@ -1340,7 +1342,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case eScriptPHP:
 				//not currently supported				case eScriptVBS:
 
-				if (!AnyOf(state, SCE_HPHP_COMMENT, SCE_HPHP_COMMENTLINE, SCE_HJ_REGEX, SCE_HJ_COMMENT, SCE_HJ_COMMENTLINE, SCE_HJ_COMMENTDOC) &&
+				if (!AnyOf(state, SCE_HPHP_COMMENT, SCE_HPHP_COMMENTLINE, SCE_HJ_COMMENT, SCE_HJ_COMMENTLINE, SCE_HJ_COMMENTDOC) &&
 				    !isStringState(state)) {
 				//Platform::DebugPrintf("state=%d, StateToPrint=%d, initStyle=%d\n", state, StateToPrint, initStyle);
 				//if ((state == SCE_HPHP_OPERATOR) || (state == SCE_HPHP_DEFAULT) || (state == SCE_HJ_SYMBOLS) || (state == SCE_HJ_START) || (state == SCE_HJ_DEFAULT)) {
