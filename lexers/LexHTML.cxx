@@ -521,8 +521,9 @@ constexpr bool IsCommentState(const int state) noexcept {
 }
 
 constexpr bool IsScriptCommentState(const int state) noexcept {
-	return AnyOf(state, SCE_HJ_COMMENT, SCE_HJ_COMMENTLINE, SCE_HJA_COMMENT,
-		   SCE_HJA_COMMENTLINE, SCE_HB_COMMENTLINE, SCE_HBA_COMMENTLINE);
+	return AnyOf(state, SCE_HJ_COMMENT, SCE_HJ_COMMENTDOC, SCE_HJ_COMMENTLINE,
+		   SCE_HJA_COMMENT, SCE_HJA_COMMENTDOC, SCE_HJA_COMMENTLINE,
+		   SCE_HB_COMMENTLINE, SCE_HBA_COMMENTLINE);
 }
 
 constexpr bool isLineEnd(int ch) noexcept {
