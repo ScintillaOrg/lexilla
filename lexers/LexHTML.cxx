@@ -2210,14 +2210,11 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_HJ_WORD;
 			} else if (ch == '/' && chNext == '*') {
 				styler.ColourTo(i - 1, StateToPrint);
+				i++;
 				if (chNext2 == '*')
 					state = SCE_HJ_COMMENTDOC;
 				else
 					state = SCE_HJ_COMMENT;
-				if (chNext2 == '/') {
-					// Eat the * so it isn't used for the end of the comment
-					i++;
-				}
 			} else if (ch == '/' && chNext == '/') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HJ_COMMENTLINE;
@@ -2256,6 +2253,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				//styler.ColourTo(i - 1, eHTJSKeyword);
 				state = SCE_HJ_DEFAULT;
 				if (ch == '/' && chNext == '*') {
+					i++;
 					if (chNext2 == '*')
 						state = SCE_HJ_COMMENTDOC;
 					else
@@ -2718,7 +2716,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 		} else if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
 			if (ch == '/' && chNext == '*') {
-				if (styler.SafeGetCharAt(i + 2) == '*')
+				i++;
+				if (styler.SafeGetCharAt(i + 1) == '*')
 					state = SCE_HJ_COMMENTDOC;
 				else
 					state = SCE_HJ_COMMENT;
