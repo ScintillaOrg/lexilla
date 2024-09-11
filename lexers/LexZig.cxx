@@ -9,9 +9,11 @@
 #include <cassert>
 #include <cstring>
 
-#include <algorithm>
 #include <string>
 #include <string_view>
+#include <vector>
+#include <algorithm>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -23,7 +25,10 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
@@ -96,6 +101,15 @@ enum {
 	ZigLineStateMaskMultilineString = 1 << 1, // multiline string
 };
 
+struct FoldLineState {
+	int lineComment;
+	int multilineString;
+	constexpr explicit FoldLineState(int lineState) noexcept:
+		lineComment(lineState & ZigLineStateMaskLineComment),
+		multilineString((lineState >> 1) & 1) {
+	}
+};
+
 enum class KeywordType {
 	None = SCE_ZIG_DEFAULT,
 	Function = SCE_ZIG_FUNCTION,
@@ -108,6 +122,11 @@ enum {
 	KeywordIndex_Type = 3,
 };
 
+// Options used for LexerZig
+struct OptionsZig {
+	bool fold = false;
+};
+
 const char *const zigWordListDesc[] = {
 	"Primary keywords",
 	"Secondary keywords",
@@ -116,7 +135,127 @@ const char *const zigWordListDesc[] = {
 	nullptr
 };
 
-void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *keywordLists[], Accessor &styler) {
+struct OptionSetZig : public OptionSet<OptionsZig> {
+	OptionSetZig() {
+		DefineProperty("fold", &OptionsZig::fold);
+
+		DefineWordListSets(zigWordListDesc);
+	}
+};
+
+LexicalClass lexicalClasses[] = {
+	// Lexer ZIG SCLEX_ZIG SCE_ZIG_:
+	0, "SCE_ZIG_DEFAULT", "default", "White space",
+	1, "SCE_ZIG_COMMENTLINE", "comment line", "Comment: //",
+	2, "SCE_ZIG_COMMENTLINEDOC", "comment line documentation", "Comment: ///",
+	3, "SCE_ZIG_COMMENTLINETOP", "comment line documentation", "Comment: //!",
+	4, "SCE_ZIG_NUMBER", "literal numeric", "Number",
+	5, "SCE_ZIG_OPERATOR", "operator", "Operator",
+	6, "SCE_ZIG_CHARACTER", "literal string character", "Single quoted string",
+	7, "SCE_ZIG_STRING", "literal string", "Double quoted string",
+	8, "SCE_ZIG_MULTISTRING", "literal string multiline", "Multiline string introduced by two backslashes",
+	9, "SCE_ZIG_ESCAPECHAR", "literal string escapesequence", "Escape sequence",
+	10, "SCE_ZIG_IDENTIFIER", "identifier", "Identifier",
+	11, "SCE_ZIG_FUNCTION", "identifier", "Function definition",
+	12, "SCE_ZIG_BUILTIN_FUNCTION", "identifier", "Builtin function",
+	13, "SCE_ZIG_KW_PRIMARY", "keyword", "Primary keywords",
+	14, "SCE_ZIG_KW_SECONDARY", "identifier", "Secondary keywords",
+	15, "SCE_ZIG_KW_TERTIARY", "identifier", "Tertiary keywords",
+	16, "SCE_ZIG_KW_TYPE", "identifier", "Global types",
+};
+
+class LexerZig : public DefaultLexer {
+	WordList keywordsPrimary;
+	WordList keywordsSecondary;
+	WordList keywordsTertiary;
+	WordList keywordsTypes;
+	OptionsZig options;
+	OptionSetZig osZig;
+public:
+	LexerZig(const char *languageName_, int language_) :
+		DefaultLexer(languageName_, language_, lexicalClasses, std::size(lexicalClasses)) {
+	}
+	// Deleted so LexerZig objects can not be copied.
+	LexerZig(const LexerZig &) = delete;
+	LexerZig(LexerZig &&) = delete;
+	void operator=(const LexerZig &) = delete;
+	void operator=(LexerZig &&) = delete;
+	~LexerZig() override = default;
+
+	void SCI_METHOD Release() override {
+		delete this;
+	}
+	int SCI_METHOD Version() const override {
+		return lvRelease5;
+	}
+	const char *SCI_METHOD PropertyNames() override {
+		return osZig.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osZig.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osZig.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osZig.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osZig.DescribeWordListSets();
+	}
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	void *SCI_METHOD PrivateCall(int, void *) override {
+		return nullptr;
+	}
+
+	void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle);
+	Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite);
+
+	static ILexer5 *LexerFactoryZig() {
+		return new LexerZig("zig", SCLEX_ZIG);
+	}
+};
+
+Sci_Position SCI_METHOD LexerZig::PropertySet(const char *key, const char *val) {
+	if (osZig.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
+
+Sci_Position SCI_METHOD LexerZig::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywordsPrimary;
+		break;
+	case 1:
+		wordListN = &keywordsSecondary;
+		break;
+	case 2:
+		wordListN = &keywordsTertiary;
+		break;
+	case 3:
+		wordListN = &keywordsTypes;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN && wordListN->Set(wl, false)) {
+		firstModification = 0;
+	}
+	return firstModification;
+}
+
+void LexerZig::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) {
+	Accessor styler(pAccess, nullptr);
+
 	KeywordType kwType = KeywordType::None;
 	int visibleChars = 0;
 	int lineState = 0;
@@ -144,17 +283,17 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 					sc.GetCurrent(s, sizeof(s));
 					if (kwType != KeywordType::None) {
 						sc.ChangeState(static_cast<int>(kwType));
-					} else if (keywordLists[KeywordIndex_Primary]->InList(s)) {
+					} else if (keywordsPrimary.InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_PRIMARY);
 						kwType = KeywordType::None;
 						if (strcmp(s, "fn") == 0) {
 							kwType = KeywordType::Function;
 						}
-					} else if (keywordLists[KeywordIndex_Secondary]->InList(s)) {
+					} else if (keywordsSecondary.InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_SECONDARY);
-					} else if (keywordLists[KeywordIndex_Tertiary]->InList(s)) {
+					} else if (keywordsTertiary.InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_TERTIARY);
-					} else if (keywordLists[KeywordIndex_Type]->InList(s)) {
+					} else if (keywordsTypes.InList(s)) {
 						sc.ChangeState(SCE_ZIG_KW_TYPE);
 					}
 				}
@@ -254,16 +393,11 @@ void ColouriseZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 	sc.Complete();
 }
 
-struct FoldLineState {
-	int lineComment;
-	int multilineString;
-	constexpr explicit FoldLineState(int lineState) noexcept:
-		lineComment(lineState & ZigLineStateMaskLineComment),
-		multilineString((lineState >> 1) & 1) {
-	}
-};
+void LexerZig::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) {
+	if (!options.fold)
+		return;
 
-void FoldZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *[] /*keywordLists*/, Accessor &styler) {
+	Accessor styler(pAccess, nullptr);
 	const Sci_PositionU endPos = startPos + lengthDoc;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	FoldLineState foldPrev(0);
@@ -319,4 +453,4 @@ void FoldZigDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, W
 
 }  // unnamed namespace end
 
-extern const LexerModule lmZig(SCLEX_ZIG, ColouriseZigDoc, "zig", FoldZigDoc, zigWordListDesc);
+extern const LexerModule lmZig(SCLEX_ZIG, LexerZig::LexerFactoryZig, "zig", zigWordListDesc);
