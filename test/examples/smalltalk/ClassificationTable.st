@@ -44,3 +44,9 @@ classificationBlock
 "
 foo
   ^ Array with: 1 with: 2 with: false with: self with: super with: nil.
+
+" Issue 274: A decimal separator is not required for scaled decimal numbers"
+32.0s2
+4.0e3
+32s2
+4e3

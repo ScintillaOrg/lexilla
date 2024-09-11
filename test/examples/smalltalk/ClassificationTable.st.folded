@@ -45,3 +45,9 @@
  0 400   0   foo
  0 400   0     ^ Array with: 1 with: 2 with: false with: self with: super with: nil.
  0 400   0   
+ 0 400   0   " Issue 274: A decimal separator is not required for scaled decimal numbers"
+ 0 400   0   32.0s2
+ 0 400   0   4.0e3
+ 0 400   0   32s2
+ 0 400   0   4e3
+ 0 400   0   
