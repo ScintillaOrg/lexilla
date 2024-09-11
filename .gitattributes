@@ -59,6 +59,7 @@
 **.roff text
 **.rs text
 **.sql text
+**.st text
 **.tcl text
 **.toml text
 **.tsql text
