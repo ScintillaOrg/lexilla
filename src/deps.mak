@@ -472,7 +472,9 @@ $(DIR_O)/LexDart.o: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexDataflex.o: \
 	../lexers/LexDataflex.cxx \
 	../../scintilla/include/ILexer.h \
