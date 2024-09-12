@@ -400,6 +400,12 @@ void LexerZig::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyl
 	Accessor styler(pAccess, nullptr);
 	const Sci_PositionU endPos = startPos + lengthDoc;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
+	// Backtrack to previous line in case it's needed to fix its fold status
+	if (lineCurrent > 0) {
+		lineCurrent--;
+		startPos = styler.LineStart(lineCurrent);
+		initStyle = (startPos > 0) ? styler.StyleIndexAt(startPos - 1) : 0;
+	}
 	FoldLineState foldPrev(0);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0) {
