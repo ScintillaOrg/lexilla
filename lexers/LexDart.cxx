@@ -12,6 +12,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 #include "ILexer.h"
@@ -24,7 +25,10 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
@@ -81,27 +85,6 @@ struct EscapeSequence {
 	}
 };
 
-enum {
-	DartLineStateMaskLineComment = 1,			// line comment
-	DartLineStateMaskImport = (1 << 1),			// import
-	DartLineStateMaskInterpolation = (1 << 2),	// string interpolation
-};
-
-enum {
-	KeywordIndex_Primary = 0,
-	KeywordIndex_Secondary = 1,
-	KeywordIndex_Tertiary = 2,
-	KeywordIndex_Type = 3,
-};
-
-const char *const dartWordListDesc[] = {
-	"Primary keywords",
-	"Secondary keywords",
-	"Tertiary keywords",
-	"Global type definitions",
-	nullptr
-};
-
 constexpr bool IsDartIdentifierStart(int ch) noexcept {
 	return IsIdentifierStart(ch) || ch == '$';
 }
@@ -149,13 +132,170 @@ constexpr int GetStringQuote(int state) noexcept {
 	return IsDoubleQuoted(state) ? '\"' : '\'';
 }
 
+enum {
+	DartLineStateMaskLineComment = 1,			// line comment
+	DartLineStateMaskImport = (1 << 1),			// import
+	DartLineStateMaskInterpolation = (1 << 2),	// string interpolation
+};
+
 // string interpolating state
 struct InterpolatingState {
 	int state;
 	int braceCount;
 };
 
-void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle) {
+struct FoldLineState {
+	int lineComment;
+	int packageImport;
+	constexpr explicit FoldLineState(int lineState) noexcept:
+		lineComment(lineState & DartLineStateMaskLineComment),
+		packageImport((lineState >> 1) & 1) {
+	}
+};
+
+// Options used for LexerDart
+struct OptionsDart {
+	bool fold = false;
+};
+
+const char * const dartWordListDesc[] = {
+	"Primary keywords",
+	"Secondary keywords",
+	"Tertiary keywords",
+	"Global type definitions",
+	nullptr
+};
+
+struct OptionSetDart : public OptionSet<OptionsDart> {
+	OptionSetDart() {
+		DefineProperty("fold", &OptionsDart::fold);
+
+		DefineWordListSets(dartWordListDesc);
+	}
+};
+
+
+LexicalClass lexicalClasses[] = {
+	// Lexer DART SCLEX_DART SCE_DART_:
+	0, "SCE_DART_DEFAULT", "default", "White space",
+	1, "SCE_DART_COMMENTLINE", "comment line", "Comment: //",
+	2, "SCE_DART_COMMENTLINEDOC", "comment line documentation", "Comment: ///",
+	3, "SCE_DART_COMMENTBLOCK", "comment", "Comment: /* */",
+	4, "SCE_DART_COMMENTBLOCKDOC", "comment documentation", "Comment: /** */",
+	5, "SCE_DART_STRING_SQ", "literal string", "Single quoted string",
+	6, "SCE_DART_STRING_DQ", "literal string", "Double quoted string",
+	7, "SCE_DART_TRIPLE_STRING_SQ", "literal string multiline", "Single quoted multiline string",
+	8, "SCE_DART_TRIPLE_STRING_DQ", "literal string multiline", "Double quoted multiline string",
+	9, "SCE_DART_RAWSTRING_SQ", "literal string raw", "Single quoted raw string",
+	10, "SCE_DART_RAWSTRING_DQ", "literal string raw", "Double quoted raw string",
+	11, "SCE_DART_TRIPLE_RAWSTRING_SQ", "literal string multiline raw", "Single quoted multiline raw string",
+	12, "SCE_DART_TRIPLE_RAWSTRING_DQ", "literal string multiline raw", "Double quoted multiline raw string",
+	13, "SCE_DART_ESCAPECHAR", "literal string escapesequence", "Escape sequence",
+	14, "SCE_DART_IDENTIFIER", "identifier", "Identifier",
+	15, "SCE_DART_IDENTIFIER_STRING", "identifier interpolated", "Identifier following $ inside strings",
+	16, "SCE_DART_OPERATOR", "operator", "Operator",
+	17, "SCE_DART_OPERATOR_STRING", "operator interpolated", "Braces following $ inside string",
+	18, "SCE_DART_SYMBOL_IDENTIFIER", "identifier symbol", "Symbol name introduced by #",
+	19, "SCE_DART_SYMBOL_OPERATOR", "operator symbol", "Operator introduced by #",
+	20, "SCE_DART_NUMBER", "literal numeric", "Number",
+	21, "SCE_DART_KEY", "key", "Keys preceding ':' and named parameters",
+	22, "SCE_DART_METADATA", "preprocessor", "Metadata introduced by @",
+	23, "SCE_DART_KW_PRIMARY", "keyword", "Primary keywords",
+	24, "SCE_DART_KW_SECONDARY", "identifier", "Secondary keywords",
+	25, "SCE_DART_KW_TERTIARY", "identifier", "Tertiary keywords",
+	26, "SCE_DART_KW_TYPE", "identifier", "Global types",
+};
+
+class LexerDart : public DefaultLexer {
+	WordList keywordsPrimary;
+	WordList keywordsSecondary;
+	WordList keywordsTertiary;
+	WordList keywordsTypes;
+	OptionsDart options;
+	OptionSetDart osDart;
+public:
+	LexerDart(const char *languageName_, int language_) :
+		DefaultLexer(languageName_, language_, lexicalClasses, std::size(lexicalClasses)) {
+	}
+	// Deleted so LexerDart objects can not be copied.
+	LexerDart(const LexerDart &) = delete;
+	LexerDart(LexerDart &&) = delete;
+	void operator=(const LexerDart &) = delete;
+	void operator=(LexerDart &&) = delete;
+	~LexerDart() override = default;
+
+	void SCI_METHOD Release() override {
+		delete this;
+	}
+	int SCI_METHOD Version() const override {
+		return lvRelease5;
+	}
+	const char *SCI_METHOD PropertyNames() override {
+		return osDart.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osDart.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osDart.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osDart.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osDart.DescribeWordListSets();
+	}
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	void *SCI_METHOD PrivateCall(int, void *) override {
+		return nullptr;
+	}
+
+	void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle);
+	Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite);
+
+	static ILexer5 *LexerFactoryDart() {
+		return new LexerDart("dart", SCLEX_DART);
+	}
+};
+
+Sci_Position SCI_METHOD LexerDart::PropertySet(const char *key, const char *val) {
+	if (osDart.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
+
+Sci_Position SCI_METHOD LexerDart::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywordsPrimary;
+		break;
+	case 1:
+		wordListN = &keywordsSecondary;
+		break;
+	case 2:
+		wordListN = &keywordsTertiary;
+		break;
+	case 3:
+		wordListN = &keywordsTypes;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN && wordListN->Set(wl, false)) {
+		firstModification = 0;
+	}
+	return firstModification;
+}
+
+void LexerDart::BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &startPos, Sci_Position &lengthDoc, int &initStyle) {
 	const Sci_Position currentLine = styler.GetLine(startPos);
 	if (currentLine != 0) {
 		Sci_Position line = currentLine - 1;
@@ -176,7 +316,7 @@ void BacktrackToStart(const LexAccessor &styler, int stateMask, Sci_PositionU &s
 	}
 }
 
-Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite) {
+Sci_PositionU LexerDart::LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int &chPrevNonWhite, int &stylePrevNonWhite) {
 	do {
 		--startPos;
 		const unsigned style = styler.StyleAt(startPos);
@@ -189,7 +329,9 @@ Sci_PositionU LookbackNonWhite(LexAccessor &styler, Sci_PositionU startPos, int 
 	return startPos;
 }
 
-void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *keywordLists[], Accessor &styler) {
+void LexerDart::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) {
+	Accessor styler(pAccess, nullptr);
+
 	int lineStateLineType = 0;
 	int commentLevel = 0;	// nested block comment level
 
@@ -254,18 +396,18 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 					if (state == SCE_DART_IDENTIFIER_STRING) {
 						sc.SetState(escSeq.outerState);
 						continue;
-					} else if (keywordLists[KeywordIndex_Primary]->InList(s)) {
+					} else if (keywordsPrimary.InList(s)) {
 						sc.ChangeState(SCE_DART_KW_PRIMARY);
 						if (strcmp(s, "import") == 0 || strcmp(s, "part") == 0) {
 							if (visibleChars == sc.LengthCurrent()) {
 								lineStateLineType = DartLineStateMaskImport;
 							}
 						}
-					} else if (keywordLists[KeywordIndex_Secondary]->InList(s)) {
+					} else if (keywordsSecondary.InList(s)) {
 						sc.ChangeState(SCE_DART_KW_SECONDARY);
-					} else if (keywordLists[KeywordIndex_Tertiary]->InList(s)) {
+					} else if (keywordsTertiary.InList(s)) {
 						sc.ChangeState(SCE_DART_KW_TERTIARY);
-					} else if (keywordLists[KeywordIndex_Type]->InList(s)) {
+					} else if (keywordsTypes.InList(s)) {
 						sc.ChangeState(SCE_DART_KW_TYPE);
 					} else if (state == SCE_DART_IDENTIFIER && sc.ch == ':') {
 						if (chBefore == ',' || chBefore == '{' || chBefore == '(') {
@@ -456,16 +598,11 @@ void ColouriseDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 	sc.Complete();
 }
 
-struct FoldLineState {
-	int lineComment;
-	int packageImport;
-	constexpr explicit FoldLineState(int lineState) noexcept:
-		lineComment(lineState & DartLineStateMaskLineComment),
-		packageImport((lineState >> 1) & 1) {
-	}
-};
+void LexerDart::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) {
+	if (!options.fold)
+		return;
 
-void FoldDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, WordList *[] /*keywordLists*/, Accessor &styler) {
+	Accessor styler(pAccess, nullptr);
 	const Sci_PositionU endPos = startPos + lengthDoc;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	FoldLineState foldPrev(0);
@@ -553,4 +690,4 @@ void FoldDartDoc(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, 
 
 }  // unnamed namespace end
 
-extern const LexerModule lmDart(SCLEX_DART, ColouriseDartDoc, "dart", FoldDartDoc, dartWordListDesc);
+extern const LexerModule lmDart(SCLEX_DART, LexerDart::LexerFactoryDart, "dart", dartWordListDesc);
