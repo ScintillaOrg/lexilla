@@ -605,6 +605,15 @@ void LexerDart::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initSty
 	Accessor styler(pAccess, nullptr);
 	const Sci_PositionU endPos = startPos + lengthDoc;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
+	while (lineCurrent > 0) {
+		lineCurrent--;
+		startPos = styler.LineStart(lineCurrent);
+		initStyle = (startPos > 0) ? styler.StyleIndexAt(startPos) : 0;
+		if (initStyle != SCE_DART_COMMENTBLOCKDOC && initStyle != SCE_DART_COMMENTBLOCK &&
+			initStyle != SCE_DART_TRIPLE_RAWSTRING_SQ && initStyle != SCE_DART_TRIPLE_RAWSTRING_DQ &&
+			initStyle != SCE_DART_TRIPLE_STRING_SQ && initStyle != SCE_DART_TRIPLE_STRING_DQ)
+			break;
+	}
 	FoldLineState foldPrev(0);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0) {
