@@ -159,6 +159,7 @@
 		3D044C4CA34C6FD7E58E0091 /* LexTOML.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 42BC44CCB57D4E78DEE6E358 /* LexTOML.cxx */; };
 		14314DCD945FDA90481F0A0D /* LexTroff.cxx in Sources */ = {isa = PBXBuildFile; fileRef = D2EF4913B8F91656C787F584 /* LexTroff.cxx */; };
 		0DFB4F5F94B018794ADB389D /* LexDart.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1F274010A7943C43BA265511 /* LexDart.cxx */; };
+		CEC8496B8D9712E6EEDBC301 /* LexZig.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 71684CF6BCC80369BCE2F893 /* LexZig.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -316,6 +317,7 @@
 		42BC44CCB57D4E78DEE6E358 /* LexTOML.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTOML.cxx; path = ../../lexers/LexTOML.cxx; sourceTree = SOURCE_ROOT; };
 		D2EF4913B8F91656C787F584 /* LexTroff.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTroff.cxx; path = ../../lexers/LexTroff.cxx; sourceTree = SOURCE_ROOT; };
 		1F274010A7943C43BA265511 /* LexDart.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDart.cxx; path = ../../lexers/LexDart.cxx; sourceTree = SOURCE_ROOT; };
+		71684CF6BCC80369BCE2F893 /* LexZig.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexZig.cxx; path = ../../lexers/LexZig.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -481,6 +483,7 @@
 				28BA731E24E34D9500272C2D /* LexVisualProlog.cxx */,
 				28BA730A24E34D9400272C2D /* LexX12.cxx */,
 				28BA72E724E34D9200272C2D /* LexYAML.cxx */,
+				71684CF6BCC80369BCE2F893 /* LexZig.cxx */,
 			);
 			name = Lexers;
 			sourceTree = "<group>";
@@ -741,6 +744,7 @@
 				3D044C4CA34C6FD7E58E0091 /* LexTOML.cxx in Sources */,
 				14314DCD945FDA90481F0A0D /* LexTroff.cxx in Sources */,
 				0DFB4F5F94B018794ADB389D /* LexDart.cxx in Sources */,
+				CEC8496B8D9712E6EEDBC301 /* LexZig.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
