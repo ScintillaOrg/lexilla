@@ -442,8 +442,12 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 				break;
 			case SCE_FSHARP_LINENUM:
 			case SCE_FSHARP_PREPROCESSOR:
-			case SCE_FSHARP_COMMENTLINE:
 				if (sc.MatchLineEnd()) {
+					state = SCE_FSHARP_DEFAULT;
+				}
+				break;
+			case SCE_FSHARP_COMMENTLINE:
+				if (sc.atLineStart) {
 					state = SCE_FSHARP_DEFAULT;
 					advance = false;
 				}
@@ -667,7 +671,7 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 
 	for (Sci_PositionU i = start; i < endPos; i++) {
 		const Sci_Position currentPos = static_cast<Sci_Position>(i);
-		const bool atEOL = (currentPos == (lineStartNext - 1) || styler.SafeGetCharAt(currentPos) == '\r');
+		const bool atEOL = (currentPos == (lineStartNext - 1));
 		const bool atLineOrDocEnd = (atEOL || (i == (endPos - 1)));
 		const int stylePrev = style;
 		const char ch = chNext;
