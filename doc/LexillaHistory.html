@@ -620,6 +620,13 @@
 	<a href="https://github.com/ScintillaOrg/lexilla/issues/277">Issue #277</a>.
 	</li>
 	<li>
+	HTML: Improve SGML/DTD lexing.
+	Don't terminate SGML when &gt; inside quoted string.
+	Lex both [ and ] as SCE_H_SGML_DEFAULT.
+	Nested sections handled instead of switching to SCE_H_SGML_ERROR.
+	<a href="https://github.com/ScintillaOrg/lexilla/issues/272">Issue #272</a>.
+	</li>
+	<li>
 	PHP: Fix failure to recognize PHP start "&lt;?php' at end of document.
 	Caused by not capping retrieval range at document end causing no text to be retrieved.
 	<a href="https://github.com/ScintillaOrg/lexilla/issues/269">Issue #269</a>.

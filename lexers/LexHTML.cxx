@@ -498,9 +498,13 @@ constexpr int StateForScript(script_type scriptLanguage) noexcept {
 	return Result;
 }
 
+constexpr int defaultStateForSGML(script_type scriptLanguage) noexcept {
+	return (scriptLanguage == eScriptSGMLblock)? SCE_H_SGML_BLOCK_DEFAULT : SCE_H_SGML_DEFAULT;
+}
+
 constexpr bool issgmlwordchar(int ch) noexcept {
 	return !IsASCII(ch) ||
-		(IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == ':' || ch == '!' || ch == '#' || ch == '[');
+		(IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == ':' || ch == '!' || ch == '#');
 }
 
 constexpr bool IsPhpWordStart(int ch) noexcept {
@@ -1212,7 +1216,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			length += startPos - backLineStart;
 			startPos = backLineStart;
 		}
-		state = SCE_H_DEFAULT;
+		state = (startPos > 0) ? styler.StyleIndexAt(startPos - 1) : SCE_H_DEFAULT;
 	}
 	// String can be heredoc, must find a delimiter first. Reread from beginning of line containing the string, to get the correct lineState
 	if (isPHPStringState(state)) {
@@ -1257,6 +1261,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	script_type clientScript = static_cast<script_type>((lineState >> 8) & 0x0F); // 4 bits of script name
 	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
 	bool isLanguageType = (lineState >> 20) & 1; // type or language attribute for script tag
+	int sgmlBlockLevel = (lineState >> 21);
 
 	script_type scriptLanguage = ScriptOfState(state);
 	// If eNonHtmlScript coincides with SCE_H_COMMENT, assume eScriptComment
@@ -1417,7 +1422,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			                    ((aspScript & 0x0F) << 4) |
 			                    ((clientScript & 0x0F) << 8) |
 			                    ((beforePreProc & 0xFF) << 12) |
-			                    ((isLanguageType ? 1 : 0) << 20));
+			                    ((isLanguageType ? 1 : 0) << 20) |
+			                    (sgmlBlockLevel << 21));
 			lineCurrent++;
 			lineStartVisibleChars = 0;
 		}
@@ -1669,7 +1675,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		/////////////////////////////////////
 		// handle the start of SGML language (DTD)
-		else if (((scriptLanguage == eScriptNone) || (scriptLanguage == eScriptXML)) &&
+		else if (AnyOf(scriptLanguage, eScriptNone, eScriptXML, eScriptSGMLblock) &&
 				 (chPrev == '<') &&
 				 (ch == '!') &&
 				 (StateToPrint != SCE_H_CDATA) &&
@@ -1678,7 +1684,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				 (!IsScriptCommentState(StateToPrint))) {
 			beforePreProc = state;
 			styler.ColourTo(i - 2, StateToPrint);
-			if ((chNext == '-') && (chNext2 == '-')) {
+			if ((state != SCE_H_SGML_BLOCK_DEFAULT) && (chNext == '-') && (chNext2 == '-')) {
 				state = SCE_H_COMMENT; // wait for a pending command
 				styler.ColourTo(i + 2, SCE_H_COMMENT);
 				i += 2; // follow styling after the --
@@ -1694,12 +1700,18 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						ch = '-';
 					}
 				}
-			} else if (isWordCdata(i + 1, i + 7, styler)) {
+			} else if ((state != SCE_H_SGML_BLOCK_DEFAULT) && isWordCdata(i + 1, i + 7, styler)) {
 				state = SCE_H_CDATA;
 			} else {
 				styler.ColourTo(i, SCE_H_SGML_DEFAULT); // <! is default
+				beforeLanguage = scriptLanguage;
 				scriptLanguage = eScriptSGML;
-				state = SCE_H_SGML_COMMAND; // wait for a pending command
+				if ((chNext == '-') && (chNext2 == '-')) {
+					i += 2;
+					state = SCE_H_SGML_COMMENT;
+				} else {
+					state = (chNext == '[') ? SCE_H_SGML_DEFAULT : SCE_H_SGML_COMMAND; // wait for a pending command
+				}
 			}
 			// fold whole tag (-- when closing the tag)
 			if (foldHTMLPreprocessor || state == SCE_H_COMMENT || state == SCE_H_CDATA)
@@ -1770,7 +1782,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		else if ((!isMako && !isDjango && ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) &&
 				  (((scriptLanguage != eScriptNone) && stateAllowsTermination(state))) &&
 				  ((chNext == '>') && isPreProcessorEndTag(state, ch))) ||
-		         ((scriptLanguage == eScriptSGML) && (ch == '>') && (state != SCE_H_SGML_COMMENT))) {
+		         ((scriptLanguage == eScriptSGML) && (ch == '>') && !AnyOf(state, SCE_H_SGML_COMMENT, SCE_H_SGML_DOUBLESTRING, SCE_H_SGML_SIMPLESTRING))) {
 			if (state == SCE_H_ASPAT) {
 				aspScript = segIsScriptingIndicator(styler,
 				                                    styler.GetStartSegment(), i - 1, aspScript);
@@ -1858,41 +1870,36 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					styler.ColourTo(i - 2, StateToPrint);
 				}
 				state = SCE_H_SGML_COMMENT;
-			} else if (IsUpperOrLowerCase(ch) && (chPrev == '%')) {
-				styler.ColourTo(i - 2, StateToPrint);
+			} else if (ch == '%' && IsUpperOrLowerCase(chNext)) {
+				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_SGML_ENTITY;
 			} else if (ch == '#') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_SGML_SPECIAL;
 			} else if (ch == '[') {
 				styler.ColourTo(i - 1, StateToPrint);
+				styler.ColourTo(i, SCE_H_SGML_DEFAULT);
+				++sgmlBlockLevel;
 				scriptLanguage = eScriptSGMLblock;
 				state = SCE_H_SGML_BLOCK_DEFAULT;
 			} else if (ch == ']') {
-				if (scriptLanguage == eScriptSGMLblock) {
-					styler.ColourTo(i, StateToPrint);
+				if (sgmlBlockLevel > 0) {
+					--sgmlBlockLevel;
+					if (sgmlBlockLevel == 0) {
+						beforePreProc = SCE_H_DEFAULT;
+					}
+					styler.ColourTo(i - 1, StateToPrint);
+					styler.ColourTo(i, SCE_H_SGML_DEFAULT);
 					scriptLanguage = eScriptSGML;
 				} else {
 					styler.ColourTo(i - 1, StateToPrint);
 					styler.ColourTo(i, SCE_H_SGML_ERROR);
 				}
 				state = SCE_H_SGML_DEFAULT;
-			} else if (scriptLanguage == eScriptSGMLblock) {
-				if ((ch == '!') && (chPrev == '<')) {
-					styler.ColourTo(i - 2, StateToPrint);
-					styler.ColourTo(i, SCE_H_SGML_DEFAULT);
-					state = SCE_H_SGML_COMMAND;
-				} else if (ch == '>') {
-					styler.ColourTo(i - 1, StateToPrint);
-					styler.ColourTo(i, SCE_H_SGML_DEFAULT);
-				}
 			}
 			break;
 		case SCE_H_SGML_COMMAND:
-			if ((ch == '-') && (chPrev == '-')) {
-				styler.ColourTo(i - 2, StateToPrint);
-				state = SCE_H_SGML_COMMENT;
-			} else if (!issgmlwordchar(ch)) {
+			if (!issgmlwordchar(ch)) {
 				if (isWordHSGML(styler.GetStartSegment(), i - 1, keywordsSGML, styler)) {
 					styler.ColourTo(i - 1, StateToPrint);
 					state = SCE_H_SGML_1ST_PARAM;
@@ -1903,19 +1910,11 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_H_SGML_1ST_PARAM:
 			// wait for the beginning of the word
-			if ((ch == '-') && (chPrev == '-')) {
-				if (scriptLanguage == eScriptSGMLblock) {
-					styler.ColourTo(i - 2, SCE_H_SGML_BLOCK_DEFAULT);
-				} else {
-					styler.ColourTo(i - 2, SCE_H_SGML_DEFAULT);
-				}
+			if ((ch == '-') && (chNext == '-')) {
+				styler.ColourTo(i - 2, SCE_H_SGML_DEFAULT);
 				state = SCE_H_SGML_1ST_PARAM_COMMENT;
 			} else if (issgmlwordchar(ch)) {
-				if (scriptLanguage == eScriptSGMLblock) {
-					styler.ColourTo(i - 1, SCE_H_SGML_BLOCK_DEFAULT);
-				} else {
-					styler.ColourTo(i - 1, SCE_H_SGML_DEFAULT);
-				}
+				styler.ColourTo(i - 1, SCE_H_SGML_DEFAULT);
 				// find the length of the word
 				Sci_Position size = 1;
 				while (setHTMLWord.Contains(SafeGetUnsignedCharAt(styler, i + size)))
@@ -1924,11 +1923,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				i += size - 1;
 				visibleChars += size - 1;
 				ch = SafeGetUnsignedCharAt(styler, i);
-				if (scriptLanguage == eScriptSGMLblock) {
-					state = SCE_H_SGML_BLOCK_DEFAULT;
-				} else {
-					state = SCE_H_SGML_DEFAULT;
-				}
+				state = SCE_H_SGML_DEFAULT;
 				continue;
 			}
 			break;
@@ -1992,12 +1987,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_H_SGML_ENTITY:
-			if (ch == ';') {
-				styler.ColourTo(i, StateToPrint);
-				state = SCE_H_SGML_DEFAULT;
-			} else if (!(IsAlphaNumeric(ch)) && ch != '-' && ch != '.') {
-				styler.ColourTo(i, SCE_H_SGML_ERROR);
-				state = SCE_H_SGML_DEFAULT;
+			if (!(IsAlphaNumeric(ch)) && ch != '-' && ch != '.' && ch != '_') {
+				styler.ColourTo(i, ((ch == ';') ? StateToPrint : SCE_H_SGML_ERROR));
+				state = defaultStateForSGML(scriptLanguage);
 			}
 			break;
 		case SCE_H_ENTITY:
