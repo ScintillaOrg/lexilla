@@ -522,10 +522,6 @@ constexpr bool InTagState(int state) noexcept {
 	       SCE_H_DOUBLESTRING, SCE_H_SINGLESTRING);
 }
 
-constexpr bool IsCommentState(const int state) noexcept {
-	return state == SCE_H_COMMENT || state == SCE_H_SGML_COMMENT;
-}
-
 constexpr bool IsScriptCommentState(const int state) noexcept {
 	return AnyOf(state, SCE_HJ_COMMENT, SCE_HJ_COMMENTDOC, SCE_HJ_COMMENTLINE,
 		   SCE_HJA_COMMENT, SCE_HJA_COMMENTDOC, SCE_HJA_COMMENTLINE,
@@ -1678,10 +1674,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		else if (AnyOf(scriptLanguage, eScriptNone, eScriptXML, eScriptSGMLblock) &&
 				 (chPrev == '<') &&
 				 (ch == '!') &&
-				 (StateToPrint != SCE_H_CDATA) &&
-				 (!isStringState(StateToPrint)) &&
-				 (!IsCommentState(StateToPrint)) &&
-				 (!IsScriptCommentState(StateToPrint))) {
+				 AnyOf(state, SCE_H_DEFAULT, SCE_H_SGML_BLOCK_DEFAULT)) {
 			beforePreProc = state;
 			styler.ColourTo(i - 2, StateToPrint);
 			if ((state != SCE_H_SGML_BLOCK_DEFAULT) && (chNext == '-') && (chNext2 == '-')) {
