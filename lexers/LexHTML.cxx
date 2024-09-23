@@ -1910,7 +1910,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_H_SGML_1ST_PARAM:
 			// wait for the beginning of the word
-			if ((ch == '-') && (chNext == '-')) {
+			if ((ch == '-') && (chPrev == '-')) {
 				styler.ColourTo(i - 2, SCE_H_SGML_DEFAULT);
 				state = SCE_H_SGML_1ST_PARAM_COMMENT;
 			} else if (issgmlwordchar(ch)) {
