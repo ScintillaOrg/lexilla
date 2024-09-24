@@ -1,6 +1,9 @@
 // File to suppress cppcheck warnings for files that will not be fixed.
 // Does not suppress warnings where an additional occurrence of the warning may be of interest.
-// Configured for cppcheck 2.14
+// Configured for cppcheck 2.15
+
+// Just a report of how many checkers are run
+checkersReport
 
 // This just warns that cppcheck isn't exhaustive and it still appears in exhaustive mode
 normalCheckLevelMaxBranches
@@ -30,9 +33,6 @@ missingIncludeSystem
 // Passing temporary string into hidden object creator functions: they do not hold the argument
 danglingTemporaryLifetime:lexilla/access/LexillaAccess.cxx
 returnDanglingLifetime:lexilla/access/LexillaAccess.cxx
-
-// cppcheck seems to believe that unique_ptr<char *[]>::get returns void* instead of char**
-arithOperationsOnVoidPointer:lexilla/lexlib/WordList.cxx
 
 // cppcheck 2.11 limits checking of complex functions unless --check-level=exhaustive but that
 // only finds one false issue in LexRuby
