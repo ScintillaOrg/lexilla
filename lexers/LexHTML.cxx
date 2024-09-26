@@ -117,20 +117,6 @@ script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start,
 	return prevValue;
 }
 
-script_type segIsScriptInstruction(Accessor &styler, Sci_PositionU start, bool isXml) {
-	if (styler.MatchIgnoreCase(start, "php")) {
-		return eScriptPHP;
-	}
-	if (isXml || styler.MatchIgnoreCase(start, "xml")) {
-		return eScriptXML;
-	}
-	return eScriptPHP;
-}
-
-int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start) {
-	return styler.MatchIgnoreCase(start, "php") ? 3 : 0;
-}
-
 script_type ScriptOfState(int state) noexcept {
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
 		return eScriptPython;
@@ -688,22 +674,35 @@ enum class AllowPHP : int {
 	Question, // <?
 };
 
+enum class InstructionTag {
+	None,
+	XML,
+	Open,// <? ?> short open tag
+	Echo,// <?= ?> short echo tag
+	PHP, // <?php ?> standard tag
+};
+
 constexpr bool IsPHPEntryState(int state) noexcept {
 	return !(isPHPStringState(state) || IsScriptCommentState(state) || AnyOf(state, SCE_H_ASPAT, SCE_HPHP_COMMENT, SCE_HPHP_COMMENTLINE));
 }
 
-bool IsPHPStart(AllowPHP allowPHP, const Accessor &styler, Sci_PositionU start) {
-	if (allowPHP == AllowPHP::None) {
-		return false;
-	}
-	if (allowPHP == AllowPHP::PHP) {
+InstructionTag segIsScriptInstruction(AllowPHP allowPHP, int state, const Accessor &styler, Sci_PositionU start, bool isXml) {
+	constexpr std::string_view phpTag = "php";
+	constexpr std::string_view xmlTag = "xml";
+	const std::string tag = styler.GetRangeLowered(start, start + phpTag.length());
+	if (allowPHP != AllowPHP::None) {
 		// Require <?php or <?=
-		constexpr std::string_view phpTag = "<?php";
-		constexpr std::string_view echoTag = "<?=";
-		const std::string tag = styler.GetRangeLowered(start, start + phpTag.length());
-		return (tag == phpTag) || (tag.substr(0, echoTag.length()) == echoTag);
+		if (tag == phpTag) {
+			return InstructionTag::PHP;
+		}
+		if (!tag.empty() && (tag.front() == '=')) {
+			return InstructionTag::Echo;
+		}
 	}
-	return true;
+	if (isXml || tag == xmlTag) {
+		return AnyOf(state, SCE_H_DEFAULT, SCE_H_SGML_BLOCK_DEFAULT)? InstructionTag::XML : InstructionTag::None;
+	}
+	return (allowPHP == AllowPHP::Question) ? InstructionTag::Open : InstructionTag::None;
 }
 
 Sci_Position FindPhpStringDelimiter(std::string &phpStringDelimiter, Sci_Position i, const Sci_Position lengthDoc, Accessor &styler, bool &isSimpleString) {
@@ -1505,31 +1504,35 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
-		else if ((ch == '<') && (chNext == '?') && IsPHPEntryState(state) && IsPHPStart(allowPHP, styler, i)) {
- 			beforeLanguage = scriptLanguage;
-			scriptLanguage = segIsScriptInstruction(styler, i + 2, isXml);
-			if ((scriptLanguage != eScriptPHP) && (isStringState(state) || (state==SCE_H_COMMENT))) continue;
-			styler.ColourTo(i - 1, StateToPrint);
-			beforePreProc = state;
-			i++;
-			visibleChars++;
-			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2);
-			if (scriptLanguage == eScriptXML)
-				styler.ColourTo(i, SCE_H_XMLSTART);
-			else
-				styler.ColourTo(i, SCE_H_QUESTION);
-			state = StateForScript(scriptLanguage);
-			if (inScriptType == eNonHtmlScript)
-				inScriptType = eNonHtmlScriptPreProc;
-			else
-				inScriptType = eNonHtmlPreProc;
-			// Fold whole script, but not if the XML first tag (all XML-like tags in this case)
-			if (foldHTMLPreprocessor && (scriptLanguage != eScriptXML)) {
-				levelCurrent++;
+		else if ((ch == '<') && (chNext == '?') && IsPHPEntryState(state)) {
+ 			const InstructionTag tag = segIsScriptInstruction(allowPHP, state, styler, i + 2, isXml);
+ 			if (tag != InstructionTag::None) {
+				beforeLanguage = scriptLanguage;
+				scriptLanguage = (tag == InstructionTag::XML) ? eScriptXML : eScriptPHP;
+				styler.ColourTo(i - 1, StateToPrint);
+				beforePreProc = state;
+				i++;
+				visibleChars++;
+				if (tag >= InstructionTag::Echo) {
+					i += (tag == InstructionTag::Echo) ? 1 : 3;
+				}
+				if (scriptLanguage == eScriptXML)
+					styler.ColourTo(i, SCE_H_XMLSTART);
+				else
+					styler.ColourTo(i, SCE_H_QUESTION);
+				state = StateForScript(scriptLanguage);
+				if (inScriptType == eNonHtmlScript)
+					inScriptType = eNonHtmlScriptPreProc;
+				else
+					inScriptType = eNonHtmlPreProc;
+				// Fold whole script, but not if the XML first tag (all XML-like tags in this case)
+				if (foldHTMLPreprocessor && (scriptLanguage != eScriptXML)) {
+					levelCurrent++;
+				}
+				// should be better
+				ch = SafeGetUnsignedCharAt(styler, i);
+				continue;
 			}
-			// should be better
-			ch = SafeGetUnsignedCharAt(styler, i);
-			continue;
 		}
 
 		// handle the start Mako template Python code
