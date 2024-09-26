@@ -138,7 +138,7 @@ script_type ScriptOfState(int state) noexcept {
 		return eScriptVBS;
 	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
 		return eScriptJS;
-	} else if ((state >= SCE_HPHP_DEFAULT && state <= SCE_HPHP_COMMENTLINE) || (state == SCE_HPHP_COMPLEX_VARIABLE)) {
+	} else if ((state >= SCE_HPHP_DEFAULT && state <= SCE_HPHP_OPERATOR) || (state == SCE_HPHP_COMPLEX_VARIABLE)) {
 		return eScriptPHP;
 	} else if ((state >= SCE_H_SGML_DEFAULT) && (state < SCE_H_SGML_BLOCK_DEFAULT)) {
 		return eScriptSGML;
