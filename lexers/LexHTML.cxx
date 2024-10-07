@@ -117,6 +117,10 @@ script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start,
 	return prevValue;
 }
 
+constexpr bool IsPHPScriptState(int state) noexcept {
+	return (state >= SCE_HPHP_DEFAULT && state <= SCE_HPHP_OPERATOR) || (state == SCE_HPHP_COMPLEX_VARIABLE);
+}
+
 script_type ScriptOfState(int state) noexcept {
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
 		return eScriptPython;
@@ -124,7 +128,7 @@ script_type ScriptOfState(int state) noexcept {
 		return eScriptVBS;
 	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
 		return eScriptJS;
-	} else if ((state >= SCE_HPHP_DEFAULT && state <= SCE_HPHP_OPERATOR) || (state == SCE_HPHP_COMPLEX_VARIABLE)) {
+	} else if (IsPHPScriptState(state)) {
 		return eScriptPHP;
 	} else if ((state >= SCE_H_SGML_DEFAULT) && (state < SCE_H_SGML_BLOCK_DEFAULT)) {
 		return eScriptSGML;
@@ -508,12 +512,6 @@ constexpr bool InTagState(int state) noexcept {
 	       SCE_H_DOUBLESTRING, SCE_H_SINGLESTRING);
 }
 
-constexpr bool IsScriptCommentState(const int state) noexcept {
-	return AnyOf(state, SCE_HJ_COMMENT, SCE_HJ_COMMENTDOC, SCE_HJ_COMMENTLINE,
-		   SCE_HJA_COMMENT, SCE_HJA_COMMENTDOC, SCE_HJA_COMMENTLINE,
-		   SCE_HB_COMMENTLINE, SCE_HBA_COMMENTLINE);
-}
-
 constexpr bool isLineEnd(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
@@ -681,10 +679,6 @@ enum class InstructionTag {
 	Echo,// <?= ?> short echo tag
 	PHP, // <?php ?> standard tag
 };
-
-constexpr bool IsPHPEntryState(int state) noexcept {
-	return !(isPHPStringState(state) || IsScriptCommentState(state) || AnyOf(state, SCE_H_ASPAT, SCE_HPHP_COMMENT, SCE_HPHP_COMMENTLINE));
-}
 
 InstructionTag segIsScriptInstruction(AllowPHP allowPHP, int state, const Accessor &styler, Sci_PositionU start, bool isXml) {
 	constexpr std::string_view phpTag = "php";
@@ -1504,7 +1498,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
-		else if ((ch == '<') && (chNext == '?') && IsPHPEntryState(state)) {
+		else if ((ch == '<') && (chNext == '?') && !IsPHPScriptState(state)) {
  			const InstructionTag tag = segIsScriptInstruction(allowPHP, state, styler, i + 2, isXml);
  			if (tag != InstructionTag::None) {
 				beforeLanguage = scriptLanguage;
