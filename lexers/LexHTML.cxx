@@ -126,7 +126,7 @@ script_type ScriptOfState(int state) noexcept {
 		return eScriptPython;
 	} else if ((state >= SCE_HB_START && state <= SCE_HB_STRINGEOL) || (state == SCE_H_ASPAT || state == SCE_H_XCCOMMENT)) {
 		return eScriptVBS;
-	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
+	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_TEMPLATELITERAL)) {
 		return eScriptJS;
 	} else if (IsPHPScriptState(state)) {
 		return eScriptPHP;
@@ -162,7 +162,7 @@ constexpr int stateForPrintState(int StateToPrint) noexcept {
 		state = StateToPrint - SCE_HA_PYTHON;
 	} else if ((StateToPrint >= SCE_HBA_START) && (StateToPrint <= SCE_HBA_STRINGEOL)) {
 		state = StateToPrint - SCE_HA_VBS;
-	} else if ((StateToPrint >= SCE_HJA_START) && (StateToPrint <= SCE_HJA_REGEX)) {
+	} else if ((StateToPrint >= SCE_HJA_START) && (StateToPrint <= SCE_HJA_TEMPLATELITERAL)) {
 		state = StateToPrint - SCE_HA_JS;
 	}
 
@@ -180,9 +180,11 @@ constexpr bool isStringState(int state) noexcept {
 	case SCE_HJ_DOUBLESTRING:
 	case SCE_HJ_SINGLESTRING:
 	case SCE_HJ_REGEX:
+	case SCE_HJ_TEMPLATELITERAL:
 	case SCE_HJA_DOUBLESTRING:
 	case SCE_HJA_SINGLESTRING:
 	case SCE_HJA_REGEX:
+	case SCE_HJA_TEMPLATELITERAL:
 	case SCE_HB_STRING:
 	case SCE_HBA_STRING:
 	case SCE_HP_STRING:
@@ -902,7 +904,7 @@ const LexicalClass lexicalClassesHTML[] = {
 	50, "SCE_HJ_SYMBOLS", "client javascript operator", "JS Symbols",
 	51, "SCE_HJ_STRINGEOL", "client javascript error literal string", "JavaScript EOL",
 	52, "SCE_HJ_REGEX", "client javascript literal regex", "JavaScript RegEx",
-	53, "", "unused", "",
+	53, "SCE_HJ_TEMPLATELITERAL", "client javascript literal template", "JS Template Literal",
 	54, "", "unused", "",
 	55, "SCE_HJA_START", "server javascript default", "JS Start - allows eol filled background to not start on same line as SCRIPT tag",
 	56, "SCE_HJA_DEFAULT", "server javascript default", "JS Default",
@@ -917,7 +919,7 @@ const LexicalClass lexicalClassesHTML[] = {
 	65, "SCE_HJA_SYMBOLS", "server javascript operator", "JS Symbols",
 	66, "SCE_HJA_STRINGEOL", "server javascript error literal string", "JavaScript EOL",
 	67, "SCE_HJA_REGEX", "server javascript literal regex", "JavaScript RegEx",
-	68, "", "unused", "",
+	68, "SCE_HJA_TEMPLATELITERAL", "server javascript literal template", "JS Template Literal",
 	69, "", "unused", "",
 	70, "SCE_HB_START", "client basic default", "Start",
 	71, "SCE_HB_DEFAULT", "client basic default", "Default",
@@ -1457,6 +1459,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
 			case SCE_HJ_REGEX:
+			case SCE_HJ_TEMPLATELITERAL:
 			case SCE_HB_STRING:
 			case SCE_HBA_STRING:
 			case SCE_HP_STRING:
@@ -2209,6 +2212,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '\'') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HJ_SINGLESTRING;
+			} else if (ch == '`') {
+				styler.ColourTo(i - 1, StateToPrint);
+				state = SCE_HJ_TEMPLATELITERAL;
 			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') &&
 			           styler.SafeGetCharAt(i + 3) == '-') {
 				styler.ColourTo(i - 1, StateToPrint);
@@ -2246,6 +2252,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					state = SCE_HJ_DOUBLESTRING;
 				} else if (ch == '\'') {
 					state = SCE_HJ_SINGLESTRING;
+				} else if (ch == '`') {
+					state = SCE_HJ_TEMPLATELITERAL;
 				} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
 					styler.ColourTo(i - 1, StateToPrint);
 					state = SCE_HJ_COMMENTLINE;
@@ -2299,6 +2307,16 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (chPrev != '\\' && (chPrev2 != '\\' || chPrev != '\r' || ch != '\n')) {
 					state = SCE_HJ_STRINGEOL;
 				}
+			}
+			break;
+		case SCE_HJ_TEMPLATELITERAL:
+			if (ch == '\\') {
+				if (chNext == '$' || chNext == '`' || chNext == '\\') {
+					i++;
+				}
+			} else if (ch == '`') {
+				styler.ColourTo(i, statePrintForState(SCE_HJ_TEMPLATELITERAL, inScriptType));
+				state = SCE_HJ_DEFAULT;
 			}
 			break;
 		case SCE_HJ_STRINGEOL:
@@ -2709,6 +2727,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_HJ_DOUBLESTRING;
 			} else if ((ch == '\'') && (nonEmptySegment)) {
 				state = SCE_HJ_SINGLESTRING;
+			} else if ((ch == '`') && (nonEmptySegment)) {
+				state = SCE_HJ_TEMPLATELITERAL;
 			} else if (IsAWordStart(ch)) {
 				state = SCE_HJ_WORD;
 			} else if (IsOperator(ch)) {
