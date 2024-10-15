@@ -1,4 +1,4 @@
- 0 400   0         *     Enumerate all styles: 0, 2 to 11, 16
+ 0 400   0         *     Enumerate all styles: 0, 2 to 12, 16
  0 400   0         *     SCE_C_COMMENTLINE=2
  0 400   0   
  0 400   0         *     SCE_C_DEFAULT=0
@@ -33,4 +33,7 @@
  0 400   0   
  0 400   0         *     SCE_C_OPERATOR=10
  0 400   0               +
+ 0 400   0   
+ 0 400   0         *     SCE_C_STRINGEOL=12
+ 0 400   0               .
  0 400   0   
