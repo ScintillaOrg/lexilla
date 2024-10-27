@@ -8,12 +8,11 @@
  ** Updated by Rod Falck, Aug 2006 Converted to COBOL
  **/
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
+#include <cstdio>
 
 #include <string>
 #include <string_view>
@@ -38,23 +37,25 @@ using namespace Lexilla;
 #define IN_FLAGS 0xF
 #define NOT_HEADER 0x10
 
-inline bool isCOBOLoperator(char ch)
+namespace {
+
+bool isCOBOLoperator(char ch)
     {
     return isoperator(ch);
     }
 
-inline bool isCOBOLwordchar(char ch)
+bool isCOBOLwordchar(char ch)
     {
     return IsASCII(ch) && (isalnum(ch) || ch == '-');
 
     }
 
-inline bool isCOBOLwordstart(char ch)
+bool isCOBOLwordstart(char ch)
     {
     return IsASCII(ch) && isalnum(ch);
     }
 
-static int CountBits(int nBits)
+int CountBits(int nBits)
     {
     int count = 0;
     for (int i = 0; i < 32; ++i)
@@ -65,7 +66,7 @@ static int CountBits(int nBits)
     return count;
     }
 
-static void getRange(Sci_PositionU start,
+void getRange(Sci_PositionU start,
         Sci_PositionU end,
         Accessor &styler,
         char *s,
@@ -78,12 +79,12 @@ static void getRange(Sci_PositionU start,
     s[i] = '\0';
 }
 
-static void ColourTo(Accessor &styler, Sci_PositionU end, unsigned int attr) {
+void ColourTo(Accessor &styler, Sci_PositionU end, unsigned int attr) {
     styler.ColourTo(end, attr);
 }
 
 
-static int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList &keywords*/WordList *keywordlists[], Accessor &styler, int nContainment, bool *bAarea) {
+int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList &keywords*/WordList *keywordlists[], Accessor &styler, int nContainment, bool *bAarea) {
     int ret = 0;
 
     char s[100];
@@ -143,7 +144,7 @@ static int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList 
     return ret;
 }
 
-static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
+void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
     Accessor &styler) {
 
     styler.StartAt(startPos);
@@ -315,7 +316,7 @@ static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int i
     ColourTo(styler, lengthDoc - 1, state);
 }
 
-static void FoldCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[],
+void FoldCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[],
                             Accessor &styler) {
     bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
     Sci_PositionU endPos = startPos + length;
@@ -377,11 +378,13 @@ static void FoldCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int, WordL
     styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-static const char * const COBOLWordListDesc[] = {
+const char * const COBOLWordListDesc[] = {
     "A Keywords",
     "B Keywords",
     "Extended Keywords",
-    0
+    nullptr
 };
+
+}
 
 extern const LexerModule lmCOBOL(SCLEX_COBOL, ColouriseCOBOLDoc, "COBOL", FoldCOBOLDoc, COBOLWordListDesc);
