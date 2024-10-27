@@ -116,7 +116,7 @@ int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList &keywor
             chAttr = SCE_COBOL_WORD2;
         }
         else if (c_keywords.InList(s)) {
-            chAttr = SCE_COBOL_UUID;
+            chAttr = SCE_COBOL_WORD3;
         }
     }
     if (*bAarea) {
