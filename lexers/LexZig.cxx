@@ -323,14 +323,6 @@ void LexerZig::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle
 			} else if ((sc.ch == '\'' && sc.state == SCE_ZIG_CHARACTER) ||
 					(sc.ch == '\"' && (sc.state == SCE_ZIG_STRING || sc.state == SCE_ZIG_IDENTIFIER_STRING))) {
 				sc.ForwardSetState(SCE_ZIG_DEFAULT);
-			} else if (sc.state != SCE_ZIG_CHARACTER) {
-				if (sc.ch == '{' || sc.ch == '}') {
-					if (sc.ch == sc.chNext) {
-						escSeq.resetEscapeState(sc.state);
-						sc.SetState(SCE_ZIG_ESCAPECHAR);
-						sc.Forward();
-					}
-				}
 			}
 			break;
 
