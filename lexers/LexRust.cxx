@@ -36,6 +36,8 @@
 using namespace Scintilla;
 using namespace Lexilla;
 
+namespace {
+
 constexpr int NUM_RUST_KEYWORD_LISTS = 7;
 constexpr int MAX_RUST_IDENT_CHARS = 1023;
 
@@ -219,7 +221,7 @@ static void GrabString(char* s, Accessor& styler, Sci_Position start, Sci_Positi
 }
 
 static void ScanRawIdentifier(Accessor& styler, Sci_Position& pos) {
-	Sci_Position start = pos;
+	const Sci_Position start = pos;
 	while (IsIdentifierContinue(styler.SafeGetCharAt(pos, '\0')))
 		pos++;
 
@@ -237,7 +239,7 @@ static void ScanRawIdentifier(Accessor& styler, Sci_Position& pos) {
 }
 
 static void ScanIdentifier(Accessor& styler, Sci_Position& pos, WordList *keywords) {
-	Sci_Position start = pos;
+	const Sci_Position start = pos;
 	while (IsIdentifierContinue(styler.SafeGetCharAt(pos, '\0')))
 		pos++;
 
@@ -265,9 +267,9 @@ static void ScanIdentifier(Accessor& styler, Sci_Position& pos, WordList *keywor
 
 /* Scans a sequence of digits, returning true if it found any. */
 static bool ScanDigits(Accessor& styler, Sci_Position& pos, int base) {
-	Sci_Position old_pos = pos;
+	const Sci_Position old_pos = pos;
 	for (;;) {
-		int c = styler.SafeGetCharAt(pos, '\0');
+		const int c = styler.SafeGetCharAt(pos, '\0');
 		if (IsADigit(c, base) || c == '_')
 			pos++;
 		else
@@ -408,7 +410,7 @@ static bool IsValidStringEscape(int c) {
 
 static bool ScanNumericEscape(Accessor &styler, Sci_Position& pos, Sci_Position num_digits, bool stop_asap) {
 	for (;;) {
-		int c = styler.SafeGetCharAt(pos, '\0');
+		const int c = styler.SafeGetCharAt(pos, '\0');
 		if (!IsADigit(c, 16))
 			break;
 		num_digits--;
@@ -519,7 +521,7 @@ static void ResumeBlockComment(Accessor &styler, Sci_Position& pos, Sci_Position
 	int c = styler.SafeGetCharAt(pos, '\0');
 	bool maybe_doc_comment = false;
 	if (c == '*') {
-		int n = styler.SafeGetCharAt(pos + 1, '\0');
+		const int n = styler.SafeGetCharAt(pos + 1, '\0');
 		if (n != '*' && n != '/') {
 			maybe_doc_comment = true;
 		}
@@ -528,7 +530,7 @@ static void ResumeBlockComment(Accessor &styler, Sci_Position& pos, Sci_Position
 	}
 
 	for (;;) {
-		int n = styler.SafeGetCharAt(pos + 1, '\0');
+		const int n = styler.SafeGetCharAt(pos + 1, '\0');
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
 			styler.SetLineState(styler.GetLine(pos), level);
 		if (c == '*') {
@@ -596,7 +598,7 @@ static void ResumeLineComment(Accessor &styler, Sci_Position& pos, Sci_Position 
 
 static void ScanComments(Accessor &styler, Sci_Position& pos, Sci_Position max) {
 	pos++;
-	int c = styler.SafeGetCharAt(pos, '\0');
+	const int c = styler.SafeGetCharAt(pos, '\0');
 	pos++;
 	if (c == '/')
 		ResumeLineComment(styler, pos, max, UnknownComment);
@@ -615,7 +617,7 @@ static void ResumeString(Accessor &styler, Sci_Position& pos, Sci_Position max, 
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
 			styler.SetLineState(styler.GetLine(pos), 0);
 		if (c == '\\') {
-			int n = styler.SafeGetCharAt(pos + 1, '\0');
+			const int n = styler.SafeGetCharAt(pos + 1, '\0');
 			if (IsValidStringEscape(n)) {
 				pos += 2;
 			} else if (n == 'x') {
@@ -661,7 +663,7 @@ static void ResumeRawString(Accessor &styler, Sci_Position& pos, Sci_Position ma
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
 			styler.SetLineState(styler.GetLine(pos), num_hashes);
 
-		int c = styler.SafeGetCharAt(pos, '\0');
+		const int c = styler.SafeGetCharAt(pos, '\0');
 		if (c == '"') {
 			pos++;
 			int trailing_num_hashes = 0;
@@ -704,7 +706,7 @@ void SCI_METHOD LexerRust::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	PropSetSimple props;
 	Accessor styler(pAccess, &props);
 	Sci_Position pos = startPos;
-	Sci_Position max = pos + length;
+	const Sci_Position max = pos + length;
 
 	styler.StartAt(pos);
 	styler.StartSegment(pos);
@@ -727,9 +729,9 @@ void SCI_METHOD LexerRust::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		ResumeRawString(styler, pos, max, styler.GetLineState(styler.GetLine(pos) - 1), StringType::RAW_CSTRING);
 	}
 	while (pos < max) {
-		int c = styler.SafeGetCharAt(pos, '\0');
-		int n = styler.SafeGetCharAt(pos + 1, '\0');
-		int n2 = styler.SafeGetCharAt(pos + 2, '\0');
+		const int c = styler.SafeGetCharAt(pos, '\0');
+		const int n = styler.SafeGetCharAt(pos + 1, '\0');
+		const int n2 = styler.SafeGetCharAt(pos + 2, '\0');
 
 		if (pos == 0 && c == '#' && n == '!' && n2 != '[') {
 			pos += 2;
@@ -792,7 +794,7 @@ void SCI_METHOD LexerRust::Fold(Sci_PositionU startPos, Sci_Position length, int
 
 	LexAccessor styler(pAccess);
 
-	Sci_PositionU endPos = startPos + length;
+	const Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
 	bool inLineComment = false;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
@@ -807,12 +809,12 @@ void SCI_METHOD LexerRust::Fold(Sci_PositionU startPos, Sci_Position length, int
 	int style = initStyle;
 	const bool userDefinedFoldMarkers = !options.foldExplicitStart.empty() && !options.foldExplicitEnd.empty();
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
-		char ch = chNext;
+		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		int stylePrev = style;
+		const int stylePrev = style;
 		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
-		bool atEOL = i == (lineStartNext-1);
+		const bool atEOL = i == (lineStartNext-1);
 		if ((style == SCE_RUST_COMMENTLINE) || (style == SCE_RUST_COMMENTLINEDOC))
 			inLineComment = true;
 		if (options.foldComment && options.foldCommentMultiline && IsStreamCommentStyle(style) && !inLineComment) {
@@ -832,7 +834,7 @@ void SCI_METHOD LexerRust::Fold(Sci_PositionU startPos, Sci_Position length, int
 				}
 			} else {
 				if ((ch == '/') && (chNext == '/')) {
-					char chNext2 = styler.SafeGetCharAt(i + 2);
+					const char chNext2 = styler.SafeGetCharAt(i + 2);
 					if (chNext2 == '{') {
 						levelNext++;
 					} else if (chNext2 == '}') {
@@ -880,6 +882,8 @@ void SCI_METHOD LexerRust::Fold(Sci_PositionU startPos, Sci_Position length, int
 			inLineComment = false;
 		}
 	}
+}
+
 }
 
 extern const LexerModule lmRust(SCLEX_RUST, LexerRust::LexerFactoryRust, "rust", rustWordLists);
