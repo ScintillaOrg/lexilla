@@ -1,3 +1,5 @@
+// coding: utf-8
+
 b"foo"; br"foo"            // foo
 b"\"foo\""; br#""foo""#;   // "foo"
 
