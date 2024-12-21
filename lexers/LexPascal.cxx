@@ -225,10 +225,12 @@ static void ColourisePascalDoc(Sci_PositionU startPos, Sci_Position length, int 
 	CharacterSet setHexNumber(CharacterSet::setDigits, "abcdefABCDEF");
 	CharacterSet setOperator(CharacterSet::setNone, "#$&'()*+,-./:;<=>@[]^{}");
 
-	Sci_Position curLine = styler.GetLine(startPos);
-	int curLineState = curLine > 0 ? styler.GetLineState(curLine - 1) : 0;
+	int curLineState = 0;
 
 	StyleContext sc(startPos, length, initStyle, styler);
+	if (sc.currentLine > 0) {
+		curLineState = styler.GetLineState(sc.currentLine - 1);
+	}
 
 	for (; sc.More(); sc.Forward()) {
 		// Determine if the current state should terminate.
