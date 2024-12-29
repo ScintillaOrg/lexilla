@@ -79,7 +79,7 @@ constexpr bool isWhiteSpace(char ch) noexcept {
     return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
 }
 
-inline bool isQestionMarkChar(char chNext, char chNext2) noexcept {
+inline bool isQuestionMarkChar(char chNext, char chNext2) noexcept {
     // followed by a single character or escape sequence that corresponds to a single codepoint
     if (isSafeAlnum(chNext)) {
         return !isSafeWordcharOrHigh(chNext2);
@@ -361,7 +361,7 @@ constexpr char opposite(char ch) noexcept {
 }
 
 // Null transitions when we see we've reached the end
-// and need to relex the curr char.
+// and need to re-lex the curr char.
 
 void redo_char(Sci_Position &i, char &ch, char &chNext, char &chNext2, int &state) noexcept {
     i--;
@@ -386,7 +386,7 @@ bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
         const char ch = styler.SafeGetCharAt(pos);
         if (isEOLChar(ch)) {
             // Leave the pointers where they are -- there are no
-            // here doc delims on the current line, even if
+            // here doc delimiters on the current line, even if
             // the EOL isn't default style
 
             return false;
@@ -747,7 +747,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     }
 
     if (isSafeAlnumOrHigh(styler[j])) {
-        // Init target_end because some compilers think it won't
+        // Initialize target_end because some compilers think it won't
         // be initialized by the time it's used
         target_start = target_end = j;
         j++;
@@ -806,7 +806,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
 
 //todo: if we aren't looking at a stdio character,
 // move to the start of the first line that is not in a
-// multi-line construct
+// multiline construct
 
 void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &initStyle, Accessor &styler, bool skipWhiteSpace=false) {
 
@@ -847,7 +847,7 @@ void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &ini
         if (styler.SafeGetCharAt(pos - 1) == '\\') {
             // Continuation line -- keep going
         } else if (actual_style(styler.StyleAt(pos)) != SCE_RB_DEFAULT) {
-            // Part of multi-line construct -- keep going
+            // Part of multiline construct -- keep going
         } else if (currLineContainsHereDelims(pos, styler)) {
             // Keep going, with pos and length now pointing
             // at the end of the here-doc delimiter
@@ -1270,7 +1270,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                         i += width;
                         styler.ColourTo(i, SCE_RB_NUMBER);
                     }
-                } else if (!isQestionMarkChar(chNext, chNext2)) {
+                } else if (!isQuestionMarkChar(chNext, chNext2)) {
                     styler.ColourTo(i, SCE_RB_OPERATOR);
                     preferRE = chNext <= ' ';
                 } else {
@@ -1297,7 +1297,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                 // constructs are binary operators
                 //
                 // So if we don't have one of these chars,
-                // we aren't ending an object exp'n, and ops
+                // we aren't ending an object expression, and ops
                 // like : << / are unary operators.
 
                 if (ch == '{') {
@@ -1338,7 +1338,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                             || isWhiteSpace(chNext))
                         && (!strcmp(prevWord, "def")
                             || followsDot(styler.GetStartSegment(), styler))) {
-                    // <name>= is a name only when being def'd -- Get it the next time
+                    // <name>= is a name only when being defined -- Get it the next time
                     // This means that <name>=<name> is always lexed as
                     // <name>, (op, =), <name>
                 } else if (ch == ':'
@@ -2010,7 +2010,7 @@ void LexerRuby::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle,
         styleNext = styler.StyleAt(i + 1);
         const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
-        /*Mutiline comment patch*/
+        /* Multiline comment patch */
         if (options.foldComment && atEOL && IsCommentLine(lineCurrent, styler)) {
             if (!IsCommentLine(lineCurrent - 1, styler)
                     && IsCommentLine(lineCurrent + 1, styler))
