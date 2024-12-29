@@ -14,6 +14,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -25,7 +26,10 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
@@ -82,6 +86,131 @@ inline bool isQestionMarkChar(char chNext, char chNext2) noexcept {
     }
     // multibyte character, escape sequence, punctuation
     return !IsASpace(chNext);
+}
+
+// Options used for LexerRuby
+struct OptionsRuby {
+	bool foldCompact = true;
+	bool foldComment = false;
+};
+
+const char *const rubyWordListDesc[] = {
+    "Keywords",
+    nullptr
+};
+
+struct OptionSetRuby : public OptionSet<OptionsRuby> {
+	OptionSetRuby() {
+		DefineProperty("fold.compact", &OptionsRuby::foldCompact);
+		DefineProperty("fold.comment", &OptionsRuby::foldComment);
+
+		DefineWordListSets(rubyWordListDesc);
+	}
+};
+
+const LexicalClass lexicalClasses[] = {
+	// Lexer ruby SCLEX_RUBY SCE_RB_
+	0, "SCE_RB_DEFAULT", "default", "White space",
+	1, "SCE_RB_ERROR", "error", "Error",
+	2, "SCE_RB_COMMENTLINE", "comment", "Comment",
+	3, "SCE_RB_POD", "data", "POD",
+	4, "SCE_RB_NUMBER", "literal numeric", "Number",
+	5, "SCE_RB_WORD", "keyword", "Keyword",
+	6, "SCE_RB_STRING", "literal string", "Quoted string",
+	7, "SCE_RB_CHARACTER", "literal string character", "Quoted string",
+	8, "SCE_RB_CLASSNAME", "identifier", "Class name definition",
+	9, "SCE_RB_DEFNAME", "identifier", "Function or method name definition",
+	10, "SCE_RB_OPERATOR", "operator", "Operator",
+	11, "SCE_RB_IDENTIFIER", "identifier", "Identifiers",
+	12, "SCE_RB_REGEX", "literal regex", "RegEx",
+	13, "SCE_RB_GLOBAL", "identifier", "Global",
+	14, "SCE_RB_SYMBOL", "identifier symbol", "",
+	15, "SCE_RB_MODULE_NAME", "identifier", "Module name",
+	16, "SCE_RB_INSTANCE_VAR", "identifier", "Instance variable",
+	17, "SCE_RB_CLASS_VAR", "identifier", "Class variable",
+	18, "SCE_RB_BACKTICKS", "literal string interpolated", "Back ticks",
+	19, "SCE_RB_DATASECTION", "data", "Data section",
+	20, "SCE_RB_HERE_DELIM", "here-doc literal string", "Here-doc (delimiter)",
+	21, "SCE_RB_HERE_Q", "here-doc literal string", "Here-doc (single quoted, q)",
+	22, "SCE_RB_HERE_QQ", "here-doc literal string", "Here-doc (double quoted, qq)",
+	23, "SCE_RB_HERE_QX", "here-doc literal string", "Here-doc (back ticks, qx)",
+	24, "SCE_RB_STRING_Q", "literal string", "Single quoted string, generic",
+	25, "SCE_RB_STRING_QQ", "literal string interpolated", "qq = double quoted string",
+	26, "SCE_RB_STRING_QX", "literal string interpolated", "qx = back ticks",
+	27, "SCE_RB_STRING_QR", "literal regex", "qr = regex",
+	28, "SCE_RB_STRING_QW", "literal string interpolated", "qw = array",
+	29, "SCE_RB_WORD_DEMOTED", "keyword", "Keyword demoted",
+	30, "SCE_RB_STDIN", "file", "Standard input stream",
+	31, "SCE_RB_STDOUT", "file", "Standard output stream",
+	40, "SCE_RB_STDERR", "file", "Standard error stream",
+	41, "SCE_RB_STRING_W", "literal string", "String array",
+	42, "SCE_RB_STRING_I", "literal string", "Symbol array",
+	43, "SCE_RB_STRING_QI", "literal string interpolated", "Interpolable symbol array",
+	44, "SCE_RB_STRING_QS", "identifier symbol", "Symbol",
+};
+
+class LexerRuby : public DefaultLexer {
+	WordList keywords;
+	OptionsRuby options;
+	OptionSetRuby osRuby;
+public:
+	LexerRuby() :
+		DefaultLexer("ruby", SCLEX_RUBY, lexicalClasses, std::size(lexicalClasses)) {
+	}
+	// Deleted so LexerRuby objects can not be copied.
+	LexerRuby(const LexerRuby &) = delete;
+	LexerRuby(LexerRuby &&) = delete;
+	void operator=(const LexerRuby &) = delete;
+	void operator=(LexerRuby &&) = delete;
+	~LexerRuby() override = default;
+
+	const char *SCI_METHOD PropertyNames() override {
+		return osRuby.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osRuby.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osRuby.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osRuby.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osRuby.DescribeWordListSets();
+	}
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	static ILexer5 *LexerFactoryRuby() {
+		return new LexerRuby();
+	}
+};
+
+Sci_Position SCI_METHOD LexerRuby::PropertySet(const char *key, const char *val) {
+	if (osRuby.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
+
+Sci_Position SCI_METHOD LexerRuby::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywords;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN && wordListN->Set(wl)) {
+		firstModification = 0;
+	}
+	return firstModification;
 }
 
 #define MAX_KEYWORD_LENGTH 200
@@ -682,6 +811,15 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
 void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &initStyle, Accessor &styler, bool skipWhiteSpace=false) {
 
     styler.Flush();
+
+    // Retreat one line to match function lexer
+    if (const Sci_Position lineCurrent = styler.GetLine(startPos); lineCurrent > 0) {
+        const Sci_Position endPos = startPos + length;
+        startPos = styler.LineStart(lineCurrent - 1);
+        length = endPos - startPos;
+        initStyle = (startPos > 0) ? styler.StyleIndexAt(startPos - 1) : 0;
+    }
+
     const int style = actual_style(styler.StyleAt(startPos));
     switch (style) {
     case SCE_RB_STDIN:
@@ -725,13 +863,13 @@ void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &ini
     initStyle = SCE_RB_DEFAULT;
 }
 
-void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[], Accessor &styler) {
+void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+    Accessor styler(pAccess, nullptr);
+    styler.StartAt(startPos);
 
     // Lexer for Ruby often has to backtrack to start of current style to determine
     // which characters are being used as quotes, how deeply nested is the
     // start position and what the termination string is for here documents
-
-    WordList &keywords = *keywordlists[0];
 
     class HereDocCls {
     public:
@@ -1569,6 +1707,7 @@ void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     } else {
         styler.ColourTo(lengthDoc - 1, state);
     }
+    styler.Flush();
 }
 
 // Helper functions for folding, disambiguation keywords
@@ -1837,9 +1976,8 @@ bool IsCommentLine(Sci_Position line, Accessor &styler) {
  *  Later offer to fold POD, here-docs, strings, and blocks of comments
  */
 
-void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler) {
-    const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
-    const bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+void LexerRuby::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+    Accessor styler(pAccess, nullptr);
 
     synchronizeDocStart(startPos, length, initStyle, styler, false);
     const Sci_PositionU endPos = startPos + length;
@@ -1873,7 +2011,7 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordL
         const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
         /*Mutiline comment patch*/
-        if (foldComment && atEOL && IsCommentLine(lineCurrent, styler)) {
+        if (options.foldComment && atEOL && IsCommentLine(lineCurrent, styler)) {
             if (!IsCommentLine(lineCurrent - 1, styler)
                     && IsCommentLine(lineCurrent + 1, styler))
                 levelCurrent++;
@@ -1883,7 +2021,7 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordL
         }
 
         if (style == SCE_RB_COMMENTLINE) {
-            if (foldComment && stylePrev != SCE_RB_COMMENTLINE) {
+            if (options.foldComment && stylePrev != SCE_RB_COMMENTLINE) {
                 if (chNext == '{') {
                     levelCurrent++;
                 } else if (chNext == '}' && levelCurrent > 0) {
@@ -1990,7 +2128,7 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordL
         }
         if (atEOL || (i == endPos - 1)) {
             int lev = levelPrev;
-            if (visibleChars == 0 && foldCompact)
+            if (visibleChars == 0 && options.foldCompact)
                 lev |= SC_FOLDLEVELWHITEFLAG;
             if ((levelCurrent > levelPrev) && (visibleChars > 0))
                 lev |= SC_FOLDLEVELHEADERFLAG;
@@ -2009,11 +2147,6 @@ void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordL
     }
 }
 
-const char *const rubyWordListDesc[] = {
-    "Keywords",
-    nullptr
-};
-
 }
 
-extern const LexerModule lmRuby(SCLEX_RUBY, ColouriseRbDoc, "ruby", FoldRbDoc, rubyWordListDesc);
+extern const LexerModule lmRuby(SCLEX_RUBY, LexerRuby::LexerFactoryRuby, "ruby", rubyWordListDesc);
