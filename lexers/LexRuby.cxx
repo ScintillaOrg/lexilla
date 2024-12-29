@@ -48,27 +48,27 @@ constexpr bool isHighBitChar(char ch) noexcept {
     return static_cast<unsigned char>(ch) > 127;
 }
 
-inline bool isSafeAlpha(char ch) noexcept {
+bool isSafeAlpha(char ch) noexcept {
     return (isSafeASCII(ch) && isalpha(ch)) || ch == '_';
 }
 
-inline bool isSafeAlphaOrHigh(char ch) noexcept {
+bool isSafeAlphaOrHigh(char ch) noexcept {
 	return isHighBitChar(ch) || isalpha(ch) || ch == '_';
 }
 
-inline bool isSafeAlnum(char ch) noexcept {
+bool isSafeAlnum(char ch) noexcept {
     return (isSafeASCII(ch) && isalnum(ch)) || ch == '_';
 }
 
-inline bool isSafeAlnumOrHigh(char ch) noexcept {
+bool isSafeAlnumOrHigh(char ch) noexcept {
     return isHighBitChar(ch) || isalnum(ch) || ch == '_';
 }
 
-inline bool isSafeDigit(char ch) noexcept {
+bool isSafeDigit(char ch) noexcept {
     return isSafeASCII(ch) && isdigit(ch);
 }
 
-inline bool isSafeWordcharOrHigh(char ch) noexcept {
+bool isSafeWordcharOrHigh(char ch) noexcept {
     // Error: scintilla's KeyWords.h includes '.' as a word-char
     // we want to separate things that can take methods from the
     // methods.
@@ -79,7 +79,7 @@ constexpr bool isWhiteSpace(char ch) noexcept {
     return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
 }
 
-inline bool isQuestionMarkChar(char chNext, char chNext2) noexcept {
+bool isQuestionMarkChar(char chNext, char chNext2) noexcept {
     // followed by a single character or escape sequence that corresponds to a single codepoint
     if (isSafeAlnum(chNext)) {
         return !isSafeWordcharOrHigh(chNext2);
@@ -222,11 +222,9 @@ bool followsDot(Sci_PositionU pos, Accessor &styler) {
     styler.Flush();
     for (; pos >= 1; --pos) {
         const int style = actual_style(styler.StyleAt(pos));
-        char ch;
         switch (style) {
         case SCE_RB_DEFAULT:
-            ch = styler[pos];
-            if (ch == ' ' || ch == '\t') {
+            if (IsASpaceOrTab(styler[pos])) {
                 //continue
             } else {
                 return false;
@@ -251,7 +249,7 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler);
 // pseudo style: prefer regex after identifier
 #define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
 
-int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, WordList &keywords, Accessor &styler, char *prevWord) {
+int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, char *prevWord) {
     char s[MAX_KEYWORD_LENGTH];
     Sci_PositionU j = 0;
     Sci_PositionU lim = end - start + 1; // num chars to copy
@@ -381,8 +379,8 @@ bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
     if (startPos <= 1)
         return false;
 
-    Sci_Position pos;
-    for (pos = startPos - 1; pos > 0; pos--) {
+    Sci_Position pos = startPos - 1;
+    for (; pos > 0; pos--) {
         const char ch = styler.SafeGetCharAt(pos);
         if (isEOLChar(ch)) {
             // Leave the pointers where they are -- there are no
@@ -448,7 +446,7 @@ constexpr bool isInterpolableLiteral(int state) noexcept {
            && state != SCE_RB_CHARACTER;
 }
 
-inline bool isSingleSpecialVariable(char ch) noexcept {
+bool isSingleSpecialVariable(char ch) noexcept {
     // https://docs.ruby-lang.org/en/master/globals_rdoc.html
     return strchr("~*$?!@/\\;,.=:<>\"&`'+", ch) != nullptr;
 }
@@ -540,7 +538,6 @@ bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
 
     // Not so fast, since Ruby's so dynamic.  Check the context
     // to make sure we're OK.
-    int prevStyle;
     const Sci_Position lineStart = styler.GetLine(iPrev);
     const Sci_Position lineStartPosn = styler.LineStart(lineStart);
     styler.Flush();
@@ -552,16 +549,15 @@ bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
         //XXX Look at the first previous non-comment non-white line
         // to establish the context.  Not too likely though.
         return true;
-    } else {
-        prevStyle = styler.StyleAt(firstWordPosn);
-        switch (prevStyle) {
-        case SCE_RB_WORD:
-        case SCE_RB_WORD_DEMOTED:
-        case SCE_RB_IDENTIFIER:
-            break;
-        default:
-            return true;
-        }
+    }
+    const int prevStyle = styler.StyleAt(firstWordPosn);
+    switch (prevStyle) {
+    case SCE_RB_WORD:
+    case SCE_RB_WORD_DEMOTED:
+    case SCE_RB_IDENTIFIER:
+        break;
+    default:
+        return true;
     }
     Sci_Position firstWordEndPosn = firstWordPosn;
     char *dst = prevWord;
@@ -725,9 +721,9 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     if (j >= lengthDoc) {
         return definitely_not_a_here_doc;
     }
-    bool allow_indent;
-    Sci_Position target_start;
-    Sci_Position target_end;
+    bool allow_indent = false;
+    Sci_Position target_start = 0;
+    Sci_Position target_end = 0;
     // From this point on no more styling, since we're looking ahead
     if (styler[j] == '-' || styler[j] == '~') {
         allow_indent = true;
@@ -831,8 +827,8 @@ void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &ini
 
     Sci_Position pos = startPos;
     // Quick way to characterize each line
-    Sci_Position lineStart;
-    for (lineStart = styler.GetLine(pos); lineStart > 0; lineStart--) {
+    Sci_Position lineStart = styler.GetLine(pos);
+    for (; lineStart > 0; lineStart--) {
         // Now look at the style before the previous line's EOL
         pos = styler.LineStart(lineStart) - 1;
         if (pos <= 10) {
@@ -1714,9 +1710,9 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 // Assert that there are no high-bit chars
 
 void getPrevWord(Sci_Position pos, char *prevWord, Accessor &styler, int word_state) {
-    Sci_Position i;
     styler.Flush();
-    for (i = pos - 1; i > 0; i--) {
+    Sci_Position i = pos - 1;
+    for (; i > 0; i--) {
         if (actual_style(styler.StyleAt(i)) != word_state) {
             i++;
             break;
@@ -1754,7 +1750,6 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
     if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
         return keywordDoStartsLoop(pos, styler);
     }
-    char ch;
     int style = SCE_RB_DEFAULT;
     Sci_Position lineStart = styler.GetLine(pos);
     Sci_Position lineStartPosn = styler.LineStart(lineStart);
@@ -1762,7 +1757,7 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
     // position. But first move lineStartPosn back behind any
     // continuations immediately above word.
     while (lineStartPosn > 0) {
-        ch = styler[lineStartPosn-1];
+        const char ch = styler[lineStartPosn-1];
         if (ch == '\n' || ch == '\r') {
             const char chPrev  = styler.SafeGetCharAt(lineStartPosn-2);
             const char chPrev2 = styler.SafeGetCharAt(lineStartPosn-3);
@@ -1784,7 +1779,7 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
     while (--pos >= lineStartPosn) {
         style = actual_style(styler.StyleAt(pos));
         if (style == SCE_RB_DEFAULT) {
-            ch = styler[pos];
+            const char ch = styler[pos];
             if (IsASpaceOrTab(ch)) {
                 //continue
             } else if (ch == '\r' || ch == '\n') {
@@ -1842,8 +1837,7 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
     // usually it's a block assignment, like
     // a << if x then y else z
 
-    ch = styler[pos];
-    switch (ch) {
+    switch (styler[pos]) {
     case ')':
     case ']':
     case '}':
@@ -1879,8 +1873,8 @@ bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler) {
             char prevWord[MAX_KEYWORD_LENGTH + 1]; // 1 byte for zero
             char *dst = prevWord;
             int wordLen = 0;
-            Sci_Position start_word;
-            for (start_word = pos;
+            Sci_Position start_word = pos;
+            for (;
                     start_word >= lineStartPosn && actual_style(styler.StyleAt(start_word)) == SCE_RB_WORD;
                     start_word--) {
                 if (++wordLen < MAX_KEYWORD_LENGTH) {
