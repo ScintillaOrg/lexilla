@@ -21,6 +21,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#include "InList.h"
 #include "WordList.h"
 #include "LexAccessor.h"
 #include "Accessor.h"
@@ -247,8 +248,6 @@ Sci_Position SCI_METHOD LexerRuby::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
-#define MAX_KEYWORD_LENGTH 200
-
 bool followsDot(Sci_PositionU pos, Accessor &styler) {
     styler.Flush();
     for (; pos >= 1; --pos) {
@@ -273,34 +272,30 @@ bool followsDot(Sci_PositionU pos, Accessor &styler) {
 }
 
 // Forward declarations
-bool keywordIsAmbiguous(const char *prevWord) noexcept;
+bool keywordIsAmbiguous(const std::string &prevWord) noexcept;
 bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler);
-bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler);
+bool keywordIsModifier(const std::string &word, Sci_Position pos, Accessor &styler);
 
 // pseudo style: prefer regex after identifier
 #define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
 
-int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, char *prevWord, const WordClassifier &idClasser) {
-    char s[MAX_KEYWORD_LENGTH];
+int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, std::string &prevWord, const WordClassifier &idClasser) {
+    std::string s;
     Sci_PositionU j = 0;
-    Sci_PositionU lim = end - start + 1; // num chars to copy
-    if (lim >= MAX_KEYWORD_LENGTH) {
-        lim = MAX_KEYWORD_LENGTH - 1;
-    }
+    const Sci_PositionU lim = end - start + 1; // num chars to copy
     for (Sci_PositionU i = start; j < lim; i++, j++) {
-        s[j] = styler[i];
+        s.push_back(styler[i]);
     }
-    s[j] = '\0';
     int chAttr = SCE_RB_IDENTIFIER;
     int style = SCE_RB_DEFAULT;
-    if (0 == strcmp(prevWord, "class"))
+    if (prevWord == "class")
         chAttr = SCE_RB_CLASSNAME;
-    else if (0 == strcmp(prevWord, "module"))
+    else if (prevWord == "module")
         chAttr = SCE_RB_MODULE_NAME;
-    else if (0 == strcmp(prevWord, "def")) {
+    else if (prevWord == "def") {
         chAttr = SCE_RB_DEFNAME;
         if (ch == '.') {
-            if (strcmp(s, "self") == 0) {
+            if (s == "self") {
                 style = SCE_RB_WORD_DEMOTED;
             } else {
                 style = SCE_RB_IDENTIFIER;
@@ -324,7 +319,7 @@ int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordLi
             } else {
                 chAttr = SCE_RB_WORD;
                 style = SCE_RB_WORD;
-                strcpy(prevWord, s);
+                prevWord = s;
             }
         } else {
             const int subStyle = idClasser.ValueFor(s);
@@ -336,14 +331,14 @@ int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordLi
     }
     if (style == SCE_RB_DEFAULT) {
         style = chAttr;
-        prevWord[0] = 0;
+        prevWord.clear();
     }
     styler.ColourTo(end, style);
 
     if (chAttr == SCE_RB_IDENTIFIER) {
         // find heredoc in lib/ruby folder: rg "\w+\s+<<[\w\-~'\"`]"
         // Kernel methods
-        if (!strcmp(s, "puts") || !strcmp(s, "print") || !strcmp(s, "warn") || !strcmp(s, "eval")) {
+        if (InList(s, { "puts", "print", "warn", "eval" } )) {
             chAttr = SCE_RB_IDENTIFIER_PREFERRE;
         }
     }
@@ -534,25 +529,24 @@ bool isEmptyLine(Sci_Position pos, Accessor &styler) {
     return (indentCurrent & SC_FOLDLEVELWHITEFLAG) != 0;
 }
 
-bool RE_CanFollowKeyword(const char *keyword) noexcept {
-    if (!strcmp(keyword, "and")
-            || !strcmp(keyword, "begin")
-            || !strcmp(keyword, "break")
-            || !strcmp(keyword, "case")
-            || !strcmp(keyword, "do")
-            || !strcmp(keyword, "else")
-            || !strcmp(keyword, "elsif")
-            || !strcmp(keyword, "if")
-            || !strcmp(keyword, "next")
-            || !strcmp(keyword, "return")
-            || !strcmp(keyword, "when")
-            || !strcmp(keyword, "unless")
-            || !strcmp(keyword, "until")
-            || !strcmp(keyword, "not")
-            || !strcmp(keyword, "or")) {
-        return true;
-    }
-    return false;
+bool RE_CanFollowKeyword(const std::string &keyword) noexcept {
+	return InList(keyword, {
+		"and",
+		"begin",
+		"break",
+		"case",
+		"do",
+		"else",
+		"elsif",
+		"if",
+		"next",
+		"return",
+		"when",
+		"unless",
+		"until",
+		"not",
+		"or"
+		});
 }
 
 // Look at chars up to but not including endPos
@@ -573,7 +567,7 @@ Sci_Position skipWhitespace(Sci_Position startPos, Sci_Position endPos, Accessor
 //
 // iPrev points to the start of <<
 
-bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
+bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, std::string &prevWord) {
 
     // Not so fast, since Ruby's so dynamic.  Check the context
     // to make sure we're OK.
@@ -599,24 +593,18 @@ bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
         return true;
     }
     Sci_Position firstWordEndPosn = firstWordPosn;
-    char *dst = prevWord;
+    prevWord.clear();
     for (;;) {
         if (firstWordEndPosn >= iPrev ||
                 styler.StyleIndexAt(firstWordEndPosn) != prevStyle) {
-            *dst = 0;
             break;
         }
-        *dst++ = styler[firstWordEndPosn];
+        prevWord.push_back(styler[firstWordEndPosn]);
         firstWordEndPosn += 1;
     }
     //XXX Write a style-aware thing to regex scintilla buffer objects
-    if (!strcmp(prevWord, "undef")
-            || !strcmp(prevWord, "def")
-            || !strcmp(prevWord, "alias")) {
-        // These keywords are what we were looking for
-        return false;
-    }
-    return true;
+    // These keywords are what we were looking for
+    return !InList(prevWord, { "undef", "def", "alias" });
 }
 
 // Routine that saves us from allocating a buffer for the here-doc target
@@ -933,7 +921,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     int state = initStyle;
     const Sci_Position lengthDoc = startPos + length;
 
-    char prevWord[MAX_KEYWORD_LENGTH + 1] = ""; // 1 byte for zero
+    std::string prevWord;
     if (length == 0)
         return;
 
@@ -1373,7 +1361,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                         && isSafeWordcharOrHigh(chPrev)
                         && (chNext == '('
                             || isWhiteSpace(chNext))
-                        && (!strcmp(prevWord, "def")
+                        && ((prevWord == "def")
                             || followsDot(styler.GetStartSegment(), styler))) {
                     // <name>= is a name only when being defined -- Get it the next time
                     // This means that <name>=<name> is always lexed as
@@ -1404,7 +1392,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                     const int word_style = ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord, idClasser);
                     switch (word_style) {
                     case SCE_RB_WORD:
-                        afterDef = strcmp(prevWord, "def") == 0;
+                        afterDef = prevWord == "def";
                         preferRE = RE_CanFollowKeyword(prevWord);
                         break;
 
@@ -1750,7 +1738,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 // Helper functions for folding, disambiguation keywords
 // Assert that there are no high-bit chars
 
-void getPrevWord(Sci_Position pos, char *prevWord, Accessor &styler, int word_state) {
+std::string getPrevWord(Sci_Position pos, Accessor &styler, int word_state) {
     styler.Flush();
     Sci_Position i = pos - 1;
     for (; i > 0; i--) {
@@ -1759,35 +1747,24 @@ void getPrevWord(Sci_Position pos, char *prevWord, Accessor &styler, int word_st
             break;
         }
     }
-    if (i < pos - MAX_KEYWORD_LENGTH) // overflow
-        i = pos - MAX_KEYWORD_LENGTH;
-    char *dst = prevWord;
+    std::string prevWord;
     for (; i <= pos; i++) {
-        *dst++ = styler[i];
+        prevWord.push_back(styler[i]);
     }
-    *dst = 0;
+    return prevWord;
 }
 
-bool keywordIsAmbiguous(const char *prevWord) noexcept {
+bool keywordIsAmbiguous(const std::string &prevWord) noexcept {
     // Order from most likely used to least likely
     // Lots of ways to do a loop in Ruby besides 'while/until'
-    if (!strcmp(prevWord, "if")
-            || !strcmp(prevWord, "do")
-            || !strcmp(prevWord, "while")
-            || !strcmp(prevWord, "unless")
-            || !strcmp(prevWord, "until")
-            || !strcmp(prevWord, "for")) {
-        return true;
-    } else {
-        return false;
-    }
+    return InList(prevWord, { "if", "do", "while", "unless", "until", "for" });
 }
 
 // Demote keywords in the following conditions:
 // if, while, unless, until modify a statement
 // do after a while or until, as a noise word (like then after if)
 
-bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
+bool keywordIsModifier(const std::string &word, Sci_Position pos, Accessor &styler) {
     if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
         return keywordDoStartsLoop(pos, styler);
     }
@@ -1865,10 +1842,9 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
         //XXX: Make a list of other keywords where 'if' isn't a modifier
         //     and can appear legitimately
         // Formulate this to avoid warnings from most compilers
-        if (strcmp(word, "if") == 0) {
-            char prevWord[MAX_KEYWORD_LENGTH + 1];
-            getPrevWord(pos, prevWord, styler, SCE_RB_WORD);
-            return strcmp(prevWord, "else") != 0;
+        if (word == "if") {
+            const std::string prevWord = getPrevWord(pos, styler, SCE_RB_WORD);
+            return prevWord != "else";
         }
         return true;
     default:
@@ -1911,22 +1887,15 @@ bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler) {
             }
         } else if (style == SCE_RB_WORD) {
             // Check for while or until, but write the word in backwards
-            char prevWord[MAX_KEYWORD_LENGTH + 1]; // 1 byte for zero
-            char *dst = prevWord;
-            int wordLen = 0;
+            std::string prevWord;
             Sci_Position start_word = pos;
             for (;
                     start_word >= lineStartPosn && styler.StyleIndexAt(start_word) == SCE_RB_WORD;
                     start_word--) {
-                if (++wordLen < MAX_KEYWORD_LENGTH) {
-                    *dst++ = styler[start_word];
-                }
+                prevWord.push_back(styler[start_word]);
             }
-            *dst = 0;
             // Did we see our keyword?
-            if (!strcmp(prevWord, WHILE_BACKWARDS)
-                    || !strcmp(prevWord, UNTIL_BACKWARDS)
-                    || !strcmp(prevWord, FOR_BACKWARDS)) {
+            if (InList(prevWord, { WHILE_BACKWARDS, UNTIL_BACKWARDS, FOR_BACKWARDS } )) {
                 return true;
             }
             // We can move pos to the beginning of the keyword, and then
@@ -2073,29 +2042,28 @@ void LexerRuby::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle,
             }
         } else if (style == SCE_RB_WORD && styleNext != SCE_RB_WORD) {
             // Look at the keyword on the left and decide what to do
-            char prevWord[MAX_KEYWORD_LENGTH + 1]; // 1 byte for zero
-            prevWord[0] = 0;
-            getPrevWord(i, prevWord, styler, SCE_RB_WORD);
-            if (!strcmp(prevWord, "end")) {
+            const std::string prevWord = getPrevWord(i, styler, SCE_RB_WORD);
+            if (prevWord == "end") {
                 // Don't decrement below 0
                 if (levelCurrent > 0)
                     levelCurrent--;
-            } else if (!strcmp(prevWord, "def")) {
+            } else if (prevWord == "def") {
                 levelCurrent++;
                 method_definition = MethodDefinition::Define;
-            } else if (!strcmp(prevWord, "if")
-                       || !strcmp(prevWord, "class")
-                       || !strcmp(prevWord, "module")
-                       || !strcmp(prevWord, "begin")
-                       || !strcmp(prevWord, "case")
-                       || !strcmp(prevWord, "do")
-                       || !strcmp(prevWord, "while")
-                       || !strcmp(prevWord, "unless")
-                       || !strcmp(prevWord, "until")
-                       || !strcmp(prevWord, "for")
-                      ) {
-                levelCurrent++;
-            }
+			} else if (InList(prevWord, {
+                    "if",
+                    "class",
+                    "module",
+                    "begin",
+                    "case",
+                    "do",
+                    "while",
+                    "unless",
+                    "until",
+                    "for"
+				})) {
+				levelCurrent++;
+			}
         } else if (style == SCE_RB_HERE_DELIM && !heredocOpen) {
             if (stylePrev == SCE_RB_OPERATOR && chPrev == '<' && styler.SafeGetCharAt(i - 2) == '<') {
                 levelCurrent++;
