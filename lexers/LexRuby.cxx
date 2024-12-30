@@ -14,6 +14,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 #include <map>
 
 #include "ILexer.h"
@@ -27,6 +28,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "SubStyles.h"
 #include "DefaultLexer.h"
 
 using namespace Scintilla;
@@ -108,6 +110,8 @@ struct OptionSetRuby : public OptionSet<OptionsRuby> {
 	}
 };
 
+const char styleSubable[] = { SCE_RB_IDENTIFIER, 0 };
+
 const LexicalClass lexicalClasses[] = {
 	// Lexer ruby SCLEX_RUBY SCE_RB_
 	0, "SCE_RB_DEFAULT", "default", "White space",
@@ -153,6 +157,7 @@ class LexerRuby : public DefaultLexer {
 	WordList keywords;
 	OptionsRuby options;
 	OptionSetRuby osRuby;
+	SubStyles subStyles{styleSubable};
 public:
 	LexerRuby() :
 		DefaultLexer("ruby", SCLEX_RUBY, lexicalClasses, std::size(lexicalClasses)) {
@@ -184,6 +189,35 @@ public:
 
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override {
+		return subStyles.Allocate(styleBase, numberStyles);
+	}
+	int SCI_METHOD SubStylesStart(int styleBase) override {
+		return subStyles.Start(styleBase);
+	}
+	int SCI_METHOD SubStylesLength(int styleBase) override {
+		return subStyles.Length(styleBase);
+	}
+	int SCI_METHOD StyleFromSubStyle(int subStyle) override {
+		const int styleBase = subStyles.BaseStyle(subStyle);
+		return styleBase;
+	}
+	int SCI_METHOD PrimaryStyleFromStyle(int style) override {
+		return style;
+	}
+	void SCI_METHOD FreeSubStyles() override {
+		subStyles.Free();
+	}
+	void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override {
+		subStyles.SetIdentifiers(style, identifiers);
+	}
+	int SCI_METHOD DistanceToSecondaryStyles() override {
+		return 0;
+	}
+	const char *SCI_METHOD GetSubStyleBases() override {
+		return styleSubable;
+	}
 
 	static ILexer5 *LexerFactoryRuby() {
 		return new LexerRuby();
@@ -246,7 +280,7 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler);
 // pseudo style: prefer regex after identifier
 #define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
 
-int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, char *prevWord) {
+int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, char *prevWord, const WordClassifier &idClasser) {
     char s[MAX_KEYWORD_LENGTH];
     Sci_PositionU j = 0;
     Sci_PositionU lim = end - start + 1; // num chars to copy
@@ -272,24 +306,32 @@ int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordLi
                 style = SCE_RB_IDENTIFIER;
             }
         }
-    } else if (keywords.InList(s) && ((start == 0) || !followsDot(start - 1, styler))) {
-        if (keywordIsAmbiguous(s)
+    } else if ((start == 0) || !followsDot(start - 1, styler)) {
+        if (keywords.InList(s)) {
+            if (keywordIsAmbiguous(s)
                 && keywordIsModifier(s, start, styler)) {
 
-            // Demoted keywords are colored as keywords,
-            // but do not affect changes in indentation.
-            //
-            // Consider the word 'if':
-            // 1. <<if test ...>> : normal
-            // 2. <<stmt if test>> : demoted
-            // 3. <<lhs = if ...>> : normal: start a new indent level
-            // 4. <<obj.if = 10>> : color as identifier, since it follows '.'
+                // Demoted keywords are colored as keywords,
+                // but do not affect changes in indentation.
+                //
+                // Consider the word 'if':
+                // 1. <<if test ...>> : normal
+                // 2. <<stmt if test>> : demoted
+                // 3. <<lhs = if ...>> : normal: start a new indent level
+                // 4. <<obj.if = 10>> : color as identifier, since it follows '.'
 
-            chAttr = SCE_RB_WORD_DEMOTED;
+                chAttr = SCE_RB_WORD_DEMOTED;
+            } else {
+                chAttr = SCE_RB_WORD;
+                style = SCE_RB_WORD;
+                strcpy(prevWord, s);
+            }
         } else {
-            chAttr = SCE_RB_WORD;
-            style = SCE_RB_WORD;
-            strcpy(prevWord, s);
+            const int subStyle = idClasser.ValueFor(s);
+            if (subStyle >= 0) {
+                chAttr = subStyle;
+                style = subStyle;
+            }
         }
     }
     if (style == SCE_RB_DEFAULT) {
@@ -884,6 +926,8 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 
     synchronizeDocStart(startPos, length, initStyle, styler, false);
 
+    const WordClassifier &idClasser = subStyles.Classifier(SCE_RB_IDENTIFIER);
+
     bool preferRE = true;
     bool afterDef = false;
     int state = initStyle;
@@ -990,7 +1034,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
             HereDoc.State = 2;
             if (state == SCE_RB_WORD) {
                 const Sci_Position wordStartPos = styler.GetStartSegment();
-                ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord);
+                ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord, idClasser);
             } else {
                 styler.ColourTo(i - 1, state);
             }
@@ -1357,7 +1401,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                     preferRE = false;
                 } else {
                     const Sci_Position wordStartPos = styler.GetStartSegment();
-                    const int word_style = ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord);
+                    const int word_style = ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord, idClasser);
                     switch (word_style) {
                     case SCE_RB_WORD:
                         afterDef = strcmp(prevWord, "def") == 0;
@@ -1696,7 +1740,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     if (state == SCE_RB_WORD) {
         // We've ended on a word, possibly at EOF, and need to
         // classify it.
-        ClassifyWordRb(styler.GetStartSegment(), lengthDoc - 1, '\0', keywords, styler, prevWord);
+        ClassifyWordRb(styler.GetStartSegment(), lengthDoc - 1, '\0', keywords, styler, prevWord, idClasser);
     } else {
         styler.ColourTo(lengthDoc - 1, state);
     }
