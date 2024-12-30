@@ -215,13 +215,10 @@ Sci_Position SCI_METHOD LexerRuby::WordListSet(int n, const char *wl) {
 
 #define MAX_KEYWORD_LENGTH 200
 
-#define STYLE_MASK 63
-#define actual_style(style) ((style) & STYLE_MASK)
-
 bool followsDot(Sci_PositionU pos, Accessor &styler) {
     styler.Flush();
     for (; pos >= 1; --pos) {
-        const int style = actual_style(styler.StyleAt(pos));
+        const int style = styler.StyleIndexAt(pos);
         switch (style) {
         case SCE_RB_DEFAULT:
             if (IsASpaceOrTab(styler[pos])) {
@@ -390,7 +387,7 @@ bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
             return false;
         } else {
             styler.Flush();
-            if (actual_style(styler.StyleAt(pos)) == SCE_RB_HERE_DELIM) {
+            if (styler.StyleIndexAt(pos) == SCE_RB_HERE_DELIM) {
                 break;
             }
         }
@@ -550,7 +547,7 @@ bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
         // to establish the context.  Not too likely though.
         return true;
     }
-    const int prevStyle = styler.StyleAt(firstWordPosn);
+    const int prevStyle = styler.StyleIndexAt(firstWordPosn);
     switch (prevStyle) {
     case SCE_RB_WORD:
     case SCE_RB_WORD_DEMOTED:
@@ -563,7 +560,7 @@ bool sureThisIsHeredoc(Sci_Position iPrev, Accessor &styler, char *prevWord) {
     char *dst = prevWord;
     for (;;) {
         if (firstWordEndPosn >= iPrev ||
-                styler.StyleAt(firstWordEndPosn) != prevStyle) {
+                styler.StyleIndexAt(firstWordEndPosn) != prevStyle) {
             *dst = 0;
             break;
         }
@@ -601,7 +598,7 @@ bool haveTargetMatch(Sci_Position currPos, Sci_Position lengthDoc, Sci_Position 
 Sci_Position findExpressionStart(Sci_Position pos, Sci_Position min_pos, Accessor &styler) {
     int depth = 0;
     for (; pos > min_pos; pos -= 1) {
-        const int style = styler.StyleAt(pos - 1);
+        const int style = styler.StyleIndexAt(pos - 1);
         if (style == SCE_RB_OPERATOR) {
             const int ch = styler[pos - 1];
             if (ch == '}' || ch == ')' || ch == ']') {
@@ -651,7 +648,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     if (firstWordPosn >= lt2StartPos) {
         return definitely_not_a_here_doc;
     }
-    int prevStyle = styler.StyleAt(firstWordPosn);
+    int prevStyle = styler.StyleIndexAt(firstWordPosn);
     // If we have '<<' following a keyword, it's not a heredoc
     if (prevStyle != SCE_RB_IDENTIFIER
             && prevStyle != SCE_RB_GLOBAL       // $stdout and $stderr
@@ -665,7 +662,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     for (firstWordPosn += 1; firstWordPosn <= lt2StartPos; firstWordPosn += 1) {
         // Inner loop looks at the name
         for (; firstWordPosn <= lt2StartPos; firstWordPosn += 1) {
-            newStyle = styler.StyleAt(firstWordPosn);
+            newStyle = styler.StyleIndexAt(firstWordPosn);
             if (newStyle != prevStyle) {
                 break;
             }
@@ -676,7 +673,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
             if (ch == '.') {
                 // yes
             } else if (ch == ':') {
-                if (styler.StyleAt(++firstWordPosn) != SCE_RB_OPERATOR) {
+                if (styler.StyleIndexAt(++firstWordPosn) != SCE_RB_OPERATOR) {
                     return definitely_not_a_here_doc;
                 } else if (styler[firstWordPosn] != ':') {
                     return definitely_not_a_here_doc;
@@ -694,9 +691,9 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     // Skip next batch of white-space
     firstWordPosn = skipWhitespace(firstWordPosn, lt2StartPos, styler);
     // possible symbol for an implicit hash argument
-    if (firstWordPosn < lt2StartPos && styler.StyleAt(firstWordPosn) == SCE_RB_SYMBOL) {
+    if (firstWordPosn < lt2StartPos && styler.StyleIndexAt(firstWordPosn) == SCE_RB_SYMBOL) {
         for (; firstWordPosn <= lt2StartPos; firstWordPosn += 1) {
-            if (styler.StyleAt(firstWordPosn) != SCE_RB_SYMBOL) {
+            if (styler.StyleIndexAt(firstWordPosn) != SCE_RB_SYMBOL) {
                 break;
             }
         }
@@ -709,7 +706,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     }
     // OK, now 'j' will point to the current spot moving ahead
     Sci_Position j = firstWordPosn + 1;
-    if (styler.StyleAt(j) != SCE_RB_OPERATOR || styler[j] != '<') {
+    if (styler.StyleIndexAt(j) != SCE_RB_OPERATOR || styler[j] != '<') {
         // This shouldn't happen
         return definitely_not_a_here_doc;
     }
@@ -816,7 +813,7 @@ void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &ini
         initStyle = (startPos > 0) ? styler.StyleIndexAt(startPos - 1) : 0;
     }
 
-    const int style = actual_style(styler.StyleAt(startPos));
+    const int style = styler.StyleIndexAt(startPos);
     switch (style) {
     case SCE_RB_STDIN:
     case SCE_RB_STDOUT:
@@ -842,7 +839,7 @@ void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &ini
         }
         if (styler.SafeGetCharAt(pos - 1) == '\\') {
             // Continuation line -- keep going
-        } else if (actual_style(styler.StyleAt(pos)) != SCE_RB_DEFAULT) {
+        } else if (styler.StyleIndexAt(pos) != SCE_RB_DEFAULT) {
             // Part of multiline construct -- keep going
         } else if (currLineContainsHereDelims(pos, styler)) {
             // Keep going, with pos and length now pointing
@@ -1713,7 +1710,7 @@ void getPrevWord(Sci_Position pos, char *prevWord, Accessor &styler, int word_st
     styler.Flush();
     Sci_Position i = pos - 1;
     for (; i > 0; i--) {
-        if (actual_style(styler.StyleAt(i)) != word_state) {
+        if (styler.StyleIndexAt(i) != word_state) {
             i++;
             break;
         }
@@ -1777,7 +1774,7 @@ bool keywordIsModifier(const char *word, Sci_Position pos, Accessor &styler) {
 
     styler.Flush();
     while (--pos >= lineStartPosn) {
-        style = actual_style(styler.StyleAt(pos));
+        style = styler.StyleIndexAt(pos);
         if (style == SCE_RB_DEFAULT) {
             const char ch = styler[pos];
             if (IsASpaceOrTab(ch)) {
@@ -1859,7 +1856,7 @@ bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler) {
     const Sci_Position lineStartPosn = styler.LineStart(lineStart);
     styler.Flush();
     while (--pos >= lineStartPosn) {
-        const int style = actual_style(styler.StyleAt(pos));
+        const int style = styler.StyleIndexAt(pos);
         if (style == SCE_RB_DEFAULT) {
             const char ch = styler[pos];
             if (ch == '\r' || ch == '\n') {
@@ -1875,7 +1872,7 @@ bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler) {
             int wordLen = 0;
             Sci_Position start_word = pos;
             for (;
-                    start_word >= lineStartPosn && actual_style(styler.StyleAt(start_word)) == SCE_RB_WORD;
+                    start_word >= lineStartPosn && styler.StyleIndexAt(start_word) == SCE_RB_WORD;
                     start_word--) {
                 if (++wordLen < MAX_KEYWORD_LENGTH) {
                     *dst++ = styler[start_word];
@@ -1983,8 +1980,8 @@ void LexerRuby::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle,
     int levelCurrent = levelPrev;
     char chPrev = '\0';
     char chNext = styler[startPos];
-    int styleNext = styler.StyleAt(startPos);
-    int stylePrev = startPos <= 1 ? SCE_RB_DEFAULT : styler.StyleAt(startPos - 1);
+    int styleNext = styler.StyleIndexAt(startPos);
+    int stylePrev = startPos <= 1 ? SCE_RB_DEFAULT : styler.StyleIndexAt(startPos - 1);
     // detect endless method definition to fix up code folding
     enum class MethodDefinition {
         None,
@@ -2001,7 +1998,7 @@ void LexerRuby::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle,
         const char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
         const int style = styleNext;
-        styleNext = styler.StyleAt(i + 1);
+        styleNext = styler.StyleIndexAt(i + 1);
         const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
         /* Multiline comment patch */
