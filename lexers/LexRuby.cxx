@@ -271,6 +271,10 @@ bool followsDot(Sci_PositionU pos, Accessor &styler) {
     return false;
 }
 
+constexpr bool IsIdentifierStyle(int style) noexcept {
+    return style == SCE_RB_IDENTIFIER || style >= SubStylesFirst;
+}
+
 // Forward declarations
 bool keywordIsAmbiguous(const std::string &prevWord) noexcept;
 bool keywordDoStartsLoop(Sci_Position pos, Accessor &styler);
@@ -680,7 +684,7 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     }
     int prevStyle = styler.StyleIndexAt(firstWordPosn);
     // If we have '<<' following a keyword, it's not a heredoc
-    if (prevStyle != SCE_RB_IDENTIFIER
+    if (!IsIdentifierStyle(prevStyle)
             && prevStyle != SCE_RB_GLOBAL       // $stdout and $stderr
             && prevStyle != SCE_RB_SYMBOL
             && prevStyle != SCE_RB_INSTANCE_VAR
