@@ -425,11 +425,10 @@ bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
             // the EOL isn't default style
 
             return false;
-        } else {
-            styler.Flush();
-            if (styler.StyleIndexAt(pos) == SCE_RB_HERE_DELIM) {
-                break;
-            }
+        }
+        styler.Flush();
+        if (styler.StyleIndexAt(pos) == SCE_RB_HERE_DELIM) {
+            break;
         }
     }
     if (pos == 0) {
@@ -445,12 +444,10 @@ bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
 
 class QuoteCls {
 public:
-    int  Count;
-    char Up;
-    char Down;
-    QuoteCls() noexcept {
-        New();
-    }
+    int  Count = 0;
+    char Up = '\0';
+    char Down = '\0';
+    QuoteCls() noexcept = default;
     void New() noexcept {
         Count = 0;
         Up    = '\0';
@@ -633,15 +630,14 @@ Sci_Position findExpressionStart(Sci_Position pos, Sci_Position min_pos, Accesso
     for (; pos > min_pos; pos -= 1) {
         const int style = styler.StyleIndexAt(pos - 1);
         if (style == SCE_RB_OPERATOR) {
-            const int ch = styler[pos - 1];
+            const char ch = styler[pos - 1];
             if (ch == '}' || ch == ')' || ch == ']') {
                 depth += 1;
             } else if (ch == '{' || ch == '(' || ch == '[') {
                 if (depth == 0) {
                     break;
-                } else {
-                    depth -= 1;
                 }
+                depth -= 1;
             } else if (ch == ';' && depth == 0) {
                 break;
             }
@@ -798,15 +794,13 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
             j = skipWhitespace(j, lengthDoc, styler);
             if (j >= lengthDoc) {
                 return definitely_not_a_here_doc;
-            } else {
-                const char ch = styler[j];
-                if (ch == '#' || isEOLChar(ch) || ch == '.' || ch == ',' || IsLowerCase(ch)) {
-                    // This is OK, so break and continue;
-                    break;
-                } else {
-                    return definitely_not_a_here_doc;
-                }
             }
+            const char ch = styler[j];
+            if (ch == '#' || isEOLChar(ch) || ch == '.' || ch == ',' || IsLowerCase(ch)) {
+                // This is OK, so break and continue;
+                break;
+            }
+            return definitely_not_a_here_doc;
         }
     }
 
@@ -976,10 +970,10 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     public:
         int brace_counts = 0;   // Number of #{ ... } things within an expression
 
-        bool canEnter() const noexcept {
+        [[nodiscard]] bool canEnter() const noexcept {
             return inner_string_count < INNER_STRINGS_MAX_COUNT;
         }
-        bool canExit() const noexcept {
+        [[nodiscard]] bool canExit() const noexcept {
             return inner_string_count > 0;
         }
         void enter(int &state, const QuoteCls &curr_quote) noexcept {

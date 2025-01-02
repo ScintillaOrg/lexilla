@@ -44,6 +44,9 @@ checkLevelNormal:lexilla/lexers/LexRuby.cxx
 // Physically but not logically const.
 constVariablePointer:lexilla/examples/CheckLexilla/CheckLexilla.c
 
+// cppcheck appears to be incorrectly determining control flow: target_end is used after write
+unreadVariable:lexilla/lexers/LexRuby.cxx
+
 // Suppress most lexer warnings since the lexers are maintained by others
 redundantCondition:lexilla/lexers/LexA68k.cxx
 constParameterReference:lexilla/lexers/LexAbaqus.cxx
