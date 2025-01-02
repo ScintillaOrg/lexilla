@@ -283,13 +283,9 @@ bool keywordIsModifier(const std::string &word, Sci_Position pos, Accessor &styl
 // pseudo style: prefer regex after identifier
 #define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
 
-int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, std::string &prevWord, const WordClassifier &idClasser) {
-    std::string s;
-    Sci_PositionU j = 0;
-    const Sci_PositionU lim = end - start + 1; // num chars to copy
-    for (Sci_PositionU i = start; j < lim; i++, j++) {
-        s.push_back(styler[i]);
-    }
+int ClassifyWordRb(Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, std::string &prevWord, const WordClassifier &idClasser) {
+    const Sci_PositionU start = styler.GetStartSegment();
+    const std::string s = styler.GetRange(start, end);
     int chAttr = SCE_RB_IDENTIFIER;
     int style = SCE_RB_DEFAULT;
     if (prevWord == "class")
@@ -328,7 +324,6 @@ int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordLi
         } else {
             const int subStyle = idClasser.ValueFor(s);
             if (subStyle >= 0) {
-                chAttr = subStyle;
                 style = subStyle;
             }
         }
@@ -337,7 +332,7 @@ int ClassifyWordRb(Sci_PositionU start, Sci_PositionU end, char ch, const WordLi
         style = chAttr;
         prevWord.clear();
     }
-    styler.ColourTo(end, style);
+    styler.ColourTo(end - 1, style);
 
     if (chAttr == SCE_RB_IDENTIFIER) {
         // find heredoc in lib/ruby folder: rg "\w+\s+<<[\w\-~'\"`]"
@@ -1025,8 +1020,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
             // Begin of here-doc (the line after the here-doc delimiter):
             HereDoc.State = 2;
             if (state == SCE_RB_WORD) {
-                const Sci_Position wordStartPos = styler.GetStartSegment();
-                ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord, idClasser);
+                ClassifyWordRb(i, ch, keywords, styler, prevWord, idClasser);
             } else {
                 styler.ColourTo(i - 1, state);
             }
@@ -1392,8 +1386,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                     // No need to handle this state -- we'll just move to the end
                     preferRE = false;
                 } else {
-                    const Sci_Position wordStartPos = styler.GetStartSegment();
-                    const int word_style = ClassifyWordRb(wordStartPos, i - 1, ch, keywords, styler, prevWord, idClasser);
+                    const int word_style = ClassifyWordRb(i, ch, keywords, styler, prevWord, idClasser);
                     switch (word_style) {
                     case SCE_RB_WORD:
                         afterDef = prevWord == "def";
@@ -1732,7 +1725,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     if (state == SCE_RB_WORD) {
         // We've ended on a word, possibly at EOF, and need to
         // classify it.
-        ClassifyWordRb(styler.GetStartSegment(), lengthDoc - 1, '\0', keywords, styler, prevWord, idClasser);
+        ClassifyWordRb(lengthDoc, '\0', keywords, styler, prevWord, idClasser);
     } else {
         styler.ColourTo(lengthDoc - 1, state);
     }
