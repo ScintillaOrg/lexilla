@@ -283,7 +283,7 @@ bool keywordIsModifier(const std::string &word, Sci_Position pos, Accessor &styl
 // pseudo style: prefer regex after identifier
 #define SCE_RB_IDENTIFIER_PREFERRE  SCE_RB_UPPER_BOUND
 
-int ClassifyWordRb(Sci_PositionU end, char ch, const WordList &keywords, Accessor &styler, std::string &prevWord, const WordClassifier &idClasser) {
+int ClassifyWordRb(Sci_PositionU end, char ch, char chNext, const WordList &keywords, Accessor &styler, std::string &prevWord, const WordClassifier &idClasser) {
     const Sci_PositionU start = styler.GetStartSegment();
     const std::string s = styler.GetRange(start, end);
     int chAttr = SCE_RB_IDENTIFIER;
@@ -294,11 +294,15 @@ int ClassifyWordRb(Sci_PositionU end, char ch, const WordList &keywords, Accesso
         chAttr = SCE_RB_MODULE_NAME;
     else if (prevWord == "def") {
         chAttr = SCE_RB_DEFNAME;
-        if (ch == '.') {
+        if (ch == '.' || (ch == ':' && chNext == ':')) {
             if (s == "self") {
                 style = SCE_RB_WORD_DEMOTED;
             } else {
                 style = SCE_RB_IDENTIFIER;
+                const int subStyle = idClasser.ValueFor(s);
+                if (subStyle >= 0) {
+                    style = subStyle;
+                }
             }
         }
     } else if ((start == 0) || !followsDot(start - 1, styler)) {
@@ -1020,7 +1024,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
             // Begin of here-doc (the line after the here-doc delimiter):
             HereDoc.State = 2;
             if (state == SCE_RB_WORD) {
-                ClassifyWordRb(i, ch, keywords, styler, prevWord, idClasser);
+                ClassifyWordRb(i, ch, chNext, keywords, styler, prevWord, idClasser);
             } else {
                 styler.ColourTo(i - 1, state);
             }
@@ -1386,7 +1390,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                     // No need to handle this state -- we'll just move to the end
                     preferRE = false;
                 } else {
-                    const int word_style = ClassifyWordRb(i, ch, keywords, styler, prevWord, idClasser);
+                    const int word_style = ClassifyWordRb(i, ch, chNext, keywords, styler, prevWord, idClasser);
                     switch (word_style) {
                     case SCE_RB_WORD:
                         afterDef = prevWord == "def";
@@ -1725,7 +1729,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     if (state == SCE_RB_WORD) {
         // We've ended on a word, possibly at EOF, and need to
         // classify it.
-        ClassifyWordRb(lengthDoc, '\0', keywords, styler, prevWord, idClasser);
+        ClassifyWordRb(lengthDoc, '\0', '\0', keywords, styler, prevWord, idClasser);
     } else {
         styler.ColourTo(lengthDoc - 1, state);
     }
@@ -2081,7 +2085,7 @@ void LexerRuby::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle,
             case MethodDefinition::Define:
                 if (style == SCE_RB_OPERATOR) {
                     method_definition = MethodDefinition::Operator;
-                } else if (style == SCE_RB_DEFNAME || style == SCE_RB_WORD_DEMOTED || style == SCE_RB_CLASSNAME || style == SCE_RB_IDENTIFIER) {
+                } else if (style == SCE_RB_DEFNAME || style == SCE_RB_WORD_DEMOTED || style == SCE_RB_CLASSNAME || IsIdentifierStyle(style)) {
                     method_definition = MethodDefinition::Name;
                 } else if (!(style == SCE_RB_WORD || IsASpaceOrTab(ch))) {
                     method_definition = MethodDefinition::None;

@@ -7,6 +7,7 @@ puts <<中
 #{1+2}
 中
 
+def STDERR::error(x) = puts(x)
 def STDERR.error(x) = puts(x)
 
 STDERR.error <<EOF
