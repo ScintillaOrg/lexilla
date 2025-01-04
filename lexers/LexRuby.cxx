@@ -249,9 +249,8 @@ Sci_Position SCI_METHOD LexerRuby::WordListSet(int n, const char *wl) {
 }
 
 bool followsDot(Sci_PositionU pos, Accessor &styler) {
-    styler.Flush();
     for (; pos >= 1; --pos) {
-        const int style = styler.StyleIndexAt(pos);
+        const int style = styler.BufferStyleAt(pos);
         switch (style) {
         case SCE_RB_DEFAULT:
             if (IsASpaceOrTab(styler[pos])) {
@@ -426,7 +425,6 @@ bool currLineContainsHereDelims(Sci_Position &startPos, Accessor &styler) {
 
             return false;
         }
-        styler.Flush();
         if (styler.StyleIndexAt(pos) == SCE_RB_HERE_DELIM) {
             break;
         }
@@ -829,9 +827,6 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
 // multiline construct
 
 void synchronizeDocStart(Sci_PositionU &startPos, Sci_Position &length, int &initStyle, Accessor &styler, bool skipWhiteSpace=false) {
-
-    styler.Flush();
-
     // Retreat one line to match function lexer
     if (const Sci_Position lineCurrent = styler.GetLine(startPos); lineCurrent > 0) {
         const Sci_Position endPos = startPos + length;
@@ -1734,7 +1729,6 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 // Assert that there are no high-bit chars
 
 std::string getPrevWord(Sci_Position pos, Accessor &styler, int word_state) {
-    styler.Flush();
     Sci_Position i = pos - 1;
     for (; i > 0; i--) {
         if (styler.StyleIndexAt(i) != word_state) {
