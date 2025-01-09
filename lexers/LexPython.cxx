@@ -716,8 +716,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 						}
 						if (ch == '.') {
 							// Is this an attribute we could style? if it is, do as asked
-							styler.Flush(); // need to be able to check to see if '.' is a comment or not, and need to flush the styler to check
-							bool isComment = (styler.StyleIndexAt(pos) == SCE_P_COMMENTLINE) || (styler.StyleIndexAt(pos) == SCE_P_COMMENTBLOCK);
+							bool isComment = (styler.BufferStyleAt(pos) == SCE_P_COMMENTLINE) || (styler.BufferStyleAt(pos) == SCE_P_COMMENTBLOCK);
 							bool isDecoratorAttribute = false;
 							const Sci_Position attrLine = styler.GetLine(pos);
 							for (Sci_Position i = styler.LineStart(attrLine); i < pos; i++) {
