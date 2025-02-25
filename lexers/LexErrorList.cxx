@@ -93,9 +93,12 @@ int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci
 		} else {
 			return SCE_ERR_DIFF_ADDITION;
 		}
-	} else if (lineBuffer[0] == '-') {
+	} else if (lineBuffer[0] == '-' && !strstart(lineBuffer, "-r")) {
 		if (strstart(lineBuffer, "--- ")) {
 			return SCE_ERR_DIFF_MESSAGE;
+		} else if (strstart(lineBuffer, "-- ")) {
+			// CMake status messages
+			return SCE_ERR_DEFAULT;
 		} else {
 			return SCE_ERR_DIFF_DELETION;
 		}
