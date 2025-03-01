@@ -109,7 +109,7 @@ constexpr int translateBashDigit(int ch) noexcept {
 	return BASH_BASE_ERROR;
 }
 
-int getBashNumberBase(char *s) noexcept {
+int getBashNumberBase(const char *s) noexcept {
 	int i = 0;
 	int base = 0;
 	while (*s) {
