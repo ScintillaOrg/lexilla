@@ -18,7 +18,7 @@
 DIR_O=.
 DIR_BIN=..\bin
 
-LEXILLA=$(DIR_BIN)\lexilla.dll
+LEXILLA=$(DIR_BIN)\Lexilla.dll
 LIBLEXILLA=$(DIR_BIN)\liblexilla.lib
 
 LD=link
@@ -72,7 +72,7 @@ all:	$(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
 
 clean:
 	-del /q $(DIR_O)\*.obj $(DIR_O)\*.o $(DIR_O)\*.pdb \
-	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb $(DIR_BIN)\lexilla.lib \
+	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb $(DIR_BIN)\Lexilla.lib \
 	$(LEXILLA) $(LIBLEXILLA)
 
 depend:
