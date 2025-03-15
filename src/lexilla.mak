@@ -13,6 +13,22 @@
 #     QUIET Avoid most compiler invocation output and copyright info.
 #     SUPPORT_XP Build for Windows XP.
 
+!IFDEF DEBUG
+BUILD=debug
+!ELSE
+BUILD=release
+!ENDIF
+
+OS=windows
+
+!IFDEF VSCMD_ARG_TGT_ARCH
+ARCH=$(VSCMD_ARG_TGT_ARCH)
+!ELSEIFDEF Platform
+ARCH=$(Platform)
+!ELSE
+!ERROR Cannot determine target platform.
+!ENDIF
+
 .SUFFIXES: .cxx
 
 DIR_O=.
@@ -27,16 +43,17 @@ LD=link
 ADD_DEFINE=-D_USING_V110_SDK71_
 # Different subsystems for 32-bit and 64-bit Windows XP so detect based on Platform
 # environment variable set by vcvars*.bat to be either x86 or x64
-!IF "$(PLATFORM)" == "x64"
+!IF "$(ARCH)" == "x64"
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,5.02
 !ELSE
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,5.01
 !ENDIF
 !ELSE
 CETCOMPAT=-CETCOMPAT
-!IFDEF ARM64
+!IF "$(ARCH)" == "arm64"
 ADD_DEFINE=-D_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,10.00
+!UNDEF CETCOMPAT
 !ENDIF
 !ENDIF
 
