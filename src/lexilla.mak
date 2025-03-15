@@ -13,12 +13,28 @@
 #     QUIET Avoid most compiler invocation output and copyright info.
 #     SUPPORT_XP Build for Windows XP.
 
+!IFDEF DEBUG
+BUILD=debug
+!ELSE
+BUILD=release
+!ENDIF
+
+OS=windows
+
+!IFDEF VSCMD_ARG_TGT_ARCH
+ARCH=$(VSCMD_ARG_TGT_ARCH)
+!ELSEIFDEF Platform
+ARCH=$(Platform)
+!ELSE
+!ERROR Cannot determine target platform.
+!ENDIF
+
 .SUFFIXES: .cxx
 
-DIR_O=.
-DIR_BIN=..\bin
+DIR_O=..\obj\$(BUILD)-$(OS)-$(ARCH)
+DIR_BIN=..\bin\$(BUILD)-$(OS)-$(ARCH)
 
-LEXILLA=$(DIR_BIN)\lexilla.dll
+LEXILLA=$(DIR_BIN)\Lexilla.dll
 LIBLEXILLA=$(DIR_BIN)\liblexilla.lib
 
 LD=link
@@ -27,16 +43,17 @@ LD=link
 ADD_DEFINE=-D_USING_V110_SDK71_
 # Different subsystems for 32-bit and 64-bit Windows XP so detect based on Platform
 # environment variable set by vcvars*.bat to be either x86 or x64
-!IF "$(PLATFORM)" == "x64"
+!IF "$(ARCH)" == "x64"
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,5.02
 !ELSE
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,5.01
 !ENDIF
 !ELSE
 CETCOMPAT=-CETCOMPAT
-!IFDEF ARM64
+!IF "$(ARCH)" == "arm64"
 ADD_DEFINE=-D_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,10.00
+!UNDEF CETCOMPAT
 !ENDIF
 !ENDIF
 
@@ -70,9 +87,15 @@ CXXFLAGS=$(CXXFLAGS) $(INCLUDEDIRS)
 
 all:	$(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
 
+$(DIR_O):
+	mkdir "$(DIR_O)" 2>NUL || cd .
+
+$(DIR_BIN):
+	mkdir "$(DIR_BIN)" 2>NUL || cd .
+
 clean:
 	-del /q $(DIR_O)\*.obj $(DIR_O)\*.o $(DIR_O)\*.pdb \
-	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb $(DIR_BIN)\lexilla.lib \
+	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb $(DIR_BIN)\Lexilla.lib \
 	$(LEXILLA) $(LIBLEXILLA)
 
 depend:
@@ -231,11 +254,11 @@ LEXILLA_OBJS=\
 	$(LEXLIB_OBJS) \
 	$(LEX_OBJS)
 
-$(LEXILLA): $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res
-	$(LD) $(LDFLAGS) -DEF:Lexilla.def -DLL -OUT:$@ $** $(LIBS)
+$(LEXILLA): $(DIR_BIN) $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res
+	$(LD) $(LDFLAGS) -DEF:Lexilla.def -DLL -OUT:$@ $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res $(LIBS)
 
-$(LIBLEXILLA): $(LEXILLA_OBJS)
-	LIB -OUT:$@ $**
+$(LIBLEXILLA): $(DIR_BIN) $(LEXILLA_OBJS)
+	LIB -OUT:$@ $(LEXILLA_OBJS)
 
 # Define how to build all the objects and what they depend on
 
