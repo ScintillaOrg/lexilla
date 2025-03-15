@@ -31,8 +31,8 @@ ARCH=$(Platform)
 
 .SUFFIXES: .cxx
 
-DIR_O=.
-DIR_BIN=..\bin
+DIR_O=..\obj\$(BUILD)-$(OS)-$(ARCH)
+DIR_BIN=..\bin\$(BUILD)-$(OS)-$(ARCH)
 
 LEXILLA=$(DIR_BIN)\Lexilla.dll
 LIBLEXILLA=$(DIR_BIN)\liblexilla.lib
@@ -86,6 +86,12 @@ INCLUDEDIRS=-I../include -I$(SCINTILLA_INCLUDE) -I../lexlib
 CXXFLAGS=$(CXXFLAGS) $(INCLUDEDIRS)
 
 all:	$(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
+
+$(DIR_O):
+	mkdir "$(DIR_O)" 2>NUL || cd .
+
+$(DIR_BIN):
+	mkdir "$(DIR_BIN)" 2>NUL || cd .
 
 clean:
 	-del /q $(DIR_O)\*.obj $(DIR_O)\*.o $(DIR_O)\*.pdb \
@@ -248,11 +254,11 @@ LEXILLA_OBJS=\
 	$(LEXLIB_OBJS) \
 	$(LEX_OBJS)
 
-$(LEXILLA): $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res
-	$(LD) $(LDFLAGS) -DEF:Lexilla.def -DLL -OUT:$@ $** $(LIBS)
+$(LEXILLA): $(DIR_BIN) $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res
+	$(LD) $(LDFLAGS) -DEF:Lexilla.def -DLL -OUT:$@ $(LEXILLA_OBJS) $(DIR_O)\LexillaVersion.res $(LIBS)
 
-$(LIBLEXILLA): $(LEXILLA_OBJS)
-	LIB -OUT:$@ $**
+$(LIBLEXILLA): $(DIR_BIN) $(LEXILLA_OBJS)
+	LIB -OUT:$@ $(LEXILLA_OBJS)
 
 # Define how to build all the objects and what they depend on
 

@@ -35,7 +35,7 @@ def Generate():
 	# Create the dependencies file for MSVC
 
 	# Place the objects in $(DIR_O) and change extension from ".o" to ".obj"
-	deps = [["$(DIR_O)/"+Dependencies.PathStem(obj)+".obj", headers] for obj, headers in deps]
+	deps = [["$(DIR_O)/"+Dependencies.PathStem(obj)+".obj", ["$(DIR_O)"] + headers] for obj, headers in deps]
 
 	Dependencies.UpdateDependencies(os.path.join(lexilla, "src", "nmdeps.mak"), deps, topComment)
 
