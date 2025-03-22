@@ -6,13 +6,17 @@ jobs:
     build:
 
         runs-on: windows-latest
-
+        strategy:
+          matrix:
+            arch:
+              - amd64
+              - amd64_arm64
         steps:
         - uses: actions/checkout@v4
         - name: Preparing nmake
           uses: ilammy/msvc-dev-cmd@v1
           with:
-            arch: x64
+            arch: ${{ matrix.arch }}
         - name: Install Scintilla source
           run: |
               pwd
@@ -33,7 +37,7 @@ jobs:
               cd ..
         - uses: actions/upload-artifact@v4
           with:
-              name: lexilla.dll
+              name: lexilla-${{ matrix.arch }}.dll
               path: bin/lexilla.dll
         - name: Test lexing and folding
           run: |
