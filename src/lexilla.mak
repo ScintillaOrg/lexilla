@@ -15,7 +15,7 @@
 
 .SUFFIXES: .cxx
 
-DIR_O=.
+DIR_O=obj
 DIR_BIN=..\bin
 
 LEXILLA=$(DIR_BIN)\lexilla.dll
@@ -73,7 +73,10 @@ SCINTILLA_INCLUDE = ../../scintilla/include
 INCLUDEDIRS=-I../include -I$(SCINTILLA_INCLUDE) -I../lexlib
 CXXFLAGS=$(CXXFLAGS) $(INCLUDEDIRS)
 
-all:	$(SCINTILLA_INCLUDE) $(LEXILLA) $(LIBLEXILLA)
+all:	$(SCINTILLA_INCLUDE) $(DIR_O) $(LEXILLA) $(LIBLEXILLA)
+
+$(DIR_O):
+	mkdir "$(DIR_O)" 2>NUL || cd .
 
 clean:
 	-del /q $(DIR_O)\*.obj $(DIR_O)\*.o $(DIR_O)\*.pdb \
