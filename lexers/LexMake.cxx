@@ -25,19 +25,51 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
-static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
+namespace {
+
+const char *const makeWordListDescription[] = {
+	nullptr
+};
+
+const LexicalClass lexicalClasses[] = {
+	// Lexer makefile SCLEX_MAKEFILE SCE_MAKE_
+	0, "SCE_MAKE_DEFAULT", "default", "White space",
+	1, "SCE_MAKE_COMMENT", "comment", "Comment",
+	2, "SCE_MAKE_PREPROCESSOR", "preprocessor", "Preprocessor",
+	3, "SCE_MAKE_IDENTIFIER", "identifier", "Identifiers",
+	4, "SCE_MAKE_OPERATOR", "operator", "Operator",
+	5, "SCE_MAKE_TARGET", "identifier", "Identifiers",
+	9, "SCE_MAKE_IDEOL", "error identifier", "Incomplete identifier reference",
+};
+
+bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
-	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
+		((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
-static void ColouriseMakeLine(
+class LexerMakeFile : public DefaultLexer {
+public:
+	LexerMakeFile() :
+		DefaultLexer("makefile", SCLEX_MAKEFILE, lexicalClasses, std::size(lexicalClasses)) {
+	}
+
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	static ILexer5 *LexerFactoryMakeFile() {
+		return new LexerMakeFile();
+	}
+};
+
+void ColouriseMakeLine(
 	const std::string &lineBuffer,
-    Sci_PositionU startLine,
-    Sci_PositionU endPos,
-    Accessor &styler) {
+	Sci_PositionU startLine,
+	Sci_PositionU endPos,
+	Accessor &styler) {
 
 	const Sci_PositionU lengthLine = lineBuffer.length();
 	Sci_PositionU i = 0;
@@ -117,7 +149,8 @@ static void ColouriseMakeLine(
 	}
 }
 
-static void ColouriseMakeDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
+void LexerMakeFile::Lex(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, IDocument *pAccess) {
+	Accessor styler(pAccess, nullptr);
 	std::string lineBuffer;
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
@@ -134,10 +167,9 @@ static void ColouriseMakeDoc(Sci_PositionU startPos, Sci_Position length, int, W
 	if (!lineBuffer.empty()) {	// Last line does not have ending characters
 		ColouriseMakeLine(lineBuffer, startLine, startPos + length - 1, styler);
 	}
+	styler.Flush();
 }
 
-static const char *const emptyWordListDesc[] = {
-	nullptr
-};
+}
 
-extern const LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile", nullptr, emptyWordListDesc);
+extern const LexerModule lmMake(SCLEX_MAKEFILE, LexerMakeFile::LexerFactoryMakeFile, "makefile", makeWordListDescription);
