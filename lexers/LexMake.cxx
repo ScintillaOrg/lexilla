@@ -66,7 +66,7 @@ public:
 };
 
 void ColouriseMakeLine(
-	const std::string &lineBuffer,
+	const std::string_view lineBuffer,
 	Sci_PositionU startLine,
 	Sci_PositionU endPos,
 	Accessor &styler) {
@@ -78,9 +78,7 @@ void ColouriseMakeLine(
 	bool bSpecial = false;
 
 	// check for a tab character in column 0 indicating a command
-	bool bCommand = false;
-	if ((lengthLine > 0) && (lineBuffer[0] == '\t'))
-		bCommand = true;
+	const bool bCommand = StartsWith(lineBuffer, '\t');
 
 	// Skip initial spaces
 	while ((i < lengthLine) && isspacechar(lineBuffer[i])) {
@@ -98,7 +96,7 @@ void ColouriseMakeLine(
 	}
 	int varCount = 0;
 	while (i < lengthLine) {
-		if (((i + 1) < lengthLine) && (lineBuffer[i] == '$' && lineBuffer[i + 1] == '(')) {
+		if (lineBuffer.substr(i, 2) == "$(") {
 			styler.ColourTo(startLine + i - 1, state);
 			state = SCE_MAKE_IDENTIFIER;
 			varCount++;
