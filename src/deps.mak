@@ -897,7 +897,9 @@ $(DIR_O)/LexMake.o: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexMarkdown.o: \
 	../lexers/LexMarkdown.cxx \
 	../../scintilla/include/ILexer.h \
