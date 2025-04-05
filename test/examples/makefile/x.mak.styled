@@ -11,7 +11,7 @@
 {2}!IFDEF DEBUG
 {0}
 {1}# 'ifdef DEBUG' GNI make directive default=0
-{0}ifdef DEBUG
+{2}ifdef{0} DEBUG
 
 {1}# '$(' ID EOL=9
 {3}X{4}={9}$(

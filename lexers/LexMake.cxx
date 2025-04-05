@@ -14,6 +14,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -25,6 +26,7 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
 #include "DefaultLexer.h"
 
 using namespace Scintilla;
@@ -32,8 +34,19 @@ using namespace Lexilla;
 
 namespace {
 
+// Options used for LexerMakeFile
+struct OptionsMake {
+};
+
 const char *const makeWordListDescription[] = {
+	"Directives",
 	nullptr
+};
+
+struct OptionSetMake : public OptionSet<OptionsMake> {
+	OptionSetMake() {
+		DefineWordListSets(makeWordListDescription);
+	}
 };
 
 const LexicalClass lexicalClasses[] = {
@@ -53,10 +66,34 @@ bool AtEOL(Accessor &styler, Sci_PositionU i) {
 }
 
 class LexerMakeFile : public DefaultLexer {
+	WordList directives;
+	OptionsMake options;
+	OptionSetMake osMake;
 public:
 	LexerMakeFile() :
 		DefaultLexer("makefile", SCLEX_MAKEFILE, lexicalClasses, std::size(lexicalClasses)) {
 	}
+
+	const char *SCI_METHOD PropertyNames() override {
+		return osMake.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osMake.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osMake.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osMake.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osMake.DescribeWordListSets();
+	}
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+
+	void ColouriseMakeLine(std::string_view lineBuffer,
+		Sci_PositionU startLine, Sci_PositionU endPos, Accessor &styler);
 
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
@@ -65,7 +102,30 @@ public:
 	}
 };
 
-void ColouriseMakeLine(
+Sci_Position SCI_METHOD LexerMakeFile::PropertySet(const char *key, const char *val) {
+	if (osMake.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
+
+Sci_Position SCI_METHOD LexerMakeFile::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &directives;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN && wordListN->Set(wl)) {
+		firstModification = 0;
+	}
+	return firstModification;
+}
+
+void LexerMakeFile::ColouriseMakeLine(
 	const std::string_view lineBuffer,
 	Sci_PositionU startLine,
 	Sci_PositionU endPos,
@@ -92,6 +152,18 @@ void ColouriseMakeLine(
 		if (lineBuffer[i] == '!') {	// Special directive
 			styler.ColourTo(endPos, SCE_MAKE_PREPROCESSOR);
 			return;
+		}
+		if (IsUpperOrLowerCase(lineBuffer[i]) &&
+			(lineBuffer.find_first_of(":=") == std::string::npos)) {
+			const std::string_view firstWord(lineBuffer.substr(i));
+			size_t endWord = 0;
+			while ((endWord < firstWord.length()) && IsUpperOrLowerCase(firstWord[endWord])) {
+				endWord++;
+			}
+			if (directives.InList(firstWord.substr(0, endWord))) {
+				styler.ColourTo(startLine + i + endWord - 1, SCE_MAKE_PREPROCESSOR);
+				i += endWord;
+			}
 		}
 	}
 	int varCount = 0;
