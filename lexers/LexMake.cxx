@@ -108,32 +108,22 @@ void ColouriseMakeLine(
 		}
 
 		// skip identifier and target styling if this is a command line
-		if (!bSpecial && !bCommand) {
-			if (lineBuffer[i] == ':') {
-				if (((i + 1) < lengthLine) && (lineBuffer[i + 1] == '=')) {
-					// it's a ':=', so style as an identifier
-					if (lastNonSpace >= 0)
-						styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_IDENTIFIER);
-					styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
-					styler.ColourTo(startLine + i + 1, SCE_MAKE_OPERATOR);
-				} else {
-					// We should check that no colouring was made since the beginning of the line,
-					// to avoid colouring stuff like /OUT:file
-					if (lastNonSpace >= 0)
-						styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_TARGET);
-					styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
-					styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
-				}
-				bSpecial = true;	// Only react to the first ':' of the line
-				state = SCE_MAKE_DEFAULT;
-			} else if (lineBuffer[i] == '=') {
-				if (lastNonSpace >= 0)
-					styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_IDENTIFIER);
-				styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
-				styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
-				bSpecial = true;	// Only react to the first '=' of the line
-				state = SCE_MAKE_DEFAULT;
+		if (!bSpecial && !bCommand && AnyOf(lineBuffer[i], ':', '=')) {
+			// Three cases:
+			// : target
+			// := immediate assignment
+			// = lazy assignment
+			const bool colon = lineBuffer[i] == ':';
+			const bool immediate = colon && ((i + 1) < lengthLine) && (lineBuffer[i + 1] == '=');
+			const Sci_PositionU lengthOperator = immediate ? 1 : 0;
+			if (lastNonSpace >= 0) {
+				const int attribute = (colon && !immediate) ? SCE_MAKE_TARGET : SCE_MAKE_IDENTIFIER;
+				styler.ColourTo(startLine + lastNonSpace, attribute);
 			}
+			styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
+			styler.ColourTo(startLine + i + lengthOperator, SCE_MAKE_OPERATOR);
+			bSpecial = true;	// Only react to the first ':' or '=' of the line
+			state = SCE_MAKE_DEFAULT;
 		}
 		if (!isspacechar(lineBuffer[i])) {
 			lastNonSpace = i;
