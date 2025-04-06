@@ -377,14 +377,15 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "else".
 
-void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle, IDocument *pAccess) {
 
 	if (!options.fold)
 		return;
 
 	LexAccessor styler(pAccess);
 
-	const Sci_PositionU endPos = startPos + length;
+	const Sci_Position startPos = static_cast<Sci_Position>(startPos_);
+	const Sci_Position endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
@@ -396,7 +397,7 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
 	int style = initStyle;
 	std::string word;
 	const bool userDefinedFoldMarkers = !options.foldExplicitStart.empty() && !options.foldExplicitEnd.empty();
-	for (Sci_PositionU i = startPos; i < endPos; i++) {
+	for (Sci_Position i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int stylePrev = style;
@@ -453,7 +454,7 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			lineCurrent++;
 			levelCurrent = levelNext;
-			if (atEOL && (i == static_cast<Sci_PositionU>(styler.Length() - 1))) {
+			if (atEOL && (i == (styler.Length() - 1))) {
 				// There is an empty line at end of file so give it same level and empty
 				styler.SetLevel(lineCurrent, (levelCurrent | levelCurrent << 16) | SC_FOLDLEVELWHITEFLAG);
 			}
