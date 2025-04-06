@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cctype>
 #include <cstdio>
 #include <cstdarg>
 
@@ -40,26 +39,19 @@ using namespace Lexilla;
 namespace {
 
 bool IsAWordChar(const int ch) noexcept {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' ||
-		ch == '_' || ch == '?');
+	return IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == '?';
 }
 
 bool IsAWordStart(const int ch) noexcept {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.' ||
-		ch == '%' || ch == '@' || ch == '$' || ch == '?');
+	return IsAlphaNumeric(ch) || ch == '_' || ch == '.' ||
+		ch == '%' || ch == '@' || ch == '$' || ch == '?';
 }
 
 bool IsAsmOperator(const int ch) noexcept {
-	if ((ch < 0x80) && (isalnum(ch)))
+	if (IsAlphaNumeric(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
-	if (ch == '*' || ch == '/' || ch == '-' || ch == '+' ||
-		ch == '(' || ch == ')' || ch == '=' || ch == '^' ||
-		ch == '[' || ch == ']' || ch == '<' || ch == '&' ||
-		ch == '>' || ch == ',' || ch == '|' || ch == '~' ||
-		ch == '%' || ch == ':')
-		return true;
-	return false;
+	return AnyOf(ch, '*', '/', '-', '+', '(', ')', '=', '^', '[', ']', '<', '&', '>', ',', '|', '~', '%', ':');
 }
 
 constexpr bool IsStreamCommentStyle(int style) noexcept {
@@ -71,26 +63,17 @@ constexpr bool IsStreamCommentStyle(int style) noexcept {
 // Options used for LexerAsm
 struct OptionsAsm {
 	std::string delimiter;
-	bool fold;
-	bool foldSyntaxBased;
-	bool foldCommentMultiline;
-	bool foldCommentExplicit;
+	bool fold = false;
+	bool foldSyntaxBased = true;
+	bool foldCommentMultiline = false;
+	bool foldCommentExplicit = false;
 	std::string foldExplicitStart;
 	std::string foldExplicitEnd;
-	bool foldExplicitAnywhere;
-	bool foldCompact;
+	bool foldExplicitAnywhere = false;
+	bool foldCompact = true;
 	std::string commentChar;
-	OptionsAsm() {
-		delimiter = "";
-		fold = false;
-		foldSyntaxBased = true;
-		foldCommentMultiline = false;
-		foldCommentExplicit = false;
-		foldExplicitStart = "";
-		foldExplicitEnd   = "";
-		foldExplicitAnywhere = false;
-		foldCompact = true;
-		commentChar = "";
+	[[nodiscard]] char Delimiter() const noexcept {
+		return delimiter.empty() ? '~' : delimiter[0];
 	}
 };
 
@@ -153,12 +136,11 @@ class LexerAsm : public DefaultLexer {
 	WordList directives4foldend;
 	OptionsAsm options;
 	OptionSetAsm osAsm;
-	int commentChar;
+	char commentChar;
 public:
-	LexerAsm(const char *languageName_, int language_, int commentChar_) : DefaultLexer(languageName_, language_) {
-		commentChar = commentChar_;
-	}
-	virtual ~LexerAsm() {
+	LexerAsm(const char *languageName_, int language_, char commentChar_) :
+		DefaultLexer(languageName_, language_),
+		commentChar(commentChar_) {
 	}
 	void SCI_METHOD Release() override {
 		delete this;
@@ -232,6 +214,8 @@ Sci_Position SCI_METHOD LexerAsm::WordListSet(int n, const char *wl) {
 		break;
 	case 7:
 		wordListN = &directives4foldend;
+		break;
+	default:
 		break;
 	}
 	Sci_Position firstModification = -1;
@@ -315,18 +299,16 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				}
 				sc.SetState(SCE_ASM_DEFAULT);
 				if (IsDirective && !strcmp(s, "comment")) {
-					const char delimiter = options.delimiter.empty() ? '~' : options.delimiter.c_str()[0];
 					while (IsASpaceOrTab(sc.ch) && !sc.atLineEnd) {
 						sc.ForwardSetState(SCE_ASM_DEFAULT);
 					}
-					if (sc.ch == delimiter) {
+					if (sc.ch == options.Delimiter()) {
 						sc.SetState(SCE_ASM_COMMENTDIRECTIVE);
 					}
 				}
 			}
 		} else if (sc.state == SCE_ASM_COMMENTDIRECTIVE) {
-			const char delimiter = options.delimiter.empty() ? '~' : options.delimiter.c_str()[0];
-			if (sc.ch == delimiter) {
+			if (sc.ch == options.Delimiter()) {
 				while (!sc.MatchLineEnd()) {
 					sc.Forward();
 				}
@@ -360,7 +342,7 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 		if (sc.state == SCE_ASM_DEFAULT) {
 			if (sc.ch == commentCharacter) {
 				sc.SetState(SCE_ASM_COMMENT);
-			} else if (IsASCII(sc.ch) && (isdigit(sc.ch) || (sc.ch == '.' && IsASCII(sc.chNext) && isdigit(sc.chNext)))) {
+			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				sc.SetState(SCE_ASM_NUMBER);
 			} else if (IsAWordStart(sc.ch)) {
 				sc.SetState(SCE_ASM_IDENTIFIER);
@@ -396,17 +378,16 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
+	int styleNext = styler.StyleIndexAt(startPos);
 	int style = initStyle;
-	char word[100]{};
-	int wordlen = 0;
+	std::string word;
 	const bool userDefinedFoldMarkers = !options.foldExplicitStart.empty() && !options.foldExplicitEnd.empty();
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int stylePrev = style;
 		style = styleNext;
-		styleNext = styler.StyleAt(i + 1);
+		styleNext = styler.StyleIndexAt(i + 1);
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (options.foldCommentMultiline && IsStreamCommentStyle(style)) {
 			if (!IsStreamCommentStyle(stylePrev)) {
@@ -434,19 +415,14 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
  			}
  		}
 		if (options.foldSyntaxBased && (style == SCE_ASM_DIRECTIVE)) {
-			word[wordlen++] = MakeLowerCase(ch);
-			if (wordlen == 100) {                   // prevent overflow
-				word[0] = '\0';
-				wordlen = 1;
-			}
+			word.push_back(MakeLowerCase(ch));
 			if (styleNext != SCE_ASM_DIRECTIVE) {   // reading directive ready
-				word[wordlen] = '\0';
-				wordlen = 0;
 				if (directives4foldstart.InList(word)) {
 					levelNext++;
 				} else if (directives4foldend.InList(word)){
 					levelNext--;
 				}
+				word.clear();
 			}
 		}
 		if (!IsASpace(ch))
