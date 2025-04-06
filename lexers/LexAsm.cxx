@@ -148,27 +148,27 @@ public:
 	int SCI_METHOD Version() const override {
 		return lvRelease5;
 	}
-	const char * SCI_METHOD PropertyNames() override {
+	const char *SCI_METHOD PropertyNames() override {
 		return osAsm.PropertyNames();
 	}
 	int SCI_METHOD PropertyType(const char *name) override {
 		return osAsm.PropertyType(name);
 	}
-	const char * SCI_METHOD DescribeProperty(const char *name) override {
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
 		return osAsm.DescribeProperty(name);
 	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
-	const char * SCI_METHOD PropertyGet(const char *key) override {
+	const char *SCI_METHOD PropertyGet(const char *key) override {
 		return osAsm.PropertyGet(key);
 	}
-	const char * SCI_METHOD DescribeWordListSets() override {
+	const char *SCI_METHOD DescribeWordListSets() override {
 		return osAsm.DescribeWordListSets();
 	}
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
-	void * SCI_METHOD PrivateCall(int, void *) override {
+	void *SCI_METHOD PrivateCall(int, void *) override {
 		return nullptr;
 	}
 
@@ -239,8 +239,7 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 
 	StyleContext sc(startPos, length, initStyle, styler);
 
-	for (; sc.More(); sc.Forward())
-	{
+	for (; sc.More(); sc.Forward()) {
 
 		if (sc.atLineStart) {
 			switch (sc.state) {
@@ -269,16 +268,21 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 		}
 
 		// Determine if the current state should terminate.
-		if (sc.state == SCE_ASM_OPERATOR) {
+		switch (sc.state) {
+		case SCE_ASM_OPERATOR:
 			if (!IsAsmOperator(sc.ch)) {
-			    sc.SetState(SCE_ASM_DEFAULT);
+				sc.SetState(SCE_ASM_DEFAULT);
 			}
-		} else if (sc.state == SCE_ASM_NUMBER) {
+			break;
+
+		case SCE_ASM_NUMBER:
 			if (!IsAWordChar(sc.ch)) {
 				sc.SetState(SCE_ASM_DEFAULT);
 			}
-		} else if (sc.state == SCE_ASM_IDENTIFIER) {
-			if (!IsAWordChar(sc.ch) ) {
+			break;
+
+		case SCE_ASM_IDENTIFIER:
+			if (!IsAWordChar(sc.ch)) {
 				char s[100];
 				sc.GetCurrentLowered(s, sizeof(s));
 				bool IsDirective = false;
@@ -307,14 +311,18 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					}
 				}
 			}
-		} else if (sc.state == SCE_ASM_COMMENTDIRECTIVE) {
+			break;
+
+		case SCE_ASM_COMMENTDIRECTIVE:
 			if (sc.ch == options.Delimiter()) {
 				while (!sc.MatchLineEnd()) {
 					sc.Forward();
 				}
 				sc.SetState(SCE_ASM_DEFAULT);
 			}
-		} else if (sc.state == SCE_ASM_STRING) {
+			break;
+
+		case SCE_ASM_STRING:
 			if (sc.ch == '\\') {
 				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
 					sc.Forward();
@@ -325,7 +333,9 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				sc.ChangeState(SCE_ASM_STRINGEOL);
 				sc.ForwardSetState(SCE_ASM_DEFAULT);
 			}
-		} else if (sc.state == SCE_ASM_CHARACTER) {
+			break;
+
+		case SCE_ASM_CHARACTER:
 			if (sc.ch == '\\') {
 				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
 					sc.Forward();
@@ -336,6 +346,10 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				sc.ChangeState(SCE_ASM_STRINGEOL);
 				sc.ForwardSetState(SCE_ASM_DEFAULT);
 			}
+			break;
+
+		default:
+			break;
 		}
 
 		// Determine if a new state should be entered.
@@ -400,10 +414,10 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
 		if (options.foldCommentExplicit && ((style == SCE_ASM_COMMENT) || options.foldExplicitAnywhere)) {
 			if (userDefinedFoldMarkers) {
 				if (styler.Match(i, options.foldExplicitStart.c_str())) {
- 					levelNext++;
+					levelNext++;
 				} else if (styler.Match(i, options.foldExplicitEnd.c_str())) {
- 					levelNext--;
- 				}
+					levelNext--;
+				}
 			} else {
 				if (ch == ';') {
 					if (chNext == '{') {
@@ -412,14 +426,14 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos, Sci_Position length, int 
 						levelNext--;
 					}
 				}
- 			}
- 		}
+			}
+		}
 		if (options.foldSyntaxBased && (style == SCE_ASM_DIRECTIVE)) {
 			word.push_back(MakeLowerCase(ch));
 			if (styleNext != SCE_ASM_DIRECTIVE) {   // reading directive ready
 				if (directives4foldstart.InList(word)) {
 					levelNext++;
-				} else if (directives4foldend.InList(word)){
+				} else if (directives4foldend.InList(word)) {
 					levelNext--;
 				}
 				word.clear();
