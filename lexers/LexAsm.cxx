@@ -390,7 +390,7 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos_, Sci_Position length, int
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
-		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
+		levelCurrent = FoldLevelStart(styler.LevelAt(lineCurrent-1));
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleIndexAt(startPos);
@@ -443,20 +443,14 @@ void SCI_METHOD LexerAsm::Fold(Sci_PositionU startPos_, Sci_Position length, int
 		if (!IsASpace(ch))
 			visibleChars++;
 		if (atEOL || (i == endPos-1)) {
-			const int levelUse = levelCurrent;
-			int lev = levelUse | levelNext << 16;
-			if (visibleChars == 0 && options.foldCompact)
-				lev |= SC_FOLDLEVELWHITEFLAG;
-			if (levelUse < levelNext)
-				lev |= SC_FOLDLEVELHEADERFLAG;
-			if (lev != styler.LevelAt(lineCurrent)) {
-				styler.SetLevel(lineCurrent, lev);
-			}
+			const int lev = FoldLevelForCurrentNext(levelCurrent, levelNext) |
+				FoldLevelFlags(levelCurrent, levelNext, visibleChars == 0 && options.foldCompact);
+			styler.SetLevelIfDifferent(lineCurrent, lev);
 			lineCurrent++;
 			levelCurrent = levelNext;
 			if (atEOL && (i == (styler.Length() - 1))) {
 				// There is an empty line at end of file so give it same level and empty
-				styler.SetLevel(lineCurrent, (levelCurrent | levelCurrent << 16) | SC_FOLDLEVELWHITEFLAG);
+				styler.SetLevel(lineCurrent, FoldLevelForCurrent(levelCurrent) | SC_FOLDLEVELWHITEFLAG);
 			}
 			visibleChars = 0;
 		}
