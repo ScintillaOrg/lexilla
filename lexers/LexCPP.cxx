@@ -1820,7 +1820,7 @@ Tokens LexerCPP::Tokenize(const std::string &expr) const {
 			word += *cp;
 			cp++;
 		}
-		tokens.push_back(word);
+		tokens.push_back(std::move(word));
 	}
 	return tokens;
 }
