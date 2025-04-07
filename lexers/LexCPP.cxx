@@ -121,7 +121,7 @@ struct BracketPair {
 BracketPair FindBracketPair(Tokens &tokens) {
 	const Tokens::iterator itBracket = std::find(tokens.begin(), tokens.end(), "(");
 	if (itBracket != tokens.end()) {
-		size_t nest = 0;
+		ptrdiff_t nest = 0;
 		for (Tokens::iterator itTok = itBracket; itTok != tokens.end(); ++itTok) {
 			if (*itTok == "(") {
 				nest++;
