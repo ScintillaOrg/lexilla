@@ -409,7 +409,6 @@ public:
 	explicit LexerPython() :
 		DefaultLexer("python", SCLEX_PYTHON, lexicalClasses, std::size(lexicalClasses)) {
 	}
-	~LexerPython() override = default;
 	void SCI_METHOD Release() override {
 		delete this;
 	}
