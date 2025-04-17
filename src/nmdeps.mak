@@ -41,6 +41,7 @@ $(DIR_O)/LexAccessor.obj: \
 	../lexlib/LexAccessor.cxx \
 	../../scintilla/include/ILexer.h \
 	../../scintilla/include/Sci_Position.h \
+	../../scintilla/include/Scintilla.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/CharacterSet.h
 $(DIR_O)/LexerBase.obj: \
