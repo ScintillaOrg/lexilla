@@ -345,7 +345,7 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
                    // identifier.identifer[.identifier ...] - stay in the identifier state until not id char and not .
                    // - is not included in the test above because it's not valid as the start of an identifier
                    sc.Forward();
-                   sc.SetState(SCE_ABL_IDENTIFIER2);
+                   sc.SetState(SCE_ABL_IDENTIFIERCOMPOUND);
                    break;
                }
                else if ((isSentenceStart && keywords2.InListAbbreviated (s,'(')) || (!isLastWordEnd && keywords3.InListAbbreviated (s,'('))) {
@@ -371,7 +371,7 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
                sc.SetState(SCE_ABL_DEFAULT);
             }
             break;
-         case SCE_ABL_IDENTIFIER2:
+         case SCE_ABL_IDENTIFIERCOMPOUND:
              // identifier.identifer[.identifier ...] - exit this state when we find something
              // that's not a valid character in an identifier
              // .* is included for cases like: USING System.Collections.*
