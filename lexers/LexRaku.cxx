@@ -1424,7 +1424,7 @@ void SCI_METHOD LexerRaku::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				const int state = sc.state;
 				sc.Forward();
-				char ch_delim = 0;
+				int ch_delim = 0;
 				if (setSpecialVar.Contains(sc.ch)
 						&& !setWord.Contains(sc.chNext)) {	// Process Special Var
 					ch_delim = -1;
