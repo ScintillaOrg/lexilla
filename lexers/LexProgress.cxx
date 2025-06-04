@@ -345,7 +345,8 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
                    // identifier.identifer[.identifier ...] - stay in the identifier state until not id char and not .
                    // - is not included in the test above because it's not valid as the start of an identifier
                    sc.Forward();
-                   sc.SetState(SCE_ABL_IDENTIFIERCOMPOUND);
+                   // sc.SetState(SCE_ABL_IDENTIFIERCOMPOUND);
+                   sc.ChangeState(SCE_ABL_IDENTIFIERCOMPOUND);
                    break;
                }
                else if ((isSentenceStart && keywords2.InListAbbreviated (s,'(')) || (!isLastWordEnd && keywords3.InListAbbreviated (s,'('))) {

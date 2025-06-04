@@ -1,5 +1,5 @@
 {12}// all of Progress.Lang.Object is styled as SCE_ABL_IDENTIFIER2
-{2}DEFINE{0} {2}VARIABLE{0} {7}obj1{0} {2}AS{0} {7}Progress.{13}Lang.Object.{0}
+{2}DEFINE{0} {2}VARIABLE{0} {7}obj1{0} {2}AS{0} {13}Progress.Lang.Object.{0}
 
 {12}// Object by itself is styled as SCE_ABL_WORD when not part of a compound identifier
 {2}DEFINE{0} {2}VARIABLE{0} {7}obj1{0} {2}AS{0} {2}OBJECT{6}.{0}
@@ -8,33 +8,33 @@
 {2}DEFINE{0} {2}VARIABLE{0} {7}obj1{0} {2}AS{0} {7}Object2{6}.{0}
 
 {12}// name is styled as SCE_ABL_IDENTIFIER2 when part of a compound identifier
-{2}DISPLAY{0} {7}customer.{13}name.{0}
-{2}DISPLAY{0} {7}sports.{13}customer.name.{0}
+{2}DISPLAY{0} {13}customer.name.{0}
+{2}DISPLAY{0} {13}sports.customer.name.{0}
 
 {12}// name by itself is styled as SCE_ABL_WORD when not part of a compound identifier
 {2}DISPLAY{0} {2}name{6}.{0}
 
 {12}// make sure that SCE_ABL_IDENTIFIER2 spans an identifier which contains a hyphen
-{2}DISPLAY{0} {7}customer.{13}cust-num.{0}
-{2}DISPLAY{0} {7}customer.{13}cust-name.{0}
+{2}DISPLAY{0} {13}customer.cust-num.{0}
+{2}DISPLAY{0} {13}customer.cust-name.{0}
 
 {12}// underscore is a valid character at the beginning of an identifier
-{2}DISPLAY{0} {7}_user.{13}_user-id.{0}
+{2}DISPLAY{0} {13}_user._user-id.{0}
 
 {12}// - is not a valid character at the beginning of an identifier
 {2}DISPLAY{0} {7}sports{6}.-{7}address{6}.{0}
 
 {12}// the attribute is styled as SCE_ABL_WORD
-{2}MESSAGE{0} {7}customer.{13}name{6}:{2}VISIBLE{6}.{0}
+{2}MESSAGE{0} {13}customer.name{6}:{2}VISIBLE{6}.{0}
 
 {12}// filename and extension is styled as SCE_ABL_IDENTIFIER2
-{2}RUN{0} {7}dir1{6}/{7}dir2{6}/{7}myprocedure.{13}p.{0}
-{2}RUN{0} {7}dir1{6}/{7}dir2{6}/{7}name.{13}p{0}
-{2}RUN{0} {7}myprocedure.{13}p{0}
-{2}RUN{0} {7}name.{13}p{0}
+{2}RUN{0} {7}dir1{6}/{7}dir2{6}/{13}myprocedure.p.{0}
+{2}RUN{0} {7}dir1{6}/{7}dir2{6}/{13}name.p{0}
+{2}RUN{0} {13}myprocedure.p{0}
+{2}RUN{0} {13}name.p{0}
 
 {12}// .* in USING statement is styled as SCE_ABL_IDENTIFIER2
-{7}USING{0} {7}System.{13}Windows.Forms.*.{0}
+{7}USING{0} {13}System.Windows.Forms.*.{0}
 
 {12}// * in an identifier (not following . as above) is invalid
-{7}DEF{0} {7}VAR{0} {7}a{0} {2}AS{0} {7}Progress.{13}Lang{6}*.{0}
+{7}DEF{0} {7}VAR{0} {7}a{0} {2}AS{0} {13}Progress.Lang{6}*.{0}
