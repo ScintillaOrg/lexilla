@@ -345,7 +345,6 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
                    // identifier.identifer[.identifier ...] - stay in the identifier state until not id char and not .
                    // - is not included in the test above because it's not valid as the start of an identifier
                    sc.Forward();
-                   // sc.SetState(SCE_ABL_IDENTIFIERCOMPOUND);
                    sc.ChangeState(SCE_ABL_IDENTIFIERCOMPOUND);
                    break;
                }
@@ -377,6 +376,8 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
              // that's not a valid character in an identifier
              // .* is included for cases like: USING System.Collections.*
              if (sc.ch != '.' && sc.ch != '-' && !(sc.ch == '*' && sc.chPrev == '.') && !setWord.Contains(sc.ch)) {
+                 // change the entire compound identifier back to SCE_ABL_IDENTIFIER
+                 sc.ChangeState(SCE_ABL_IDENTIFIER);
                  sc.SetState(SCE_ABL_DEFAULT);
                  isSentenceStart = false;
              }
