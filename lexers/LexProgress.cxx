@@ -45,6 +45,9 @@ Differentiate between labels and variables
 using namespace Scintilla;
 using namespace Lexilla;
 
+// Intermediate style for compund identifiers; this style won't be seen in lexed documents
+#define SCE_ABL_IDENTIFIERCOMPOUND 30
+
 namespace {
    // Use an unnamed namespace to protect the functions and classes from name conflicts
 
