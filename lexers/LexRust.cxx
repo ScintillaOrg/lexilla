@@ -7,12 +7,12 @@
 // Copyright 1998-2005 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
+#include <cstdio>
+#include <cstdarg>
 
 #include <string>
 #include <string_view>
@@ -93,7 +93,7 @@ static const char * const rustWordLists[NUM_RUST_KEYWORD_LISTS + 1] = {
 	"Keywords 5",
 	"Keywords 6",
 	"Keywords 7",
-	0,
+	nullptr,
 };
 
 struct OptionSetRust : public OptionSet<OptionsRust> {
@@ -196,7 +196,7 @@ public:
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void * SCI_METHOD PrivateCall(int, void *) override {
-		return 0;
+		return nullptr;
 	}
 	static ILexer5 *LexerFactoryRust() {
 		return new LexerRust();
