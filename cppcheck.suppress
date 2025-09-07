@@ -156,6 +156,7 @@ constParameterReference:lexilla/lexers/LexRuby.cxx
 constParameterReference:lexilla/lexers/LexRust.cxx
 knownConditionTrueFalse:lexilla/lexers/LexScriptol.cxx
 constParameterReference:lexilla/lexers/LexScriptol.cxx
+constParameterReference:lexilla/lexers/LexSINEX.cxx
 constParameterPointer:lexilla/lexers/LexSmalltalk.cxx
 variableScope:lexilla/lexers/LexSpecman.cxx
 unreadVariable:lexilla/lexers/LexSpice.cxx
