@@ -75,6 +75,7 @@ constParameterPointer:lexilla/lexers/LexCoffeeScript.cxx
 knownConditionTrueFalse:lexilla/lexers/LexCoffeeScript.cxx
 constVariableReference:lexilla/lexers/LexConf.cxx
 constParameterReference:lexilla/lexers/LexCPP.cxx
+knownConditionTrueFalse:lexilla/lexers/LexCPP.cxx
 variableScope:lexilla/lexers/LexCSS.cxx
 constVariablePointer:lexilla/lexers/LexCSS.cxx
 knownConditionTrueFalse:lexilla/lexers/LexDataflex.cxx
