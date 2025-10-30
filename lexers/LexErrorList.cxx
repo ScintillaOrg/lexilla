@@ -333,6 +333,9 @@ int StyleFromSequence(const char *seq) noexcept {
 				bold = 1;
 			} else if (base >= 30 && base <= 37) {
 				colour = base - 30;
+			} else if (base >= 90 && base <= 97) {
+				colour = base - 90;
+				bold = 1;
 			}
 		}
 		seq++;
