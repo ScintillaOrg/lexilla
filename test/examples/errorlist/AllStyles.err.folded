@@ -114,3 +114,7 @@
  0 400   0   Escape Sequence Colour 41
  0 400   0   [31mColour 1 is 41
  0 400   0   
+ 0 400   0   
+ 0 400   0   Check short reset after colour
+ 0 400   0   [31m41[m0
+ 0 400   0   

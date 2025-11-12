@@ -108,8 +108,12 @@ Escape Sequence Unknown 24
 
 
 Escape Sequence Colour 40
-{23}[0m{40}Colour 0 is 40
-{0}
+{23}[0m{0}Colour 0 is 40
+
 
 Escape Sequence Colour 41
 {23}[31m{41}Colour 1 is 41
+{0}
+
+Check short reset after colour
+{23}[31m{41}41{23}[m{0}0
