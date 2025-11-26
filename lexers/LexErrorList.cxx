@@ -13,6 +13,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 #include <initializer_list>
 
 #include "ILexer.h"
@@ -26,10 +27,137 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
+
+// Options used for LexerErrorList
+struct OptionsErrorList {
+	bool valueSeparate = false;
+	bool escapeSequences = false;
+};
+
+const char *const emptyWordListDesc[] = {
+	nullptr
+};
+
+struct OptionSetErrorList : public OptionSet<OptionsErrorList> {
+	OptionSetErrorList() {
+		DefineProperty("lexer.errorlist.value.separate", &OptionsErrorList::valueSeparate,
+			"For lines in the output pane that are matches from Find in Files or GCC-style"
+			"diagnostics, style the path and line number separately from the rest of the"
+			"line with style 21 used for the rest of the line."
+			"This allows matched text to be more easily distinguished from its location."
+		);
+
+		DefineProperty("lexer.errorlist.escape.sequences", &OptionsErrorList::escapeSequences,
+			"Set to 1 to interpret escape sequences."
+		);
+	}
+};
+
+const LexicalClass lexicalClasses[] = {
+	// Lexer errorlist SCLEX_ERRORLIST SCE_ERR_
+	0, "SCE_ERR_DEFAULT", "diagnostic", "Text",
+	1, "SCE_ERR_PYTHON", "diagnostic", "Python Error",
+	2, "SCE_ERR_GCC", "diagnostic", "GCC Error",
+	3, "SCE_ERR_MS", "diagnostic", "Microsoft Error",
+	4, "SCE_ERR_CMD", "default", "Command or return status",
+	5, "SCE_ERR_BORLAND", "diagnostic", "Borland error and warning messages",
+	6, "SCE_ERR_PERL", "diagnostic", "Perl error and warning messages",
+	7, "SCE_ERR_NET", "diagnostic", ".NET tracebacks",
+	8, "SCE_ERR_LUA", "diagnostic", "Lua error and warning messages",
+	9, "SCE_ERR_CTAG", "diagnostic", "ctags",
+	10, "SCE_ERR_DIFF_CHANGED", "default", "Diff changed !",
+	11, "SCE_ERR_DIFF_ADDITION", "default", "Diff addition +",
+	12, "SCE_ERR_DIFF_DELETION", "default", "Diff deletion -",
+	13, "SCE_ERR_DIFF_MESSAGE", "default", "Diff message ---",
+	14, "SCE_ERR_PHP", "diagnostic", "PHP error",
+	15, "SCE_ERR_ELF", "diagnostic", "Essential Lahey Fortran 90 error",
+	16, "SCE_ERR_IFC", "diagnostic", "Intel Fortran Compiler error",
+	17, "SCE_ERR_IFORT", "diagnostic", "Intel Fortran Compiler v8.0 error/warning",
+	18, "SCE_ERR_ABSF", "diagnostic", "Absoft Pro Fortran 90/95 v8.2 error or warning",
+	19, "SCE_ERR_TIDY", "diagnostic", "HTML Tidy",
+	20, "SCE_ERR_JAVA_STACK", "diagnostic", "Java runtime stack trace",
+	21, "SCE_ERR_VALUE", "default", "Text matched with find in files and message part of GCC errors",
+	22, "SCE_ERR_GCC_INCLUDED_FROM", "diagnostic", "GCC showing include path to following error",
+	23, "SCE_ERR_ESCSEQ", "escapesequence", "Escape sequence",
+	24, "SCE_ERR_ESCSEQ_UNKNOWN", "escapesequence", "Escape sequence unknown",
+	25, "SCE_ERR_GCC_EXCERPT", "diagnostic", "GCC showing excerpt of code with pointer",
+	26, "SCE_ERR_BASH", "diagnostic", "Bash diagnostic",
+	27, "", "unused", "",
+	28, "", "unused", "",
+	29, "", "unused", "",
+	30, "", "unused", "",
+	31, "", "unused", "",
+	32, "", "predefined", "",
+	33, "", "predefined", "",
+	34, "", "predefined", "",
+	35, "", "predefined", "",
+	36, "", "predefined", "",
+	37, "", "predefined", "",
+	38, "", "predefined", "",
+	39, "", "predefined", "",
+	40, "SCE_ERR_ES_BLACK", "default", "Black",
+	41, "SCE_ERR_ES_RED", "default", "Red",
+	42, "SCE_ERR_ES_GREEN", "default", "Green",
+	43, "SCE_ERR_ES_BROWN", "default", "Brown",
+	44, "SCE_ERR_ES_BLUE", "default", "Blue",
+	45, "SCE_ERR_ES_MAGENTA", "default", "Magenta",
+	46, "SCE_ERR_ES_CYAN", "default", "Cyan",
+	47, "SCE_ERR_ES_GRAY", "default", "Gray",
+	48, "SCE_ERR_ES_DARK_GRAY", "default", "Dark Gray",
+	49, "SCE_ERR_ES_BRIGHT_RED", "default", "Bright Red",
+	50, "SCE_ERR_ES_BRIGHT_GREEN", "default", "Bright Green",
+	51, "SCE_ERR_ES_YELLOW", "default", "Yellow",
+	52, "SCE_ERR_ES_BRIGHT_BLUE", "default", "Bright Blue",
+	53, "SCE_ERR_ES_BRIGHT_MAGENTA", "default", "Bright Magenta",
+	54, "SCE_ERR_ES_BRIGHT_CYAN", "default", "Bright Cyan",
+	55, "SCE_ERR_ES_WHITE", "default", "White",
+};
+
+class LexerErrorList : public DefaultLexer {
+	OptionsErrorList options;
+	OptionSetErrorList osErrorList;
+public:
+	LexerErrorList() :
+		DefaultLexer("errorlist", SCLEX_ERRORLIST, lexicalClasses, std::size(lexicalClasses)) {
+	}
+
+	const char *SCI_METHOD PropertyNames() override {
+		return osErrorList.PropertyNames();
+	}
+	int SCI_METHOD PropertyType(const char *name) override {
+		return osErrorList.PropertyType(name);
+	}
+	const char *SCI_METHOD DescribeProperty(const char *name) override {
+		return osErrorList.DescribeProperty(name);
+	}
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char *SCI_METHOD PropertyGet(const char *key) override {
+		return osErrorList.PropertyGet(key);
+	}
+	const char *SCI_METHOD DescribeWordListSets() override {
+		return osErrorList.DescribeWordListSets();
+	}
+
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	static ILexer5 *LexerFactoryErrorList() {
+		return new LexerErrorList();
+	}
+};
+
+Sci_Position SCI_METHOD LexerErrorList::PropertySet(const char *key, const char *val) {
+	if (osErrorList.PropertySet(&options, key, val)) {
+		return 0;
+	}
+	return -1;
+}
 
 bool strstart(const char *haystack, const char *needle) noexcept {
 	return strncmp(haystack, needle, strlen(needle)) == 0;
@@ -402,39 +530,27 @@ void ColouriseErrorListLine(
 	}
 }
 
-void ColouriseErrorListDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
+void LexerErrorList::Lex(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, IDocument *pAccess) {
+	Accessor styler(pAccess, nullptr);
 	std::string lineBuffer;
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-
-	// property lexer.errorlist.value.separate
-	//	For lines in the output pane that are matches from Find in Files or GCC-style
-	//	diagnostics, style the path and line number separately from the rest of the
-	//	line with style 21 used for the rest of the line.
-	//	This allows matched text to be more easily distinguished from its location.
-	const bool valueSeparate = styler.GetPropertyInt("lexer.errorlist.value.separate", 0) != 0;
-
-	// property lexer.errorlist.escape.sequences
-	//	Set to 1 to interpret escape sequences.
-	const bool escapeSequences = styler.GetPropertyInt("lexer.errorlist.escape.sequences") != 0;
 
 	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
 		lineBuffer.push_back(styler[i]);
 		if (AtEOL(styler, i)) {
 			// End of line met, colourise it
-			ColouriseErrorListLine(lineBuffer, i, styler, valueSeparate, escapeSequences);
+			ColouriseErrorListLine(lineBuffer, i, styler, options.valueSeparate, options.escapeSequences);
 			lineBuffer.clear();
 		}
 	}
 	if (!lineBuffer.empty()) {	// Last line does not have ending characters
-		ColouriseErrorListLine(lineBuffer, startPos + length - 1, styler, valueSeparate, escapeSequences);
+		ColouriseErrorListLine(lineBuffer, startPos + length - 1, styler, options.valueSeparate, options.escapeSequences);
 	}
+
+	styler.Flush();
 }
 
-const char *const emptyWordListDesc[] = {
-	nullptr
-};
-
 }
 
-extern const LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc, "errorlist", nullptr, emptyWordListDesc);
+extern const LexerModule lmErrorList(SCLEX_ERRORLIST, LexerErrorList::LexerFactoryErrorList, "errorlist", emptyWordListDesc);
