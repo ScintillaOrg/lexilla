@@ -379,16 +379,15 @@ int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci
 					state = stMsVc;
 				} else if ((ch == ':' && chNext == ' ') || (ch == ' ')) {
 					// Possibly Delphi.. don't test against chNext as it's one of the strings below.
-					char word[512];
 					unsigned numstep = 0;
 					if (ch == ' ')
 						numstep = 1; // ch was ' ', handle as if it's a delphi errorline, only add 1 to i.
 					else
 						numstep = 2; // otherwise add 2.
 					Sci_PositionU chPos = 0;
-					for (Sci_PositionU j = i + numstep; j < lengthLine && IsUpperOrLowerCase(lineBuffer[j]) && chPos < sizeof(word) - 1; j++)
-						word[chPos++] = lineBuffer[j];
-					word[chPos] = 0;
+					for (Sci_PositionU j = i + numstep; j < lengthLine && IsUpperOrLowerCase(lineBuffer[j]); j++)
+						chPos++;
+					const std::string_view word(lineBuffer + i + numstep, chPos);
 					if (InListCaseInsensitive(word, {"error", "warning", "fatal", "catastrophic", "note", "remark"})) {
 						state = stMsVc;
 					} else {
