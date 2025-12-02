@@ -8,6 +8,13 @@
 #ifndef LEXACCESSOR_H
 #define LEXACCESSOR_H
 
+#include "Sci_Position.h"
+#include <string>
+
+namespace Scintilla {
+class IDocument;
+}
+
 namespace Lexilla {
 
 enum class EncodingType { eightBit, unicode, dbcs };

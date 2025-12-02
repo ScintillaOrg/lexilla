@@ -8,6 +8,8 @@
 #ifndef PROPSETSIMPLE_H
 #define PROPSETSIMPLE_H
 
+#include <string_view>
+
 namespace Lexilla {
 
 class PropSetSimple {
