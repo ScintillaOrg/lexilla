@@ -461,6 +461,9 @@ int StyleFromSequence(const char *seq) noexcept {
 			} else if (base == 1) {
 				// Set style as bright.
 				bold = 1;
+				if (style == 0) {
+					style = 40;
+				}
 			} else if (base >= 30 && base <= 37) {
 				// Set dim style which starts at 40.
 				style = base + 10;
