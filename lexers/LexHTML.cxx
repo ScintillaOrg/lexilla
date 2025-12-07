@@ -857,7 +857,7 @@ const LexicalClass lexicalClassesHTML[] = {
 	// Lexer HTML SCLEX_HTML SCE_H_ SCE_HJ_ SCE_HJA_ SCE_HB_ SCE_HBA_ SCE_HP_ SCE_HPHP_ SCE_HPA_:
 	0, "SCE_H_DEFAULT", "default", "Text",
 	1, "SCE_H_TAG", "tag", "Tags",
-	2, "SCE_H_ERRORTAGUNKNOWN", "error tag", "Unknown Tags",
+	2, "SCE_H_TAGUNKNOWN", "error tag", "Unknown Tags",
 	3, "SCE_H_ATTRIBUTE", "attribute", "Attributes",
 	4, "SCE_H_ATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
 	5, "SCE_H_NUMBER", "literal numeric", "Numbers",
@@ -991,7 +991,7 @@ const LexicalClass lexicalClassesXML[] = {
 	1, "SCE_H_TAG", "tag", "Tags",
 	2, "SCE_H_TAGUNKNOWN", "error tag", "Unknown Tags",
 	3, "SCE_H_ATTRIBUTE", "attribute", "Attributes",
-	4, "SCE_H_ERRORATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
+	4, "SCE_H_ATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
 	5, "SCE_H_NUMBER", "literal numeric", "Numbers",
 	6, "SCE_H_DOUBLESTRING", "literal string", "Double quoted strings",
 	7, "SCE_H_SINGLESTRING", "literal string", "Single quoted strings",
