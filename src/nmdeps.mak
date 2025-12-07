@@ -583,7 +583,9 @@ $(DIR_O)/LexErrorList.obj: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexEScript.obj: \
 	../lexers/LexEScript.cxx \
 	../../scintilla/include/ILexer.h \
