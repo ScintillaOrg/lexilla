@@ -2236,30 +2236,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if (!IsAWordChar(ch)) {
 				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywordsJS,
 					classifierJavaScript, classifierJavaScriptServer, styler, inScriptType);
-				//styler.ColourTo(i - 1, eHTJSKeyword);
 				state = SCE_HJ_DEFAULT;
-				if (ch == '/' && chNext == '*') {
-					i++;
-					if (chNext2 == '*')
-						state = SCE_HJ_COMMENTDOC;
-					else
-						state = SCE_HJ_COMMENT;
-				} else if (ch == '/' && chNext == '/') {
-					state = SCE_HJ_COMMENTLINE;
-				} else if (ch == '\"') {
-					state = SCE_HJ_DOUBLESTRING;
-				} else if (ch == '\'') {
-					state = SCE_HJ_SINGLESTRING;
-				} else if (ch == '`') {
-					state = SCE_HJ_TEMPLATELITERAL;
-				} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
-					styler.ColourTo(i - 1, StateToPrint);
-					state = SCE_HJ_COMMENTLINE;
-					i += 2;
-				} else if (IsOperator(ch)) {
-					styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
-					state = SCE_HJ_DEFAULT;
-				}
 			}
 			break;
 		case SCE_HJ_COMMENT:
@@ -2696,7 +2673,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		} else if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
 			if (ch == '/' && chNext == '*') {
 				i++;
-				if (styler.SafeGetCharAt(i + 1) == '*')
+				if (chNext2 == '*')
 					state = SCE_HJ_COMMENTDOC;
 				else
 					state = SCE_HJ_COMMENT;
@@ -2710,6 +2687,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_HJ_TEMPLATELITERAL;
 			} else if (IsAWordStart(ch)) {
 				state = SCE_HJ_WORD;
+			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
+				styler.ColourTo(i - 1, StateToPrint);
+				state = SCE_HJ_COMMENTLINE;
+				i += 2;
 			} else if (IsOperator(ch)) {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
 			}
