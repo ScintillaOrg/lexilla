@@ -17,7 +17,10 @@ Microsoft Error 3
 {0}
 {3}NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\HostX64\x64\link.EXE"' : return code '0x460'
 {0}
-
+Delphi diagnostic is similar so also uses style 3
+See https://sourceforge.net/p/scintilla/feature-requests/175/
+{3}packerunitPas.pas(22) Error: Unknown directive: 'functixon'
+{0}
 Command 4
 {4}>pwd
 {0}
