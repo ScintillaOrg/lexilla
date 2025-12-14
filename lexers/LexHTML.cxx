@@ -2262,6 +2262,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '\"') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_DOUBLESTRING, inScriptType));
 				state = SCE_HJ_DEFAULT;
+				continue;
 			} else if (isLineEnd(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				if (chPrev != '\\' && (chPrev2 != '\\' || chPrev != '\r' || ch != '\n')) {
@@ -2277,6 +2278,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '\'') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SINGLESTRING, inScriptType));
 				state = SCE_HJ_DEFAULT;
+				continue;
 			} else if (isLineEnd(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				if (chPrev != '\\' && (chPrev2 != '\\' || chPrev != '\r' || ch != '\n')) {
@@ -2292,6 +2294,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '`') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_TEMPLATELITERAL, inScriptType));
 				state = SCE_HJ_DEFAULT;
+				continue;
 			}
 			break;
 		case SCE_HJ_STRINGEOL:
@@ -2359,6 +2362,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			if (ch == '\"') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HB_DEFAULT;
+				continue;
 			} else if (ch == '\r' || ch == '\n') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HB_STRINGEOL;
@@ -2656,12 +2660,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			///////////// end - PHP state handling
 		}
 
-		// Some of the above terminated their lexeme but since the same character starts
-		// the same class again, only reenter if non empty segment.
+		// Some of the above terminated their lexeme
 
-		const bool nonEmptySegment = i >= static_cast<Sci_Position>(styler.GetStartSegment());
 		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
-			if ((ch == '\"') && (nonEmptySegment)) {
+			if (ch == '\"') {
 				state = SCE_HB_STRING;
 			} else if (ch == '\'') {
 				state = SCE_HB_COMMENTLINE;
@@ -2679,11 +2681,11 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					state = SCE_HJ_COMMENT;
 			} else if (ch == '/' && chNext == '/') {
 				state = SCE_HJ_COMMENTLINE;
-			} else if ((ch == '\"') && (nonEmptySegment)) {
+			} else if (ch == '\"') {
 				state = SCE_HJ_DOUBLESTRING;
-			} else if ((ch == '\'') && (nonEmptySegment)) {
+			} else if (ch == '\'') {
 				state = SCE_HJ_SINGLESTRING;
-			} else if ((ch == '`') && (nonEmptySegment)) {
+			} else if (ch == '`') {
 				state = SCE_HJ_TEMPLATELITERAL;
 			} else if (IsAWordStart(ch)) {
 				state = SCE_HJ_WORD;
