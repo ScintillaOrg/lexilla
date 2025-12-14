@@ -2376,16 +2376,6 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_HB_WORD:
 			if (!IsAWordChar(ch)) {
 				state = classifyWordHTVB(styler.GetStartSegment(), i - 1, keywordsVB, classifierBasic, styler, inScriptType);
-				if (state == SCE_HB_DEFAULT) {
-					if (ch == '\"') {
-						state = SCE_HB_STRING;
-					} else if (ch == '\'') {
-						state = SCE_HB_COMMENTLINE;
-					} else if (IsOperator(ch)) {
-						styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
-						state = SCE_HB_DEFAULT;
-					}
-				}
 			}
 			break;
 		case SCE_HB_STRING:
@@ -2701,17 +2691,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (IsAWordStart(ch)) {
 				state = SCE_HB_WORD;
 			} else if (IsOperator(ch)) {
-				styler.ColourTo(i, SCE_HB_DEFAULT);
-			}
-		} else if (state == SCE_HBA_DEFAULT) {    // One of the above succeeded
-			if ((ch == '\"') && (nonEmptySegment)) {
-				state = SCE_HBA_STRING;
-			} else if (ch == '\'') {
-				state = SCE_HBA_COMMENTLINE;
-			} else if (IsAWordStart(ch)) {
-				state = SCE_HBA_WORD;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i, SCE_HBA_DEFAULT);
+				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 			}
 		} else if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
 			if (ch == '/' && chNext == '*') {
