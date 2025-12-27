@@ -950,13 +950,18 @@ bool AccessLexilla(std::filesystem::path basePath) {
 	}
 
 	bool success = true;
+	size_t count = 0;
 	for (auto &p : std::filesystem::recursive_directory_iterator(basePath)) {
 		if (p.is_directory()) {
 			//std::cout << p.path().string() << '\n';
+			++count;
 			if (!TestDirectory(p, basePath)) {
 				success = false;
 			}
 		}
+	}
+	if (count == 0) {
+		success = TestDirectory(basePath, basePath);
 	}
 	return success;
 }
@@ -1006,7 +1011,15 @@ int main(int argc, char **argv) {
 		std::filesystem::path examplesDirectory = baseDirectory / "test" / "examples";
 		for (int i = 1; i < argc; i++) {
 			if (argv[i][0] != '-') {
-				examplesDirectory = argv[i];
+				std::filesystem::path path = argv[i];
+				if (std::filesystem::is_directory(path)) {
+					examplesDirectory = path;
+				} else {
+					path = examplesDirectory / path;
+					if (std::filesystem::is_directory(path)) {
+						examplesDirectory = path;
+					}
+				}
 			}
 		}
 		success = AccessLexilla(examplesDirectory);
