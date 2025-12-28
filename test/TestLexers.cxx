@@ -993,24 +993,24 @@ std::filesystem::path FindLexillaDirectory(std::filesystem::path startDirectory)
 	return std::filesystem::path();
 }
 
-struct TestDir {
+struct LexerTestsDirectory {
 	std::filesystem::path path;
 	std::filesystem::path parent;
 	bool singleLexer;
 };
 
-bool AccessLexilla(std::filesystem::path basePath, const std::vector<TestDir> &directoryList) {
+bool AccessLexilla(std::filesystem::path basePath, const std::vector<LexerTestsDirectory> &directoryList) {
 	if (directoryList.empty()) {
 		return AccessLexilla(basePath);
 	}
 	bool success = true;
-	for (const TestDir &testDir : directoryList) {
-		if (testDir.singleLexer) {
-			if (!TestDirectory(testDir.path, testDir.parent)) {
+	for (const LexerTestsDirectory &directory : directoryList) {
+		if (directory.singleLexer) {
+			if (!TestDirectory(directory.path, directory.parent)) {
 				success = false;
 			}
 		} else {
-			if (!AccessLexilla(testDir.path)) {
+			if (!AccessLexilla(directory.path)) {
 				success = false;
 			}
 		}
@@ -1034,7 +1034,7 @@ int main(int argc, char **argv) {
 		}
 #endif
 		std::filesystem::path examplesDirectory = baseDirectory / "test" / "examples";
-		std::vector<TestDir> directoryList;
+		std::vector<LexerTestsDirectory> directoryList;
 		for (int i = 1; i < argc; i++) {
 			if (argv[i][0] != '-') {
 				std::filesystem::path path = argv[i];
