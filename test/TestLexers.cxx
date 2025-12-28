@@ -961,7 +961,7 @@ bool AccessLexilla(std::filesystem::path basePath) {
 		}
 	}
 	if (count == 0) {
-		success = TestDirectory(basePath, basePath);
+		success = TestDirectory(basePath, basePath.parent_path());
 	}
 	return success;
 }
@@ -993,6 +993,31 @@ std::filesystem::path FindLexillaDirectory(std::filesystem::path startDirectory)
 	return std::filesystem::path();
 }
 
+struct TestDir {
+	std::filesystem::path path;
+	std::filesystem::path parent;
+	bool singleLexer;
+};
+
+bool AccessLexilla(std::filesystem::path basePath, const std::vector<TestDir> &directoryList) {
+	if (directoryList.empty()) {
+		return AccessLexilla(basePath);
+	}
+	bool success = true;
+	for (const TestDir &testDir : directoryList) {
+		if (testDir.singleLexer) {
+			if (!TestDirectory(testDir.path, testDir.parent)) {
+				success = false;
+			}
+		} else {
+			if (!AccessLexilla(testDir.path)) {
+				success = false;
+			}
+		}
+	}
+	return success;
+}
+
 }
 
 
@@ -1009,20 +1034,23 @@ int main(int argc, char **argv) {
 		}
 #endif
 		std::filesystem::path examplesDirectory = baseDirectory / "test" / "examples";
+		std::vector<TestDir> directoryList;
 		for (int i = 1; i < argc; i++) {
 			if (argv[i][0] != '-') {
 				std::filesystem::path path = argv[i];
 				if (std::filesystem::is_directory(path)) {
-					examplesDirectory = path;
+					std::filesystem::path parent = path.parent_path();
+					const bool singleLexer = std::filesystem::equivalent(examplesDirectory, parent);
+					directoryList.push_back({path, parent, singleLexer});
 				} else {
 					path = examplesDirectory / path;
 					if (std::filesystem::is_directory(path)) {
-						examplesDirectory = path;
+						directoryList.push_back({path, examplesDirectory, true});
 					}
 				}
 			}
 		}
-		success = AccessLexilla(examplesDirectory);
+		success = AccessLexilla(examplesDirectory, directoryList);
 	}
 	return success ? 0 : 1;
 }
