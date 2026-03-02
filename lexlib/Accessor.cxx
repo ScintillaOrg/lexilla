@@ -60,7 +60,8 @@ int Accessor::IndentAmount(Sci_Position line, int *flags, PFNIsCommentLeader pfn
 			spaceFlags |= wsTab;
 			if (spaceFlags & wsSpace)
 				spaceFlags |= wsSpaceTab;
-			indent = (indent / 8 + 1) * 8;
+			constexpr int defaultTabSpaces = 8;
+			indent = (indent / defaultTabSpaces + 1) * defaultTabSpaces;
 		}
 		ch = (*this)[++pos];
 	}
