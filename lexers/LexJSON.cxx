@@ -373,6 +373,14 @@ void SCI_METHOD LexerJSON::Lex(Sci_PositionU startPos,
 				}
 				if (context.ch == '"') {
 					context.ForwardSetState(SCE_JSON_DEFAULT);
+				} else if (context.ch == '\\') {
+					if (options.escapeSequence) {
+						context.SetState(SCE_JSON_ESCAPESEQUENCE);
+						if (!escapeSeq.newSequence(context.chNext)) {
+							context.SetState(SCE_JSON_ERROR);
+						}
+					}
+					context.Forward();
 				} else if (context.atLineEnd) {
 					context.ChangeState(SCE_JSON_STRINGEOL);
 				}
