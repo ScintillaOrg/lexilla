@@ -208,7 +208,7 @@ void ColouriseBatchDoc(
 
 				// Check for Comment - return if found
 				if (continueProcessing) {
-					if ((wordView == "rem") || (wordBuffer[0] == ':' && wordBuffer[1] == ':')) {
+					if ((wordView == "rem") || (wordView.substr(0,2) == "::")) {
 						if ((offset == wbl) || !textQuoted(lineBuffer, offset - wbl)) {
 							styler.ColourTo(startLine + offset - wbl - 1, SCE_BAT_DEFAULT);
 							styler.ColourTo(endPos, SCE_BAT_COMMENT);
@@ -302,23 +302,18 @@ void ColouriseBatchDoc(
 					for (Sci_PositionU keywordLength = 2; keywordLength < wbl && keywordLength < 7 && !sKeywordFound; keywordLength++) {
 						// Special Keywords are those that allow certain characters without whitespace after the command
 						// Examples are: cd. cd\ md. rd. dir| dir> echo: echo. path=
-						// Special Keyword Buffer used to determine if the first n characters is a Keyword
-						char sKeywordBuffer[10]{};	// Special Keyword Buffer
-						wbo = 0;
-						// Copy Keyword Length from Word Buffer into Special Keyword Buffer
-						for (; wbo < keywordLength; wbo++) {
-							sKeywordBuffer[wbo] = wordBuffer[wbo];
-						}
-						sKeywordBuffer[wbo] = '\0';
+						// Special Keyword used to determine if the first n characters is a Keyword
+						wbo = keywordLength;
+						const std::string_view sKeyword(wordBuffer, keywordLength);
 						// Check for Special Keyword in list
-						if ((keywords.InList(sKeywordBuffer)) &&
+						if ((keywords.InList(sKeyword)) &&
 							((IsBOperator(wordBuffer[wbo])) ||
 							(IsBSeparator(wordBuffer[wbo])) ||
 							(wordBuffer[wbo] == ':' &&
-							(InList(sKeywordBuffer, {"call", "echo", "goto"}) )))) {
+							(InList(sKeyword, {"call", "echo", "goto"}) )))) {
 							sKeywordFound = true;
 							// ECHO requires no further Regular Keyword Checking
-							if (std::string_view(sKeywordBuffer) == "echo") {
+							if (sKeyword== "echo") {
 								continueProcessing = false;
 							}
 							// Colorize Special Keyword as Regular Keyword
