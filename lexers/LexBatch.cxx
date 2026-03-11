@@ -36,8 +36,8 @@ constexpr bool Is0To9(char ch) noexcept {
 	return (ch >= '0') && (ch <= '9');
 }
 
-bool IsAlphabetic(int ch) noexcept {
-	return IsASCII(ch) && isalpha(ch);
+constexpr bool IsAlphabetic(int ch) noexcept {
+	return IsUpperOrLowerCase(ch);
 }
 
 inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
