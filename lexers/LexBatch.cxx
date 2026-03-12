@@ -47,15 +47,22 @@ inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 
 // Tests for BATCH Operators
 constexpr bool IsBOperator(char ch) noexcept {
-	return (ch == '=') || (ch == '+') || (ch == '>') || (ch == '<') ||
-		(ch == '|') || (ch == '?') || (ch == '*')||
-		(ch == '&') || (ch == '(') || (ch == ')');
+	return AnyOf(ch, '=', '+', '>', '<', '|', '?', '*', '&', '(', ')');
 }
 
 // Tests for BATCH Separators
 constexpr bool IsBSeparator(char ch) noexcept {
-	return (ch == '\\') || (ch == '.') || (ch == ';') ||
-		(ch == '\"') || (ch == '\'') || (ch == '/');
+	return AnyOf(ch, '\\', '.', ';', '\"', '\'', '/');
+}
+
+// Both operators and separators -- words often ended with these characters.
+constexpr bool IsBPunctuation(char ch) noexcept {
+	return IsBOperator(ch) || IsBSeparator(ch);
+}
+
+// These characters end words.
+constexpr bool IsBEndWord(char ch) noexcept {
+	return IsBPunctuation(ch) || AnyOf(ch, '%', '!');
 }
 
 // Tests for escape character
@@ -203,6 +210,7 @@ void ColouriseBatchDoc(
 					wordBuffer[wbl] = MakeLowerCase(lineBuffer[offset]);
 				}
 				wordBuffer[wbl] = '\0';
+				const char first = wordBuffer[0];
 				const std::string_view wordView(wordBuffer);
 				Sci_PositionU wbo = 0;		// Word Buffer Offset - also Special Keyword Buffer Length
 
@@ -217,12 +225,10 @@ void ColouriseBatchDoc(
 					}
 				}
 				// Check for Separator
-				if (IsBSeparator(wordBuffer[0])) {
+				if (IsBSeparator(first)) {
 					// Check for External Command / Program
 					if ((cmdLoc == offset - wbl) &&
-						((wordBuffer[0] == ':') ||
-						(wordBuffer[0] == '\\') ||
-						(wordBuffer[0] == '.'))) {
+						(AnyOf(first, ':', '\\', '.'))) {
 						// Reset Offset to re-process remainder of word
 						offset -= (wbl - 1);
 						// Colorize External Command / Program
@@ -242,8 +248,7 @@ void ColouriseBatchDoc(
 						styler.ColourTo(startLine + offset - 1, SCE_BAT_DEFAULT);
 					}
 				// Check for Regular Keyword in list
-				} else if ((keywords.InList(wordBuffer)) &&
-					(continueProcessing)) {
+				} else if ((keywords.InList(wordBuffer)) && (continueProcessing)) {
 					// ECHO, GOTO, PROMPT and SET require no further Regular Keyword Checking
 					if (InList(wordView, {"echo", "goto", "prompt"})) {
 						continueProcessing = false;
@@ -258,18 +263,15 @@ void ColouriseBatchDoc(
 						// Reset External Command / Program Location
 						cmdLoc = offset;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) &&
-							(isspacechar(lineBuffer[cmdLoc]))) {
+						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
 						// Skip comparison
-						while ((cmdLoc < lengthLine) &&
-							(!isspacechar(lineBuffer[cmdLoc]))) {
+						while ((cmdLoc < lengthLine) && (!isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) &&
-							(isspacechar(lineBuffer[cmdLoc]))) {
+						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
 					// Identify External Command / Program Location for CALL, DO, LOADHIGH and LH
@@ -277,8 +279,7 @@ void ColouriseBatchDoc(
 						// Reset External Command / Program Location
 						cmdLoc = offset;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) &&
-							(isspacechar(lineBuffer[cmdLoc]))) {
+						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
 						// Check if call is followed by a label
@@ -291,9 +292,8 @@ void ColouriseBatchDoc(
 					styler.ColourTo(startLine + offset - 1, SCE_BAT_WORD);
 					// No need to Reset Offset
 				// Check for Special Keyword in list, External Command / Program, or Default Text
-				} else if ((wordBuffer[0] != '%') &&
-						   (wordBuffer[0] != '!') &&
-					(!IsBOperator(wordBuffer[0])) &&
+				} else if (
+					(!(IsBOperator(first) || AnyOf(first, '%', '!'))) &&
 					(continueProcessing)) {
 					// Check for Special Keyword
 					//     Affected Commands are in Length range 2-6
@@ -307,10 +307,8 @@ void ColouriseBatchDoc(
 						const std::string_view sKeyword(wordBuffer, keywordLength);
 						// Check for Special Keyword in list
 						if ((keywords.InList(sKeyword)) &&
-							((IsBOperator(wordBuffer[wbo])) ||
-							(IsBSeparator(wordBuffer[wbo])) ||
-							(wordBuffer[wbo] == ':' &&
-							(InList(sKeyword, {"call", "echo", "goto"}) )))) {
+							((IsBPunctuation(wordBuffer[wbo])) ||
+							(wordBuffer[wbo] == ':' && (InList(sKeyword, {"call", "echo", "goto"}) )))) {
 							sKeywordFound = true;
 							// ECHO requires no further Regular Keyword Checking
 							if (sKeyword== "echo") {
@@ -327,12 +325,8 @@ void ColouriseBatchDoc(
 						wbo = 0;
 						// Check for External Command / Program
 						if (cmdLoc == offset - wbl) {
-							// Read up to %, Operator or Separator
-							while ((wbo < wbl) &&
-								(((wordBuffer[wbo] != '%') &&
-								(wordBuffer[wbo] != '!') &&
-								(!IsBOperator(wordBuffer[wbo])) &&
-								(!IsBSeparator(wordBuffer[wbo]))))) {
+							// Read up to %, !, Operator or Separator
+							while ((wbo < wbl) && (!(IsBEndWord(wordBuffer[wbo])))) {
 								wbo++;
 							}
 							// Reset External Command / Program Location
@@ -348,20 +342,17 @@ void ColouriseBatchDoc(
 								// Reset External Command / Program Location
 								cmdLoc = offset;
 								// Skip next spaces
-								while ((cmdLoc < lengthLine) &&
-									(isspacechar(lineBuffer[cmdLoc]))) {
+								while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 									cmdLoc++;
 								}
 								// Reset External Command / Program Location if command switch detected
 								if (lineBuffer[cmdLoc] == '/') {
 									// Skip command switch
-									while ((cmdLoc < lengthLine) &&
-										(!isspacechar(lineBuffer[cmdLoc]))) {
+									while ((cmdLoc < lengthLine) && (!isspacechar(lineBuffer[cmdLoc]))) {
 										cmdLoc++;
 									}
 									// Skip next spaces
-									while ((cmdLoc < lengthLine) &&
-										(isspacechar(lineBuffer[cmdLoc]))) {
+									while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 										cmdLoc++;
 									}
 								}
@@ -377,12 +368,8 @@ void ColouriseBatchDoc(
 							// No need to Reset Offset
 						// Check for Default Text
 						} else {
-							// Read up to %, Operator or Separator
-							while ((wbo < wbl) &&
-								(((wordBuffer[wbo] != '%') &&
-								(wordBuffer[wbo] != '!') &&
-								(!IsBOperator(wordBuffer[wbo])) &&
-								(!IsBSeparator(wordBuffer[wbo]))))) {
+							// Read up to %, !, Operator or Separator
+							while ((wbo < wbl) && (!IsBEndWord(wordBuffer[wbo]))) {
 								wbo++;
 							}
 							// Colorize Default Text
@@ -392,13 +379,12 @@ void ColouriseBatchDoc(
 						}
 					}
 				// Check for Argument  (%n), Environment Variable (%x...%) or Local Variable (%%a)
-				} else if (wordBuffer[0] == '%') {
+				} else if (first == '%') {
 					// Colorize Default Text
 					styler.ColourTo(startLine + offset - 1 - wbl, SCE_BAT_DEFAULT);
 					wbo++;
 					// Search to end of word for second % (can be a long path)
-					while ((wbo < wbl) &&
-						(wordBuffer[wbo] != '%')) {
+					while ((wbo < wbl) && (wordBuffer[wbo] != '%')) {
 						wbo++;
 					}
 					// Check for Argument (%n) or (%*)
@@ -447,10 +433,7 @@ void ColouriseBatchDoc(
 							// start after ~
 							wbo = 3;
 							// Search to end of word for another % (can be a long path)
-							while ((wbo < wbl) &&
-								(wordBuffer[wbo] != '%') &&
-								(!IsBOperator(wordBuffer[wbo])) &&
-								(!IsBSeparator(wordBuffer[wbo]))) {
+							while ((wbo < wbl) && (!(IsBPunctuation(wordBuffer[wbo]) || (wordBuffer[wbo] == '%')))) {
 								wbo++;
 							}
 							if (wbo > 3) {
@@ -464,8 +447,7 @@ void ColouriseBatchDoc(
 						// Reset Offset to re-process remainder of word
 						offset -= (wbl - wbo);
 					// Check for Environment Variable (%x...%)
-					} else if ((wordBuffer[1] != '%') &&
-						(wordBuffer[wbo] == '%')) {
+					} else if ((wordBuffer[1] != '%') && (wordBuffer[wbo] == '%')) {
 						wbo++;
 						// Check for External Command / Program
 						if (cmdLoc == offset - wbl) {
@@ -480,8 +462,7 @@ void ColouriseBatchDoc(
 						(wbl > 2) &&
 						(wordBuffer[1] == '%') &&
 						(wordBuffer[2] != '%') &&
-						(!IsBOperator(wordBuffer[2])) &&
-						(!IsBSeparator(wordBuffer[2]))) {
+						(!IsBPunctuation(wordBuffer[2]))) {
 						// Check for External Command / Program
 						if (cmdLoc == offset - wbl) {
 							cmdLoc = offset - (wbl - 3);
@@ -500,13 +481,12 @@ void ColouriseBatchDoc(
 						offset -= (wbl - 2);
 					}
 				// Check for Environment Variable (!x...!)
-				} else if (wordBuffer[0] == '!') {
+				} else if (first == '!') {
 					// Colorize Default Text
 					styler.ColourTo(startLine + offset - 1 - wbl, SCE_BAT_DEFAULT);
 					wbo++;
 					// Search to end of word for second ! (can be a long path)
-					while ((wbo < wbl) &&
-						(wordBuffer[wbo] != '!')) {
+					while ((wbo < wbl) && (wordBuffer[wbo] != '!')) {
 						wbo++;
 					}
 					if (wordBuffer[wbo] == '!') {
@@ -521,16 +501,15 @@ void ColouriseBatchDoc(
 						offset -= (wbl - wbo);
 					}
 				// Check for Operator
-				} else if (IsBOperator(wordBuffer[0])) {
+				} else if (IsBOperator(first)) {
 					// Colorize Default Text
 					styler.ColourTo(startLine + offset - 1 - wbl, SCE_BAT_DEFAULT);
 					// Check for Comparison Operator
-					if ((wordBuffer[0] == '=') && (wordBuffer[1] == '=')) {
+					if ((first == '=') && (wordBuffer[1] == '=')) {
 						// Identify External Command / Program Location for IF
 						cmdLoc = offset;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) &&
-							(isspacechar(lineBuffer[cmdLoc]))) {
+						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
 						// Colorize Comparison Operator
@@ -541,13 +520,12 @@ void ColouriseBatchDoc(
 						// Reset Offset to re-process remainder of word
 						offset -= (wbl - 2);
 					// Check for Pipe Operator
-					} else if ((wordBuffer[0] == '|') &&
+					} else if ((first == '|') &&
 								!(IsEscaped(lineBuffer,offset - wbl + wbo) || textQuoted(lineBuffer, offset - wbl) )) {
 						// Reset External Command / Program Location
 						cmdLoc = offset - wbl + 1;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) &&
-							(isspacechar(lineBuffer[cmdLoc]))) {
+						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
 							cmdLoc++;
 						}
 						// Colorize Pipe Operator
@@ -558,10 +536,7 @@ void ColouriseBatchDoc(
 					// Check for Other Operator
 					} else {
 						// Check for Operators: >, |, &
-						if (((wordBuffer[0] == '>')||
-						   (wordBuffer[0] == ')')||
-						   (wordBuffer[0] == '(')||
-						   (wordBuffer[0] == '&' )) &&
+						if ((AnyOf(first, '>', ')', '(', '&')) &&
 						   !(!continueProcessing && (IsEscaped(lineBuffer,offset - wbl + wbo)
 						   || textQuoted(lineBuffer, offset - wbl) ))){
 							// Turn Keyword and External Command / Program checking back on
@@ -570,27 +545,23 @@ void ColouriseBatchDoc(
 						}
 						// Colorize Other Operators
 						// Do not Colorize Parenthesis, quoted text and escaped operators
-						if (((wordBuffer[0] != ')') && (wordBuffer[0] != '(')
+						if (((first != ')') && (first != '(')
 						&& !textQuoted(lineBuffer, offset - wbl)  && !IsEscaped(lineBuffer,offset - wbl + wbo))
-						&& !((wordBuffer[0] == '=') && !isNotAssigned ))
+						&& !((first == '=') && !isNotAssigned ))
 							styler.ColourTo(startLine + offset - 1 - (wbl - 1), SCE_BAT_OPERATOR);
 						else
 							styler.ColourTo(startLine + offset - 1 - (wbl - 1), SCE_BAT_DEFAULT);
 						// Reset Offset to re-process remainder of word
 						offset -= (wbl - 1);
 
-						if ((wordBuffer[0] == '=') && isNotAssigned ){
+						if ((first == '=') && isNotAssigned ){
 							isNotAssigned=false;
 						}
 					}
 				// Check for Default Text
 				} else {
-					// Read up to %, Operator or Separator
-					while ((wbo < wbl) &&
-						((wordBuffer[wbo] != '%') &&
-						(wordBuffer[wbo] != '!') &&
-						(!IsBOperator(wordBuffer[wbo])) &&
-						(!IsBSeparator(wordBuffer[wbo])))) {
+					// Read up to %, !, Operator or Separator
+					while ((wbo < wbl) && (!IsBEndWord(wordBuffer[wbo]))) {
 						wbo++;
 					}
 					// Colorize Default Text
@@ -616,7 +587,7 @@ void ColouriseBatchDoc(
 						lineContinuationPos=linePos-3;
 					else
 						lineContinuationPos=linePos-2; // Unix or Mac EOL
-					// Reset continueProcessing	if line continuation was not found
+					// Reset continueProcessin if line continuation was not found
 					if ((lineBuffer[lineContinuationPos]!='^')
 							|| IsEscaped(lineBuffer, lineContinuationPos)
 							|| textQuoted(lineBuffer, lineContinuationPos))
