@@ -65,6 +65,18 @@ constexpr bool IsBEndWord(char ch) noexcept {
 	return IsBPunctuation(ch) || AnyOf(ch, '%', '!');
 }
 
+constexpr void SkipSpace(Sci_PositionU &i, std::string_view sv) noexcept {
+	while (i < sv.length() && isspacechar(sv[i])) {
+		i++;
+	}
+}
+
+constexpr void SkipNonSpace(Sci_PositionU &i, std::string_view sv) noexcept {
+	while (i < sv.length() && !isspacechar(sv[i])) {
+		i++;
+	}
+}
+
 // Tests for escape character
 constexpr bool IsEscaped(const char* wordStr, Sci_PositionU pos) noexcept {
 	bool isQoted=false;
@@ -147,9 +159,7 @@ void ColouriseBatchDoc(
 
 			Sci_PositionU offset = 0;	// Line Buffer Offset
 			// Skip initial spaces
-			while ((offset < lengthLine) && (isspacechar(lineBuffer[offset]))) {
-				offset++;
-			}
+			SkipSpace(offset, lineBuffer);
 			// Colorize Default Text
 			styler.ColourTo(startLine + offset - 1, SCE_BAT_DEFAULT);
 			// Set External Command / Program Location
@@ -192,9 +202,7 @@ void ColouriseBatchDoc(
 				offset++;
 			}
 			// Skip next spaces
-			while ((offset < lengthLine) && (isspacechar(lineBuffer[offset]))) {
-				offset++;
-			}
+			SkipSpace(offset, lineBuffer);
 
 			// Read remainder of line word-at-a-time or remainder-of-word-at-a-time
 			while (offset < lengthLine  && !stopLineProcessing) {
@@ -263,25 +271,17 @@ void ColouriseBatchDoc(
 						// Reset External Command / Program Location
 						cmdLoc = offset;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-							cmdLoc++;
-						}
+						SkipSpace(cmdLoc, lineBuffer);
 						// Skip comparison
-						while ((cmdLoc < lengthLine) && (!isspacechar(lineBuffer[cmdLoc]))) {
-							cmdLoc++;
-						}
+						SkipNonSpace(cmdLoc, lineBuffer);
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-							cmdLoc++;
-						}
+						SkipSpace(cmdLoc, lineBuffer);
 					// Identify External Command / Program Location for CALL, DO, LOADHIGH and LH
 					} else if (InList(wordView, {"call", "do", "loadhigh", "lh"})) {
 						// Reset External Command / Program Location
 						cmdLoc = offset;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-							cmdLoc++;
-						}
+						SkipSpace(cmdLoc, lineBuffer);
 						// Check if call is followed by a label
 						if ((lineBuffer[cmdLoc] == ':') &&
 							(wordView == "call")) {
@@ -342,19 +342,13 @@ void ColouriseBatchDoc(
 								// Reset External Command / Program Location
 								cmdLoc = offset;
 								// Skip next spaces
-								while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-									cmdLoc++;
-								}
+								SkipSpace(cmdLoc, lineBuffer);
 								// Reset External Command / Program Location if command switch detected
 								if (lineBuffer[cmdLoc] == '/') {
 									// Skip command switch
-									while ((cmdLoc < lengthLine) && (!isspacechar(lineBuffer[cmdLoc]))) {
-										cmdLoc++;
-									}
+									SkipNonSpace(cmdLoc, lineBuffer);
 									// Skip next spaces
-									while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-										cmdLoc++;
-									}
+									SkipSpace(cmdLoc, lineBuffer);
 								}
 							}
 							// Colorize External Command / Program
@@ -509,9 +503,7 @@ void ColouriseBatchDoc(
 						// Identify External Command / Program Location for IF
 						cmdLoc = offset;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-							cmdLoc++;
-						}
+						SkipSpace(cmdLoc, lineBuffer);
 						// Colorize Comparison Operator
 						if (continueProcessing)
 							styler.ColourTo(startLine + offset - 1 - (wbl - 2), SCE_BAT_OPERATOR);
@@ -525,9 +517,7 @@ void ColouriseBatchDoc(
 						// Reset External Command / Program Location
 						cmdLoc = offset - wbl + 1;
 						// Skip next spaces
-						while ((cmdLoc < lengthLine) && (isspacechar(lineBuffer[cmdLoc]))) {
-							cmdLoc++;
-						}
+						SkipSpace(cmdLoc, lineBuffer);
 						// Colorize Pipe Operator
 						styler.ColourTo(startLine + offset - 1 - (wbl - 1), SCE_BAT_OPERATOR);
 						// Reset Offset to re-process remainder of word
@@ -570,9 +560,7 @@ void ColouriseBatchDoc(
 					offset -= (wbl - wbo);
 				}
 				// Skip next spaces - nothing happens if Offset was Reset
-				while ((offset < lengthLine) && (isspacechar(lineBuffer[offset]))) {
-					offset++;
-				}
+				SkipSpace(offset, lineBuffer);
 			}
 			// Colorize Default Text for remainder of line - currently not lexed
 			styler.ColourTo(endPos, SCE_BAT_DEFAULT);
