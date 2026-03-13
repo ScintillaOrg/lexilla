@@ -39,7 +39,7 @@ jobs:
               cd src
               nmake -f lexilla.mak DEBUG=1
               cd ..
-        - uses: actions/upload-artifact@v4
+        - uses: actions/upload-artifact@v6
           with:
               name: lexilla${{ matrix.arch == 'amd64_arm64' && '-arm64' || '' }}.dll
               path: bin/lexilla.dll
