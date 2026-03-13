@@ -27,10 +27,50 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 
 using namespace Lexilla;
 
 namespace {
+
+const char *const batchWordListDesc[] = {
+	"Internal Commands",
+	"External Commands",
+	nullptr
+};
+
+const LexicalClass lexicalClasses[] = {
+	// Lexer batch SCLEX_BATCH SCE_BAT_
+	0, "SCE_BAT_DEFAULT", "default", "White space",
+	1, "SCE_BAT_COMMENT", "comment", "Line comment",
+	2, "SCE_BAT_WORD", "keyword", "Keyword",
+	3, "SCE_BAT_LABEL", "label", "Label",
+	4, "SCE_BAT_HIDE", "preprocessor", "Hide line @",
+	5, "SCE_BAT_COMMAND", "identifier", "Command",
+	6, "SCE_BAT_IDENTIFIER", "identifier", "Identifier",
+	7, "SCE_BAT_OPERATOR", "operator", "Operator",
+	8, "SCE_BAT_AFTER_LABEL", "comment","After label",
+};
+
+class LexerBatch : public DefaultLexer {
+	WordList keywords;
+	WordList keywords2;
+public:
+	explicit LexerBatch() :
+		DefaultLexer("batch", SCLEX_BATCH, lexicalClasses, std::size(lexicalClasses)) {}
+	LexerBatch(const LexerBatch &) = delete;
+	LexerBatch(LexerBatch &&) = delete;
+	LexerBatch &operator=(const LexerBatch &) = delete;
+	LexerBatch &operator=(LexerBatch &&) = delete;
+	~LexerBatch() override = default;
+
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, Scintilla::IDocument *pAccess) override;
+
+	static ILexer5 *LexerFactoryBatch() {
+		return new LexerBatch();
+	}
+};
 
 constexpr bool Is0To9(char ch) noexcept {
 	return (ch >= '0') && (ch <= '9');
@@ -40,7 +80,7 @@ constexpr bool IsAlphabetic(int ch) noexcept {
 	return IsUpperOrLowerCase(ch);
 }
 
-inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
+bool AtEOL(LexAccessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
@@ -130,12 +170,30 @@ bool IsContinuation(const std::string &lineBuffer) noexcept {
 	return true;
 }
 
-void ColouriseBatchDoc(
-    Sci_PositionU startPos,
-    Sci_Position length,
-    int /*initStyle*/,
-    WordList *keywordlists[],
-    Accessor &styler) {
+Sci_Position SCI_METHOD LexerBatch::WordListSet(int n, const char *wl) {
+	WordList *wordListN = nullptr;
+	switch (n) {
+	case 0:
+		wordListN = &keywords;
+		break;
+	case 1:
+		wordListN = &keywords2;
+		break;
+	default:
+		break;
+	}
+	Sci_Position firstModification = -1;
+	if (wordListN) {
+		if (wordListN->Set(wl)) {
+			firstModification = 0;
+		}
+	}
+	return firstModification;
+}
+
+void LexerBatch::Lex(Sci_PositionU startPos, Sci_Position length, int, Scintilla::IDocument *pAccess) {
+	LexAccessor styler(pAccess);
+
 	// Always backtracks to the start of a line that is not a continuation
 	// of the previous line
 	if (startPos > 0) {
@@ -153,9 +211,6 @@ void ColouriseBatchDoc(
 				break;
 		}
 	}
-
-	const WordList &keywords = *keywordlists[0];      // Internal Commands
-	const WordList &keywords2 = *keywordlists[1];     // External Commands (optional)
 
 	std::string lineBuffer;
 	std::string word;
@@ -567,14 +622,9 @@ void ColouriseBatchDoc(
 			startLine = i + 1;
 		}
 	}
+	styler.Flush();
 }
-
-const char *const batchWordListDesc[] = {
-	"Internal Commands",
-	"External Commands",
-	nullptr
-};
 
 }
 
-extern const LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc, "batch", nullptr, batchWordListDesc);
+extern const LexerModule lmBatch(SCLEX_LUA, LexerBatch::LexerFactoryBatch, "batch", batchWordListDesc);
