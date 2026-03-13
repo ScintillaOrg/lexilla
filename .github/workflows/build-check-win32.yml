@@ -16,7 +16,7 @@ jobs:
         env:
           TEST: ${{ matrix.arch == 'amd64' && 'test' || '' }}
         steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v6
         - name: Preparing nmake
           uses: ilammy/msvc-dev-cmd@v1
           with:
