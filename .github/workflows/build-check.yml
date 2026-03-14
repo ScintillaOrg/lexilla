@@ -22,9 +22,9 @@ jobs:
         - name: Install Scintilla source
           if: steps.cache-scintilla.outputs.cache-hit != 'true'
           run: |
-              (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
               (mkdir scintilla)
-              (cd scintilla && unzip scintilla500.zip)
+              (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
+              (unzip ../scintilla500.zip -d scintilla)
         - name: Copy Scintilla
               (cp -r scintilla/ ..)
           run: (cd test/unit && make DEBUG=1 CXX=${{matrix.cpp_compiler}} --jobs=$(getconf _NPROCESSORS_ONLN) test)
