@@ -28,6 +28,7 @@ jobs:
             path: scintilla
             key: ${{ runner.os }}-scintilla
         - name: Install Scintilla source
+          if: steps.cache-scintilla.outputs.cache-hit != 'true'
           run: |
               pwd
               New-Item -Name "scintilla" -Type Directory -Force
