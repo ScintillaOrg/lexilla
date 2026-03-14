@@ -284,7 +284,8 @@ $(DIR_O)/LexBatch.o: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexBibTeX.o: \
 	../lexers/LexBibTeX.cxx \
 	../../scintilla/include/ILexer.h \
