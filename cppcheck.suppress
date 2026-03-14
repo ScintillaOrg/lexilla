@@ -112,7 +112,6 @@ constParameterReference:lexilla/lexers/LexLaTeX.cxx
 constParameterReference:lexilla/lexers/LexLisp.cxx
 constParameterPointer:lexilla/lexers/LexMagik.cxx
 constParameterReference:lexilla/lexers/LexMagik.cxx
-constParameterReference:lexilla/lexers/LexMarkdown.cxx
 constParameterPointer:lexilla/lexers/LexMatlab.cxx
 constParameterReference:lexilla/lexers/LexMatlab.cxx
 unreadVariable:lexilla/lexers/LexMatlab.cxx
