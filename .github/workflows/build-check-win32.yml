@@ -38,7 +38,7 @@ jobs:
               cd ..
         - name: Copy Scintilla
           run: |
-              xcopy /s scintilla\scintilla\ ..\scintilla\)
+              xcopy /s scintilla\scintilla\ ..\scintilla\
         - name: Unit Test
           run: |
               cd test/unit
