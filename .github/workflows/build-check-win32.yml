@@ -30,7 +30,7 @@ jobs:
         - name: Install Scintilla source
           run: |
               pwd
-              mkdir scintilla
+              if not exist scintilla\ mkdir scintilla
               cd scintilla
               curl --fail --location --show-error --retry 3 -O https://www.scintilla.org/scintilla500.zip
               ls
