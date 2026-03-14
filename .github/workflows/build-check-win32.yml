@@ -21,14 +21,25 @@ jobs:
           uses: ilammy/msvc-dev-cmd@v1
           with:
             arch: ${{ matrix.arch }}
+        - name: Cache Scintilla
+          id: cache-scintilla
+          uses: actions/cache@v5
+          with:
+            path: scintilla
+            key: ${{ runner.os }}-scintilla
         - name: Install Scintilla source
           run: |
               pwd
-              cd ..
+              mkdir scintilla
+              cd scintilla
               curl --fail --location --show-error --retry 3 -O https://www.scintilla.org/scintilla500.zip
               ls
               7z x scintilla500.zip
+              cd ..
               cd lexilla
+        - name: Copy Scintilla
+          run: |
+              xcopy /s scintilla\scintilla\ ..\scintilla\)
         - name: Unit Test
           run: |
               cd test/unit

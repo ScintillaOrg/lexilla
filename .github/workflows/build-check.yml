@@ -22,7 +22,6 @@ jobs:
         - name: Install Scintilla source
           if: steps.cache-scintilla.outputs.cache-hit != 'true'
           run: |
-              (pwd)
               (mkdir scintilla)
               (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
               (unzip ../scintilla500.zip -d scintilla)
