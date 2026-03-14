@@ -36,7 +36,6 @@ jobs:
               ls
               7z x scintilla500.zip
               cd ..
-              cd lexilla
         - name: Copy Scintilla
           run: |
               xcopy /s scintilla\scintilla\ ..\scintilla\)
