@@ -23,6 +23,7 @@ jobs:
           if: steps.cache-scintilla.outputs.cache-hit != 'true'
           run: |
               (cd .. && wget --no-verbose https://www.scintilla.org/scintilla500.zip)
+              (mkdir scintilla)
               (cd scintilla && unzip scintilla500.zip)
         - name: Copy Scintilla
               (cp -r scintilla/ ..)
