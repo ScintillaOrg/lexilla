@@ -1128,7 +1128,9 @@ $(DIR_O)/LexPascal.obj: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexPB.obj: \
 	../lexers/LexPB.cxx \
 	../../scintilla/include/ILexer.h \
