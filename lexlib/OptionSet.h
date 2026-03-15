@@ -12,6 +12,18 @@
 
 namespace Lexilla {
 
+inline std::string JoinWordListDescriptions(const char *const wordListDescriptions[]) {
+	std::string wordLists;
+	if (wordListDescriptions) {
+		for (size_t wl = 0; wordListDescriptions[wl]; wl++) {
+			if (wl > 0)
+				wordLists += "\n";
+			wordLists += wordListDescriptions[wl];
+		}
+	}
+	return wordLists;
+}
+
 template <typename T>
 class OptionSet {
 	typedef T Target;
@@ -141,13 +153,7 @@ public:
 	}
 
 	void DefineWordListSets(const char * const wordListDescriptions[]) {
-		if (wordListDescriptions) {
-			for (size_t wl = 0; wordListDescriptions[wl]; wl++) {
-				if (wl > 0)
-					wordLists += "\n";
-				wordLists += wordListDescriptions[wl];
-			}
-		}
+		wordLists = JoinWordListDescriptions(wordListDescriptions);
 	}
 
 	const char *DescribeWordListSets() const noexcept {

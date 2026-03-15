@@ -285,6 +285,7 @@ $(DIR_O)/LexBatch.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
 $(DIR_O)/LexBibTeX.o: \
 	../lexers/LexBibTeX.cxx \
