@@ -110,12 +110,12 @@ contains requires
 
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
+#include <cstdio>
+#include <cstdarg>
 
 #include <string>
 #include <string_view>
@@ -149,7 +149,7 @@ void GetRangeLowered(Sci_PositionU start,
 }
 
 void GetForwardRangeLowered(Sci_PositionU start,
-		CharacterSet &charSet,
+		const CharacterSet &charSet,
 		Accessor &styler,
 		char *s,
 		Sci_PositionU len) {
@@ -173,7 +173,7 @@ enum {
 };
 
 void ClassifyPascalWord(WordList *keywordlists[], StyleContext &sc, int &curLineState, bool bSmartHighlighting) {
-	WordList& keywords = *keywordlists[0];
+	const WordList& keywords = *keywordlists[0];
 
 	char s[100];
 	sc.GetCurrentLowered(s, sizeof(s));
@@ -219,13 +219,13 @@ void ClassifyPascalWord(WordList *keywordlists[], StyleContext &sc, int &curLine
 
 void ColourisePascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
 		Accessor &styler) {
-	bool bSmartHighlighting = styler.GetPropertyInt("lexer.pascal.smart.highlighting", 1) != 0;
+	const bool bSmartHighlighting = styler.GetPropertyInt("lexer.pascal.smart.highlighting", 1) != 0;
 
-	CharacterSet setWordStart(CharacterSet::setAlpha, "_", 0x80, true);
-	CharacterSet setWord(CharacterSet::setAlphaNum, "_", 0x80, true);
-	CharacterSet setNumber(CharacterSet::setDigits, ".-+eE");
-	CharacterSet setHexNumber(CharacterSet::setDigits, "abcdefABCDEF");
-	CharacterSet setOperator(CharacterSet::setNone, "#$&'()*+,-./:;<=>@[]^{}");
+	const CharacterSet setWordStart(CharacterSet::setAlpha, "_", 0x80, true);
+	const CharacterSet setWord(CharacterSet::setAlphaNum, "_", 0x80, true);
+	const CharacterSet setNumber(CharacterSet::setDigits, ".-+eE");
+	const CharacterSet setHexNumber(CharacterSet::setDigits, "abcdefABCDEF");
+	const CharacterSet setOperator(CharacterSet::setNone, "#$&'()*+,-./:;<=>@[]^{}");
 
 	int curLineState = 0;
 
@@ -347,17 +347,17 @@ void ColourisePascalDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 	sc.Complete();
 }
 
-bool IsStreamCommentStyle(int style) {
+constexpr bool IsStreamCommentStyle(int style) noexcept {
 	return style == SCE_PAS_COMMENT || style == SCE_PAS_COMMENT2;
 }
 
 bool IsCommentLine(Sci_Position line, Accessor &styler) {
-	Sci_Position pos = styler.LineStart(line);
-	Sci_Position eolPos = styler.LineStart(line + 1) - 1;
+	const Sci_Position pos = styler.LineStart(line);
+	const Sci_Position eolPos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eolPos; i++) {
-		char ch = styler[i];
-		char chNext = styler.SafeGetCharAt(i + 1);
-		int style = styler.StyleAt(i);
+		const char ch = styler[i];
+		const char chNext = styler.SafeGetCharAt(i + 1);
+		const int style = styler.StyleAt(i);
 		if (ch == '/' && chNext == '/' && style == SCE_PAS_COMMENTLINE) {
 			return true;
 		} else if (!IsASpaceOrTab(ch)) {
@@ -367,18 +367,18 @@ bool IsCommentLine(Sci_Position line, Accessor &styler) {
 	return false;
 }
 
-unsigned int GetFoldInPreprocessorLevelFlag(int lineFoldStateCurrent) {
+constexpr unsigned int GetFoldInPreprocessorLevelFlag(int lineFoldStateCurrent) noexcept {
 	return lineFoldStateCurrent & stateFoldInPreprocessorLevelMask;
 }
 
-void SetFoldInPreprocessorLevelFlag(int &lineFoldStateCurrent, unsigned int nestLevel) {
+void SetFoldInPreprocessorLevelFlag(int &lineFoldStateCurrent, unsigned int nestLevel) noexcept {
 	lineFoldStateCurrent &= ~stateFoldInPreprocessorLevelMask;
 	lineFoldStateCurrent |= nestLevel & stateFoldInPreprocessorLevelMask;
 }
 
 void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 		Sci_PositionU startPos, Accessor &styler) {
-	CharacterSet setWord(CharacterSet::setAlpha);
+	const CharacterSet setWord(CharacterSet::setAlpha);
 
 	char s[11];	// Size of the longest possible keyword + one additional character + null
 	GetForwardRangeLowered(startPos, setWord, styler, s, sizeof(s));
@@ -411,7 +411,7 @@ void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFoldStateCu
 
 Sci_PositionU SkipWhiteSpace(Sci_PositionU currentPos, Sci_PositionU endPos,
 		Accessor &styler, bool includeChars = false) {
-	CharacterSet setWord(CharacterSet::setAlphaNum, "_");
+	const CharacterSet setWord(CharacterSet::setAlphaNum, "_");
 	Sci_PositionU j = currentPos + 1;
 	char ch = styler.SafeGetCharAt(j);
 	while ((j < endPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' ||
@@ -441,8 +441,8 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 		bool ignoreKeyword = false;
 		Sci_PositionU j = SkipWhiteSpace(currentPos, endPos, styler);
 		if (j < endPos) {
-			CharacterSet setWordStart(CharacterSet::setAlpha, "_");
-			CharacterSet setWord(CharacterSet::setAlphaNum, "_");
+			const CharacterSet setWordStart(CharacterSet::setAlpha, "_");
+			const CharacterSet setWord(CharacterSet::setAlphaNum, "_");
 
 			if (styler.SafeGetCharAt(j) == ';') {
 				// Handle forward class declarations ("type TMyClass = class;")
@@ -491,7 +491,7 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 			ignoreKeyword = false;
 		}
 		if (!ignoreKeyword) {
-			Sci_PositionU k = SkipWhiteSpace(currentPos, endPos, styler);
+			const Sci_PositionU k = SkipWhiteSpace(currentPos, endPos, styler);
 			if (k < endPos && styler.SafeGetCharAt(k) == ';') {
 				// Handle forward interface declarations ("type IMyInterface = interface;")
 				ignoreKeyword = true;
@@ -503,7 +503,7 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 	} else if (strcmp(s, "dispinterface") == 0) {
 		// "dispinterface" keyword requires special handling...
 		bool ignoreKeyword = false;
-		Sci_PositionU j = SkipWhiteSpace(currentPos, endPos, styler);
+		const Sci_PositionU j = SkipWhiteSpace(currentPos, endPos, styler);
 		if (j < endPos && styler.SafeGetCharAt(j) == ';') {
 			// Handle forward dispinterface declarations ("type IMyInterface = dispinterface;")
 			ignoreKeyword = true;
@@ -522,10 +522,10 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 
 void FoldPascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[],
 		Accessor &styler) {
-	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
-	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
-	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
-	Sci_PositionU endPos = startPos + length;
+	const bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	const bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
+	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+	const Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -536,15 +536,15 @@ void FoldPascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 	int style = initStyle;
 
 	Sci_Position lastStart = 0;
-	CharacterSet setWord(CharacterSet::setAlphaNum, "_", 0x80, true);
+	const CharacterSet setWord(CharacterSet::setAlphaNum, "_", 0x80, true);
 
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
-		char ch = chNext;
+		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		int stylePrev = style;
+		const int stylePrev = style;
 		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
-		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
 		if (foldComment && IsStreamCommentStyle(style)) {
 			if (!IsStreamCommentStyle(stylePrev)) {
@@ -595,7 +595,7 @@ void FoldPascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			if (lev != styler.LevelAt(lineCurrent)) {
 				styler.SetLevel(lineCurrent, lev);
 			}
-			int newLineState = (styler.GetLineState(lineCurrent) & ~stateFoldMaskAll) | lineFoldStateCurrent;
+			const int newLineState = (styler.GetLineState(lineCurrent) & ~stateFoldMaskAll) | lineFoldStateCurrent;
 			styler.SetLineState(lineCurrent, newLineState);
 			lineCurrent++;
 			levelPrev = levelCurrent;
@@ -613,7 +613,7 @@ void FoldPascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 
 const char * const pascalWordListDesc[] = {
 	"Keywords",
-	0
+	nullptr
 };
 
 }

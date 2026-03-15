@@ -238,7 +238,6 @@ constVariableReference:lexilla/lexers/LexMSSQL.cxx
 constVariableReference:lexilla/lexers/LexNsis.cxx
 constVariableReference:lexilla/lexers/LexOpal.cxx
 constVariableReference:lexilla/lexers/LexPOV.cxx
-constVariableReference:lexilla/lexers/LexPascal.cxx
 constVariableReference:lexilla/lexers/LexPB.cxx
 constVariableReference:lexilla/lexers/LexPowerPro.cxx
 constVariableReference:lexilla/lexers/LexPS.cxx
