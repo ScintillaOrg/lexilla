@@ -113,9 +113,6 @@ contains requires
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cctype>
-#include <cstdio>
-#include <cstdarg>
 
 #include <string>
 #include <string_view>
@@ -248,27 +245,27 @@ Sci_Position SCI_METHOD LexerPascal::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
-void GetRangeLowered(Sci_PositionU start,
-		Sci_PositionU end,
+void GetRangeLowered(Sci_Position start,
+		Sci_Position end,
 		LexAccessor &styler,
 		char *s,
-		Sci_PositionU len) {
-	Sci_PositionU i = 0;
+		Sci_Position len) {
+	Sci_Position i = 0;
 	while ((i < end - start + 1) && (i < len-1)) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = MakeLowerCase(styler[start + i]);
 		i++;
 	}
 	s[i] = '\0';
 }
 
-void GetForwardRangeLowered(Sci_PositionU start,
+void GetForwardRangeLowered(Sci_Position start,
 		const CharacterSet &charSet,
 		LexAccessor &styler,
 		char *s,
-		Sci_PositionU len) {
-	Sci_PositionU i = 0;
+		Sci_Position len) {
+	Sci_Position i = 0;
 	while ((i < len-1) && charSet.Contains(styler.SafeGetCharAt(start + i))) {
-		s[i] = static_cast<char>(tolower(styler.SafeGetCharAt(start + i)));
+		s[i] = MakeLowerCase(styler.SafeGetCharAt(start + i));
 		i++;
 	}
 	s[i] = '\0';
@@ -467,7 +464,7 @@ bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 	for (Sci_Position i = pos; i < eolPos; i++) {
 		const char ch = styler[i];
 		const char chNext = styler.SafeGetCharAt(i + 1);
-		const int style = styler.StyleAt(i);
+		const int style = styler.StyleIndexAt(i);
 		if (ch == '/' && chNext == '/' && style == SCE_PAS_COMMENTLINE) {
 			return true;
 		} else if (!IsASpaceOrTab(ch)) {
@@ -487,7 +484,7 @@ void SetFoldInPreprocessorLevelFlag(int &lineFoldStateCurrent, unsigned int nest
 }
 
 void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
-		Sci_PositionU startPos, LexAccessor &styler) {
+		Sci_Position startPos, LexAccessor &styler) {
 	const CharacterSet setWord(CharacterSet::setAlpha);
 
 	char s[11];	// Size of the longest possible keyword + one additional character + null
@@ -519,10 +516,10 @@ void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFoldStateCu
 	}
 }
 
-Sci_PositionU SkipWhiteSpace(Sci_PositionU currentPos, Sci_PositionU endPos,
+Sci_Position SkipWhiteSpace(Sci_Position currentPos, Sci_Position endPos,
 		LexAccessor &styler, bool includeChars = false) {
 	const CharacterSet setWord(CharacterSet::setAlphaNum, "_");
-	Sci_PositionU j = currentPos + 1;
+	Sci_Position j = currentPos + 1;
 	char ch = styler.SafeGetCharAt(j);
 	while ((j < endPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' ||
 		IsStreamCommentStyle(styler.StyleAt(j)) || (includeChars && setWord.Contains(ch)))) {
@@ -533,8 +530,8 @@ Sci_PositionU SkipWhiteSpace(Sci_PositionU currentPos, Sci_PositionU endPos,
 }
 
 void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
-		Sci_Position startPos, Sci_PositionU endPos,
-		Sci_PositionU lastStart, Sci_PositionU currentPos, LexAccessor &styler) {
+		Sci_Position startPos, Sci_Position endPos,
+		Sci_Position lastStart, Sci_Position currentPos, LexAccessor &styler) {
 	char s[100];
 	GetRangeLowered(lastStart, currentPos, styler, s, sizeof(s));
 
@@ -549,7 +546,7 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 	} else if (strcmp(s, "class") == 0 || strcmp(s, "object") == 0) {
 		// "class" & "object" keywords require special handling...
 		bool ignoreKeyword = false;
-		Sci_PositionU j = SkipWhiteSpace(currentPos, endPos, styler);
+		Sci_Position j = SkipWhiteSpace(currentPos, endPos, styler);
 		if (j < endPos) {
 			const CharacterSet setWordStart(CharacterSet::setAlpha, "_");
 			const CharacterSet setWord(CharacterSet::setAlphaNum, "_");
@@ -601,7 +598,7 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 			ignoreKeyword = false;
 		}
 		if (!ignoreKeyword) {
-			const Sci_PositionU k = SkipWhiteSpace(currentPos, endPos, styler);
+			const Sci_Position k = SkipWhiteSpace(currentPos, endPos, styler);
 			if (k < endPos && styler.SafeGetCharAt(k) == ';') {
 				// Handle forward interface declarations ("type IMyInterface = interface;")
 				ignoreKeyword = true;
@@ -613,7 +610,7 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 	} else if (strcmp(s, "dispinterface") == 0) {
 		// "dispinterface" keyword requires special handling...
 		bool ignoreKeyword = false;
-		const Sci_PositionU j = SkipWhiteSpace(currentPos, endPos, styler);
+		const Sci_Position j = SkipWhiteSpace(currentPos, endPos, styler);
 		if (j < endPos && styler.SafeGetCharAt(j) == ';') {
 			// Handle forward dispinterface declarations ("type IMyInterface = dispinterface;")
 			ignoreKeyword = true;
@@ -630,14 +627,15 @@ void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 	}
 }
 
-void LexerPascal::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, Scintilla::IDocument *pAccess) {
+void LexerPascal::Fold(Sci_PositionU startPos_, Sci_Position length, int initStyle, Scintilla::IDocument *pAccess) {
 
 	if (!options.fold)
 		return;
 
 	LexAccessor styler(pAccess);
 
-	const Sci_PositionU endPos = startPos + length;
+	Sci_Position startPos = startPos_;
+	const Sci_Position endPos = startPos + length;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	// Backtrack to previous line in case need to fix its fold status
 	if (lineCurrent > 0) {
@@ -650,7 +648,7 @@ void LexerPascal::Fold(Sci_PositionU startPos, Sci_Position length, int initStyl
 	int levelCurrent = levelPrev;
 	int lineFoldStateCurrent = lineCurrent > 0 ? styler.GetLineState(lineCurrent - 1) & stateFoldMaskAll : 0;
 	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
+	int styleNext = styler.StyleIndexAt(startPos);
 	int style = initStyle;
 
 	int visibleChars = 0;
@@ -658,12 +656,12 @@ void LexerPascal::Fold(Sci_PositionU startPos, Sci_Position length, int initStyl
 	Sci_Position lastStart = 0;
 	const CharacterSet setWord(CharacterSet::setAlphaNum, "_", 0x80, true);
 
-	for (Sci_PositionU i = startPos; i < endPos; i++) {
+	for (Sci_Position i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		const int stylePrev = style;
 		style = styleNext;
-		styleNext = styler.StyleAt(i + 1);
+		styleNext = styler.StyleIndexAt(i + 1);
 		const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
 		if (options.foldComment && IsStreamCommentStyle(style)) {
