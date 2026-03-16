@@ -32,6 +32,7 @@ $(DIR_O)/DefaultLexer.o: \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h \
 	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
 $(DIR_O)/InList.o: \
 	../lexlib/InList.cxx \

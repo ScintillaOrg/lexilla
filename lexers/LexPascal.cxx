@@ -191,26 +191,16 @@ class LexerPascal : public DefaultLexer {
 	OptionSetPascal osPascal;
 public:
 	explicit LexerPascal() :
-		DefaultLexer("pascal", SCLEX_PASCAL, lexicalClasses, std::size(lexicalClasses)) {}
+		DefaultLexer("pascal", SCLEX_PASCAL, lexicalClasses, std::size(lexicalClasses)) {
+		SetOptionSet(&osPascal);
+	}
 	LexerPascal(const LexerPascal &) = delete;
 	LexerPascal(LexerPascal &&) = delete;
 	LexerPascal &operator=(const LexerPascal &) = delete;
 	LexerPascal &operator=(LexerPascal &&) = delete;
 	~LexerPascal() override = default;
 
-	const char *SCI_METHOD PropertyNames() override {
-		return osPascal.PropertyNames();
-	}
-	int SCI_METHOD PropertyType(const char *name) override {
-		return osPascal.PropertyType(name);
-	}
-	const char *SCI_METHOD DescribeProperty(const char *name) override {
-		return osPascal.DescribeProperty(name);
-	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
-	const char *SCI_METHOD DescribeWordListSets() override {
-		return osPascal.DescribeWordListSets();
-	}
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, Scintilla::IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, Scintilla::IDocument *pAccess) override;
