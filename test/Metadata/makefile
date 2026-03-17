@@ -5,7 +5,7 @@ EXE = $(if $(windir),Metadata.exe,Metadata)
 
 ifdef windir
 	RM = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
-	CC = g++
+	CXX = g++
 else
 	LIBS += -ldl
 endif
@@ -24,4 +24,4 @@ vpath %.cxx ../../access
 	$(CXX) $(INCLUDES) -c $< -o $@
 
 $(EXE): *.cxx LexillaAccess.o
-	$(CC) $(INCLUDES) $^ $(LIBS) -o $@
+	$(CXX) $(INCLUDES) $^ $(LIBS) -o $@
