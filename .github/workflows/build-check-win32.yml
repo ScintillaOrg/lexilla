@@ -60,6 +60,7 @@ jobs:
               nmake -f testlexers.mak DEBUG=1 $env:TEST
               cd ..
         - name: Check metadata
+          if: matrix.arch == 'amd64'
           run: |
               cd test/Metadata
               cl Metadata.cxx ../../access/LexillaAccess.cxx -EHsc -std:c++17 -I ../../include -I ../../access -I ../../../scintilla/include -Fe: Metadata
