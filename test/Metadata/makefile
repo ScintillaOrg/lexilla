@@ -21,7 +21,7 @@ clean:
 vpath %.cxx ../../access
 
 %.o: %.cxx
-	$(CXX) --std=c++17 $(INCLUDES) -c $< -o $@
+	$(CXX) --std=c++20 $(INCLUDES) -c $< -o $@
 
-$(EXE): *.cxx LexillaAccess.o
-	$(CXX) --std=c++17 $(INCLUDES) $^ $(LIBS) -o $@
+$(EXE): Metadata.o LexillaAccess.o
+	$(CXX) $^ $(LIBS) -o $@

@@ -15,7 +15,7 @@ Build
         make
 
     Win32 Visual C++
-        cl Metadata.cxx ../../access/LexillaAccess.cxx -EHsc -std:c++17 -I ../../include -I ../../access -I ../../../scintilla/include -Fe: Metadata
+        cl Metadata.cxx ../../access/LexillaAccess.cxx -EHsc -std:c++20 -I ../../include -I ../../access -I ../../../scintilla/include -Fe: Metadata
 
 Using
 
@@ -51,11 +51,11 @@ namespace {
 
 std::vector<std::string> StringSplit(const std::string_view &text, int separator) {
 	std::vector<std::string> vs(text.empty() ? 0 : 1);
-	for (std::string_view::const_iterator it = text.begin(); it != text.end(); ++it) {
-		if (*it == separator) {
+	for (const char ch : text) {
+		if (ch == separator) {
 			vs.push_back(std::string());
 		} else {
-			vs.back() += *it;
+			vs.back() += ch;
 		}
 	}
 	return vs;
@@ -79,7 +79,7 @@ void ShowMetadata(std::ostringstream &os, ILexer5 *lexer) {
 	if (propertyNames && *propertyNames) {
 		os << "    Properties:\n";
 		std::vector<std::string> properties = StringSplit(propertyNames, '\n');
-		for (auto p : properties) {
+		for (const auto &p : properties) {
 			const char *type = translateType(lexer->PropertyType(p.c_str()));
 			const char *description = lexer->DescribeProperty(p.c_str());
 			os << "        " << type << " " << p << "\n";
@@ -92,7 +92,7 @@ void ShowMetadata(std::ostringstream &os, ILexer5 *lexer) {
 	if (wordListSets && *wordListSets) {
 		os << "    Word Lists:\n";
 		std::vector<std::string> wordLists = StringSplit(wordListSets, '\n');
-		for (auto wl : wordLists) {
+		for (const auto &wl : wordLists) {
 			os << "        " << wl << "\n";
 		}
 	}
@@ -119,7 +119,7 @@ void ShowMetadata(std::ostringstream &os, ILexer5 *lexer) {
 }
 
 void ShowAllMetadata(std::ostringstream &os, const std::vector<std::string> &lexers) {
-	for (auto name : lexers) {
+	for (const auto &name : lexers) {
 		ILexer5 *lexer = MakeLexer(name);
 		if (lexer) {
 			os << "\nLexer " << name << "\n";
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 	if (!lexers.empty()) {
 		std::ostringstream os(std::ios::binary);
 		os << "There are " << lexers.size() << " lexers.\n";
-		for (auto name : lexers) {
+		for (const auto &name : lexers) {
 			os << "    " << name << "\n";
 		}
 		os << "\n";

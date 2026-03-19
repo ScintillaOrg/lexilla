@@ -4,7 +4,7 @@
 
 # Check that LexicalClass data in lexer source files is valid and matches LexicalStyles.iface.
 # Check that lexerMetadata.txt matches LexicalStyles.iface.
-# Requires Python 3.14 or later
+# Requires Python 3.6 or later
 
 import pathlib
 
