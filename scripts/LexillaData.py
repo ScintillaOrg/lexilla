@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # LexillaData.py - implemented 2013 by Neil Hodgson neilh@scintilla.org
 # Released to the public domain.
-# Requires FileGenerator from Scintilla so scintilla must be a peer directory of lexilla.
 
 """
 Common code used by Lexilla and SciTE for source file regeneration.
