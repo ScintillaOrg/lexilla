@@ -29,7 +29,9 @@
 using namespace Lexilla;
 
 static inline bool IsAWordStart(int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
+	return (ch < 0x80) && (isalnum(ch) ||
+		// symbolic standard words and word prefixes (https://forth-standard.org/standard/core)
+		AnyOf(ch, '!', '#', '\'', '(', '*', '+', ',', '-', '.', '/', '<', '=', '>', '?', '@', '[', '\\', ']', '_'));
 }
 
 static inline bool IsANumChar(int ch) {
@@ -109,7 +111,7 @@ static void ColouriseForthDoc(Sci_PositionU startPos, Sci_Position length, int i
 
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_FORTH_DEFAULT) {
-			if (sc.ch == '\\'){
+			if (sc.ch == '\\' && (sc.atLineStart || IsASpaceChar(sc.chPrev)) && IsASpaceChar(sc.chNext)) {
 				sc.SetState(SCE_FORTH_COMMENT);
 			} else if (sc.ch == '(' &&
 					(sc.atLineStart || IsASpaceChar(sc.chPrev)) &&
