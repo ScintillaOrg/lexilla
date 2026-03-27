@@ -374,6 +374,7 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 	Sci_PositionU cursor = 0;
 	UnicodeChar uniCh = UnicodeChar();
 	FSharpString fsStr = FSharpString();
+	std::string token;
 	constexpr Sci_Position MAX_WORD_LEN = 64;
 	constexpr int SPACE = ' ';
 	int currentBase = 10;
@@ -558,23 +559,23 @@ void SCI_METHOD LexerFSharp::Lex(Sci_PositionU start, Sci_Position length, int i
 				}
 				break;
 			case SCE_FSHARP_IDENTIFIER:
-				if (!(iswordstart(sc.ch) || sc.ch == '\'')) {
-					const Sci_Position wordLen = static_cast<Sci_Position>(sc.currentPos - cursor);
+				if (!(iswordstart(sc.ch) || AnyOf(sc.ch, '\'', '!'))) {
+					const Sci_PositionU wordLen = sc.currentPos - cursor;
 					if (wordLen < MAX_WORD_LEN) {
 						// wordLength is believable as keyword, [re-]construct token - RR
-						char token[MAX_WORD_LEN] = { 0 };
-						for (Sci_Position i = -wordLen; i < 0; i++) {
-							token[wordLen + i] = static_cast<char>(sc.GetRelative(i));
-						}
-						token[wordLen] = '\0';
+						token = styler.GetRange(sc.currentPos - wordLen, sc.currentPos);
+						// except for the standard source file macros,
 						// a snake_case_identifier can never be a keyword
-						if (!(sc.ch == '_' || sc.GetRelative(-wordLen - 1) == '_')) {
+						if (token.find('_') == token.npos) {
 							for (int i = 0; i < WORDLIST_SIZE; i++) {
 								if (keywords[i].InList(token)) {
 									sc.ChangeState(keywordClasses[i]);
 									break;
 								}
 							}
+						} else if (token == "__LINE__" || token == "__SOURCE_DIRECTORY__" ||
+							   token == "__SOURCE_FILE__") {
+							sc.ChangeState(SCE_FSHARP_KEYWORD);
 						}
 					}
 					state = SCE_FSHARP_DEFAULT;
