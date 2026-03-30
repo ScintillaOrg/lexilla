@@ -434,6 +434,8 @@ void LexerPascal::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle
 			case SCE_PAS_ASM:
 				sc.SetState(SCE_PAS_DEFAULT);
 				break;
+			default:	// Only SCE_PAS_DEFAULT missing from cases
+				break;
 		}
 
 		// Determine if a new state should be entered.
