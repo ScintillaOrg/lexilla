@@ -1750,6 +1750,7 @@ Lexer pascal
          12 SCE_PAS_CHARACTER [literal string character] Character
          13 SCE_PAS_OPERATOR [operator] Operator
          14 SCE_PAS_ASM [assembler] Inline Assembler
+         15 SCE_PAS_MULTILINESTRING [literal string multiline] Triple quoted multiline string
 
 Lexer powerbasic
     Word Lists:

@@ -80,3 +80,13 @@ asm
   this is 
   inside assembler
 end
+
+// multiline string=15
+'''
+triple-quoted
+''';
+
+'''''
+5 quotes needs matching 5 quote end
+''' triple quotes allowed in 5 quote
+''''';

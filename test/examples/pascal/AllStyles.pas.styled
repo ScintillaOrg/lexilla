@@ -80,3 +80,13 @@
   this is 
   inside assembler
 {9}end{0}
+
+{4}// multiline string=15
+{15}'''
+triple-quoted
+'''{13};{0}
+
+{15}'''''
+5 quotes needs matching 5 quote end
+''' triple quotes allowed in 5 quote
+'''''{13};{0}
