@@ -125,6 +125,46 @@ struct OptionSetAsm : public OptionSet<OptionsAsm> {
 	}
 };
 
+const LexicalClass lexicalClassesAsm[] = {
+	// Lexer Assembler SCLEX_ASM SCE_ASM_:
+	0, "SCE_ASM_DEFAULT", "default", "White space",
+	1, "SCE_ASM_COMMENT", "comment line", "Comment",
+	2, "SCE_ASM_NUMBER", "literal numeric", "Number",
+	3, "SCE_ASM_STRING", "literal string", "String",
+	4, "SCE_ASM_OPERATOR", "operator", "Operator",
+	5, "SCE_ASM_IDENTIFIER", "identifier", "Identifier",
+	6, "SCE_ASM_CPUINSTRUCTION", "keyword", "CPU Instruction",
+	7, "SCE_ASM_MATHINSTRUCTION", "keyword", "FPU Instruction",
+	8, "SCE_ASM_REGISTER", "keyword identifier", "Register",
+	9, "SCE_ASM_DIRECTIVE", "keyword", "Directive",
+	10, "SCE_ASM_DIRECTIVEOPERAND", "keyword", "Directive Operand",
+	11, "SCE_ASM_COMMENTBLOCK", "comment", "Comment block",
+	12, "SCE_ASM_CHARACTER", "literal string", "Single quoted string",
+	13, "SCE_ASM_STRINGEOL", "error literal string", "End of line where string is not closed",
+	14, "SCE_ASM_EXTINSTRUCTION", "keyword", "Extended Instruction",
+	15, "SCE_ASM_COMMENTDIRECTIVE", "comment", "Directive Comment",
+};
+
+const LexicalClass lexicalClassesAs[] = {
+	// Lexer.Secondary As SCLEX_AS SCE_ASM_:
+	0, "SCE_ASM_DEFAULT", "default", "White space",
+	1, "SCE_ASM_COMMENT", "comment line", "Comment",
+	2, "SCE_ASM_NUMBER", "literal numeric", "Number",
+	3, "SCE_ASM_STRING", "literal string", "String",
+	4, "SCE_ASM_OPERATOR", "operator", "Operator",
+	5, "SCE_ASM_IDENTIFIER", "identifier", "Identifier",
+	6, "SCE_ASM_CPUINSTRUCTION", "keyword", "CPU Instruction",
+	7, "SCE_ASM_MATHINSTRUCTION", "keyword", "FPU Instruction",
+	8, "SCE_ASM_REGISTER", "keyword identifier", "Register",
+	9, "SCE_ASM_DIRECTIVE", "keyword", "Directive",
+	10, "SCE_ASM_DIRECTIVEOPERAND", "keyword", "Directive Operand",
+	11, "SCE_ASM_COMMENTBLOCK", "comment", "Comment block",
+	12, "SCE_ASM_CHARACTER", "literal string", "Single quoted string",
+	13, "SCE_ASM_STRINGEOL", "error literal string", "End of line where string is not closed",
+	14, "SCE_ASM_EXTINSTRUCTION", "keyword", "Extended Instruction",
+	15, "SCE_ASM_COMMENTDIRECTIVE", "comment", "Directive Comment",
+};
+
 class LexerAsm : public DefaultLexer {
 	WordList cpuInstruction;
 	WordList mathInstruction;
@@ -139,7 +179,9 @@ class LexerAsm : public DefaultLexer {
 	char commentChar;
 public:
 	LexerAsm(const char *languageName_, int language_, char commentChar_) :
-		DefaultLexer(languageName_, language_),
+		DefaultLexer(languageName_, language_,
+		(language_ == SCLEX_ASM) ? lexicalClassesAsm : lexicalClassesAs,
+		(language_ == SCLEX_ASM) ? std::size(lexicalClassesAsm) : std::size(lexicalClassesAs)),
 		commentChar(commentChar_) {
 	}
 	void SCI_METHOD Release() override {
