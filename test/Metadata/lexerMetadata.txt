@@ -217,6 +217,7 @@ Lexer as
          13 SCE_ASM_STRINGEOL [error literal string] End of line where string is not closed
          14 SCE_ASM_EXTINSTRUCTION [keyword] Extended Instruction
          15 SCE_ASM_COMMENTDIRECTIVE [comment] Directive Comment
+         16 SCE_ASM_STRINGBACKQUOTE [literal string] Back quoted string
 
 Lexer asciidoc
 
@@ -266,6 +267,7 @@ Lexer asm
          13 SCE_ASM_STRINGEOL [error literal string] End of line where string is not closed
          14 SCE_ASM_EXTINSTRUCTION [keyword] Extended Instruction
          15 SCE_ASM_COMMENTDIRECTIVE [comment] Directive Comment
+         16 SCE_ASM_STRINGBACKQUOTE [literal string] Back quoted string
 
 Lexer asn1
     Word Lists:

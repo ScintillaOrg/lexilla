@@ -143,6 +143,7 @@ const LexicalClass lexicalClassesAsm[] = {
 	13, "SCE_ASM_STRINGEOL", "error literal string", "End of line where string is not closed",
 	14, "SCE_ASM_EXTINSTRUCTION", "keyword", "Extended Instruction",
 	15, "SCE_ASM_COMMENTDIRECTIVE", "comment", "Directive Comment",
+	16, "SCE_ASM_STRINGBACKQUOTE", "literal string", "Back quoted string",
 };
 
 const LexicalClass lexicalClassesAs[] = {
@@ -163,6 +164,7 @@ const LexicalClass lexicalClassesAs[] = {
 	13, "SCE_ASM_STRINGEOL", "error literal string", "End of line where string is not closed",
 	14, "SCE_ASM_EXTINSTRUCTION", "keyword", "Extended Instruction",
 	15, "SCE_ASM_COMMENTDIRECTIVE", "comment", "Directive Comment",
+	16, "SCE_ASM_STRINGBACKQUOTE", "literal string", "Back quoted string",
 };
 
 class LexerAsm : public DefaultLexer {
@@ -287,6 +289,7 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			switch (sc.state) {
 			case SCE_ASM_STRING:
 			case SCE_ASM_CHARACTER:
+			case SCE_ASM_STRINGBACKQUOTE:
 				// Prevent SCE_ASM_STRINGEOL from leaking back to previous line
 				sc.SetState(sc.state);
 				break;
@@ -390,6 +393,19 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			}
 			break;
 
+		case SCE_ASM_STRINGBACKQUOTE:
+			if (sc.ch == '\\') {
+				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\' || sc.chNext == '`') {
+					sc.Forward();
+				}
+			} else if (sc.ch == '`') {
+				sc.ForwardSetState(SCE_ASM_DEFAULT);
+			} else if (sc.atLineEnd) {
+				sc.ChangeState(SCE_ASM_STRINGEOL);
+				sc.ForwardSetState(SCE_ASM_DEFAULT);
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -406,6 +422,8 @@ void SCI_METHOD LexerAsm::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				sc.SetState(SCE_ASM_STRING);
 			} else if (sc.ch == '\'') {
 				sc.SetState(SCE_ASM_CHARACTER);
+			} else if (sc.ch == '`') {
+				sc.SetState(SCE_ASM_STRINGBACKQUOTE);
 			} else if (IsAsmOperator(sc.ch)) {
 				sc.SetState(SCE_ASM_OPERATOR);
 			}
