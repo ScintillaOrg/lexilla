@@ -54,6 +54,7 @@ struct OptionsFSharp {
 	bool foldCommentStream = true;
 	bool foldCommentMultiLine = true;
 	bool foldPreprocessor = false;
+	bool foldQuotes = false;
 	bool foldImports = true;
 };
 
@@ -74,6 +75,9 @@ struct OptionSetFSharp : public OptionSet<OptionsFSharp> {
 
 		DefineProperty("fold.fsharp.preprocessor", &OptionsFSharp::foldPreprocessor,
 				   "Setting this option to 1 enables folding of F# compiler directives.");
+
+		DefineProperty("fold.fsharp.quotes", &OptionsFSharp::foldQuotes,
+				   "Setting this option to 1 enables folding of multi-line strings in F# files.");
 
 		DefineProperty("fold.fsharp.imports", &OptionsFSharp::foldImports,
 				   "Setting this option to 0 disables folding of F# import declarations.");
@@ -691,6 +695,17 @@ void SCI_METHOD LexerFSharp::Fold(Sci_PositionU start, Sci_Position length, int 
 					   !atEOL) {
 					levelNext--;
 				}
+			}
+		}
+
+		if (options.foldQuotes && atEOL) {
+			const int lineState = (styler.GetLineState(lineCurrent > 0 ? lineCurrent - 1 : lineCurrent) >> 8) & 0xff;
+			const bool isQuoted = (lineState == SCE_FSHARP_STRING || lineState == SCE_FSHARP_VERBATIM);
+			const bool isStringlike = (style == SCE_FSHARP_STRING || style == SCE_FSHARP_VERBATIM);
+			if (isStringlike && (!isQuoted || lineCurrent == 0)) {
+				levelNext++;
+			} else if (!isStringlike && isQuoted) {
+				levelNext--;
 			}
 		}
 

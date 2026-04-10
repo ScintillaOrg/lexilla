@@ -1168,6 +1168,8 @@ Lexer fsharp
                Setting this option to 0 disables folding of grouped line comments in F# files when fold.comment=1.
         bool   fold.fsharp.preprocessor
                Setting this option to 1 enables folding of F# compiler directives.
+        bool   fold.fsharp.quotes
+               Setting this option to 1 enables folding of multi-line strings in F# files.
         bool   fold.fsharp.imports
                Setting this option to 0 disables folding of F# import declarations.
     Word Lists:
