@@ -82,6 +82,11 @@ constexpr bool isWhiteSpace(char ch) noexcept {
     return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
 }
 
+constexpr bool isOperatorName(char ch) noexcept {
+    // see operator list at https://docs.ruby-lang.org/en/master/syntax/methods_rdoc.html#method-names
+    return AnyOf(ch, '[', '*', '!', '~', '+', '-', '*', '/', '%', '=', '<', '>', '&', '^', '|');
+}
+
 bool isQuestionMarkChar(char chNext, char chNext2) noexcept {
     // followed by a single character or escape sequence that corresponds to a single codepoint
     if (isSafeAlnum(chNext)) {
@@ -486,9 +491,9 @@ constexpr bool isInterpolableLiteral(int state) noexcept {
            && state != SCE_RB_CHARACTER;
 }
 
-bool isSingleSpecialVariable(char ch) noexcept {
+constexpr bool isSingleSpecialVariable(char ch) noexcept {
     // https://docs.ruby-lang.org/en/master/globals_rdoc.html
-    return strchr("~*$?!@/\\;,.=:<>\"&`'+", ch) != nullptr;
+    return AnyOf(ch, '~', '*', '$', '?', '!', '@', '/', '\\', ';', ',', '.', '=', ':', '<', '>', '"', '&', '`', '\'', '+');
 }
 
 void InterpolateVariable(LexAccessor &styler, int state, Sci_Position &i, char &ch, char &chNext, char chNext2) {
@@ -931,7 +936,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     styler.StartAt(startPos);
     styler.StartSegment(startPos);
 
-    static constexpr int q_states[] = {
+    static constexpr unsigned char q_states[] = {
         SCE_RB_STRING_Q,
         SCE_RB_STRING_QQ,
         SCE_RB_STRING_QR,
@@ -943,6 +948,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
         SCE_RB_STRING_QS,
     };
     constexpr const char *q_chars = "qQrwWxiIs";
+    constexpr size_t q_charsLen = std::size(q_states);
 
     // In most cases a value of 2 should be ample for the code in the
     // Ruby library, and the code the user is likely to enter.
@@ -1111,7 +1117,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                 chNext = chNext2;
                 styler.ColourTo(i, SCE_RB_OPERATOR);
 
-                if (!(strchr("\"\'`_-~", chNext2) || isSafeAlphaOrHigh(chNext2))) {
+                if (!(AnyOf(chNext2, '\"', '\'', '`', '-', '~') || isSafeAlphaOrHigh(chNext2))) {
                     // It's definitely not a here-doc,
                     // based on Ruby's lexer/parser in the
                     // heredoc_identifier routine.
@@ -1170,7 +1176,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
                     chNext = styler.SafeGetCharAt(i+1);
                     styler.ColourTo(i, SCE_RB_SYMBOL);
                     state = SCE_RB_DEFAULT;
-                } else if (strchr("[*!~+-*/%=<>&^|", chNext)) {
+                } else if (isOperatorName(chNext)) {
                     // Do the operator analysis in-line, looking ahead
                     // Based on the table in pickaxe 2nd ed., page 339
                     bool doColoring = true;
@@ -1255,7 +1261,7 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
             } else if (ch == '%' && !afterDef) {
                 styler.ColourTo(i - 1, state);
                 bool have_string = false;
-                const char *hit = strchr(q_chars, chNext);
+                const char *hit = static_cast<const char *>(memchr(q_chars, static_cast<unsigned char>(chNext), q_charsLen));
                 if (hit != nullptr && !isSafeWordcharOrHigh(chNext2)) {
                     Quote.New();
                     state = q_states[hit - q_chars];
