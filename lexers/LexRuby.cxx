@@ -96,6 +96,43 @@ bool isQuestionMarkChar(char chNext, char chNext2) noexcept {
     return !IsASpace(chNext);
 }
 
+Sci_Position GetEscapeSequenceLength(LexAccessor &styler, Sci_Position pos, char &chNext, char chNext2) {
+    // https://docs.ruby-lang.org/en/master/syntax/literals_rdoc.html#escape-sequences
+    Sci_Position width = 1;
+    if (isHighBitChar(chNext)) {
+        styler.MultiByteAccess()->GetCharacterAndWidth(pos, &width);
+    } else {
+        Sci_Position digits = 3; // \xHH, \nnn
+        int base = 16;
+        if (chNext == 'u') {
+            if (chNext2 == '{') {
+                digits = 9; // \u{HHHHHH}
+                width += 1;
+                pos += 1;
+            } else {
+                digits = 5; // \uHHHH
+            }
+        } else if (IsAnOctalDigit(chNext)) {
+            base = 8;
+        } else if (chNext != 'x') {
+            return width;
+        }
+        do {
+            ++pos;
+            chNext2 = styler.SafeGetCharAt(pos);
+            if (!IsADigit(chNext2, base)) {
+                if (chNext2 == '}' && digits == 9) {
+                    ++width;
+                }
+                break;
+            }
+            ++width;
+        } while (width < digits);
+        chNext = chNext2;
+    }
+    return width;
+}
+
 // Options used for LexerRuby
 struct OptionsRuby {
 	bool foldCompact = true;
@@ -1423,34 +1460,30 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
             }
         } else if (state == SCE_RB_NUMBER) {
             if (!is_real_number) {
-                if (ch != '\\' || chPrev == '\\') {
+                if (ch != '\\' || isEOLChar(chNext)) {
                     styler.ColourTo(i, state);
                     state = SCE_RB_DEFAULT;
                     preferRE = false;
-                } else if (strchr("\\ntrfvaebs", chNext)) {
-                    // Terminal escape sequence -- handle it next time
-                    // Nothing more to do this time through the loop
-                } else if (chNext == 'C' || chNext == 'M') {
-                    if (chNext2 != '-') {
-                        // \C or \M ends the sequence -- handle it next time
-                    } else {
-                        // Move from abc?\C-x
-                        //               ^
-                        // to
-                        //                 ^
-                        i += 2;
-                        ch = chNext2;
-                        chNext = styler.SafeGetCharAt(i + 1);
-                    }
+                } else if ((chNext == 'C' || chNext == 'M') && chNext2 == '-') {
+                    // Move from abc?\C-x
+                    //               ^
+                    // to
+                    //                 ^
+                    i += 2;
+                    ch = chNext2;
+                    chNext = styler.SafeGetCharAt(i + 1);
                 } else if (chNext == 'c') {
                     // Stay here, \c is a combining sequence
                     advance_char(i, ch, chNext, chNext2); // pass by ref
                 } else {
                     // ?\x, including ?\\ is final.
-                    styler.ColourTo(i + 1, state);
+                    const Sci_Position width = GetEscapeSequenceLength(styler, i + 1, chNext, chNext2);
+                    i += width;
+                    styler.ColourTo(std::min(i, lengthDoc - 1), state);
                     state = SCE_RB_DEFAULT;
                     preferRE = false;
-                    advance_char(i, ch, chNext, chNext2);
+                    ch = chNext;
+                    chNext = styler.SafeGetCharAt(i + 1);
                 }
             } else if (isSafeAlnumOrHigh(ch) || ch == '_' || (ch == '.' && isSafeDigit(chNext))) {
                 // Keep going
