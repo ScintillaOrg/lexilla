@@ -182,7 +182,9 @@ public:
 	void ColourTo(Sci_PositionU pos, int chAttr) {
 		// Only perform styling for non empty range [startSeg, pos + 1)
 		pos += 1; // pos could be -1
-		assert(pos >= startSeg && pos <= static_cast<Sci_PositionU>(Length()));
+		if (pos > static_cast<Sci_PositionU>(Length())) {
+			pos = static_cast<Sci_PositionU>(Length());
+		}
 		if (pos > startSeg) {
 			const Sci_PositionU len = pos - startSeg;
 			if (validLen + len >= bufferSize) {
