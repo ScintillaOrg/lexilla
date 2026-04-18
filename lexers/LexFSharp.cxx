@@ -272,15 +272,15 @@ public:
 	      setFormatFlags(CharacterSet::setNone, ".-+0 "),
 	      numericMetaChars1(CharacterSet::setNone, "_uU"),
 	      numericMetaChars2(CharacterSet::setNone, "fFIlLmMnsy") {
+		SetOptionSet(&optionSet);
 	}
 	LexerFSharp(const LexerFSharp &) = delete;
 	LexerFSharp(LexerFSharp &&) = delete;
 	LexerFSharp &operator=(const LexerFSharp &) = delete;
 	LexerFSharp &operator=(LexerFSharp &&) = delete;
+	~LexerFSharp() override = default;
 	static ILexer5 *LexerFactoryFSharp() {
 		return new LexerFSharp();
-	}
-	virtual ~LexerFSharp() {
 	}
 	void SCI_METHOD Release() noexcept override {
 		delete this;
@@ -299,21 +299,6 @@ public:
 	}
 	void *SCI_METHOD PrivateCall(int, void *) noexcept override {
 		return nullptr;
-	}
-	const char *SCI_METHOD DescribeWordListSets() override {
-		return optionSet.DescribeWordListSets();
-	}
-	const char *SCI_METHOD PropertyNames() override {
-		return optionSet.PropertyNames();
-	}
-	int SCI_METHOD PropertyType(const char *name) override {
-		return optionSet.PropertyType(name);
-	}
-	const char *SCI_METHOD DescribeProperty(const char *name) override {
-		return optionSet.DescribeProperty(name);
-	}
-	const char *SCI_METHOD PropertyGet(const char *key) override {
-		return optionSet.PropertyGet(key);
 	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override {
 		if (optionSet.PropertySet(&options, key, val)) {
