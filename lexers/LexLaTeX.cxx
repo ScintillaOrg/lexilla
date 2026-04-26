@@ -323,7 +323,7 @@ void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int
 					state = SCE_L_MATH2;
 				}
 			} else {
-				styler.ColourTo(i, SCE_L_ERROR);
+				styler.ColourTo(i < styler.Length() ? i : styler.Length() - 1, SCE_L_ERROR);
 				latexStateReset(mode, state);
 				ch = styler.SafeGetCharAt(i);
 				if (ch == '\r' || ch == '\n') setMode(styler.GetLine(i), mode);
@@ -335,7 +335,7 @@ void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int
 				styler.ColourTo(i, state);
 				latexStateReset(mode, state);
 			} else {
-				styler.ColourTo(i, SCE_L_ERROR);
+				styler.ColourTo(i < styler.Length() ? i : styler.Length() - 1, SCE_L_ERROR);
 				latexStateReset(mode, state);
 				ch = styler.SafeGetCharAt(i);
 				if (ch == '\r' || ch == '\n') setMode(styler.GetLine(i), mode);
@@ -357,6 +357,8 @@ void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int
 					}
 					state = SCE_L_COMMAND;
 				} else if (latexIsSpecial(chNext)) {
+					if ((i + 1) >= styler.Length())
+						break;
 					styler.ColourTo(i + 1, SCE_L_SPECIAL);
 					i++;
 					chNext = styler.SafeGetCharAt(i + 1);
@@ -399,6 +401,8 @@ void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int
 					}
 					state = SCE_L_COMMAND;
 				} else if (latexIsSpecial(chNext)) {
+					if ((i + 1) >= styler.Length())
+						break;
 					styler.ColourTo(i + 1, SCE_L_SPECIAL);
 					i++;
 					chNext = styler.SafeGetCharAt(i + 1);
@@ -474,7 +478,7 @@ void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int
 				i++;
 				chNext = styler.SafeGetCharAt(i + 1);
 			} else if (chVerbatimDelim != '\0' && (ch == '\n' || ch == '\r')) {
-				styler.ColourTo(i, SCE_L_ERROR);
+				styler.ColourTo(i - 1, SCE_L_ERROR);
 				latexStateReset(mode, state);
 				chVerbatimDelim = '\0';
 			}
