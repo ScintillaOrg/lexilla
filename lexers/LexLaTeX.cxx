@@ -140,17 +140,28 @@ static bool latexIsTagValid(Sci_Position &i, Sci_Position l, Accessor &styler) {
 	return false;
 }
 
-static bool latexNextNotBlankIs(Sci_Position i, Accessor &styler, char needle) {
-  char ch;
-	while (i < styler.Length()) {
-    ch = styler.SafeGetCharAt(i);
-		if (!latexIsBlankAndNL(ch) && ch != '*') {
-      if (ch == needle)
-        return true;
-      else
-        return false;
+// Determine if there is a valid [optional argument] after a command.
+// Heuristic searches for '[' followed by non-special characters then ']'
+// but is not exhaustive and may fail.
+static bool latexIsCmdOpt(Sci_Position i, Accessor &styler) {
+	bool beforeOptional = true;
+	for (; i < styler.Length(); i++) {
+		const char ch = styler.SafeGetCharAt(i);
+		if (beforeOptional) {
+			if (ch == '[') {
+				beforeOptional = false;
+			} else if (!latexIsBlankAndNL(ch) && ch != '*') {
+				return false;
+			}
+		} else {
+			if (ch == ']') { // Whole [optional] -> success
+				return true;
+			}
+			if (ch > ' ' && latexIsSpecial(ch)) {
+				// Prefer inner highlighting inside optional command argument
+				return false;
+			}
 		}
-		i++;
 	}
 	return false;
 }
@@ -285,7 +296,7 @@ void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int
 		case SCE_L_COMMAND :
 			if (!latexIsLetter(chNext)) {
 				styler.ColourTo(i, state);
-				if (latexNextNotBlankIs(i + 1, styler, '[' )) {
+				if (latexIsCmdOpt(i + 1, styler)) {
 					state = SCE_L_CMDOPT;
 				} else if (latexLastWordIs(i, styler, "\\begin")) {
 					state = SCE_L_TAG;
