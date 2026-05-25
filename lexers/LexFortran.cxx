@@ -94,7 +94,7 @@ static void ColouriseFortranDoc(Sci_PositionU startPos, Sci_Position length, int
 				if (sc.MatchIgnoreCase("cdec$") || sc.MatchIgnoreCase("*dec$") || sc.MatchIgnoreCase("!dec$") ||
 				        sc.MatchIgnoreCase("cdir$") || sc.MatchIgnoreCase("*dir$") || sc.MatchIgnoreCase("!dir$") ||
 				        sc.MatchIgnoreCase("cms$")  || sc.MatchIgnoreCase("*ms$")  || sc.MatchIgnoreCase("!ms$")  ||
-				        sc.chNext == '$') {
+				        sc.MatchIgnoreCase("!gcc$") || sc.chNext == '$') {
 					sc.SetState(SCE_F_PREPROCESSOR);
 				} else {
 					sc.SetState(SCE_F_COMMENT);
@@ -228,7 +228,7 @@ static void ColouriseFortranDoc(Sci_PositionU startPos, Sci_Position length, int
 		if (sc.state == SCE_F_DEFAULT) {
 			if (sc.ch == '!') {
 				if (sc.MatchIgnoreCase("!dec$") || sc.MatchIgnoreCase("!dir$") ||
-					sc.MatchIgnoreCase("!ms$") || sc.chNext == '$') {
+					sc.MatchIgnoreCase("!gcc$") || sc.MatchIgnoreCase("!ms$") || sc.chNext == '$') {
 					sc.SetState(SCE_F_PREPROCESSOR);
 				} else {
 					sc.SetState(SCE_F_COMMENT);
@@ -361,7 +361,7 @@ static void CheckBackComLines(Accessor &styler, bool isFixFormat, Sci_Position l
 		comL[copyTo]    = comLineF[i];
 		nComCol[copyTo] = nComColF[i];
 	}
-	
+
 	Sci_Position lineC = lineCurrent - nComL + 1;
 	Sci_PositionU iStart;
 	if (lineC <= 0) {
@@ -373,7 +373,7 @@ static void CheckBackComLines(Accessor &styler, bool isFixFormat, Sci_Position l
 	}
 	bool levChanged = false;
 	int lev = styler.LevelAt(lineC) & SC_FOLDLEVELNUMBERMASK;
-	
+
 	for (Sci_PositionU i=iStart; i<=nComL; i++) {
 		if (comL[i] && (!comL[i-1] || nComCol[i] != nComCol[i-1])) {
 			bool increase = true;
@@ -426,17 +426,18 @@ static int classifyFoldPointFortran(const char* s, const char* prevWord, const c
 	} else if (strcmp(s, "associate") == 0 || strcmp(s, "block") == 0
 	        || strcmp(s, "blockdata") == 0 || strcmp(s, "select") == 0
 	        || strcmp(s, "selecttype") == 0 || strcmp(s, "selectcase") == 0
-	        || strcmp(s, "do") == 0 || strcmp(s, "enum") ==0
+	        || strcmp(s, "do") == 0 || strcmp(s, "enum") == 0
 	        || strcmp(s, "function") == 0 || strcmp(s, "interface") == 0
 	        || strcmp(s, "module") == 0 || strcmp(s, "program") == 0
 	        || strcmp(s, "subroutine") == 0 || strcmp(s, "then") == 0
-	        || (strcmp(s, "type") == 0 && chNextNonBlank != '(')
+	        || (strcmp(s, "type") == 0 && chNextNonBlank != '(' && strcmp(prevWord, "enumeration") != 0)
+		|| strcmp(s, "enumeration") == 0
 		|| strcmp(s, "critical") == 0 || strcmp(s, "submodule") == 0){
 		if (strcmp(prevWord, "end") == 0)
 			lev = 0;
 		else
 			lev = 1;
-	} else if ((strcmp(s, "end") == 0 && chNextNonBlank != '=')
+	} else if ((strcmp(s, "end") == 0 && chNextNonBlank != '=' && chNextNonBlank != '(')
 	        || strcmp(s, "endassociate") == 0 || strcmp(s, "endblock") == 0
 	        || strcmp(s, "endblockdata") == 0 || strcmp(s, "endselect") == 0
 	        || strcmp(s, "enddo") == 0 || strcmp(s, "endenum") ==0
@@ -515,7 +516,7 @@ static void FoldFortranDoc(Sci_PositionU startPos, Sci_Position length, int init
 			GetIfLineComment(styler, isFixFormat, chL, comLineF[i], nComColF[i]);
 		}
 		GetIfLineComment(styler, isFixFormat, lineCurrent, comLineCur, nComCur);
-		CheckBackComLines(styler, isFixFormat, lineCurrent, nComL, nComColB, nComColF, nComCur, 
+		CheckBackComLines(styler, isFixFormat, lineCurrent, nComL, nComColB, nComColF, nComCur,
 				comLineB, comLineF, comLineCur);
 	}
 	int levelCurrent = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -636,7 +637,8 @@ static void FoldFortranDoc(Sci_PositionU startPos, Sci_Position length, int init
 							levelCurrent--;
 						}
 					} else if ((strcmp(prevWord, "select") == 0 && strcmp(s, "case") == 0) || strcmp(s, "selectcase") == 0 ||
-							   (strcmp(prevWord, "select") == 0 && strcmp(s, "type") == 0) || strcmp(s, "selecttype") == 0) {
+							   (strcmp(prevWord, "select") == 0 && strcmp(s, "type") == 0) || strcmp(s, "selecttype") == 0 ||
+							   (strcmp(prevWord, "select") == 0 && strcmp(s, "rank") == 0)) {
 						levelDeltaNext += 2;
 					} else if ((strcmp(s, "case") == 0 && chNextNonBlank == '(') || (strcmp(prevWord, "case") == 0 && strcmp(s, "default") == 0) ||
 							   (strcmp(prevWord, "type") == 0 && strcmp(s, "is") == 0) ||
