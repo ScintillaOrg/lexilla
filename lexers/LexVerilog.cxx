@@ -354,11 +354,11 @@ Sci_Position SCI_METHOD LexerVerilog::WordListSet(int n, const char *wl) {
 }
 
 inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '\''|| ch == '$');
+	return IsAlphaNumeric(ch) || ch == '_' || ch == '\''|| ch == '$';
 }
 
 inline bool IsAWordStart(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '$');
+	return IsAlphaNumeric(ch) || ch == '_' || ch == '$';
 }
 
 inline bool AllUpperCase(const char *a) {

@@ -45,12 +45,12 @@ static void ColouriseVHDLDoc(
 
 /***************************************/
 inline bool IsAWordChar(const int ch) {
-  return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_' );
+  return IsAlphaNumeric(ch) || ch == '.' || ch == '_';
 }
 
 /***************************************/
 inline bool IsAWordStart(const int ch) {
-  return (ch < 0x80) && (isalnum(ch) || ch == '_');
+  return IsAlphaNumeric(ch) || ch == '_';
 }
 
 /***************************************/
@@ -291,7 +291,7 @@ void FoldNoBoxVHDLDoc(
         char s[32];
         Sci_PositionU k;
         for(k=0; (k<31 ) && (k<end-j+1 ); k++) {
-          s[k] = static_cast<char>(tolower(styler[j+k]));
+          s[k] = MakeLowerCase(styler[j+k]);
         }
         s[k] = '\0';
 
@@ -389,7 +389,7 @@ void FoldNoBoxVHDLDoc(
         char s[32];
         Sci_PositionU k;
         for(k=0; (k<31 ) && (k<i-lastStart+1 ); k++) {
-          s[k] = static_cast<char>(tolower(styler[lastStart+k]));
+          s[k] = MakeLowerCase(styler[lastStart+k]);
         }
         s[k] = '\0';
 
