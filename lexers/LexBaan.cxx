@@ -513,7 +513,6 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	bool lineHasDefines = false;
 	bool numberIsHex = false;
 	char word[1000];
-	int wordlen = 0;
 
 	std::string preProcessorTags[13] = { "#context_off", "#context_on",
 		"#define", "#elif", "#else", "#endif",
@@ -687,15 +686,16 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				// Preprocessor commands are alone on their line
 				sc.SetState(SCE_BAAN_PREPROCESSOR);
 				word[0] = '\0';
-				wordlen = 0;
 				while (sc.More() && !(IsASpace(sc.chNext) || IsAnOperator(sc.chNext))) {
 					sc.Forward();
-					wordlen++;
 				}
 				sc.GetCurrentLowered(word, sizeof(word));
 				if (!sc.atLineEnd) {
-					word[wordlen++] = sc.ch;
-					word[wordlen++] = '\0';
+					size_t len = strlen(word);
+					if (len + 2 < sizeof(word)) {
+						word[len]   = sc.ch;
+						word[len+1] = '\0';
+					}
 				}
 				if (!wordInArray(word, preProcessorTags, 13))
 					// Colorise only preprocessor built in Baan.
