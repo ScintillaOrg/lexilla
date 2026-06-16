@@ -549,8 +549,11 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.GetCurrentLowered(s, sizeof(s));
 				if (sc.ch == ':') {
 					memcpy(s1, s, sizeof(s));
-					s1[sc.LengthCurrent()] = sc.ch;
-					s1[sc.LengthCurrent() + 1] = '\0';
+					const size_t len = static_cast<size_t>(sc.LengthCurrent());
+					if (len < sizeof(s1) - 1) {
+						s1[len] = sc.ch;
+						s1[len + 1] = '\0';
+					}
 				}
 				if ((keywords.kwHasSection && (sc.ch == ':')) ? keywords.Contains(s1) : keywords.Contains(s)) {
 					sc.ChangeState(SCE_BAAN_WORD);
