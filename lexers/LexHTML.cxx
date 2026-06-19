@@ -1693,6 +1693,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 			} else if ((state != SCE_H_SGML_BLOCK_DEFAULT) && isWordCdata(i + 1, i + 7, styler)) {
 				state = SCE_H_CDATA;
+				styler.ColourTo(i + 1, SCE_H_SGML_DEFAULT);
+				styler.ColourTo(i + 1 + 5, SCE_H_SGML_COMMAND);
+				styler.ColourTo(i + 1 + 5 + 1, SCE_H_SGML_DEFAULT);
 			} else {
 				styler.ColourTo(i, SCE_H_SGML_DEFAULT); // <! is default
 				beforeLanguage = scriptLanguage;
@@ -1944,7 +1947,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_H_CDATA:
 			if ((chPrev2 == ']') && (chPrev == ']') && (ch == '>')) {
-				styler.ColourTo(i, StateToPrint);
+				styler.ColourTo(i - 3, StateToPrint);
+				styler.ColourTo(i, SCE_H_SGML_DEFAULT);
 				state = SCE_H_DEFAULT;
 				levelCurrent--;
 			}
