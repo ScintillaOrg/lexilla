@@ -42,6 +42,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -53,7 +54,10 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
@@ -163,8 +167,80 @@ bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
     }
 }
 
-void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
-                                WordList **, Accessor &styler) {
+// Options used for LexerMarkdown
+struct OptionsMarkdown {
+    bool headerEOLFill = false;
+};
+
+struct OptionSetMarkdown : public OptionSet<OptionsMarkdown> {
+    OptionSetMarkdown() {
+        DefineProperty("lexer.markdown.header.eolfill", &OptionsMarkdown::headerEOLFill,
+            "Set to 1 to highlight all ATX header text.");
+    }
+};
+
+// Using "default" for tags as have not defined tags for text roles.
+
+const LexicalClass lexicalClasses[] = {
+    // Lexer markdown SCLEX_MARKDOWN SCE_MARKDOWN_
+    0, "SCE_MARKDOWN_DEFAULT", "default", "Regular text",
+    1, "SCE_MARKDOWN_LINE_BEGIN", "default", "Special",
+    2, "SCE_MARKDOWN_STRONG1", "default", "Strong emphasis (bold)",
+    3, "SCE_MARKDOWN_STRONG2", "default", "Strong emphasis (bold)",
+    4, "SCE_MARKDOWN_EM1", "default", "Emphasis (italic)",
+    5, "SCE_MARKDOWN_EM2", "default", "Emphasis (italic)",
+    6, "SCE_MARKDOWN_HEADER1", "default", "Level-one header",
+    7, "SCE_MARKDOWN_HEADER2", "default", "Level-two header",
+    8, "SCE_MARKDOWN_HEADER3", "default", "Level-three header",
+    9, "SCE_MARKDOWN_HEADER4", "default", "Level-four header",
+    10, "SCE_MARKDOWN_HEADER5", "default", "Level-five header",
+    11, "SCE_MARKDOWN_HEADER6", "default", "Level-six header",
+    12, "SCE_MARKDOWN_PRECHAR", "default", "Prechar (up to three indent spaces)",
+    13, "SCE_MARKDOWN_ULIST_ITEM", "default", "Unordered list item",
+    14, "SCE_MARKDOWN_OLIST_ITEM", "default", "Ordered list item",
+    15, "SCE_MARKDOWN_BLOCKQUOTE", "default", "Block quote",
+    16, "SCE_MARKDOWN_STRIKEOUT", "default", "Strikeout",
+    17, "SCE_MARKDOWN_HRULE", "default", "Horizontal rule",
+    18, "SCE_MARKDOWN_LINK", "default", "Link or image",
+    19, "SCE_MARKDOWN_CODE", "default", "Inline code",
+    20, "SCE_MARKDOWN_CODE2", "default", "Inline code (quotes code containing a single backtick)",
+    21, "SCE_MARKDOWN_CODEBK", "default", "Code block",
+};
+
+class LexerMarkdown : public DefaultLexer {
+    OptionsMarkdown options;
+    OptionSetMarkdown osMarkdown;
+public:
+    LexerMarkdown() :
+        DefaultLexer("markdown", SCLEX_MARKDOWN, lexicalClasses, std::size(lexicalClasses)) {
+        SetOptionSet(&osMarkdown);
+    }
+    // Deleted so LexerMarkdown objects can not be copied.
+    LexerMarkdown(const LexerMarkdown &) = delete;
+    LexerMarkdown(LexerMarkdown &&) = delete;
+    void operator=(const LexerMarkdown &) = delete;
+    void operator=(LexerMarkdown &&) = delete;
+    ~LexerMarkdown() override = default;
+
+    Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+
+    void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+    static ILexer5 *LexerFactoryMarkdown() {
+        return new LexerMarkdown();
+    }
+};
+
+Sci_Position SCI_METHOD LexerMarkdown::PropertySet(const char *key, const char *val) {
+    if (osMarkdown.PropertySet(&options, key, val)) {
+        return 0;
+    }
+    return -1;
+}
+
+void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+    Accessor styler(pAccess, nullptr);
+
     const Sci_PositionU endPos = startPos + length;
     int precharCount = 0;
     bool isLinkNameDetecting = false;
@@ -173,9 +249,7 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
     // in the default state.
     bool freezeCursor = false;
 
-    // property lexer.markdown.header.eolfill
-    //  Set to 1 to highlight all ATX header text.
-    const bool headerEOLFill = styler.GetPropertyInt("lexer.markdown.header.eolfill", 0) == 1;
+    const bool headerEOLFill = options.headerEOLFill;
 
     StyleContext sc(startPos, static_cast<Sci_PositionU>(length), initStyle, styler);
 
@@ -492,4 +566,4 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
 
 }
 
-extern const LexerModule lmMarkdown(SCLEX_MARKDOWN, ColorizeMarkdownDoc, "markdown");
+extern const LexerModule lmMarkdown(SCLEX_MARKDOWN, LexerMarkdown::LexerFactoryMarkdown, "markdown");
