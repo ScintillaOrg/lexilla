@@ -105,14 +105,15 @@ void SetStateAndZoom(const int state, const Sci_Position length, const int token
 // Does the previous line have more than spaces and tabs?
 bool HasPrevLineContent(StyleContext &sc) {
     Sci_Position i = 0;
+    const Sci_Position currentPos = sc.currentPos;
     // Go back to the previous newline
-    while ((--i + (Sci_Position)sc.currentPos) >= 0 && !IsNewline(sc.GetRelative(i)))
+    while ((--i + currentPos) >= 0 && !IsNewline(sc.GetRelative(i)))
         ;
-    while ((--i + (Sci_Position)sc.currentPos) >= 0) {
+    while ((--i + currentPos) >= 0) {
         const int ch = sc.GetRelative(i);
         if (ch == '\n')
             break;
-        if (!((ch == '\r' || IsASpaceOrTab(ch))))
+        if (!AnyOf(ch, '\r', ' ', '\t'))
             return true;
     }
     return false;
@@ -144,10 +145,10 @@ bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
     for (;;) {
         ++i;
         const int c = sc.GetRelative(i);
-        if (c == sc.ch)
+        if (c == sc.ch) {
             ++count;
-        // hit a terminating character
-        else if (!IsASpaceOrTab(c) || sc.currentPos + i == endPos) {
+            // hit a terminating character
+        } else if (!IsASpaceOrTab(c) || sc.currentPos + i == endPos) {
             // Are we a valid HRULE
             if ((IsNewline(c) || sc.currentPos + i == endPos) &&
                     count >= 3 && !HasPrevLineContent(sc)) {
@@ -265,17 +266,19 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
         }
         else if (sc.state == SCE_MARKDOWN_LINE_BEGIN) {
             // Header
+            constexpr Sci_Position header5Length = 5;
+            constexpr Sci_Position header6Length = 6;
             if (sc.Match("######")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER6);
                 else
-                    SetStateAndZoom(SCE_MARKDOWN_HEADER6, 6, '#', sc);
+                    SetStateAndZoom(SCE_MARKDOWN_HEADER6, header6Length, '#', sc);
             }
             else if (sc.Match("#####")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER5);
                 else
-                    SetStateAndZoom(SCE_MARKDOWN_HEADER5, 5, '#', sc);
+                    SetStateAndZoom(SCE_MARKDOWN_HEADER5, header5Length, '#', sc);
             }
             else if (sc.Match("####")) {
                 if (headerEOLFill)
@@ -304,8 +307,9 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
                 else if (headerEOLFill) {
                     sc.SetState(SCE_MARKDOWN_HEADER1);
                 }
-                else
+                else {
                     SetStateAndZoom(SCE_MARKDOWN_HEADER1, 1, '#', sc);
+                }
             }
             // Code block
             else if (sc.Match("~~~")) {
@@ -319,8 +323,9 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
                     if (!headerEOLFill)
                         sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
                 }
-                else
+                else {
                     sc.SetState(SCE_MARKDOWN_DEFAULT);
+                }
             }
             else if (sc.ch == '-') {
                 if (HasPrevLineContent(sc) && FollowToLineEnd('-', SCE_MARKDOWN_HEADER2, endPos, sc)) {
@@ -332,8 +337,9 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
                     sc.SetState(SCE_MARKDOWN_PRECHAR);
                 }
             }
-            else if (IsNewline(sc.ch))
+            else if (IsNewline(sc.ch)) {
                 sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
+            }
             else {
                 precharCount = 0;
                 sc.SetState(SCE_MARKDOWN_PRECHAR);
@@ -350,15 +356,17 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
                     freezeCursor = true;
                 }
             }
-            else if (IsNewline(sc.ch))
+            else if (IsNewline(sc.ch)) {
                 sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
+            }
         }
 
         // New state only within the initial whitespace
         if (sc.state == SCE_MARKDOWN_PRECHAR) {
             // Blockquote
-            if (sc.ch == '>' && precharCount < 5)
+            if (sc.ch == '>' && precharCount <= 4) {
                 sc.SetState(SCE_MARKDOWN_BLOCKQUOTE);
+            }
             /*
             // Begin of code block
             else if (!HasPrevLineContent(sc) && (sc.chPrev == '\t' || precharCount >= 4))
@@ -366,8 +374,9 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
             */
             // HRule - Total of three or more hyphens, asterisks, or underscores
             // on a line by themselves
-            else if ((sc.ch == '-' || sc.ch == '*' || sc.ch == '_') && IsValidHrule(endPos, sc))
+            else if ((sc.ch == '-' || sc.ch == '*' || sc.ch == '_') && IsValidHrule(endPos, sc)) {
                 ;
+            }
             // Unordered list
             else if ((sc.ch == '-' || sc.ch == '*' || sc.ch == '+') && IsASpaceOrTab(sc.chNext)) {
                 sc.SetState(SCE_MARKDOWN_ULIST_ITEM);
@@ -375,7 +384,7 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
             }
             // Ordered list
             else if (IsADigit(sc.ch)) {
-                int digitCount = 0;
+                Sci_Position digitCount = 0;
                 while (IsADigit(sc.GetRelative(++digitCount)))
                     ;
                 if (sc.GetRelative(digitCount) == '.' &&
@@ -394,10 +403,12 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-            else if (sc.ch != ' ' || precharCount > 2)
+            else if (sc.ch != ' ' || precharCount > 2) {
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
-            else
+            }
+            else {
                 ++precharCount;
+            }
         }
 
         // Any link
@@ -461,7 +472,7 @@ void ColorizeMarkdownDoc(Sci_PositionU startPos, Sci_Position length, int initSt
                 sc.SetState(SCE_MARKDOWN_EM2);
             }
             // Strikeout
-            else if (sc.Match("~~") && !(sc.GetRelative(2) == '~' || sc.GetRelative(2) == ' ') &&
+            else if (sc.Match("~~") && !(AnyOf(sc.GetRelative(2), '~', ' ')) &&
                      IsCompleteStyleRegion(sc, "~~")) {
                 sc.SetState(SCE_MARKDOWN_STRIKEOUT);
                 sc.Forward();
