@@ -167,6 +167,29 @@ bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
     }
 }
 
+enum class FrontMatter { None, YAML, TOML, JSON };
+
+constexpr std::string_view markYAML = "---";
+constexpr std::string_view markTOML = "+++";
+constexpr std::string_view markJSON = ";;;";
+
+constexpr FrontMatter FrontMatterFromString(std::string_view value) {
+    if (value == markYAML) {
+        return FrontMatter::YAML;
+    }
+    if (value == markTOML) {
+        return FrontMatter::TOML;
+    }
+    if (value == markJSON) {
+        return FrontMatter::JSON;
+    }
+    return FrontMatter::None;
+}
+
+FrontMatter DetectFrontMatter(const Accessor &styler) {
+    return FrontMatterFromString(styler.GetRange(0, 3));
+}
+
 constexpr std::string_view header5 = "#####";
 constexpr std::string_view header6 = "######";
 
@@ -208,11 +231,15 @@ const LexicalClass lexicalClasses[] = {
     19, "SCE_MARKDOWN_CODE", "default", "Inline code",
     20, "SCE_MARKDOWN_CODE2", "default", "Inline code (quotes code containing a single backtick)",
     21, "SCE_MARKDOWN_CODEBK", "default", "Code block",
+    22, "SCE_MARKDOWN_FRONT_MARK", "default", "Front matter marker",
+    23, "SCE_MARKDOWN_FRONT", "default", "Front matter",
+    24, "SCE_MARKDOWN_FRONT_KEY", "default", "Front matter key",
 };
 
 class LexerMarkdown : public DefaultLexer {
     OptionsMarkdown options;
     OptionSetMarkdown osMarkdown;
+    FrontMatter frontMatter = FrontMatter::None;
 public:
     LexerMarkdown() :
         DefaultLexer("markdown", SCLEX_MARKDOWN, lexicalClasses, std::size(lexicalClasses)) {
@@ -256,6 +283,13 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
 
     StyleContext sc(startPos, static_cast<Sci_PositionU>(length), initStyle, styler);
 
+    if (startPos == 0) {
+        frontMatter = DetectFrontMatter(styler);
+        if (frontMatter != FrontMatter::None) {
+            sc.SetState(SCE_MARKDOWN_FRONT_MARK);
+        }
+    }
+
     while (sc.More()) {
         // Skip past escaped characters
         if (sc.ch == '\\') {
@@ -280,6 +314,58 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
         case SCE_MARKDOWN_CODE:
             if (sc.ch == '`' && sc.chPrev != ' ')
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
+            break;
+
+        case SCE_MARKDOWN_FRONT_MARK:
+            if (sc.atLineStart && (sc.currentLine > 0)) {
+                if (sc.currentLine > 1) {
+                    sc.SetState(SCE_MARKDOWN_DEFAULT);
+                } else if (sc.ch == '{') {
+                    sc.SetState(SCE_MARKDOWN_FRONT);
+                } else {
+                    sc.SetState(SCE_MARKDOWN_FRONT_KEY);
+                }
+            }
+            break;
+
+        case SCE_MARKDOWN_FRONT: 
+            if (sc.atLineStart) {
+                const FrontMatter frontMatterMark = FrontMatterFromString(
+                    styler.GetRange(sc.currentPos, sc.currentPos + 3));
+                if (frontMatterMark == frontMatter) {
+                    sc.SetState(SCE_MARKDOWN_FRONT_MARK);
+                } else if (AnyOf(sc.ch, '{', '}')) {
+                    sc.SetState(SCE_MARKDOWN_FRONT);
+                } else {
+                    sc.SetState(SCE_MARKDOWN_FRONT_KEY);
+                }
+            }
+            break;
+
+        case SCE_MARKDOWN_FRONT_KEY:
+            if (sc.atLineEnd) {
+                sc.SetState(SCE_MARKDOWN_FRONT);
+            } else {
+                switch (frontMatter) {
+                case FrontMatter::YAML:
+                    if (AnyOf(sc.ch, ':', ' ')) {
+                        sc.SetState(SCE_MARKDOWN_FRONT);
+                    }
+                    break;
+                case FrontMatter::TOML:
+                    if (AnyOf(sc.ch, '=', ' ')) {
+                        sc.SetState(SCE_MARKDOWN_FRONT);
+                    }
+                    break;
+                case FrontMatter::JSON:
+                    if (AnyOf(sc.ch, ':', '{')) {
+                        sc.SetState(SCE_MARKDOWN_FRONT);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
             break;
 
             // Strong

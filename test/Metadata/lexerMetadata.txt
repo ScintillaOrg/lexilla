@@ -1651,6 +1651,9 @@ Lexer markdown
          19 SCE_MARKDOWN_CODE [default] Inline code
          20 SCE_MARKDOWN_CODE2 [default] Inline code (quotes code containing a single backtick)
          21 SCE_MARKDOWN_CODEBK [default] Code block
+         22 SCE_MARKDOWN_FRONT_MARK [default] Front matter marker
+         23 SCE_MARKDOWN_FRONT [default] Front matter
+         24 SCE_MARKDOWN_FRONT_KEY [default] Front matter key
 
 Lexer matlab
     Word Lists:
