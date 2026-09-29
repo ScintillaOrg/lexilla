@@ -167,6 +167,9 @@ bool IsValidHrule(const Sci_PositionU endPos, StyleContext &sc) {
     }
 }
 
+constexpr std::string_view header5 = "#####";
+constexpr std::string_view header6 = "######";
+
 // Options used for LexerMarkdown
 struct OptionsMarkdown {
     bool headerEOLFill = false;
@@ -265,65 +268,45 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
             sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
 
         // Conditional state-based actions
-        if (sc.state == SCE_MARKDOWN_CODE2) {
+        switch (sc.state) {
+        case SCE_MARKDOWN_CODE2:
             if (sc.Match("``")) {
                 const int closingSpan = (sc.GetRelative(2) == '`') ? 3 : 2;
                 sc.Forward(closingSpan);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        }
-        else if (sc.state == SCE_MARKDOWN_CODE) {
+            break;
+
+        case SCE_MARKDOWN_CODE:
             if (sc.ch == '`' && sc.chPrev != ' ')
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
-        }
-        /* De-activated because it gets in the way of other valid indentation
-         * schemes, for example multiple paragraphs inside a list item.
-        // Code block
-        else if (sc.state == SCE_MARKDOWN_CODEBK) {
-            bool d = true;
-            if (IsNewline(sc.ch)) {
-                if (sc.chNext != '\t') {
-                    for (int c = 1; c < 5; ++c) {
-                        if (sc.GetRelative(c) != ' ')
-                            d = false;
-                    }
-                }
-            }
-            else if (sc.atLineStart) {
-                if (sc.ch != '\t' ) {
-                    for (int i = 0; i < 4; ++i) {
-                        if (sc.GetRelative(i) != ' ')
-                            d = false;
-                    }
-                }
-            }
-            if (!d)
-                sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
-        }
-        */
-        // Strong
-        else if (sc.state == SCE_MARKDOWN_STRONG1) {
+            break;
+
+            // Strong
+        case SCE_MARKDOWN_STRONG1:
             if ((sc.Match("**") && sc.chPrev != ' ') || IsNewline(sc.GetRelative(2))) {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        }
-        else if (sc.state == SCE_MARKDOWN_STRONG2) {
+            break;
+        case SCE_MARKDOWN_STRONG2:
             if ((sc.Match("__") && sc.chPrev != ' ') || IsNewline(sc.GetRelative(2))) {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        }
-        // Emphasis
-        else if (sc.state == SCE_MARKDOWN_EM1) {
+            break;
+
+            // Emphasis
+        case SCE_MARKDOWN_EM1:
             if ((sc.ch == '*' && sc.chPrev != ' ') || IsNewline(sc.chNext))
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
-        }
-        else if (sc.state == SCE_MARKDOWN_EM2) {
+            break;
+        case SCE_MARKDOWN_EM2:
             if ((sc.ch == '_' && sc.chPrev != ' ') || IsNewline(sc.chNext))
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
-        }
-        else if (sc.state == SCE_MARKDOWN_CODEBK) {
+            break;
+
+        case SCE_MARKDOWN_CODEBK:
             if (sc.atLineStart && sc.Match("~~~")) {
                 Sci_Position i = 1;
                 while (!IsNewline(sc.GetRelative(i)) && sc.currentPos + i < endPos)
@@ -331,57 +314,50 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
                 sc.Forward(i);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        }
-        else if (sc.state == SCE_MARKDOWN_STRIKEOUT) {
+            break;
+
+        case SCE_MARKDOWN_STRIKEOUT:
             if ((sc.Match("~~") && sc.chPrev != ' ') || IsNewline(sc.GetRelative(2))) {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        }
-        else if (sc.state == SCE_MARKDOWN_LINE_BEGIN) {
+            break;
+
+        case SCE_MARKDOWN_LINE_BEGIN:
             // Header
-            constexpr Sci_Position header5Length = 5;
-            constexpr Sci_Position header6Length = 6;
             if (sc.Match("######")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER6);
                 else
-                    SetStateAndZoom(SCE_MARKDOWN_HEADER6, header6Length, '#', sc);
-            }
-            else if (sc.Match("#####")) {
+                    SetStateAndZoom(SCE_MARKDOWN_HEADER6, header6.length(), '#', sc);
+            } else if (sc.Match("#####")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER5);
                 else
-                    SetStateAndZoom(SCE_MARKDOWN_HEADER5, header5Length, '#', sc);
-            }
-            else if (sc.Match("####")) {
+                    SetStateAndZoom(SCE_MARKDOWN_HEADER5, header5.length(), '#', sc);
+            } else if (sc.Match("####")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER4);
                 else
                     SetStateAndZoom(SCE_MARKDOWN_HEADER4, 4, '#', sc);
-            }
-            else if (sc.Match("###")) {
+            } else if (sc.Match("###")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER3);
                 else
                     SetStateAndZoom(SCE_MARKDOWN_HEADER3, 3, '#', sc);
-            }
-            else if (sc.Match("##")) {
+            } else if (sc.Match("##")) {
                 if (headerEOLFill)
                     sc.SetState(SCE_MARKDOWN_HEADER2);
                 else
                     SetStateAndZoom(SCE_MARKDOWN_HEADER2, 2, '#', sc);
-            }
-            else if (sc.Match("#")) {
+            } else if (sc.Match("#")) {
                 // Catch the special case of an unordered list
                 if (sc.chNext == '.' && IsASpaceOrTab(sc.GetRelative(2))) {
                     precharCount = 0;
                     sc.SetState(SCE_MARKDOWN_PRECHAR);
-                }
-                else if (headerEOLFill) {
+                } else if (headerEOLFill) {
                     sc.SetState(SCE_MARKDOWN_HEADER1);
-                }
-                else {
+                } else {
                     SetStateAndZoom(SCE_MARKDOWN_HEADER1, 1, '#', sc);
                 }
             }
@@ -391,48 +367,48 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
                     sc.SetState(SCE_MARKDOWN_CODEBK);
                 else
                     sc.SetState(SCE_MARKDOWN_DEFAULT);
-            }
-            else if (sc.ch == '=') {
+            } else if (sc.ch == '=') {
                 if (HasPrevLineContent(sc) && FollowToLineEnd('=', SCE_MARKDOWN_HEADER1, endPos, sc)) {
                     if (!headerEOLFill)
                         sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
-                }
-                else {
+                } else {
                     sc.SetState(SCE_MARKDOWN_DEFAULT);
                 }
-            }
-            else if (sc.ch == '-') {
+            } else if (sc.ch == '-') {
                 if (HasPrevLineContent(sc) && FollowToLineEnd('-', SCE_MARKDOWN_HEADER2, endPos, sc)) {
                     if (!headerEOLFill)
                         sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
-                }
-                else {
+                } else {
                     precharCount = 0;
                     sc.SetState(SCE_MARKDOWN_PRECHAR);
                 }
-            }
-            else if (IsNewline(sc.ch)) {
+            } else if (IsNewline(sc.ch)) {
                 sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
-            }
-            else {
+            } else {
                 precharCount = 0;
                 sc.SetState(SCE_MARKDOWN_PRECHAR);
             }
-        }
+            break;
 
-        // The header lasts until the newline
-        else if (sc.state == SCE_MARKDOWN_HEADER1 || sc.state == SCE_MARKDOWN_HEADER2 ||
-                 sc.state == SCE_MARKDOWN_HEADER3 || sc.state == SCE_MARKDOWN_HEADER4 ||
-                 sc.state == SCE_MARKDOWN_HEADER5 || sc.state == SCE_MARKDOWN_HEADER6) {
+            // The header lasts until the newline
+        case SCE_MARKDOWN_HEADER1:
+        case SCE_MARKDOWN_HEADER2:
+        case SCE_MARKDOWN_HEADER3:
+        case SCE_MARKDOWN_HEADER4:
+        case SCE_MARKDOWN_HEADER5:
+        case SCE_MARKDOWN_HEADER6:
             if (headerEOLFill) {
                 if (sc.atLineStart) {
                     sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
                     freezeCursor = true;
                 }
-            }
-            else if (IsNewline(sc.ch)) {
+            } else if (IsNewline(sc.ch)) {
                 sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
             }
+            break;
+
+        default:
+            break;
         }
 
         // New state only within the initial whitespace
@@ -476,11 +452,9 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
                 sc.SetState(SCE_MARKDOWN_OLIST_ITEM);
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
-            }
-            else if (sc.ch != ' ' || precharCount > 2) {
+            } else if (sc.ch != ' ' || precharCount > 2) {
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
-            }
-            else {
+            } else {
                 ++precharCount;
             }
         }
@@ -490,16 +464,13 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
             if (sc.Match("](") && sc.GetRelative(-1) != '\\') {
                 sc.Forward(2);
                 isLinkNameDetecting = true;
-            }
-            else if (sc.Match("]:") && sc.GetRelative(-1) != '\\') {
+            } else if (sc.Match("]:") && sc.GetRelative(-1) != '\\') {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
-            }
-            else if (!isLinkNameDetecting && sc.ch == ']' && sc.GetRelative(-1) != '\\') {
+            } else if (!isLinkNameDetecting && sc.ch == ']' && sc.GetRelative(-1) != '\\') {
                 sc.Forward();
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
-            }
-            else if (isLinkNameDetecting && sc.ch == ')' && sc.GetRelative(-1) != '\\') {
+            } else if (isLinkNameDetecting && sc.ch == ')' && sc.GetRelative(-1) != '\\') {
                 sc.Forward();
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
                 isLinkNameDetecting = false;
@@ -516,8 +487,7 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
             if (sc.Match("![")) {
                 sc.SetState(SCE_MARKDOWN_LINK);
                 sc.Forward(1);
-            }
-            else if (sc.ch == '[' && sc.GetRelative(-1) != '\\') {
+            } else if (sc.ch == '[' && sc.GetRelative(-1) != '\\') {
                 sc.SetState(SCE_MARKDOWN_LINK);
             }
             // Code - also a special case for alternate inside spacing
@@ -525,24 +495,21 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
                 const int openingSpan = (sc.GetRelative(2) == '`') ? 2 : 1;
                 sc.SetState(SCE_MARKDOWN_CODE2);
                 sc.Forward(openingSpan);
-            }
-            else if (sc.ch == '`' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "`")) {
+            } else if (sc.ch == '`' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "`")) {
                 sc.SetState(SCE_MARKDOWN_CODE);
             }
             // Strong
             else if (sc.Match("**") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "**")) {
                 sc.SetState(SCE_MARKDOWN_STRONG1);
                 sc.Forward();
-            }
-            else if (sc.Match("__") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "__")) {
+            } else if (sc.Match("__") && sc.GetRelative(2) != ' ' && IsCompleteStyleRegion(sc, "__")) {
                 sc.SetState(SCE_MARKDOWN_STRONG2);
                 sc.Forward();
             }
             // Emphasis
             else if (sc.ch == '*' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "*")) {
                 sc.SetState(SCE_MARKDOWN_EM1);
-            }
-            else if (sc.ch == '_' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "_")) {
+            } else if (sc.ch == '_' && sc.chNext != ' ' && IsCompleteStyleRegion(sc, "_")) {
                 sc.SetState(SCE_MARKDOWN_EM2);
             }
             // Strikeout
