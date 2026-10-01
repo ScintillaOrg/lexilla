@@ -2305,28 +2305,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_HB_DEFAULT:
 		case SCE_HB_START:
-			if (IsAWordStart(ch)) {
+			if (ch > ' ' || (state == SCE_HB_START && AnyOf(ch, ' ', '\t'))) {
 				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_WORD;
-			} else if (ch == '\'') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_COMMENTLINE;
-			} else if (ch == '\"') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_STRING;
-			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') &&
-			           styler.SafeGetCharAt(i + 3) == '-') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_COMMENTLINE;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 				state = SCE_HB_DEFAULT;
-			} else if ((ch == ' ') || (ch == '\t')) {
-				if (state == SCE_HB_START) {
-					styler.ColourTo(i - 1, StateToPrint);
-					state = SCE_HB_DEFAULT;
-				}
 			}
 			break;
 		case SCE_HB_WORD:
@@ -2671,6 +2652,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_HB_COMMENTLINE;
 			} else if (IsAWordStart(ch)) {
 				state = SCE_HB_WORD;
+			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') && styler.SafeGetCharAt(i + 3) == '-') {
+				state = SCE_HB_COMMENTLINE;
+			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
+				state = SCE_HB_COMMENTLINE;
 			} else if (IsOperator(ch)) {
 				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 			}
