@@ -2203,48 +2203,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_HJ_DEFAULT:
 		case SCE_HJ_START:
 		case SCE_HJ_SYMBOLS:
-			if (IsAWordStart(ch)) {
+			if (ch > ' ' || (state == SCE_HJ_START && AnyOf(ch, ' ', '\t'))) {
 				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_WORD;
-			} else if (ch == '/' && chNext == '*') {
-				styler.ColourTo(i - 1, StateToPrint);
-				i++;
-				if (chNext2 == '*')
-					state = SCE_HJ_COMMENTDOC;
-				else
-					state = SCE_HJ_COMMENT;
-			} else if (ch == '/' && chNext == '/') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-			} else if (ch == '/' && setOKBeforeJSRE.Contains(chPrevNonWhite) && CheckRegexClosed(styler, i)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_REGEX;
-			} else if (ch == '\"') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_DOUBLESTRING;
-			} else if (ch == '\'') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_SINGLESTRING;
-			} else if (ch == '`') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_TEMPLATELITERAL;
-			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') &&
-			           styler.SafeGetCharAt(i + 3) == '-') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-				i += 2;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
 				state = SCE_HJ_DEFAULT;
-			} else if ((ch == ' ') || (ch == '\t')) {
-				if (state == SCE_HJ_START) {
-					styler.ColourTo(i - 1, StateToPrint);
-					state = SCE_HJ_DEFAULT;
-				}
 			}
 			break;
 		case SCE_HJ_WORD:
@@ -2686,6 +2647,8 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					state = SCE_HJ_COMMENT;
 			} else if (ch == '/' && chNext == '/') {
 				state = SCE_HJ_COMMENTLINE;
+			} else if (ch == '/' && setOKBeforeJSRE.Contains(chPrevNonWhite) && CheckRegexClosed(styler, i)) {
+				state = SCE_HJ_REGEX;
 			} else if (ch == '\"') {
 				state = SCE_HJ_DOUBLESTRING;
 			} else if (ch == '\'') {
@@ -2694,10 +2657,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_HJ_TEMPLATELITERAL;
 			} else if (IsAWordStart(ch)) {
 				state = SCE_HJ_WORD;
-			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
-				styler.ColourTo(i - 1, StateToPrint);
+			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') && styler.SafeGetCharAt(i + 3) == '-') {
 				state = SCE_HJ_COMMENTLINE;
-				i += 2;
+			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
+				state = SCE_HJ_COMMENTLINE;
 			} else if (IsOperator(ch)) {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
 			}
