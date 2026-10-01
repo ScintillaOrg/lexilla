@@ -2677,17 +2677,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		// Some of the above terminated their lexeme
 
-		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
-			if (ch == '\"') {
-				state = SCE_HB_STRING;
-			} else if (ch == '\'') {
-				state = SCE_HB_COMMENTLINE;
-			} else if (IsAWordStart(ch)) {
-				state = SCE_HB_WORD;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
-			}
-		} else if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
+		if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
 			if (ch == '/' && chNext == '*') {
 				i++;
 				if (chNext2 == '*')
@@ -2710,6 +2700,16 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				i += 2;
 			} else if (IsOperator(ch)) {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
+			}
+		} else if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
+			if (ch == '\"') {
+				state = SCE_HB_STRING;
+			} else if (ch == '\'') {
+				state = SCE_HB_COMMENTLINE;
+			} else if (IsAWordStart(ch)) {
+				state = SCE_HB_WORD;
+			} else if (IsOperator(ch)) {
+				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 			}
 		}
 	}
