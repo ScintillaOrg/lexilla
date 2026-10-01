@@ -1262,13 +1262,13 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	}
 	script_mode inScriptType = static_cast<script_mode>((lineState >> 0) & 0x03); // 2 bits of scripting mode
 
-	bool tagOpened = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
-	bool tagClosing = (lineState >> 3) & 0x01; // 1 bit to know if we are in a closing tag
+	bool tagOpened = false; // 1 bit to know if we are in an opened tag
+	bool tagClosing = false; // 1 bit to know if we are in a closing tag
 	bool tagDontFold = false; //some HTML tags should not be folded
 	script_type aspScript = static_cast<script_type>((lineState >> 4) & 0x0F); // 4 bits of script name
 	script_type clientScript = static_cast<script_type>((lineState >> 8) & 0x0F); // 4 bits of script name
 	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
-	bool isLanguageType = (lineState >> 20) & 1; // type or language attribute for script tag
+	bool isLanguageType = false; // type or language attribute for script tag
 	int sgmlBlockLevel = (lineState >> 21);
 
 	script_type scriptLanguage = ScriptOfState(state);
@@ -1425,12 +1425,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			styler.SetLineState(lineCurrent,
 			                    ((inScriptType & 0x03) << 0) |
-			                    ((tagOpened ? 1 : 0) << 2) |
-			                    ((tagClosing ? 1 : 0) << 3) |
 			                    ((aspScript & 0x0F) << 4) |
 			                    ((clientScript & 0x0F) << 8) |
 			                    ((beforePreProc & 0xFF) << 12) |
-			                    ((isLanguageType ? 1 : 0) << 20) |
 			                    (sgmlBlockLevel << 21));
 			lineCurrent++;
 			lineStartVisibleChars = 0;
