@@ -508,7 +508,7 @@ constexpr bool issgmlwordchar(int ch) noexcept {
 }
 
 constexpr bool IsPhpWordStart(int ch) noexcept {
-	return (IsUpperOrLowerCase(ch) || (ch == '_')) || (ch >= 0x7f);
+	return (IsUpperOrLowerCase(ch) || (ch == '_')) || (ch > 0x7f);
 }
 
 constexpr bool IsPhpWordChar(int ch) noexcept {
@@ -2591,7 +2591,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					state = SCE_HPHP_NUMBER;
 				}
-			} else if (IsAWordStart(ch)) {
+			} else if (IsPhpWordStart(ch)) {
 				state = SCE_HPHP_WORD;
 			} else if (ch == '/' && chNext == '*') {
 				i++;
