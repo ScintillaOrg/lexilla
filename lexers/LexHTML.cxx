@@ -53,6 +53,14 @@ constexpr bool IsAWordStart(int ch) noexcept {
 	return IsAlphaNumeric(ch) || ch == '_';
 }
 
+constexpr bool IsJsWordChar(int ch) noexcept {
+	return IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == '$' || ch > 0x7f;
+}
+
+constexpr bool IsJsWordStart(int ch) noexcept {
+	return IsAlphaNumeric(ch) || ch == '_' || ch == '$' || ch == '#' || ch > 0x7f;
+}
+
 bool IsOperator(int ch) noexcept {
 	if (IsAlphaNumeric(ch))
 		return false;
@@ -2209,7 +2217,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_HJ_WORD:
-			if (!IsAWordChar(ch)) {
+			if (!IsJsWordChar(ch)) {
 				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywordsJS,
 					classifierJavaScript, classifierJavaScriptServer, styler, inScriptType);
 				state = SCE_HJ_DEFAULT;
@@ -2636,7 +2644,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				state = SCE_HJ_SINGLESTRING;
 			} else if (ch == '`') {
 				state = SCE_HJ_TEMPLATELITERAL;
-			} else if (IsAWordStart(ch)) {
+			} else if (IsJsWordStart(ch)) {
 				state = SCE_HJ_WORD;
 			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') && styler.SafeGetCharAt(i + 3) == '-') {
 				state = SCE_HJ_COMMENTLINE;
