@@ -1063,6 +1063,11 @@ const char * const tagsThatDoNotFold[] = {
 	"wbr"
 };
 
+// string interpolating state
+struct InterpolatingState {
+	int braceCount;
+};
+
 }
 
 class LexerHTML : public DefaultLexer {
@@ -1077,6 +1082,7 @@ class LexerHTML : public DefaultLexer {
 	OptionsHTML options;
 	OptionSetHTML osHTML;
 	std::set<std::string> nonFoldingTags;
+	std::map<Sci_Position, std::vector<InterpolatingState>> interpolatingAtEol;
 	SubStyles subStyles{styleSubable,SubStylesHTML,SubStylesAvailable,0};
 public:
 	explicit LexerHTML(bool isXml_, bool isPHPScript_) :
@@ -1298,6 +1304,19 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	// Only allow [A-Za-z0-9.#-_:] in entities
 	const CharacterSet setEntity(CharacterSet::setAlphaNum, ".#-_:");
 
+	std::vector<InterpolatingState> interpolatingStack;
+	// code copied from LexCPP
+	{
+		auto it = interpolatingAtEol.find(lineCurrent - 1);
+		if (it != interpolatingAtEol.end()) {
+			interpolatingStack = it->second;
+		}
+		it = interpolatingAtEol.lower_bound(lineCurrent);
+		if (it != interpolatingAtEol.end()) {
+			interpolatingAtEol.erase(it, interpolatingAtEol.end());
+		}
+	}
+
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	Sci_Position visibleChars = 0;
@@ -1429,6 +1448,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			                    ((clientScript & 0x0F) << 8) |
 			                    ((beforePreProc & 0xFF) << 12) |
 			                    (sgmlBlockLevel << 21));
+			if (!interpolatingStack.empty()) {
+				interpolatingAtEol[lineCurrent] = interpolatingStack;
+			}
 			lineCurrent++;
 			lineStartVisibleChars = 0;
 		}
@@ -1508,6 +1530,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				tagClosing = true;
 				if (foldXmlAtTagOpen) {
 					levelCurrent--;
+				}
+				if (!interpolatingStack.empty()) {
+					interpolatingAtEol[lineCurrent] = interpolatingStack;
+					interpolatingStack.clear();
 				}
 				continue;
 			}
@@ -2272,6 +2298,14 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (chNext == '$' || chNext == '`' || chNext == '\\') {
 					i++;
 				}
+			} else if (ch == '$' && chNext == '{') {
+				styler.ColourTo(i - 1, StateToPrint);
+				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
+				interpolatingStack.push_back({0}); // braceCount will be increased later
+				levelCurrent += 1; // fix code folding
+				i++;
+				ch = chNext;
+				state = SCE_HJ_DEFAULT;
 			} else if (ch == '`') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_TEMPLATELITERAL, inScriptType));
 				state = SCE_HJ_DEFAULT;
@@ -2648,6 +2682,17 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
 				state = SCE_HJ_COMMENTLINE;
 			} else if (IsOperator(ch)) {
+				if (!interpolatingStack.empty()) {
+					if (ch == '{') {
+						interpolatingStack.back().braceCount += 1;
+					} else if (ch == '}') {
+						interpolatingStack.back().braceCount -= 1;
+						if (interpolatingStack.back().braceCount == 0) {
+							interpolatingStack.pop_back();
+							state = SCE_HJ_TEMPLATELITERAL;
+						}
+					}
+				}
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
 			}
 		} else if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
