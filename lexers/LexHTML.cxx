@@ -44,6 +44,7 @@ namespace {
 
 enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock, eScriptComment };
 enum script_mode { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
+enum class TagState { None = 0, Close = -1, Open = 1 };
 
 constexpr bool IsAWordChar(int ch) noexcept {
 	return IsAlphaNumeric(ch) || ch == '.' || ch == '_';
@@ -51,6 +52,14 @@ constexpr bool IsAWordChar(int ch) noexcept {
 
 constexpr bool IsAWordStart(int ch) noexcept {
 	return IsAlphaNumeric(ch) || ch == '_';
+}
+
+constexpr bool IsJsWordChar(int ch) noexcept {
+	return IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == '$' || ch > 0x7f;
+}
+
+constexpr bool IsJsWordStart(int ch) noexcept {
+	return IsAlphaNumeric(ch) || ch == '_' || ch == '$' || ch == '#' || ch > 0x7f;
 }
 
 bool IsOperator(int ch) noexcept {
@@ -500,7 +509,7 @@ constexpr bool issgmlwordchar(int ch) noexcept {
 }
 
 constexpr bool IsPhpWordStart(int ch) noexcept {
-	return (IsUpperOrLowerCase(ch) || (ch == '_')) || (ch >= 0x7f);
+	return (IsUpperOrLowerCase(ch) || (ch == '_')) || (ch > 0x7f);
 }
 
 constexpr bool IsPhpWordChar(int ch) noexcept {
@@ -1055,6 +1064,11 @@ const char * const tagsThatDoNotFold[] = {
 	"wbr"
 };
 
+// string interpolating state
+struct InterpolatingState {
+	int braceCount;
+};
+
 }
 
 class LexerHTML : public DefaultLexer {
@@ -1069,6 +1083,7 @@ class LexerHTML : public DefaultLexer {
 	OptionsHTML options;
 	OptionSetHTML osHTML;
 	std::set<std::string> nonFoldingTags;
+	std::map<Sci_Position, std::vector<InterpolatingState>> interpolatingAtEol;
 	SubStyles subStyles{styleSubable,SubStylesHTML,SubStylesAvailable,0};
 public:
 	explicit LexerHTML(bool isXml_, bool isPHPScript_) :
@@ -1254,13 +1269,12 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	}
 	script_mode inScriptType = static_cast<script_mode>((lineState >> 0) & 0x03); // 2 bits of scripting mode
 
-	bool tagOpened = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
-	bool tagClosing = (lineState >> 3) & 0x01; // 1 bit to know if we are in a closing tag
+	TagState tagState = TagState::None;
 	bool tagDontFold = false; //some HTML tags should not be folded
 	script_type aspScript = static_cast<script_type>((lineState >> 4) & 0x0F); // 4 bits of script name
 	script_type clientScript = static_cast<script_type>((lineState >> 8) & 0x0F); // 4 bits of script name
 	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
-	bool isLanguageType = (lineState >> 20) & 1; // type or language attribute for script tag
+	bool isLanguageType = false; // type or language attribute for script tag
 	int sgmlBlockLevel = (lineState >> 21);
 
 	script_type scriptLanguage = ScriptOfState(state);
@@ -1289,6 +1303,19 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	const CharacterSet setOKBeforeJSRE(CharacterSet::setNone, "([{=,:;!%^&*|?~> ");
 	// Only allow [A-Za-z0-9.#-_:] in entities
 	const CharacterSet setEntity(CharacterSet::setAlphaNum, ".#-_:");
+
+	std::vector<InterpolatingState> interpolatingStack;
+	// code copied from LexCPP
+	{
+		auto it = interpolatingAtEol.find(lineCurrent - 1);
+		if (it != interpolatingAtEol.end()) {
+			interpolatingStack = it->second;
+		}
+		it = interpolatingAtEol.lower_bound(lineCurrent);
+		if (it != interpolatingAtEol.end()) {
+			interpolatingAtEol.erase(it, interpolatingAtEol.end());
+		}
+	}
 
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
@@ -1417,13 +1444,13 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			styler.SetLineState(lineCurrent,
 			                    ((inScriptType & 0x03) << 0) |
-			                    ((tagOpened ? 1 : 0) << 2) |
-			                    ((tagClosing ? 1 : 0) << 3) |
 			                    ((aspScript & 0x0F) << 4) |
 			                    ((clientScript & 0x0F) << 8) |
 			                    ((beforePreProc & 0xFF) << 12) |
-			                    ((isLanguageType ? 1 : 0) << 20) |
 			                    (sgmlBlockLevel << 21));
+			if (!interpolatingStack.empty()) {
+				interpolatingAtEol[lineCurrent] = interpolatingStack;
+			}
 			lineCurrent++;
 			lineStartVisibleChars = 0;
 		}
@@ -1500,9 +1527,13 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				isLanguageType = false;
 				i += 2;
 				visibleChars += 2;
-				tagClosing = true;
+				tagState = TagState::Close;
 				if (foldXmlAtTagOpen) {
 					levelCurrent--;
+				}
+				if (!interpolatingStack.empty()) {
+					interpolatingAtEol[lineCurrent] = interpolatingStack;
+					interpolatingStack.clear();
 				}
 				continue;
 			}
@@ -1843,8 +1874,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_DEFAULT:
 			if (ch == '<') {
 				// in HTML, fold on tag open and unfold on tag close
-				tagOpened = true;
-				tagClosing = (chNext == '/');
+				tagState = (chNext == '/')? TagState::Close : TagState::Open;
 				if (foldXmlAtTagOpen && !AnyOf(chNext, '/', '?', '!', '-', '%')) {
 					levelCurrent++;
 				}
@@ -2018,7 +2048,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
 					i - 1, keywordsHTML, classifierTags, styler, tagDontFold, caseSensitive, isXml, allowScripts, nonFoldingTags, lastTag);
 				if (eClass == SCE_H_SCRIPT || eClass == SCE_H_COMMENT) {
-					if (!tagClosing) {
+					if (tagState == TagState::Open) {
 						inScriptType = eNonHtmlScript;
 						scriptLanguage = eClass == SCE_H_SCRIPT ? clientScript : eScriptComment;
 					} else {
@@ -2034,15 +2064,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					} else {
 						state = SCE_H_DEFAULT;
 					}
-					tagOpened = false;
 					if (!(foldXmlAtTagOpen || tagDontFold)) {
-						if (tagClosing) {
-							levelCurrent--;
-						} else {
-							levelCurrent++;
-						}
+						levelCurrent += static_cast<int>(tagState);
 					}
-					tagClosing = false;
+					tagState = TagState::None;
 				} else if (ch == '/' && chNext == '>') {
 					if (eClass == SCE_H_TAGUNKNOWN) {
 						styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
@@ -2053,13 +2078,14 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					i++;
 					ch = chNext;
 					state = SCE_H_DEFAULT;
-					tagOpened = false;
+					tagState = TagState::None;
 					if (foldXmlAtTagOpen) {
 						levelCurrent--;
 					}
 				} else {
 					if (eClass != SCE_H_TAGUNKNOWN) {
 						if (eClass == SCE_H_SGML_DEFAULT) {
+							tagState = TagState::None;
 							state = SCE_H_SGML_DEFAULT;
 						} else {
 							state = SCE_H_OTHER;
@@ -2078,15 +2104,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					} else {
 						state = SCE_H_DEFAULT;
 					}
-					tagOpened = false;
 					if (!(foldXmlAtTagOpen || tagDontFold)) {
-						if (tagClosing) {
-							levelCurrent--;
-						} else {
-							levelCurrent++;
-						}
+						levelCurrent += static_cast<int>(tagState);
 					}
-					tagClosing = false;
+					tagState = TagState::None;
 				} else if (ch == '=') {
 					styler.ColourTo(i, SCE_H_OTHER);
 					state = SCE_H_VALUE;
@@ -2104,15 +2125,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					state = SCE_H_DEFAULT;
 				}
-				tagOpened = false;
 				if (!(foldXmlAtTagOpen || tagDontFold)) {
-					if (tagClosing) {
-						levelCurrent--;
-					} else {
-						levelCurrent++;
-					}
+					levelCurrent += static_cast<int>(tagState);
 				}
-				tagClosing = false;
+				tagState = TagState::None;
 			} else if (ch == '\"') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_DOUBLESTRING;
@@ -2128,7 +2144,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				i++;
 				ch = chNext;
 				state = SCE_H_DEFAULT;
-				tagOpened = false;
+				tagState = TagState::None;
 				if (foldXmlAtTagOpen) {
 					levelCurrent--;
 				}
@@ -2138,6 +2154,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				i++;
 				ch = chNext;
 				state = SCE_H_DEFAULT;
+				tagState = TagState::None;
 			} else if (setHTMLWord.Contains(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_ATTRIBUTE;
@@ -2185,15 +2202,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						} else {
 							state = SCE_H_DEFAULT;
 						}
-						tagOpened = false;
 						if (!tagDontFold) {
-							if (tagClosing) {
-								levelCurrent--;
-							} else {
-								levelCurrent++;
-							}
+							levelCurrent += static_cast<int>(tagState);
 						}
-						tagClosing = false;
+						tagState = TagState::None;
 					} else {
 						state = SCE_H_OTHER;
 					}
@@ -2203,52 +2215,13 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_HJ_DEFAULT:
 		case SCE_HJ_START:
 		case SCE_HJ_SYMBOLS:
-			if (IsAWordStart(ch)) {
+			if (ch > ' ' || (state == SCE_HJ_START && AnyOf(ch, ' ', '\t'))) {
 				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_WORD;
-			} else if (ch == '/' && chNext == '*') {
-				styler.ColourTo(i - 1, StateToPrint);
-				i++;
-				if (chNext2 == '*')
-					state = SCE_HJ_COMMENTDOC;
-				else
-					state = SCE_HJ_COMMENT;
-			} else if (ch == '/' && chNext == '/') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-			} else if (ch == '/' && setOKBeforeJSRE.Contains(chPrevNonWhite) && CheckRegexClosed(styler, i)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_REGEX;
-			} else if (ch == '\"') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_DOUBLESTRING;
-			} else if (ch == '\'') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_SINGLESTRING;
-			} else if (ch == '`') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_TEMPLATELITERAL;
-			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') &&
-			           styler.SafeGetCharAt(i + 3) == '-') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HJ_COMMENTLINE;
-				i += 2;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
 				state = SCE_HJ_DEFAULT;
-			} else if ((ch == ' ') || (ch == '\t')) {
-				if (state == SCE_HJ_START) {
-					styler.ColourTo(i - 1, StateToPrint);
-					state = SCE_HJ_DEFAULT;
-				}
 			}
 			break;
 		case SCE_HJ_WORD:
-			if (!IsAWordChar(ch)) {
+			if (!IsJsWordChar(ch)) {
 				classifyWordHTJS(styler.GetStartSegment(), i - 1, keywordsJS,
 					classifierJavaScript, classifierJavaScriptServer, styler, inScriptType);
 				state = SCE_HJ_DEFAULT;
@@ -2306,6 +2279,14 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				if (chNext == '$' || chNext == '`' || chNext == '\\') {
 					i++;
 				}
+			} else if (ch == '$' && chNext == '{') {
+				styler.ColourTo(i - 1, StateToPrint);
+				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
+				interpolatingStack.push_back({0}); // braceCount will be increased later
+				levelCurrent += 1; // fix code folding
+				i++;
+				ch = chNext;
+				state = SCE_HJ_DEFAULT;
 			} else if (ch == '`') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_TEMPLATELITERAL, inScriptType));
 				state = SCE_HJ_DEFAULT;
@@ -2344,28 +2325,9 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			break;
 		case SCE_HB_DEFAULT:
 		case SCE_HB_START:
-			if (IsAWordStart(ch)) {
+			if (ch > ' ' || (state == SCE_HB_START && AnyOf(ch, ' ', '\t'))) {
 				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_WORD;
-			} else if (ch == '\'') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_COMMENTLINE;
-			} else if (ch == '\"') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_STRING;
-			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') &&
-			           styler.SafeGetCharAt(i + 3) == '-') {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HB_COMMENTLINE;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 				state = SCE_HB_DEFAULT;
-			} else if ((ch == ' ') || (ch == '\t')) {
-				if (state == SCE_HB_START) {
-					styler.ColourTo(i - 1, StateToPrint);
-					state = SCE_HB_DEFAULT;
-				}
 			}
 			break;
 		case SCE_HB_WORD:
@@ -2541,7 +2503,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (ch == '\'') {
 					state = SCE_HPHP_SIMPLESTRING;
 					phpStringDelimiter = "\'";
-				} else if (ch == '$' && IsPhpWordStart(chNext)) {
+				} else if (ch == '$' && (IsPhpWordStart(chNext) || chNext == '$')) {
 					state = SCE_HPHP_VARIABLE;
 				} else if (IsOperator(ch)) {
 					state = SCE_HPHP_OPERATOR;
@@ -2641,7 +2603,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					state = SCE_HPHP_NUMBER;
 				}
-			} else if (IsAWordStart(ch)) {
+			} else if (IsPhpWordStart(ch)) {
 				state = SCE_HPHP_WORD;
 			} else if (ch == '/' && chNext == '*') {
 				i++;
@@ -2664,7 +2626,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '\'') {
 				state = SCE_HPHP_SIMPLESTRING;
 				phpStringDelimiter = "\'";
-			} else if (ch == '$' && IsPhpWordStart(chNext)) {
+			} else if (ch == '$' && (IsPhpWordStart(chNext) || chNext == '$')) {
 				state = SCE_HPHP_VARIABLE;
 			} else if (IsOperator(ch)) {
 				state = SCE_HPHP_OPERATOR;
@@ -2677,17 +2639,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 		// Some of the above terminated their lexeme
 
-		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
-			if (ch == '\"') {
-				state = SCE_HB_STRING;
-			} else if (ch == '\'') {
-				state = SCE_HB_COMMENTLINE;
-			} else if (IsAWordStart(ch)) {
-				state = SCE_HB_WORD;
-			} else if (IsOperator(ch)) {
-				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
-			}
-		} else if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
+		if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
 			if (ch == '/' && chNext == '*') {
 				i++;
 				if (chNext2 == '*')
@@ -2696,20 +2648,47 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					state = SCE_HJ_COMMENT;
 			} else if (ch == '/' && chNext == '/') {
 				state = SCE_HJ_COMMENTLINE;
+			} else if (ch == '/' && setOKBeforeJSRE.Contains(chPrevNonWhite) && CheckRegexClosed(styler, i)) {
+				state = SCE_HJ_REGEX;
 			} else if (ch == '\"') {
 				state = SCE_HJ_DOUBLESTRING;
 			} else if (ch == '\'') {
 				state = SCE_HJ_SINGLESTRING;
 			} else if (ch == '`') {
 				state = SCE_HJ_TEMPLATELITERAL;
-			} else if (IsAWordStart(ch)) {
+			} else if (IsJsWordStart(ch)) {
 				state = SCE_HJ_WORD;
-			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
-				styler.ColourTo(i - 1, StateToPrint);
+			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') && styler.SafeGetCharAt(i + 3) == '-') {
 				state = SCE_HJ_COMMENTLINE;
-				i += 2;
+			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
+				state = SCE_HJ_COMMENTLINE;
 			} else if (IsOperator(ch)) {
+				if (!interpolatingStack.empty()) {
+					if (ch == '{') {
+						interpolatingStack.back().braceCount += 1;
+					} else if (ch == '}') {
+						interpolatingStack.back().braceCount -= 1;
+						if (interpolatingStack.back().braceCount == 0) {
+							interpolatingStack.pop_back();
+							state = SCE_HJ_TEMPLATELITERAL;
+						}
+					}
+				}
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
+			}
+		} else if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
+			if (ch == '\"') {
+				state = SCE_HB_STRING;
+			} else if (ch == '\'') {
+				state = SCE_HB_COMMENTLINE;
+			} else if (IsAWordStart(ch)) {
+				state = SCE_HB_WORD;
+			} else if ((ch == '<') && (chNext == '!') && (chNext2 == '-') && styler.SafeGetCharAt(i + 3) == '-') {
+				state = SCE_HB_COMMENTLINE;
+			} else if ((ch == '-') && (chNext == '-') && (chNext2 == '>')) {
+				state = SCE_HB_COMMENTLINE;
+			} else if (IsOperator(ch)) {
+				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 			}
 		}
 	}
