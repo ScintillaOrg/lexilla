@@ -44,6 +44,7 @@ namespace {
 
 enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock, eScriptComment };
 enum script_mode { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
+enum class TagState { None = 0, Close = -1, Open = 1 };
 
 constexpr bool IsAWordChar(int ch) noexcept {
 	return IsAlphaNumeric(ch) || ch == '.' || ch == '_';
@@ -1268,8 +1269,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	}
 	script_mode inScriptType = static_cast<script_mode>((lineState >> 0) & 0x03); // 2 bits of scripting mode
 
-	bool tagOpened = false; // 1 bit to know if we are in an opened tag
-	bool tagClosing = false; // 1 bit to know if we are in a closing tag
+	TagState tagState = TagState::None;
 	bool tagDontFold = false; //some HTML tags should not be folded
 	script_type aspScript = static_cast<script_type>((lineState >> 4) & 0x0F); // 4 bits of script name
 	script_type clientScript = static_cast<script_type>((lineState >> 8) & 0x0F); // 4 bits of script name
@@ -1527,7 +1527,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				isLanguageType = false;
 				i += 2;
 				visibleChars += 2;
-				tagClosing = true;
+				tagState = TagState::Close;
 				if (foldXmlAtTagOpen) {
 					levelCurrent--;
 				}
@@ -1874,8 +1874,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_DEFAULT:
 			if (ch == '<') {
 				// in HTML, fold on tag open and unfold on tag close
-				tagOpened = true;
-				tagClosing = (chNext == '/');
+				tagState = (chNext == '/')? TagState::Close : TagState::Open;
 				if (foldXmlAtTagOpen && !AnyOf(chNext, '/', '?', '!', '-', '%')) {
 					levelCurrent++;
 				}
@@ -2049,7 +2048,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
 					i - 1, keywordsHTML, classifierTags, styler, tagDontFold, caseSensitive, isXml, allowScripts, nonFoldingTags, lastTag);
 				if (eClass == SCE_H_SCRIPT || eClass == SCE_H_COMMENT) {
-					if (!tagClosing) {
+					if (tagState == TagState::Open) {
 						inScriptType = eNonHtmlScript;
 						scriptLanguage = eClass == SCE_H_SCRIPT ? clientScript : eScriptComment;
 					} else {
@@ -2065,15 +2064,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					} else {
 						state = SCE_H_DEFAULT;
 					}
-					tagOpened = false;
 					if (!(foldXmlAtTagOpen || tagDontFold)) {
-						if (tagClosing) {
-							levelCurrent--;
-						} else {
-							levelCurrent++;
-						}
+						levelCurrent += static_cast<int>(tagState);
 					}
-					tagClosing = false;
+					tagState = TagState::None;
 				} else if (ch == '/' && chNext == '>') {
 					if (eClass == SCE_H_TAGUNKNOWN) {
 						styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
@@ -2084,13 +2078,14 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					i++;
 					ch = chNext;
 					state = SCE_H_DEFAULT;
-					tagOpened = false;
+					tagState = TagState::None;
 					if (foldXmlAtTagOpen) {
 						levelCurrent--;
 					}
 				} else {
 					if (eClass != SCE_H_TAGUNKNOWN) {
 						if (eClass == SCE_H_SGML_DEFAULT) {
+							tagState = TagState::None;
 							state = SCE_H_SGML_DEFAULT;
 						} else {
 							state = SCE_H_OTHER;
@@ -2109,15 +2104,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					} else {
 						state = SCE_H_DEFAULT;
 					}
-					tagOpened = false;
 					if (!(foldXmlAtTagOpen || tagDontFold)) {
-						if (tagClosing) {
-							levelCurrent--;
-						} else {
-							levelCurrent++;
-						}
+						levelCurrent += static_cast<int>(tagState);
 					}
-					tagClosing = false;
+					tagState = TagState::None;
 				} else if (ch == '=') {
 					styler.ColourTo(i, SCE_H_OTHER);
 					state = SCE_H_VALUE;
@@ -2135,15 +2125,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else {
 					state = SCE_H_DEFAULT;
 				}
-				tagOpened = false;
 				if (!(foldXmlAtTagOpen || tagDontFold)) {
-					if (tagClosing) {
-						levelCurrent--;
-					} else {
-						levelCurrent++;
-					}
+					levelCurrent += static_cast<int>(tagState);
 				}
-				tagClosing = false;
+				tagState = TagState::None;
 			} else if (ch == '\"') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_DOUBLESTRING;
@@ -2159,7 +2144,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				i++;
 				ch = chNext;
 				state = SCE_H_DEFAULT;
-				tagOpened = false;
+				tagState = TagState::None;
 				if (foldXmlAtTagOpen) {
 					levelCurrent--;
 				}
@@ -2169,6 +2154,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				i++;
 				ch = chNext;
 				state = SCE_H_DEFAULT;
+				tagState = TagState::None;
 			} else if (setHTMLWord.Contains(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_ATTRIBUTE;
@@ -2216,15 +2202,10 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						} else {
 							state = SCE_H_DEFAULT;
 						}
-						tagOpened = false;
 						if (!tagDontFold) {
-							if (tagClosing) {
-								levelCurrent--;
-							} else {
-								levelCurrent++;
-							}
+							levelCurrent += static_cast<int>(tagState);
 						}
-						tagClosing = false;
+						tagState = TagState::None;
 					} else {
 						state = SCE_H_OTHER;
 					}
