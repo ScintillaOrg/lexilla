@@ -2503,7 +2503,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (ch == '\'') {
 					state = SCE_HPHP_SIMPLESTRING;
 					phpStringDelimiter = "\'";
-				} else if (ch == '$' && IsPhpWordStart(chNext)) {
+				} else if (ch == '$' && (IsPhpWordStart(chNext) || chNext == '$')) {
 					state = SCE_HPHP_VARIABLE;
 				} else if (IsOperator(ch)) {
 					state = SCE_HPHP_OPERATOR;
@@ -2626,7 +2626,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '\'') {
 				state = SCE_HPHP_SIMPLESTRING;
 				phpStringDelimiter = "\'";
-			} else if (ch == '$' && IsPhpWordStart(chNext)) {
+			} else if (ch == '$' && (IsPhpWordStart(chNext) || chNext == '$')) {
 				state = SCE_HPHP_VARIABLE;
 			} else if (IsOperator(ch)) {
 				state = SCE_HPHP_OPERATOR;
