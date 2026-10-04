@@ -1337,11 +1337,14 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		int style = 0;
 		while (--back) {
 			style = styler.StyleIndexAt(back);
+			if (style >= SCE_HJA_START && style <= SCE_HJA_TEMPLATELITERAL) {
+				style -= SCE_HA_JS;
+			}
 			if (style < SCE_HJ_DEFAULT || style > SCE_HJ_COMMENTDOC)
 				// includes SCE_HJ_COMMENT & SCE_HJ_COMMENTLINE
 				break;
 		}
-		if (style == SCE_HJ_SYMBOLS) {
+		if (AnyOf(style, SCE_HJ_SYMBOLS, SCE_HJ_NUMBER, SCE_HJ_WORD, SCE_HJ_KEYWORD)) {
 			chPrevNonWhite = SafeGetUnsignedCharAt(styler, back);
 		}
 	}
@@ -1351,8 +1354,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	for (Sci_Position i = startPos; i < lengthDoc; i++) {
 		const int chPrev2 = chPrev;
 		chPrev = ch;
-		if (!IsASpace(ch) && state != SCE_HJ_COMMENT &&
-			state != SCE_HJ_COMMENTLINE && state != SCE_HJ_COMMENTDOC)
+		if (!IsASpace(ch) && !AnyOf(state, SCE_HJ_COMMENT, SCE_HJ_COMMENTLINE, SCE_HJ_COMMENTDOC))
 			chPrevNonWhite = ch;
 		ch = static_cast<unsigned char>(styler[i]);
 		int chNext = SafeGetUnsignedCharAt(styler, i + 1);

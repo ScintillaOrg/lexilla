@@ -883,9 +883,14 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	// look back to set chPrevNonWhite properly for better regex colouring
 	if (startPos > 0) {
 		Sci_Position back = startPos;
-		while (--back && IsSpaceEquiv(MaskActive(styler.StyleAt(back))))
-			;
-		if (MaskActive(styler.StyleAt(back)) == SCE_C_OPERATOR) {
+		int style = 0;
+		while (--back) {
+			style = MaskActive(styler.StyleAt(back));
+			if (!IsSpaceEquiv(style)) {
+				break;
+			}
+		}
+		if (AnyOf(style, SCE_C_OPERATOR, SCE_C_NUMBER, SCE_C_IDENTIFIER, SCE_C_WORD, SCE_C_WORD2)) {
 			chPrevNonWhite = styler.SafeGetCharAt(back);
 		}
 	}
