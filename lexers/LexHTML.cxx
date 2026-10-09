@@ -1327,6 +1327,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	int levelCurrent = levelPrev;
 	Sci_Position visibleChars = 0;
 	int lineStartVisibleChars = 0;
+	bool insideRegexRange = false;
 
 	int chPrev = ' ';
 	int ch = ' ';
@@ -2321,7 +2322,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_HJ_REGEX:
-			if (ch == '\r' || ch == '\n' || ch == '/') {
+			if (ch == '\r' || ch == '\n' || (ch == '/' && !insideRegexRange)) {
 				if (ch == '/') {
 					while (IsLowerCase(chNext)) {   // gobble regex flags
 						i++;
@@ -2334,11 +2335,13 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				continue;
 			} else if (ch == '\\') {
 				// Gobble up the quoted character
-				if (chNext == '\\' || chNext == '/') {
+				if (AnyOf(chNext, '\\', '/', '[', ']')) {
 					i++;
 					ch = chNext;
 					chNext = SafeGetUnsignedCharAt(styler, i + 1);
 				}
+			} else if (ch == '[' || ch == ']') {
+				insideRegexRange = ch == '[';
 			}
 			break;
 		case SCE_HB_DEFAULT:
@@ -2667,6 +2670,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			} else if (ch == '/' && chNext == '/') {
 				state = SCE_HJ_COMMENTLINE;
 			} else if (ch == '/' && setOKBeforeJSRE.Contains(chPrevNonWhite) && CheckRegexClosed(styler, i)) {
+				insideRegexRange = false;
 				state = SCE_HJ_REGEX;
 			} else if (ch == '\"') {
 				state = SCE_HJ_DOUBLESTRING;
