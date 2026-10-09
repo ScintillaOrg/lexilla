@@ -38,11 +38,6 @@ constexpr bool IsEOLChar(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
 
-constexpr bool IsAGraphic(int ch) noexcept {
-	// excludes C0 control characters and whitespace
-	return ch > 32 && ch < 127;
-}
-
 constexpr bool IsIdentifierChar(int ch) noexcept {
 	return IsAlphaNumeric(ch) || ch == '_';
 }

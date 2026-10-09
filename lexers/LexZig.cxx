@@ -34,11 +34,6 @@ using namespace Lexilla;
 namespace {
 // Use an unnamed namespace to protect the functions and classes from name conflicts
 
-constexpr bool IsAGraphic(int ch) noexcept {
-	// excludes C0 control characters and whitespace
-	return ch > 32 && ch < 127;
-}
-
 constexpr bool IsIdentifierStart(int ch) noexcept {
 	return IsUpperOrLowerCase(ch) || ch == '_';
 }
