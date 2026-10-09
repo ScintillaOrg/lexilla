@@ -892,7 +892,7 @@ const LexicalClass lexicalClassesHTML[] = {
 	13, "SCE_H_XMLEND", "identifier", "XML identifier end '?>'",
 	14, "SCE_H_SCRIPT", "error", "Internal state which should never be visible",
 	15, "SCE_H_ASP", "preprocessor", "ASP <% ... %>",
-	16, "SCE_H_ASPAT", "preprocessor", "ASP <% ... %>",
+	16, "SCE_H_ASPAT", "preprocessor", "ASP <%@ ... %>",
 	17, "SCE_H_CDATA", "literal", "CDATA",
 	18, "SCE_H_QUESTION", "preprocessor", "PHP",
 	19, "SCE_H_VALUE", "literal string", "Unquoted values",
