@@ -1700,7 +1700,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				scriptLanguage = eScriptVBS;
 				continue;
 			} else {
-				if (chNext2 == '=') {
+				if (AnyOf(chNext2, '=', '!', '#', '$', ':')) {
 					i += 2; // place as if it was the second next char treated
 					visibleChars += 2;
 				} else {
