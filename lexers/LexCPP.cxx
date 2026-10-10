@@ -847,7 +847,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	bool continuationLine = false;
 	bool isIncludePreprocessor = false;
 	bool isStringInPreprocessor = false;
-	bool inRERange = false;
+	bool insideRegexCharacterClass = false; // inside regex character class []
 	bool seenDocKeyBrace = false;
 
 	std::vector<InterpolatingState> interpolatingStack;
@@ -957,7 +957,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			visibleChars = 0;
 			lastWordWasUUID = false;
 			isIncludePreprocessor = false;
-			inRERange = false;
+			insideRegexCharacterClass = false;
 			if (preproc.IsInactive()) {
 				activitySet = inactiveFlag;
 				sc.SetState(sc.state | activitySet);
@@ -1267,7 +1267,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			case SCE_C_REGEX:
 				if (sc.atLineStart) {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
-				} else if (!inRERange && sc.ch == '/') {
+				} else if (!insideRegexCharacterClass && sc.ch == '/') {
 					sc.Forward();
 					while (IsLowerCase(sc.ch))
 						sc.Forward();    // gobble regex flags
@@ -1276,9 +1276,9 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					// Gobble up the escaped character
 					sc.Forward();
 				} else if (sc.ch == '[') {
-					inRERange = true;
+					insideRegexCharacterClass = true;
 				} else if (sc.ch == ']') {
-					inRERange = false;
+					insideRegexCharacterClass = false;
 				}
 				break;
 			case SCE_C_STRINGEOL:
@@ -1377,7 +1377,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				       || !FollowsPostfixOperator(sc, styler))
 				   && CheckRegexClosed(sc)) {
 				sc.SetState(SCE_C_REGEX|activitySet);	// JavaScript's RegEx
-				inRERange = false;
+				insideRegexCharacterClass = false;
 			} else if (sc.ch == '\"') {
 				if (sc.chPrev == 'R') {
 					styler.Flush();
