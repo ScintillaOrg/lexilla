@@ -69,6 +69,7 @@ namespace {
 // delimiter) will be preserved.
 
 #define HERE_DELIM_MAX 256		// maximum length of HERE doc delimiter
+#define HERE_DELIM_CHAR_MAX 4	// maximum number of bytes appended to the delimiter per character
 
 #define PERLNUM_BINARY		1	// order is significant: 1-3 cannot have a dot
 #define PERLNUM_OCTAL		2
@@ -1054,7 +1055,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						sc.SetState(SCE_PL_DEFAULT);
 					}
 				}
-				if (HereDoc.DelimiterLength >= HERE_DELIM_MAX - 1) {
+				if (HereDoc.DelimiterLength >= HERE_DELIM_MAX - HERE_DELIM_CHAR_MAX - 1) {
 					sc.SetState(SCE_PL_ERROR);
 					HereDoc.State = 0;
 				}
