@@ -1105,7 +1105,8 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					// \ at end-of-line does not appear to have any effect, skip
 					if (sc.ch != '\r' && sc.ch != '\n')
 						sc.Forward();
-				} else if (endType == 2) {
+				} else {
+					// endType 2 (line break) or 0 (NUL byte): step over it; without this a NUL byte was never consumed
 					if (!sc.atLineEnd)
 						sc.Forward();
 				}
