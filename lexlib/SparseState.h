@@ -68,6 +68,11 @@ public:
 		}
 		return false;
 	}
+	[[nodiscard]] T StartAt(Sci_Position position) {
+		// Called to restart lexing from a line, so truncate state on or after this line then return the state before this line
+		Delete(position);
+		return ValueAt(position);
+	}
 	[[nodiscard]] size_t size() const {
 		return states.size();
 	}
