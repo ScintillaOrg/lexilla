@@ -1108,6 +1108,9 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (endType == 2) {
 					if (!sc.atLineEnd)
 						sc.Forward();
+				} else if (!sc.atLineEnd) {
+					// NUL byte in the here-doc body: nothing consumed it, so skip it to avoid looping forever
+					sc.Forward();
 				}
 			}
 			break;
