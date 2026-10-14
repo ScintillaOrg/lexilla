@@ -100,18 +100,29 @@ bool Contains(const std::string &s, std::string_view search) noexcept {
 	return s.find(search) != std::string::npos;
 }
 
-script_type segIsScriptingIndicator(const Accessor &styler, Sci_PositionU start, Sci_PositionU end, script_type prevValue) {
+script_type segIsScriptingIndicator(const Accessor & styler, Sci_PositionU end, script_type prevValue, script_type aspScript) {
+	const Sci_PositionU start = styler.GetStartSegment(); 
 	const std::string s = styler.GetRangeLowered(start, end+1);
-	if (Contains(s, "vbs"))
+	if (Contains(s, "java"))
+		return eScriptJS;
+	if (Contains(s, "vb"))
 		return eScriptVBS;
-	if (Contains(s, "pyth"))
+	if (Contains(s, "python"))
 		return eScriptPython;
 	// https://html.spec.whatwg.org/multipage/scripting.html#attr-script-type
 	// https://mimesniff.spec.whatwg.org/#javascript-mime-type
-	if (Contains(s, "javas") || Contains(s, "ecmas") || Contains(s, "module") || Contains(s, "jscr"))
+	if (Contains(s, "ecma"))
+		return eScriptJS;
+	if (Contains(s, "module"))
 		return eScriptJS;
 	if (Contains(s, "php"))
 		return eScriptPHP;
+	if (Contains(s, "c#"))
+		return eScriptJS;
+	if (Contains(s, "script"))
+		return eScriptJS;
+	if (Contains(s, "server"))    // ASP.NET runat="server"
+		return aspScript;
 
 	const size_t xml = s.find("xml");
 	if (xml != std::string::npos) {
@@ -286,7 +297,7 @@ bool classifyAttribHTML(script_mode inScriptType, Sci_PositionU start, Sci_Posit
 
 		if (inScriptType == eNonHtmlScript) {
 			// see https://html.spec.whatwg.org/multipage/scripting.html#script-processing-model
-			if (s == "type" || s == "language") {
+			if (InList(s, { "type", "language", "runat" })) {
 				isLanguageType = true;
 			}
 		}
@@ -1770,8 +1781,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				 (scriptLanguage != eScriptNone) && stateAllowsTermination(state) &&
 				 isMakoBlockEnd(ch, chNext, makoBlockType)) {
 			if (state == SCE_H_ASPAT) {
-				aspScript = segIsScriptingIndicator(styler,
-				                                    styler.GetStartSegment(), i - 1, aspScript);
+				aspScript = segIsScriptingIndicator(styler, i - 1, aspScript, aspScript);
 			}
 			if (state == SCE_HP_WORD) {
 				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywordsPy, classifierPython, styler, prevWord, inScriptType, isMako);
@@ -1803,8 +1813,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				 (scriptLanguage != eScriptNone) && stateAllowsTermination(state) &&
 				 isDjangoBlockEnd(ch, chNext, djangoBlockType)) {
 			if (state == SCE_H_ASPAT) {
-				aspScript = segIsScriptingIndicator(styler,
-				                                    styler.GetStartSegment(), i - 1, aspScript);
+				aspScript = segIsScriptingIndicator(styler, i - 1, aspScript, aspScript);
 			}
 			if (state == SCE_HP_WORD) {
 				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywordsPy, classifierPython, styler, prevWord, inScriptType, isMako);
@@ -1829,8 +1838,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				  ((chNext == '>') && isPreProcessorEndTag(state, ch))) ||
 		         ((scriptLanguage == eScriptSGML) && (ch == '>') && !AnyOf(state, SCE_H_SGML_COMMENT, SCE_H_SGML_DOUBLESTRING, SCE_H_SGML_SIMPLESTRING))) {
 			if (state == SCE_H_ASPAT) {
-				aspScript = segIsScriptingIndicator(styler,
-				                                    styler.GetStartSegment(), i - 1, aspScript);
+				aspScript = segIsScriptingIndicator(styler, i - 1, aspScript, aspScript);
 			}
 			// Bounce out of any ASP mode
 			switch (state) {
@@ -2181,7 +2189,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_DOUBLESTRING:
 			if (ch == '\"') {
 				if (isLanguageType) {
-					scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment(), i, scriptLanguage);
+					scriptLanguage = segIsScriptingIndicator(styler, i, scriptLanguage, aspScript);
 					clientScript = scriptLanguage;
 					isLanguageType = false;
 				}
@@ -2192,7 +2200,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_SINGLESTRING:
 			if (ch == '\'') {
 				if (isLanguageType) {
-					scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment(), i, scriptLanguage);
+					scriptLanguage = segIsScriptingIndicator(styler, i, scriptLanguage, aspScript);
 					clientScript = scriptLanguage;
 					isLanguageType = false;
 				}
