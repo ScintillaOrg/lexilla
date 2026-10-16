@@ -1727,6 +1727,11 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 						}
 
 						// Remove invocation
+						if (tok >= tokens.size()) {
+							// Incomplete invocation, possibly missing ) like MACRO( so remove it and don't insert value.
+							tokens.erase(tokens.begin() + i, tokens.end());
+							continue;
+						}
 						tokens.erase(tokens.begin() + i, tokens.begin() + tok + 1);
 
 						// Substitute values into macro
