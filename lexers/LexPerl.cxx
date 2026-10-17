@@ -1321,6 +1321,9 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_PL_ERROR:
+			if (sc.MatchLineEnd()) {
+				sc.SetState(SCE_PL_DEFAULT);
+			}
 			break;
 		}
 		// Needed for specific continuation styles (one follows the other)
