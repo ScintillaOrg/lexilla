@@ -1357,7 +1357,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		}
 
 		// Must check end of HereDoc states here before default state is handled
-		if (HereDoc.State == 1 && sc.atLineEnd) {
+		if (HereDoc.State == 1 && sc.MatchLineEnd()) {
 			// Begin of here-doc (the line after the here-doc delimiter):
 			// Lexically, the here-doc starts from the next line after the >>, but the
 			// first line of here-doc seem to follow the style of the last EOL sequence
@@ -1386,7 +1386,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			sc.SetState(st_new);
 		}
-		if (HereDoc.State == 3 && sc.atLineEnd) {
+		if (HereDoc.State == 3 && sc.MatchLineEnd()) {
 			// Start of format body.
 			HereDoc.State = 0;
 			sc.SetState(SCE_PL_FORMAT);
