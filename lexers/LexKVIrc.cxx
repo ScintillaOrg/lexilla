@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -39,13 +38,13 @@ static inline bool IsAWordChar(int ch) {
 
     /* Keyword list includes modules, i.e. words including '.', and
      * alias namespaces include ':' */
-    return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.'
+    return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' || ch == '.'
             || ch == ':');
 }
 static inline bool IsAWordStart(int ch) {
 
     /* Functions (start with '$') are treated separately to keywords */
-    return (ch < 0x80) && (isalnum(ch) || ch == '_' );
+    return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' );
 }
 
 /* Interface function called by Scintilla to request some text to be

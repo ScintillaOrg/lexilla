@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -53,7 +52,7 @@ static void getRange(Sci_PositionU start,
 		Sci_PositionU len) {
 	Sci_PositionU i = 0;
 	while ((i < end - start + 1) && (i < len-1)) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 		i++;
 	}
 	s[i] = '\0';
@@ -85,7 +84,7 @@ static int classifyWordTACL(Sci_PositionU start, Sci_PositionU end, /*WordList &
 	getRange(start, end, styler, s, sizeof(s));
 
 	char chAttr = SCE_C_IDENTIFIER;
-	if (isdigit(s[0]) || (s[0] == '.')) {
+	if (IsADigit(s[0]) || (s[0] == '.')) {
 		chAttr = SCE_C_NUMBER;
 	}
 	else {

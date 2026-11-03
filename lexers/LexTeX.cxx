@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -323,7 +322,7 @@ static Sci_Position ParseTeXCommand(Sci_PositionU pos, Accessor &styler, char *c
 
 static int classifyFoldPointTeXPaired(const char* s) {
 	int lev=0;
-	if (!(isdigit(s[0]) || (s[0] == '.'))){
+	if (!(IsADigit(s[0]) || (s[0] == '.'))){
 		if (strcmp(s, "begin")==0||strcmp(s,"FoldStart")==0||
 			strcmp(s,"abstract")==0||strcmp(s,"unprotect")==0||
 			strcmp(s,"title")==0||strncmp(s,"start",5)==0||strncmp(s,"Start",5)==0||
@@ -342,7 +341,7 @@ static int classifyFoldPointTeXPaired(const char* s) {
 
 static int classifyFoldPointTeXUnpaired(const char* s) {
 	int lev=0;
-	if (!(isdigit(s[0]) || (s[0] == '.'))){
+	if (!(IsADigit(s[0]) || (s[0] == '.'))){
 		if (strcmp(s,"part")==0||
 			strcmp(s,"chapter")==0||
 			strcmp(s,"section")==0||

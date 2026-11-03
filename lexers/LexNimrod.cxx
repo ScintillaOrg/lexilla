@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -32,7 +31,7 @@
 using namespace Lexilla;
 
 static inline bool IsAWordChar(int ch) {
-	return (ch >= 0x80) || isalnum(ch) || ch == '_';
+	return (ch >= 0x80) || IsAlphaNumeric(ch) || ch == '_';
 }
 
 static Sci_Position tillEndOfTripleQuote(Accessor &styler, Sci_Position pos, Sci_Position max) {
@@ -73,7 +72,7 @@ static Sci_Position scanChar(Accessor &styler, Sci_Position pos, Sci_Position ma
     if (pos >= max) return pos;
     char ch = styler.SafeGetCharAt(pos, '\0');
     if (ch == CR || ch == LF || ch == '\0') return pos;
-    if (ch == '\'' && !isalnum(styler.SafeGetCharAt(pos+1, '\0')) )
+    if (ch == '\'' && !IsAlphaNumeric(styler.SafeGetCharAt(pos+1, '\0')) )
       return pos;
     if (ch == '\\') {
       pos += 2;
@@ -91,7 +90,7 @@ static Sci_Position scanIdent(Accessor &styler, Sci_Position pos, WordList &keyw
     char ch = styler.SafeGetCharAt(pos, '\0');
     if (!IsAWordChar(ch)) break;
     if (ch != '_' && i < ((int)sizeof(buf))-1) {
-      buf[i] = static_cast<char>(tolower(ch));
+      buf[i] = static_cast<char>(MakeLowerCase(ch));
       i++;
     }
     pos++;

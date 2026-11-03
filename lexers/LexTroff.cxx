@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -446,7 +445,7 @@ static Sci_PositionU ColouriseTroffNumber(Sci_PositionU startLine, Sci_PositionU
                                           Accessor &styler) {
 	Sci_PositionU i = startLine;
 
-	if (!isdigit(styler[i])) {
+	if (!IsADigit(styler[i])) {
 		// not a digit
 		return 0;
 	}
@@ -454,7 +453,7 @@ static Sci_PositionU ColouriseTroffNumber(Sci_PositionU startLine, Sci_PositionU
 	styler.ColourTo(i-1, SCE_TROFF_DEFAULT);
 
 	i++;
-	while (i <= endPos && isdigit(styler[i])) {
+	while (i <= endPos && IsADigit(styler[i])) {
 		i++;
 	}
 	if (i > endPos) {
@@ -462,7 +461,7 @@ static Sci_PositionU ColouriseTroffNumber(Sci_PositionU startLine, Sci_PositionU
 	}
 	if (styler[i] == '.') {
 		i++;
-		while (i <= endPos && isdigit(styler[i])) {
+		while (i <= endPos && IsADigit(styler[i])) {
 			i++;
 		}
 		if (i > endPos) {

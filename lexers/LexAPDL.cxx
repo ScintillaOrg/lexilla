@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -30,7 +29,7 @@
 using namespace Lexilla;
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80 && (isalnum(ch) || ch == '_'));
+	return (ch < 0x80 && (IsAlphaNumeric(ch) || ch == '_'));
 }
 
 static inline bool IsAnOperator(char ch) {
@@ -120,7 +119,7 @@ static void ColouriseAPDLDoc(Sci_PositionU startPos, Sci_Position length, int in
 			} else if (sc.ch == '\'' || sc.ch == '\"') {
 				sc.SetState(SCE_APDL_STRING);
 				stringStart = sc.ch;
-			} else if (IsAWordChar(sc.ch) || ((sc.ch == '*' || sc.ch == '/') && !isgraph(sc.chPrev))) {
+			} else if (IsAWordChar(sc.ch) || ((sc.ch == '*' || sc.ch == '/') && !IsAGraphic(sc.chPrev))) {
 				sc.SetState(SCE_APDL_WORD);
 			} else if (IsAnOperator(static_cast<char>(sc.ch))) {
 				sc.SetState(SCE_APDL_OPERATOR);

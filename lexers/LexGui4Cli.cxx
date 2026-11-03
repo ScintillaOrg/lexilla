@@ -27,7 +27,6 @@ val SCE_GC_OPERATOR=9
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -48,11 +47,11 @@ using namespace Lexilla;
 #define debug Platform::DebugPrintf
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_' || ch =='\\');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch =='\\');
 }
 
 inline bool isGCOperator(int ch)
-{	if (isalnum(ch))
+{	if (IsAlphaNumeric(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
 	if (ch == '*' || ch == '/' || ch == '-' || ch == '+' ||
@@ -88,7 +87,7 @@ static void colorFirstWord(WordList *keywordlists[], Accessor &styler,
 	buff[c] = '\0';
 	char *p = buff;
 	while (*p)	// capitalize..
-	{	if (islower(*p)) *p = static_cast<char>(toupper(*p));
+	{	if (IsLowerCase(*p)) *p = static_cast<char>(MakeUpperCase(*p));
 		++p;
 	}
 

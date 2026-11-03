@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -30,15 +29,15 @@
 using namespace Lexilla;
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_' || ch == '\'');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == '\'');
 }
 
 static inline bool IsANumberChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '\'');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' || ch == '\'');
 }
 
 static inline bool IsAWordStart(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '`');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' || ch == '`');
 }
 
 static void ColouriseSpecmanDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],

@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -41,11 +40,11 @@ namespace {
     // Use an unnamed namespace to protect the functions and classes from name conflicts
 
 bool IsAWordChar(const int ch) {
-    return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
+    return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' || ch == '.');
 }
 
 bool IsOperator(const int ch) {
-    if ((ch < 0x80) && (isalnum(ch)))
+    if ((ch < 0x80) && (IsAlphaNumeric(ch)))
         return false;
 
     if (strchr("!%&*+-/<=>@^|~()[]{}", ch)) {

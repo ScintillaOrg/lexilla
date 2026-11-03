@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -36,18 +35,18 @@ using namespace Lexilla;
 namespace {
 
 inline bool IsAWordChar(int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 inline bool IsAWordStart(int ch) {
-	return (ch < 0x80) && (isalpha(ch) || ch == '_');
+	return (ch < 0x80) && (IsUpperOrLowerCase(ch) || ch == '_');
 }
 
 inline bool IsANumberChar(int ch) {
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases.
 	return (ch < 0x80) &&
-	        (isdigit(ch) || toupper(ch) == 'E' ||
+	        (IsADigit(ch) || MakeUpperCase(ch) == 'E' ||
              ch == '.' || ch == '-' || ch == '+');
 }
 
@@ -338,7 +337,7 @@ bool MatchIgnoreCase(Accessor &styler, Sci_Position currentPos, const char *s)
 {
   for (Sci_Position n = 0; *s; n++)
   {
-    if (*s != tolower(styler.SafeGetCharAt(currentPos + n)))
+    if (*s != MakeLowerCase(styler.SafeGetCharAt(currentPos + n)))
       return false;
     s++;
   }

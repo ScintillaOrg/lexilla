@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -29,11 +28,11 @@ using namespace Lexilla;
 
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
 }
 
 static inline bool IsAWordStart(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 
@@ -234,7 +233,7 @@ static void FoldESCRIPTDoc(Sci_PositionU startPos, Sci_Position length, int init
 				char s[32];
 				Sci_PositionU j;
 				for(j = 0; ( j < 31 ) && ( j < i-lastStart+1 ); j++) {
-					s[j] = static_cast<char>(tolower(styler[lastStart + j]));
+					s[j] = static_cast<char>(MakeLowerCase(styler[lastStart + j]));
 				}
 				s[j] = '\0';
 				levelCurrent += classifyFoldPointESCRIPT(s, prevWord);

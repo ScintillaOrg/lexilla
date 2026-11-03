@@ -52,7 +52,6 @@ The list of keywords that can be used in dataflex.properties file (up to DataFle
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -78,7 +77,7 @@ static void GetRangeLowered(Sci_PositionU start,
 		Sci_PositionU len) {
 	Sci_PositionU i = 0;
 	while ((i < end - start + 1) && (i < len-1)) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 		i++;
 	}
 	s[i] = '\0';
@@ -91,7 +90,7 @@ static void GetForwardRangeLowered(Sci_PositionU start,
 		Sci_PositionU len) {
 	Sci_PositionU i = 0;
 	while ((i < len-1) && charSet.Contains(styler.SafeGetCharAt(start + i))) {
-		s[i] = static_cast<char>(tolower(styler.SafeGetCharAt(start + i)));
+		s[i] = static_cast<char>(MakeLowerCase(styler.SafeGetCharAt(start + i)));
 		i++;
 	}
 	s[i] = '\0';

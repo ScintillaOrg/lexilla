@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -107,7 +106,7 @@ static void ColouriseWord(StyleContext& sc, WordList& keywords, WordList& keywor
     sc.SetState(SCE_SPICE_IDENTIFIER);
     std::string word;
     while (!sc.atLineEnd && !IsSeparatorOrDelimiterCharacter(sc.ch)) {
-        word += static_cast<char>(tolower(sc.ch));
+        word += static_cast<char>(MakeLowerCase(sc.ch));
         sc.Forward();
     }
     if (keywords.InList(word.c_str())) {

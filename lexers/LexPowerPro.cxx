@@ -30,7 +30,6 @@
 
 #include <string.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -158,7 +157,7 @@ static void ColourisePowerProDoc(Sci_PositionU startPos, Sci_Position length, in
 			strcpy(s_save,s);
 			int tp = static_cast<int>(strlen(s_save));
 			if (tp < 99) {
-				s_save[tp] = static_cast<char>(tolower(sc.ch));
+				s_save[tp] = static_cast<char>(MakeLowerCase(sc.ch));
 				s_save[tp+1] = '\0';
 			}
 		}
@@ -444,7 +443,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 			if (setWord.Contains(ch) || setWordStart.Contains(ch) || ch == ';' || ch == '/') {
 				isFirstWordStarted = true;
 				if (firstWordLen < FIRST_WORD_MAX_LEN - 1) {
-					szFirstWord[firstWordLen++] = static_cast<char>(tolower(ch));
+					szFirstWord[firstWordLen++] = static_cast<char>(MakeLowerCase(ch));
 					szFirstWord[firstWordLen] = '\0';
 				}
 			}
@@ -454,7 +453,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 				isFirstWordEnded = true;
 			}
 			else if (firstWordLen < (FIRST_WORD_MAX_LEN - 1)) {
-				szFirstWord[firstWordLen++] = static_cast<char>(tolower(ch));
+				szFirstWord[firstWordLen++] = static_cast<char>(MakeLowerCase(ch));
 				szFirstWord[firstWordLen] = '\0';
 			}
 		}
@@ -472,14 +471,14 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 			if ((ch > 0) && isFirstWordEnded && strcmp(szFirstWord, "if") == 0) {
 				if (szDolen == 2) {
 					szDo[0] = szDo[1];
-					szDo[1] = static_cast<char>(tolower(ch));
+					szDo[1] = static_cast<char>(MakeLowerCase(ch));
 					szDo[2] = '\0';
 
 					if (strcmp(szDo, "do") == 0)
 						isDoLastWord = true;
 
 				} else if (szDolen < 2) {
-					szDo[szDolen++] = static_cast<char>(tolower(ch));
+					szDo[szDolen++] = static_cast<char>(MakeLowerCase(ch));
 					szDo[szDolen] = '\0';
 				}
 			}

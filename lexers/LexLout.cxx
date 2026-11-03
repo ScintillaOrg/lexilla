@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -29,7 +28,7 @@
 using namespace Lexilla;
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalpha(ch) || ch == '@' || ch == '_');
+	return (ch < 0x80) && (IsUpperOrLowerCase(ch) || ch == '@' || ch == '_');
 }
 
 static inline bool IsAnOther(const int ch) {

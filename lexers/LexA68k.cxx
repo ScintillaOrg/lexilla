@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -46,7 +45,7 @@ using namespace Lexilla;
 
 static inline bool IsIdentifierStart (const int ch)
 {
-    return (isalpha(ch) || (ch == '_') || (ch == '\\'));
+    return (IsUpperOrLowerCase(ch) || (ch == '_') || (ch == '\\'));
 }
 
 
@@ -58,7 +57,7 @@ static inline bool IsIdentifierStart (const int ch)
 
 static inline bool IsIdentifierChar (const int ch)
 {
-    return (isalnum(ch) || (ch == '_') || (ch == '@') || (ch == ':') || (ch == '.'));
+    return (IsAlphaNumeric(ch) || (ch == '_') || (ch == '@') || (ch == ':') || (ch == '.'));
 }
 
 
@@ -106,7 +105,7 @@ static inline bool IsBin (const int ch)
 
 static inline bool IsDoxygenChar (const int ch)
 {
-    return isalpha(ch) || (ch == '$') || (ch == '[') || (ch == ']') || (ch == '{') || (ch == '}');
+    return IsUpperOrLowerCase(ch) || (ch == '$') || (ch == '[') || (ch == ']') || (ch == '{') || (ch == '}');
 }
 
 
@@ -167,18 +166,18 @@ static void ColouriseA68kDoc (Sci_PositionU startPos, Sci_Position length, int i
 
         if (sc.state != SCE_A68K_DEFAULT)
         {
-            if (   ((sc.state == SCE_A68K_NUMBER_DEC)        && isdigit(sc.ch))                      // Decimal number
+            if (   ((sc.state == SCE_A68K_NUMBER_DEC)        && IsADigit(sc.ch))                      // Decimal number
                 || ((sc.state == SCE_A68K_NUMBER_BIN) && IsBin(sc.ch))                                      // Binary number
-                || ((sc.state == SCE_A68K_NUMBER_HEX) && isxdigit(sc.ch))                                   // Hexa number
-                || ((sc.state == SCE_A68K_MACRO_ARG)         && isdigit(sc.ch))                      // Macro argument
+                || ((sc.state == SCE_A68K_NUMBER_HEX) && IsAHeXDigit(sc.ch))                                   // Hexa number
+                || ((sc.state == SCE_A68K_MACRO_ARG)         && IsADigit(sc.ch))                      // Macro argument
                 || ((sc.state == SCE_A68K_STRING1)    && (sc.ch != '\''))                                   // String single-quoted
                 || ((sc.state == SCE_A68K_STRING2)    && (sc.ch != '\"'))                                   // String double-quoted
                 || ((sc.state == SCE_A68K_MACRO_DECLARATION) && IsIdentifierChar(sc.ch))             // Macro declaration (or global label, we don't know at this point)
                 || ((sc.state == SCE_A68K_IDENTIFIER)        && IsIdentifierChar(sc.ch))             // Identifier
                 || ((sc.state == SCE_A68K_LABEL)             && IsIdentifierChar(sc.ch))             // Label (local)
                 || ((sc.state == SCE_A68K_COMMENT_DOXYGEN)   && IsDoxygenChar(sc.ch))                // Doxygen keyword
-                || ((sc.state == SCE_A68K_COMMENT_SPECIAL)   && isalpha(sc.ch))                      // Alert
-                || ((sc.state == SCE_A68K_COMMENT)           && !isalpha(sc.ch) && (sc.ch != '\\'))) // Normal comment
+                || ((sc.state == SCE_A68K_COMMENT_SPECIAL)   && IsUpperOrLowerCase(sc.ch))                      // Alert
+                || ((sc.state == SCE_A68K_COMMENT)           && !IsUpperOrLowerCase(sc.ch) && (sc.ch != '\\'))) // Normal comment
             {
                 continue;
             }
@@ -295,7 +294,7 @@ static void ColouriseA68kDoc (Sci_PositionU startPos, Sci_Position length, int i
         else if ((sc.ch < 0x80) && (sc.ch == ';')) {                            // Default: alert in a comment. If it doesn't match
             sc.SetState(SCE_A68K_COMMENT);                                      // with an alert, it will be toggle to a normal comment
         }
-        else if ((sc.ch < 0x80) && isdigit(sc.ch)) {                            // Decimal numbers haven't prefix
+        else if ((sc.ch < 0x80) && IsADigit(sc.ch)) {                            // Decimal numbers haven't prefix
             sc.SetState(SCE_A68K_NUMBER_DEC);
         }
         else if ((sc.ch < 0x80) && (sc.ch == '%')) {                            // Binary numbers are prefixed with '%'
@@ -310,7 +309,7 @@ static void ColouriseA68kDoc (Sci_PositionU startPos, Sci_Position length, int i
         else if ((sc.ch < 0x80) && (sc.ch == '\"')) {                           // String (double-quoted)
             sc.SetState(SCE_A68K_STRING2);
         }
-        else if ((sc.ch < 0x80) && (sc.ch == '\\') && (isdigit(sc.chNext))) {   // Replacement symbols in macro are prefixed with '\'
+        else if ((sc.ch < 0x80) && (sc.ch == '\\') && (IsADigit(sc.chNext))) {   // Replacement symbols in macro are prefixed with '\'
             sc.SetState(SCE_A68K_MACRO_ARG);
         }
         else if ((sc.ch < 0x80) && IsIdentifierStart(sc.ch)) {                  // An identifier: constant, label, etc...

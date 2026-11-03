@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -32,21 +31,21 @@ using namespace Lexilla;
 
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
 }
 static inline bool IsEnumChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch)|| ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch)|| ch == '_');
 }
 static inline bool IsANumberChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' );
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' );
 }
 
 inline bool IsAWordStart(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 inline bool isAveOperator(char ch) {
-	if (IsASCII(ch) && isalnum(ch))
+	if (IsASCII(ch) && IsAlphaNumeric(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
 	if (ch == '*' || ch == '/' || ch == '-' || ch == '+' ||
@@ -165,14 +164,14 @@ static void FoldAveDoc(Sci_PositionU startPos, Sci_Position length, int /* initS
 	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
-	char chNext = static_cast<char>(tolower(styler[startPos]));
+	char chNext = static_cast<char>(MakeLowerCase(styler[startPos]));
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	int styleNext = styler.StyleAt(startPos);
 	char s[10] = "";
 
 	for (Sci_PositionU i = startPos; i < lengthDoc; i++) {
-		char ch = static_cast<char>(tolower(chNext));
-		chNext = static_cast<char>(tolower(styler.SafeGetCharAt(i + 1)));
+		char ch = static_cast<char>(MakeLowerCase(chNext));
+		chNext = static_cast<char>(MakeLowerCase(styler.SafeGetCharAt(i + 1)));
 		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
@@ -182,7 +181,7 @@ static void FoldAveDoc(Sci_PositionU startPos, Sci_Position length, int /* initS
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}
-					s[j] = static_cast<char>(tolower(styler[i + j]));
+					s[j] = static_cast<char>(MakeLowerCase(styler[i + j]));
 					s[j + 1] = '\0';
 				}
 

@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -31,12 +30,12 @@
 #pragma clang diagnostic ignored "-Wcomma"
 #endif
 
-inline int  issml(int c) {return isalnum(c) || c == '_';}
-inline int issmlf(int c) {return isalpha(c) || c == '_';}
-inline int issmld(int c) {return isdigit(c) || c == '_';}
-
-
 using namespace Lexilla;
+
+inline int  issml(int c) {return IsAlphaNumeric(c) || c == '_';}
+inline int issmlf(int c) {return IsUpperOrLowerCase(c) || c == '_';}
+inline int issmld(int c) {return IsADigit(c) || c == '_';}
+
 
 static void ColouriseSMLDoc(
 	Sci_PositionU startPos, Sci_Position length,
@@ -70,14 +69,14 @@ static void ColouriseSMLDoc(
 				state2 = SCE_SML_IDENTIFIER;
 			else if (sc.Match('`') && issmlf(sc.chNext))
 				state2 = SCE_SML_TAGNAME;
-			else if (sc.Match('#')&&isdigit(sc.chNext))
+			else if (sc.Match('#')&&IsADigit(sc.chNext))
 					state2 = SCE_SML_LINENUM;
 			else if (sc.Match('#','\"')){
 					state2 = SCE_SML_CHAR,chLit = 0;
 					sc.Forward();
 
 				}
-			else if (isdigit(sc.ch)) {
+			else if (IsADigit(sc.ch)) {
 				state2 = SCE_SML_NUMBER, chBase = 10;
 				if (sc.Match('0') && strchr("xX", sc.chNext))
 					chBase = 16, sc.Forward();}
@@ -118,13 +117,13 @@ static void ColouriseSMLDoc(
 			break;
 
 		case SCE_SML_LINENUM:
-			if (!isdigit(sc.ch))
+			if (!IsADigit(sc.ch))
 				state2 = SCE_SML_DEFAULT, advance = false;
 			break;
 
 		case SCE_SML_OPERATOR: {
 			const char* o = 0;
-			if (issml(sc.ch) || isspace(sc.ch)
+			if (issml(sc.ch) || IsASpace(sc.ch)
 				|| (o = strchr(")]};,\'\"`#", sc.ch),o)
 				|| !strchr("!$%&*+-./:<=>?@^|~", sc.ch)) {
 				if (o && strchr(")]};,", sc.ch)) {

@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -43,16 +42,16 @@
 #pragma clang diagnostic ignored "-Wcomma"
 #endif
 
+using namespace Lexilla;
+
 //	Since the Microsoft __iscsym[f] funcs are not ANSI...
-inline int  iscaml(int c) {return isalnum(c) || c == '_';}
-inline int iscamlf(int c) {return isalpha(c) || c == '_';}
+inline int  iscaml(int c) {return IsAlphaNumeric(c) || c == '_';}
+inline int iscamlf(int c) {return IsUpperOrLowerCase(c) || c == '_';}
 
 static const int baseT[24] = {
 	0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* A - L */
 	0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0,16	/* M - X */
 };
-
-using namespace Lexilla;
 
 static void ColouriseCamlDoc(
 	Sci_PositionU startPos, Sci_Position length,
@@ -94,9 +93,9 @@ static void ColouriseCamlDoc(
 				state2 = SCE_CAML_IDENTIFIER;
 			else if (!isSML && sc.Match('`') && iscamlf(sc.chNext))
 				state2 = SCE_CAML_TAGNAME;
-			else if (!isSML && sc.Match('#') && isdigit(sc.chNext))
+			else if (!isSML && sc.Match('#') && IsADigit(sc.chNext))
 				state2 = SCE_CAML_LINENUM;
-			else if (isdigit(sc.ch)) {
+			else if (IsADigit(sc.ch)) {
 				// it's a number, assume base 10
 				state2 = SCE_CAML_NUMBER, chBase = 10;
 				if (sc.Match('0')) {
@@ -109,7 +108,7 @@ static void ColouriseCamlDoc(
 					}
 					// ... change to specified base AS REQUIRED
 					if (strchr(baseC, sc.chNext))
-						chBase = baseT[tolower(sc.chNext) - 'a'], sc.Forward();
+						chBase = baseT[MakeLowerCase(sc.chNext) - 'a'], sc.Forward();
 				}
 			} else if (!isSML && sc.Match('\''))	// (Caml char literal?)
 				state2 = SCE_CAML_CHAR, chLit = 0;
@@ -165,14 +164,14 @@ static void ColouriseCamlDoc(
 
 		case SCE_CAML_LINENUM:
 			// [try to] interpret as [additional] linenum directive char
-			if (!isdigit(sc.ch))
+			if (!IsADigit(sc.ch))
 				state2 = SCE_CAML_DEFAULT, advance = false;
 			break;
 
 		case SCE_CAML_OPERATOR: {
 			// [try to] interpret as [additional] operator char
 			const char* o = 0;
-			if (iscaml(sc.ch) || isspace(sc.ch)			// ident or whitespace
+			if (iscaml(sc.ch) || IsASpace(sc.ch)			// ident or whitespace
 				|| (o = strchr(")]};,\'\"#", sc.ch),o)	// "termination" chars
 				|| (!isSML && sc.Match('`'))			// Caml extra term char
 				|| (!strchr("!$%&*+-./:<=>?@^|~", sc.ch)// "operator" chars
@@ -247,7 +246,7 @@ static void ColouriseCamlDoc(
 
 		case SCE_CAML_STRING:
 			// [try to] interpret as [additional] [SML char/] string literal char
-			if (isSML && sc.Match('\\') && sc.chPrev != '\\' && isspace(sc.chNext))
+			if (isSML && sc.Match('\\') && sc.chPrev != '\\' && IsASpace(sc.chNext))
 				state2 = SCE_CAML_WHITE;
 			else if (sc.Match('\\') && sc.chPrev == '\\')
 				sc.ch = ' ';	// (...\\")

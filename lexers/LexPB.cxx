@@ -38,7 +38,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -63,12 +62,12 @@ static inline bool IsTypeCharacter(const int ch)
 
 static inline bool IsAWordChar(const int ch)
 {
-    return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+    return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
 }
 
 static inline bool IsAWordStart(const int ch)
 {
-    return (ch < 0x80) && (isalnum(ch) || ch == '_');
+    return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 static bool MatchUpperCase(Accessor &styler, Sci_Position pos, const char *s)   //Same as styler.Match() but uppercase comparison (a-z,A-Z and space only)
@@ -166,9 +165,9 @@ static void ColourisePBDoc(Sci_PositionU startPos, Sci_Position length, int init
         {
             if (sc.ch == '\'') {sc.SetState(SCE_B_COMMENT);}
             else if (sc.ch == '\"') {sc.SetState(SCE_B_STRING);}
-            else if (sc.ch == '&' && tolower(sc.chNext) == 'h') {sc.SetState(SCE_B_NUMBER);}
-            else if (sc.ch == '&' && tolower(sc.chNext) == 'b') {sc.SetState(SCE_B_NUMBER);}
-            else if (sc.ch == '&' && tolower(sc.chNext) == 'o') {sc.SetState(SCE_B_NUMBER);}
+            else if (sc.ch == '&' && MakeLowerCase(sc.chNext) == 'h') {sc.SetState(SCE_B_NUMBER);}
+            else if (sc.ch == '&' && MakeLowerCase(sc.chNext) == 'b') {sc.SetState(SCE_B_NUMBER);}
+            else if (sc.ch == '&' && MakeLowerCase(sc.chNext) == 'o') {sc.SetState(SCE_B_NUMBER);}
             else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {sc.SetState(SCE_B_NUMBER);}
             else if (IsAWordStart(sc.ch)) {sc.SetState(SCE_B_KEYWORD);}
             else if (sc.ch == '%') {sc.SetState(SCE_B_CONSTANT);}

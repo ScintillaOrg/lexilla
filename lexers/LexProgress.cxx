@@ -20,7 +20,6 @@ Differentiate between labels and variables
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -568,7 +567,7 @@ void SCI_METHOD LexerABL::Fold(Sci_PositionU startPos, Sci_Position length, int 
    int styleNext = styler.StyleAt(startPos);
    int style = initStyle;
    for (Sci_PositionU i = startPos; i < endPos; i++) {
-      chNext = static_cast<char>(tolower(chNext));  // check tolower
+      chNext = static_cast<char>(MakeLowerCase(chNext));  // check MakeLowerCase
       char ch = chNext;
       chNext = styler.SafeGetCharAt(i+1);
       int stylePrev = style;

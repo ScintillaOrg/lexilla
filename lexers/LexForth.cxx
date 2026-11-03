@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -29,17 +28,17 @@
 using namespace Lexilla;
 
 static inline bool IsAWordStart(int ch) {
-	return (ch < 0x80) && (isalnum(ch) ||
+	return (ch < 0x80) && (IsAlphaNumeric(ch) ||
 		// symbolic standard words and word prefixes (https://forth-standard.org/standard/core)
 		AnyOf(ch, '!', '#', '\'', '(', '*', '+', ',', '-', '.', '/', '<', '=', '>', '?', '@', '[', '\\', ']', '_'));
 }
 
 static inline bool IsANumChar(int ch) {
-	return (ch < 0x80) && (isxdigit(ch) || ch == '.' || ch == 'e' || ch == 'E' );
+	return (ch < 0x80) && (IsAHeXDigit(ch) || ch == '.' || ch == 'e' || ch == 'E' );
 }
 
 static inline bool IsASpaceChar(int ch) {
-	return (ch < 0x80) && isspace(ch);
+	return (ch < 0x80) && IsASpace(ch);
 }
 
 static void ColouriseForthDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordLists[],
@@ -117,10 +116,10 @@ static void ColouriseForthDoc(Sci_PositionU startPos, Sci_Position length, int i
 					(sc.atLineStart || IsASpaceChar(sc.chPrev)) &&
 					(sc.MatchLineEnd()   || IsASpaceChar(sc.chNext))) {
 				sc.SetState(SCE_FORTH_COMMENT_ML);
-			} else if (	(sc.ch == '$' && (IsASCII(sc.chNext) && isxdigit(sc.chNext))) ) {
+			} else if (	(sc.ch == '$' && (IsASCII(sc.chNext) && IsAHeXDigit(sc.chNext))) ) {
 				// number starting with $ is a hex number
 				sc.SetState(SCE_FORTH_NUMBER);
-				while(sc.More() && IsASCII(sc.chNext) && isxdigit(sc.chNext))
+				while(sc.More() && IsASCII(sc.chNext) && IsAHeXDigit(sc.chNext))
 					sc.Forward();
 			} else if ( (sc.ch == '%' && (IsASCII(sc.chNext) && (sc.chNext == '0' || sc.chNext == '1'))) ) {
 				// number starting with % is binary
@@ -128,18 +127,18 @@ static void ColouriseForthDoc(Sci_PositionU startPos, Sci_Position length, int i
 				while(sc.More() && IsASCII(sc.chNext) && (sc.chNext == '0' || sc.chNext == '1'))
 					sc.Forward();
 			} else if (	IsASCII(sc.ch) &&
-						(isxdigit(sc.ch) || ((sc.ch == '.' || sc.ch == '-') && IsASCII(sc.chNext) && isxdigit(sc.chNext)) )
+						(IsAHeXDigit(sc.ch) || ((sc.ch == '.' || sc.ch == '-') && IsASCII(sc.chNext) && IsAHeXDigit(sc.chNext)) )
 					){
 				sc.SetState(SCE_FORTH_NUMBER);
 			} else if (IsAWordStart(sc.ch)) {
 				sc.SetState(SCE_FORTH_IDENTIFIER);
 			} else if (sc.ch == '{') {
 				sc.SetState(SCE_FORTH_LOCALE);
-			} else if (sc.ch == ':' && IsASCII(sc.chNext) && isspace(sc.chNext)) {
+			} else if (sc.ch == ':' && IsASCII(sc.chNext) && IsASpace(sc.chNext)) {
 				// highlight word definitions e.g.  : GCD ( n n -- n ) ..... ;
 				//                                  ^ ^^^
 				sc.SetState(SCE_FORTH_DEFWORD);
-				while(sc.More() && IsASCII(sc.chNext) && isspace(sc.chNext))
+				while(sc.More() && IsASCII(sc.chNext) && IsASpace(sc.chNext))
 					sc.Forward();
 			} else if (sc.ch == ';' &&
 					(sc.atLineStart || IsASpaceChar(sc.chPrev)) &&

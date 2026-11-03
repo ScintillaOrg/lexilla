@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -30,7 +29,7 @@
 using namespace Lexilla;
 
 static inline bool IsGAPOperator(char ch) {
-	if (IsASCII(ch) && isalnum(ch)) return false;
+	if (IsASCII(ch) && IsAlphaNumeric(ch)) return false;
 	if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
 		ch == '^' || ch == ',' || ch == '!' || ch == '.' ||
 		ch == '=' || ch == '<' || ch == '>' || ch == '(' ||
@@ -95,7 +94,7 @@ static void ColouriseGAPDoc(Sci_PositionU startPos, Sci_Position length, int ini
 								sc.ChangeState(SCE_GAP_IDENTIFIER);
 							}
 						}
-					} else if (isalpha(sc.ch) || sc.ch == '_') {
+					} else if (IsUpperOrLowerCase(sc.ch) || sc.ch == '_') {
 						sc.ChangeState(SCE_GAP_IDENTIFIER);
 					}
 					else sc.SetState(SCE_GAP_DEFAULT);
@@ -166,7 +165,7 @@ static void ColouriseGAPDoc(Sci_PositionU startPos, Sci_Position length, int ini
 			}
 			else if (IsADigit(sc.ch)) {
 				sc.SetState(SCE_GAP_NUMBER);
-			} else if (isalpha(sc.ch) || sc.ch == '_' || sc.ch == '\\' || sc.ch == '$' || sc.ch == '~') {
+			} else if (IsUpperOrLowerCase(sc.ch) || sc.ch == '_' || sc.ch == '\\' || sc.ch == '$' || sc.ch == '~') {
 				sc.SetState(SCE_GAP_IDENTIFIER);
 				if (sc.ch == '\\') sc.Forward();
 			} else if (sc.ch == '#') {

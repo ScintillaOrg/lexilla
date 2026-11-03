@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -29,7 +28,7 @@ using namespace Lexilla;
 static void ClassifyWordSol(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, char *prevWord)
 {
     char s[100] = "";
-    bool wordIsNumber = isdigit(styler[start]) != 0;
+    bool wordIsNumber = IsADigit(styler[start]) != 0;
     for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++)
      {
            s[i] = styler[start + i];

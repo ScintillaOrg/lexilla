@@ -115,7 +115,7 @@ struct OptionSetBaan : public OptionSet<OptionsBaan> {
 };
 
 static inline bool IsAWordChar(const int  ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_' || ch == '$');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_' || ch == '$');
 }
 
 static inline bool IsAnOperator(int ch) {
@@ -144,34 +144,34 @@ static inline int IsAnyOtherIdentifier(char *s, Sci_Position sLength) {
 	*/
 	switch (sLength) {
 	case 8:
-		if (isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
+		if (IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
 			//^^^^^###
 			return(SCE_BAAN_TABLEDEF);
 		}
 		break;
 	case 9:
-		if (s[0] == 't' && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && isalpha(s[5]) && IsADigit(s[6]) && IsADigit(s[7]) && IsADigit(s[8])) {
+		if (s[0] == 't' && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsUpperOrLowerCase(s[5]) && IsADigit(s[6]) && IsADigit(s[7]) && IsADigit(s[8])) {
 			//t^^^^^###
 			return(SCE_BAAN_TABLEDEF);
 		}
-		else if (s[8] == '.' && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
+		else if (s[8] == '.' && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
 			//^^^^^###.
 			return(SCE_BAAN_TABLESQL);
 		}
 		break;
 	case 13:
-		if (s[8] == '.' && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
+		if (s[8] == '.' && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
 			//^^^^^###.****
 			return(SCE_BAAN_TABLESQL);
 		}
-		else if (s[0] == 'r' && s[1] == 'c' && s[2] == 'd' && s[3] == '.' && s[4] == 't' && isalpha(s[5]) && isalpha(s[6]) && isalpha(s[7]) && isalpha(s[8]) && isalpha(s[9]) && IsADigit(s[10]) && IsADigit(s[11]) && IsADigit(s[12])) {
+		else if (s[0] == 'r' && s[1] == 'c' && s[2] == 'd' && s[3] == '.' && s[4] == 't' && IsUpperOrLowerCase(s[5]) && IsUpperOrLowerCase(s[6]) && IsUpperOrLowerCase(s[7]) && IsUpperOrLowerCase(s[8]) && IsUpperOrLowerCase(s[9]) && IsADigit(s[10]) && IsADigit(s[11]) && IsADigit(s[12])) {
 			//rcd.t^^^^^###
 			return(SCE_BAAN_TABLEDEF);
 		}
 		break;
 	case 14:
 	case 15:
-		if (s[8] == '.' && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
+		if (s[8] == '.' && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
 			if (s[13] != ':') {
 				//^^^^^###.******
 				return(SCE_BAAN_TABLESQL);
@@ -180,11 +180,11 @@ static inline int IsAnyOtherIdentifier(char *s, Sci_Position sLength) {
 		break;
 	case 16:
 	case 17:
-		if (s[8] == '.' && s[9] == '_' && s[10] == 'i' && s[11] == 'n' && s[12] == 'd' && s[13] == 'e' && s[14] == 'x' && IsADigit(s[15]) && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
+		if (s[8] == '.' && s[9] == '_' && s[10] == 'i' && s[11] == 'n' && s[12] == 'd' && s[13] == 'e' && s[14] == 'x' && IsADigit(s[15]) && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
 			//^^^^^###._index##
 			return(SCE_BAAN_TABLEDEF);
 		}
-		else if (s[8] == '.' && s[9] == '_' && s[10] == 'c' && s[11] == 'o' && s[12] == 'm' && s[13] == 'p' && s[14] == 'n' && s[15] == 'r' && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
+		else if (s[8] == '.' && s[9] == '_' && s[10] == 'c' && s[11] == 'o' && s[12] == 'm' && s[13] == 'p' && s[14] == 'n' && s[15] == 'r' && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[5]) && IsADigit(s[6]) && IsADigit(s[7])) {
 			//^^^^^###._compnr
 			return(SCE_BAAN_TABLEDEF);
 		}
@@ -192,15 +192,15 @@ static inline int IsAnyOtherIdentifier(char *s, Sci_Position sLength) {
 	default:
 		break;
 	}
-	if (sLength > 14 && s[5] == '.' && s[6] == 'd' && s[7] == 'l' && s[8] == 'l' && s[13] == '.' && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && IsADigit(s[9]) && IsADigit(s[10]) && IsADigit(s[11]) && IsADigit(s[12])) {
+	if (sLength > 14 && s[5] == '.' && s[6] == 'd' && s[7] == 'l' && s[8] == 'l' && s[13] == '.' && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsADigit(s[9]) && IsADigit(s[10]) && IsADigit(s[11]) && IsADigit(s[12])) {
 		//^^^^^.dll####.
 		return(SCE_BAAN_FUNCTION);
 	}
-	else if (sLength > 15 && s[2] == 'i' && s[3] == 'n' && s[4] == 't' && s[5] == '.' && s[6] == 'd' && s[7] == 'l' && s[8] == 'l' && isalpha(s[0]) && isalpha(s[1]) && isalpha(s[9]) && isalpha(s[10]) && isalpha(s[11]) && isalpha(s[12]) && isalpha(s[13])) {
+	else if (sLength > 15 && s[2] == 'i' && s[3] == 'n' && s[4] == 't' && s[5] == '.' && s[6] == 'd' && s[7] == 'l' && s[8] == 'l' && IsUpperOrLowerCase(s[0]) && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[9]) && IsUpperOrLowerCase(s[10]) && IsUpperOrLowerCase(s[11]) && IsUpperOrLowerCase(s[12]) && IsUpperOrLowerCase(s[13])) {
 		//^^int.dll^^^^^.
 		return(SCE_BAAN_FUNCTION);
 	}
-	else if (sLength > 11 && s[0] == 'i' && s[10] == '.' && isalpha(s[1]) && isalpha(s[2]) && isalpha(s[3]) && isalpha(s[4]) && isalpha(s[5]) && IsADigit(s[6]) && IsADigit(s[7]) && IsADigit(s[8]) && IsADigit(s[9])) {
+	else if (sLength > 11 && s[0] == 'i' && s[10] == '.' && IsUpperOrLowerCase(s[1]) && IsUpperOrLowerCase(s[2]) && IsUpperOrLowerCase(s[3]) && IsUpperOrLowerCase(s[4]) && IsUpperOrLowerCase(s[5]) && IsADigit(s[6]) && IsADigit(s[7]) && IsADigit(s[8]) && IsADigit(s[9])) {
 		//i^^^^^####.
 		return(SCE_BAAN_FUNCTION);
 	}

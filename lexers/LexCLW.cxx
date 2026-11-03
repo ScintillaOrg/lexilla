@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -58,13 +57,13 @@ static void StringUpper(char *szString) {
 // Is a label start character
 inline bool IsALabelStart(const int iChar) {
 
-	return(isalpha(iChar) || iChar == '_');
+	return(IsUpperOrLowerCase(iChar) || iChar == '_');
 }
 
 // Is a label character
 inline bool IsALabelCharacter(const int iChar) {
 
-	return(isalnum(iChar) || iChar == '_' || iChar == ':');
+	return(IsAlphaNumeric(iChar) || iChar == '_' || iChar == ':');
 }
 
 // Is the character is a ! and the the next character is not a !
@@ -155,7 +154,7 @@ inline bool GetNextWordUpper(Accessor &styler, Sci_PositionU uiStartPos, Sci_Pos
 			break;
 		}
 		// If the character is alphabet character
-		if (isalpha(cCharacter)) {
+		if (IsUpperOrLowerCase(cCharacter)) {
 			// Add UPPERCASE character to the word buffer
 			cWord[iIndex++] = CharacterUpper(cCharacter);
 		}
@@ -389,7 +388,7 @@ static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, 
 		}
 		// Standard Equate State Handling
 		else if (scDoc.state == SCE_CLW_STANDARD_EQUATE) {
-			if (!isalnum(scDoc.ch)) {
+			if (!IsAlphaNumeric(scDoc.ch)) {
 				scDoc.SetState(SCE_CLW_DEFAULT);
 			}
 		}
@@ -399,7 +398,7 @@ static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, 
 			// or character is not a hexidecimal character (A-F)
 			// or character is not a . (point)
 			// or character is not a numberic base character (B,O,H)
-			if (!(isdigit(scDoc.ch)
+			if (!(IsADigit(scDoc.ch)
 			|| IsAHexCharacter(scDoc.ch, bCaseSensitive)
 			|| scDoc.ch == '.'
 			|| IsANumericBaseCharacter(scDoc.ch, bCaseSensitive))) {
@@ -468,12 +467,12 @@ static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, 
 			// If in default state
 			if (scDoc.state == SCE_CLW_DEFAULT) {
 				// If is a letter could be a possible statement
-				if (isalpha(scDoc.ch)) {
+				if (IsUpperOrLowerCase(scDoc.ch)) {
 					// Set the state to Clarion Keyword and verify later
 					scDoc.SetState(SCE_CLW_KEYWORD);
 				}
 				// else is a number
-				else if (isdigit(scDoc.ch)) {
+				else if (IsADigit(scDoc.ch)) {
 					// Set the state to Integer Constant and verify later
 					scDoc.SetState(SCE_CLW_INTEGER_CONSTANT);
 				}
@@ -540,7 +539,7 @@ static void FillBuffer(Sci_PositionU uiStart, Sci_PositionU uiEnd, Accessor &acc
 	Sci_PositionU uiPos = 0;
 
 	while ((uiPos < uiEnd - uiStart + 1) && (uiPos < uiLength-1)) {
-		szBuffer[uiPos] = static_cast<char>(toupper(accStyler[uiStart + uiPos]));
+		szBuffer[uiPos] = static_cast<char>(MakeUpperCase(accStyler[uiStart + uiPos]));
 		uiPos++;
 	}
 	szBuffer[uiPos] = '\0';
@@ -550,7 +549,7 @@ static void FillBuffer(Sci_PositionU uiStart, Sci_PositionU uiEnd, Accessor &acc
 
 static int ClassifyClarionFoldPoint(int iLevel, const char* szString) {
 
-	if (!(isdigit(szString[0]) || (szString[0] == '.'))) {
+	if (!(IsADigit(szString[0]) || (szString[0] == '.'))) {
 		if (strcmp(szString, "PROCEDURE") == 0) {
 	//		iLevel = SC_FOLDLEVELBASE + 1;
 		}

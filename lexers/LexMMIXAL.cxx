@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -33,11 +32,11 @@ using namespace Lexilla;
 
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == ':' || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == ':' || ch == '_');
 }
 
 static inline bool isMMIXALOperator(char ch) {
-	if (IsASCII(ch) && isalnum(ch))
+	if (IsASCII(ch) && IsAlphaNumeric(ch))
 		return false;
 	if (ch == '+' || ch == '-' || ch == '|' || ch == '^' ||
 		ch == '*' || ch == '/' ||
@@ -70,7 +69,7 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 		}
 
 		// Check if first non whitespace character in line is alphanumeric
-		if (sc.state == SCE_MMIXAL_LEADWS && !isspace(sc.ch)) {	// LEADWS
+		if (sc.state == SCE_MMIXAL_LEADWS && !IsASpace(sc.ch)) {	// LEADWS
 			if(!IsAWordChar(sc.ch)) {
 				sc.SetState(SCE_MMIXAL_COMMENT);
 			} else {
@@ -86,7 +85,7 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 		if (sc.state == SCE_MMIXAL_OPERATOR) {			// OPERATOR
 			sc.SetState(SCE_MMIXAL_OPERANDS);
 		} else if (sc.state == SCE_MMIXAL_NUMBER) {		// NUMBER
-			if (!isdigit(sc.ch)) {
+			if (!IsADigit(sc.ch)) {
 				if (IsAWordChar(sc.ch)) {
 					sc.ChangeState(SCE_MMIXAL_REF);
 					sc.SetState(SCE_MMIXAL_REF);
@@ -114,7 +113,7 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_MMIXAL_OPERANDS);
 			}
 		} else if (sc.state == SCE_MMIXAL_OPCODE_PRE) {	// OPCODE_PRE
-				if (!isspace(sc.ch)) {
+				if (!IsASpace(sc.ch)) {
 					sc.SetState(SCE_MMIXAL_OPCODE);
 				}
 		} else if (sc.state == SCE_MMIXAL_OPCODE) {		// OPCODE
@@ -141,11 +140,11 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 				sc.ForwardSetState(SCE_MMIXAL_OPERANDS);
 			}
 		} else if (sc.state == SCE_MMIXAL_REGISTER) {		// REGISTER
-			if (!isdigit(sc.ch)) {
+			if (!IsADigit(sc.ch)) {
 				sc.SetState(SCE_MMIXAL_OPERANDS);
 			}
 		} else if (sc.state == SCE_MMIXAL_HEX) {			// HEX
-			if (!isxdigit(sc.ch)) {
+			if (!IsAHeXDigit(sc.ch)) {
 				sc.SetState(SCE_MMIXAL_OPERANDS);
 			}
 		}
@@ -153,9 +152,9 @@ static void ColouriseMMIXALDoc(Sci_PositionU startPos, Sci_Position length, int 
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_MMIXAL_OPCODE_POST ||		// OPCODE_POST
 			sc.state == SCE_MMIXAL_OPERANDS) {			// OPERANDS
-			if (sc.state == SCE_MMIXAL_OPERANDS && isspace(sc.ch)) {
+			if (sc.state == SCE_MMIXAL_OPERANDS && IsASpace(sc.ch)) {
 				sc.SetState(SCE_MMIXAL_COMMENT);
-			} else if (isdigit(sc.ch)) {
+			} else if (IsADigit(sc.ch)) {
 				sc.SetState(SCE_MMIXAL_NUMBER);
 			} else if (IsAWordChar(sc.ch) || sc.Match('@')) {
 				sc.SetState(SCE_MMIXAL_REF);

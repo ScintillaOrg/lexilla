@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -31,7 +30,7 @@ using namespace Lexilla;
 
 
 static bool IsAlphabetic(int ch) {
-	return IsASCII(ch) && isalpha(ch);
+	return IsASCII(ch) && IsUpperOrLowerCase(ch);
 }
 
 static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
@@ -63,7 +62,7 @@ static unsigned int GetBatchVarLen( char *wordBuffer )
 
 		for ( ; ( wordBuffer[nLength] ); nLength++ ) {
 
-			switch ( toupper(wordBuffer[nLength]) ) {
+			switch ( MakeUpperCase(wordBuffer[nLength]) ) {
 			case 'A':
 				// file attributes
 			case 'D':
@@ -133,7 +132,7 @@ static void ColouriseTCMDLine( char *lineBuffer, Sci_PositionU lengthLine, Sci_P
 		return;
 
 	// Check for Comment - return if found
-	} else if (( CompareNCaseInsensitive(lineBuffer+offset, "rem", 3) == 0 ) && (( lineBuffer[offset+3] == 0 ) || ( isspace(lineBuffer[offset+3] )))) {
+	} else if (( CompareNCaseInsensitive(lineBuffer+offset, "rem", 3) == 0 ) && (( lineBuffer[offset+3] == 0 ) || ( IsASpace(lineBuffer[offset+3] )))) {
 			styler.ColourTo(endPos, SCE_TCMD_COMMENT);
 			return;
 
@@ -167,7 +166,7 @@ static void ColouriseTCMDLine( char *lineBuffer, Sci_PositionU lengthLine, Sci_P
 		// Copy word from Line Buffer into Word Buffer
 		wbl = 0;
 		for (; offset < lengthLine && ( wbl < 259 ) && !isspacechar(lineBuffer[offset]); wbl++, offset++) {
-			wordBuffer[wbl] = static_cast<char>(tolower(lineBuffer[offset]));
+			wordBuffer[wbl] = static_cast<char>(MakeLowerCase(lineBuffer[offset]));
 		}
 		wordBuffer[wbl] = '\0';
 		wbo = 0;
@@ -299,7 +298,7 @@ static void ColouriseTCMDLine( char *lineBuffer, Sci_PositionU lengthLine, Sci_P
 			}
 
 			// Check for Argument (%n) or (%*)
-			if (((isdigit(wordBuffer[1])) || (wordBuffer[1] == '*')) && (wordBuffer[wbo] != '%')) {
+			if (((IsADigit(wordBuffer[1])) || (wordBuffer[1] == '*')) && (wordBuffer[wbo] != '%')) {
 				while (( wordBuffer[n] ) && ( strchr( "%0123456789*#$", wordBuffer[n] ) != NULL ))
 					n++;
 ColorizeArg:

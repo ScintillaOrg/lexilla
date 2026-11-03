@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -33,7 +32,7 @@ static void GetRange(Sci_PositionU start,
                      Sci_PositionU len) {
 	Sci_PositionU i = 0;
 	while ((i < end - start + 1) && (i < len-1)) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 		i++;
 	}
 	s[i] = '\0';
@@ -62,10 +61,10 @@ static void ColourisePlmDoc(Sci_PositionU startPos,
 			} else if (ch == '\'') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PLM_STRING;
-			} else if (isdigit(ch)) {
+			} else if (IsADigit(ch)) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PLM_NUMBER;
-			} else if (isalpha(ch)) {
+			} else if (IsUpperOrLowerCase(ch)) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PLM_IDENTIFIER;
 			} else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
@@ -92,13 +91,13 @@ static void ColourisePlmDoc(Sci_PositionU startPos,
 				}
 			}
 		} else if (state == SCE_PLM_NUMBER) {
-			if (!isdigit(ch) && !isalpha(ch) && ch != '$') {
+			if (!IsADigit(ch) && !IsUpperOrLowerCase(ch) && ch != '$') {
 				i--;
 				styler.ColourTo(i, state);
 				state = SCE_PLM_DEFAULT;
 			}
 		} else if (state == SCE_PLM_IDENTIFIER) {
-			if (!isdigit(ch) && !isalpha(ch) && ch != '$') {
+			if (!IsADigit(ch) && !IsUpperOrLowerCase(ch) && ch != '$') {
 				// Get the entire identifier.
 				char word[1024];
 				Sci_Position segmentStart = styler.GetStartSegment();

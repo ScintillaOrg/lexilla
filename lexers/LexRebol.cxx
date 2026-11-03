@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -35,12 +34,12 @@
 using namespace Lexilla;
 
 static inline bool IsAWordChar(const int ch) {
-	return (isalnum(ch) || ch == '?' || ch == '!' || ch == '.' || ch == '\'' || ch == '+' || ch == '-' || ch == '*' || ch == '&' || ch == '|' || ch == '=' || ch == '_' || ch == '~');
+	return (IsAlphaNumeric(ch) || ch == '?' || ch == '!' || ch == '.' || ch == '\'' || ch == '+' || ch == '-' || ch == '*' || ch == '&' || ch == '|' || ch == '=' || ch == '_' || ch == '~');
 }
 
 static inline bool IsAWordStart(const int ch, const int ch2) {
-	return ((ch == '+' || ch == '-' || ch == '.') && !isdigit(ch2)) ||
-		(isalpha(ch) || ch == '?' || ch == '!' || ch == '\'' || ch == '*' || ch == '&' || ch == '|' || ch == '=' || ch == '_' || ch == '~');
+	return ((ch == '+' || ch == '-' || ch == '.') && !IsADigit(ch2)) ||
+		(IsUpperOrLowerCase(ch) || ch == '?' || ch == '!' || ch == '\'' || ch == '*' || ch == '&' || ch == '|' || ch == '=' || ch == '_' || ch == '~');
 }
 
 static inline bool IsAnOperator(const int ch, const int ch2, const int ch3) {

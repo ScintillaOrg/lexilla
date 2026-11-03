@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -30,13 +29,13 @@
 using namespace Lexilla;
 
 /**
- * Is it a core character (C isalpha(), exclamation and question mark)
+ * Is it a core character (IsUpperOrLowerCase(), exclamation and question mark)
  *
  * \param  ch The character
  * \return True if ch is a character, False otherwise
  */
 static inline bool IsAlphaCore(int ch) {
-    return (isalpha(ch) || ch == '!' || ch == '?');
+    return (IsUpperOrLowerCase(ch) || ch == '!' || ch == '?');
 }
 
 /**
@@ -140,7 +139,7 @@ static void ColouriseMagikDoc(Sci_PositionU startPos, Sci_Position length, int i
                     scanPosition < 50;
                     scanPosition++) {
 	                char keywordChar = static_cast<char>(
-                        tolower(styler.SafeGetCharAt(
+                        MakeLowerCase(styler.SafeGetCharAt(
                             scanPosition +
                                 static_cast<Sci_Position>(sc.currentPos+1), ' ')));
                     if(IsAlpha(keywordChar)) {
@@ -223,7 +222,7 @@ static void ColouriseMagikDoc(Sci_PositionU startPos, Sci_Position length, int i
                     scanPosition < 50;
                     scanPosition++) {
 	                char keywordChar = static_cast<char>(
-                        tolower(styler.SafeGetCharAt(
+                        MakeLowerCase(styler.SafeGetCharAt(
                             scanPosition +
                                 static_cast<int>(sc.currentPos), ' ')));
                     if(IsAlpha(keywordChar)) {
@@ -401,7 +400,7 @@ static void FoldMagikDoc(Sci_PositionU startPos, Sci_Position length, int,
                     scanPosition < 50;
                     scanPosition++) {
                     char keywordChar = static_cast<char>(
-                        tolower(styler.SafeGetCharAt(
+                        MakeLowerCase(styler.SafeGetCharAt(
                             scanPosition +
                                 currentPos + 1, ' ')));
                     if(IsAlpha(keywordChar)) {

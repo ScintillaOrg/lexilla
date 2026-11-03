@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -28,12 +27,12 @@ static int classifyWordBullant(Sci_PositionU start, Sci_PositionU end, WordList 
 	char s[100];
 	s[0] = '\0';
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 		s[i + 1] = '\0';
 	}
 	int lev= 0;
 	char chAttr = SCE_C_IDENTIFIER;
-	if (isdigit(s[0]) || (s[0] == '.')){
+	if (IsADigit(s[0]) || (s[0] == '.')){
 		chAttr = SCE_C_NUMBER;
 	}
 	else {
@@ -117,7 +116,7 @@ static void ColouriseBullantDoc(Sci_PositionU startPos, Sci_Position length, int
 			}
 			blockChange=0;
 */		}
-		if (!(IsASCII(ch) && isspace(ch)))
+		if (!(IsASCII(ch) && IsASpace(ch)))
 			visibleChars++;
 
 		if (styler.IsLeadByte(ch)) {

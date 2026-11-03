@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -40,10 +39,10 @@ int is_radix(int radix, int ch) {
 	if (36 < radix || 2 > radix)
 		return 0;
 
-	if (isdigit(ch)) {
+	if (IsADigit(ch)) {
 		digit = ch - '0';
-	} else if (isalnum(ch)) {
-		digit = toupper(ch) - 'A' + 10;
+	} else if (IsAlphaNumeric(ch)) {
+		digit = MakeUpperCase(ch) - 'A' + 10;
 	} else {
 		return 0;
 	}
@@ -76,7 +75,7 @@ typedef enum {
 } atom_parse_state_t;
 
 inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (ch != ' ') && (isalnum(ch) || ch == '_');
+	return (ch < 0x80) && (ch != ' ') && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
@@ -158,7 +157,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 				// V--- Falling through!
 				case COMMENT_DOC_MACRO : {
 
-					if (!isalnum(sc.ch)) {
+					if (!IsAlphaNumeric(sc.ch)) {
 						// Try to match documentation comment
 						sc.GetCurrent(cur, sizeof(cur));
 
@@ -199,7 +198,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 							parse_state = STATE_NULL;
 						} else {
 							sc.Forward();
-							if (isalnum(sc.ch) || (sc.ch == '\''))  {
+							if (IsAlphaNumeric(sc.ch) || (sc.ch == '\''))  {
 								sc.GetCurrent(cur, sizeof(cur));
 								sc.ChangeState(SCE_ERLANG_MODULES);
 								sc.SetState(SCE_ERLANG_MODULES);
@@ -269,7 +268,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 				case RECORD_START : {
 					if ('\'' == sc.ch) {
 						parse_state = RECORD_QUOTED;
-					} else if (isalpha(sc.ch) && islower(sc.ch)) {
+					} else if (IsUpperOrLowerCase(sc.ch) && IsLowerCase(sc.ch)) {
 						parse_state = RECORD_UNQUOTED;
 					} else { // error
 						sc.SetState(SCE_ERLANG_DEFAULT);
@@ -298,7 +297,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 				case MACRO_START : {
 					if ('\'' == sc.ch) {
 						parse_state = MACRO_QUOTED;
-					} else if (isalpha(sc.ch)) {
+					} else if (IsUpperOrLowerCase(sc.ch)) {
 						parse_state = MACRO_UNQUOTED;
 					} else { // error
 						sc.SetState(SCE_ERLANG_DEFAULT);
@@ -326,7 +325,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 			/* Numerics ------------------------------------------------------*/
 			/* Simple integer */
 				case NUMERAL_START : {
-					if (isdigit(sc.ch)) {
+					if (IsADigit(sc.ch)) {
 						radix_digits *= 10;
 						radix_digits += sc.ch - '0'; // Assuming ASCII here!
 					} else if ('#' == sc.ch) {
@@ -336,7 +335,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 						} else {
 							parse_state = NUMERAL_BASE_VALUE;
 						}
-					} else if ('.' == sc.ch && isdigit(sc.chNext)) {
+					} else if ('.' == sc.ch && IsADigit(sc.chNext)) {
 						radix_digits = 0;
 						parse_state = NUMERAL_FLOAT;
 					} else if ('e' == sc.ch || 'E' == sc.ch) {
@@ -355,7 +354,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 					if (!is_radix(radix_digits,sc.ch)) {
 						radix_digits = 0;
 
-						if (!isalnum(sc.ch))
+						if (!IsAlphaNumeric(sc.ch))
 							sc.ChangeState(SCE_ERLANG_NUMBER);
 
 						sc.SetState(SCE_ERLANG_DEFAULT);
@@ -368,7 +367,7 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 					if ('e' == sc.ch || 'E' == sc.ch) {
 						exponent_digits = 0;
 						parse_state = NUMERAL_EXPONENT;
-					} else if (!isdigit(sc.ch)) {
+					} else if (!IsADigit(sc.ch)) {
 						sc.ChangeState(SCE_ERLANG_NUMBER);
 						sc.SetState(SCE_ERLANG_DEFAULT);
 						parse_state = STATE_NULL;
@@ -378,9 +377,9 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 			/* Exponent, either integer or float (xEyy, x.yyEzzz) */
 				case NUMERAL_EXPONENT : {
 					if (('-' == sc.ch || '+' == sc.ch)
-							&& (isdigit(sc.chNext))) {
+							&& (IsADigit(sc.chNext))) {
 						sc.Forward();
-					} else if (!isdigit(sc.ch)) {
+					} else if (!IsADigit(sc.ch)) {
 						if (0 < exponent_digits)
 							sc.ChangeState(SCE_ERLANG_NUMBER);
 						sc.SetState(SCE_ERLANG_DEFAULT);
@@ -487,13 +486,13 @@ void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initSty
 			}
 
 			if (no_new_state) {
-				if (isdigit(sc.ch)) {
+				if (IsADigit(sc.ch)) {
 					parse_state = NUMERAL_START;
 					radix_digits = sc.ch - '0';
 					sc.SetState(SCE_ERLANG_UNKNOWN);
-				} else if (isupper(sc.ch) || '_' == sc.ch) {
+				} else if (IsUpperCase(sc.ch) || '_' == sc.ch) {
 					sc.SetState(SCE_ERLANG_VARIABLE);
-				} else if (isalpha(sc.ch)) {
+				} else if (IsUpperOrLowerCase(sc.ch)) {
 					parse_state = ATOM_UNQUOTED;
 					sc.SetState(SCE_ERLANG_UNKNOWN);
 				} else if (isoperator(static_cast<char>(sc.ch))

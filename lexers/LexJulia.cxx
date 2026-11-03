@@ -295,7 +295,7 @@ int is_wc_cat_id_start(uint32_t wc) {
 
 inline bool IsIdentifierFirstCharacter (int ch) {
     if (IsASCII(ch)) {
-        return (bool) (isalpha(ch) || ch == '_');
+        return (bool) (IsUpperOrLowerCase(ch) || ch == '_');
     }
     if (ch < 0xA1 || ch > 0x10ffff) {
         return false;
@@ -306,7 +306,7 @@ inline bool IsIdentifierFirstCharacter (int ch) {
 
 inline bool IsIdentifierCharacter (int ch) {
     if (IsASCII(ch)) {
-        return (bool) (isalnum(ch) || ch == '_' || ch == '!');
+        return (bool) (IsAlphaNumeric(ch) || ch == '_' || ch == '!');
     }
     if (ch < 0xA1 || ch > 0x10ffff) {
         return false;

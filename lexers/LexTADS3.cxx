@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -102,30 +101,30 @@ static inline bool IsATADS3Operator(const int ch) {
 }
 
 static inline bool IsAWordChar(const int ch) {
-        return isalnum(ch) || ch == '_';
+        return IsAlphaNumeric(ch) || ch == '_';
 }
 
 static inline bool IsAWordStart(const int ch) {
-        return isalpha(ch) || ch == '_';
+        return IsUpperOrLowerCase(ch) || ch == '_';
 }
 
 static inline bool IsAHexDigit(const int ch) {
-        int lch = tolower(ch);
-        return isdigit(lch) || lch == 'a' || lch == 'b' || lch == 'c'
+        int lch = MakeLowerCase(ch);
+        return IsADigit(lch) || lch == 'a' || lch == 'b' || lch == 'c'
                 || lch == 'd' || lch == 'e' || lch == 'f';
 }
 
 static inline bool IsAnHTMLChar(int ch) {
-        return isalnum(ch) || ch == '-' || ch == '_' || ch == '.';
+        return IsAlphaNumeric(ch) || ch == '-' || ch == '_' || ch == '.';
 }
 
 static inline bool IsADirectiveChar(int ch) {
-        return isalnum(ch) || isspace(ch) || ch == '-' || ch == '/';
+        return IsAlphaNumeric(ch) || IsASpace(ch) || ch == '-' || ch == '/';
 }
 
 static inline bool IsANumberStart(StyleContext &sc) {
-        return isdigit(sc.ch)
-                || (!isdigit(sc.chPrev) && sc.ch == '.' && isdigit(sc.chNext));
+        return IsADigit(sc.ch)
+                || (!IsADigit(sc.chPrev) && sc.ch == '.' && IsADigit(sc.chNext));
 }
 
 inline static void ColouriseTADS3Operator(StyleContext &sc) {
@@ -487,7 +486,7 @@ static void ColouriseTADS3Number(StyleContext &sc) {
         if (sc.More()) {
                 sc.Forward();
         }
-        if (sc.chPrev == '0' && tolower(sc.ch) == 'x') {
+        if (sc.chPrev == '0' && MakeLowerCase(sc.ch) == 'x') {
                 inHexNumber = true;
                 sc.Forward();
         }
@@ -496,8 +495,8 @@ static void ColouriseTADS3Number(StyleContext &sc) {
                         if (!IsAHexDigit(sc.ch)) {
                                 break;
                         }
-                } else if (!isdigit(sc.ch)) {
-                        if (!seenE && tolower(sc.ch) == 'e') {
+                } else if (!IsADigit(sc.ch)) {
+                        if (!seenE && MakeLowerCase(sc.ch) == 'e') {
                                 seenE = true;
                                 seenDot = true;
                                 if (sc.chNext == '+' || sc.chNext == '-') {
@@ -702,7 +701,7 @@ static inline bool IsAnOperator(const int style) {
 }
 
 static inline bool IsSpaceEquivalent(const int ch, const int style) {
-        return isspace(ch)
+        return IsASpace(ch)
                 || style == SCE_T3_BLOCK_COMMENT
                 || style == SCE_T3_LINE_COMMENT
                 || style == SCE_T3_PREPROCESSOR;

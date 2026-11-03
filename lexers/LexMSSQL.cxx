@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -43,7 +42,7 @@ static char classifyWordSQL(Sci_PositionU start,
                             unsigned int actualState,
 							unsigned int prevState) {
 	char s[256];
-	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
+	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.');
 
 	WordList &kwStatements          = *keywordlists[KW_MSSQL_STATEMENTS];
     WordList &kwDataTypes           = *keywordlists[KW_MSSQL_DATA_TYPES];
@@ -54,7 +53,7 @@ static char classifyWordSQL(Sci_PositionU start,
     WordList &kwOperators           = *keywordlists[KW_MSSQL_OPERATORS];
 
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 128; i++) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 		s[i + 1] = '\0';
 	}
 	char chAttr = SCE_MSSQL_IDENTIFIER;
@@ -324,7 +323,7 @@ static void FoldMSSQLDoc(Sci_PositionU startPos, Sci_Position length, int, WordL
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}
-					s[j] = static_cast<char>(tolower(styler[i + j]));
+					s[j] = static_cast<char>(MakeLowerCase(styler[i + j]));
 					s[j + 1] = '\0';
                 }
 				if ((strcmp(s, "begin") == 0) || (strcmp(s, "case") == 0)) {

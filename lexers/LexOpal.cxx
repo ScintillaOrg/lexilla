@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -296,7 +295,7 @@ inline bool HandleInteger( Sci_PositionU & cur, Sci_PositionU one_too_much, Acce
 		}
 
 		ch = styler.SafeGetCharAt( cur );
-		if( !( IsASCII( ch ) && isdigit( ch ) ) )
+		if( !( IsASCII( ch ) && IsADigit( ch ) ) )
 		{
 			styler.ColourTo( cur - 1, SCE_OPAL_INTEGER );
 			styler.StartSegment( cur );
@@ -315,7 +314,7 @@ inline bool HandleWord( Sci_PositionU & cur, Sci_PositionU one_too_much, Accesso
 	{
 		ch = styler.SafeGetCharAt( cur );
 		if( ( ch != '_' ) && ( ch != '-' ) &&
-			!( IsASCII( ch ) && ( islower( ch ) || isupper( ch ) || isdigit( ch ) ) ) ) break;
+			!( IsASCII( ch ) && ( IsLowerCase( ch ) || IsUpperCase( ch ) || IsADigit( ch ) ) ) ) break;
 
 		cur++;
 		if( cur >= one_too_much )
@@ -491,13 +490,13 @@ static void ColouriseOpalDoc( Sci_PositionU startPos, Sci_Position length, int i
 				default:
 					{
 						// Integer
-						if( IsASCII( ch ) && isdigit( ch ) )
+						if( IsASCII( ch ) && IsADigit( ch ) )
 						{
 							if( !HandleInteger( cur, one_too_much, styler ) ) return;
 						}
 
 						// Keyword
-						else if( IsASCII( ch ) && ( islower( ch ) || isupper( ch ) ) )
+						else if( IsASCII( ch ) && ( IsLowerCase( ch ) || IsUpperCase( ch ) ) )
 						{
 							if( !HandleWord( cur, one_too_much, styler, keywordlists ) ) return;
 

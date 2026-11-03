@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -99,12 +98,12 @@ static void ColouriseNncrontabDoc(Sci_PositionU startPos, Sci_Position length, i
 					// signals an asterisk
 					// no state jump necessary for this simple case...
 					styler.ColourTo(i,SCE_NNCRONTAB_ASTERISK);
-				} else if( (IsASCII(ch) && isalpha(ch)) || ch == '<' ) {
+				} else if( (IsASCII(ch) && IsUpperOrLowerCase(ch)) || ch == '<' ) {
 					// signals the start of an identifier
 					bufferCount = 0;
 					buffer[bufferCount++] = ch;
 					state = SCE_NNCRONTAB_IDENTIFIER;
-				} else if( IsASCII(ch) && isdigit(ch) ) {
+				} else if( IsASCII(ch) && IsADigit(ch) ) {
 					// signals the start of a number
 					bufferCount = 0;
 					buffer[bufferCount++] = ch;
@@ -172,7 +171,7 @@ static void ColouriseNncrontabDoc(Sci_PositionU startPos, Sci_Position length, i
 
 			case SCE_NNCRONTAB_IDENTIFIER:
 				// stay  in CONF_IDENTIFIER state until we find a non-alphanumeric
-				if( (IsASCII(ch) && isalnum(ch)) || (ch == '_') || (ch == '-') || (ch == '/') ||
+				if( (IsASCII(ch) && IsAlphaNumeric(ch)) || (ch == '_') || (ch == '-') || (ch == '/') ||
 					(ch == '$') || (ch == '.') || (ch == '<') || (ch == '>') ||
 					(ch == '@') ) {
 					buffer[bufferCount++] = ch;
@@ -201,7 +200,7 @@ static void ColouriseNncrontabDoc(Sci_PositionU startPos, Sci_Position length, i
 
 			case SCE_NNCRONTAB_NUMBER:
 				// stay  in CONF_NUMBER state until we find a non-numeric
-				if( IsASCII(ch) && isdigit(ch) /* || ch == '.' */ ) {
+				if( IsASCII(ch) && IsADigit(ch) /* || ch == '.' */ ) {
 					buffer[bufferCount++] = ch;
 				} else {
 					state = SCE_NNCRONTAB_DEFAULT;

@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include <cassert>
-#include <cctype>
 
 #include <string>
 #include <string_view>
@@ -36,11 +35,11 @@ using namespace Lexilla;
 namespace {
 	bool IsAlphabetic(unsigned int ch)
 	{
-		return IsASCII(ch) && std::isalpha(ch) != 0;
+		return IsASCII(ch) && IsUpperOrLowerCase(ch) != 0;
 	}
 	bool IsAlphaNumeric(char ch)
 	{
-	    return IsASCII(ch) && std::isalnum(ch);
+	    return IsASCII(ch) && IsAlphaNumeric(ch);
 	}
 
 	bool EqualCaseInsensitive(const char* a, const char* b)
@@ -254,7 +253,7 @@ namespace {
 					collect_entry_name = false;
 
 				if (collect_entry_name) {
-					buffer += static_cast<char>(tolower(sc.ch));
+					buffer += static_cast<char>(MakeLowerCase(sc.ch));
                     if (EntryNames.InList(buffer.c_str()))
                         sc.ChangeState(SCE_BIBTEX_ENTRY);
                     else

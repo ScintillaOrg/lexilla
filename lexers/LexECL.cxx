@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4786)
@@ -178,7 +177,7 @@ static void ColouriseEclDoc(Sci_PositionU startPos, Sci_Position length, int ini
 					else	//Data types are of from KEYWORD##
 					{
 						int i = static_cast<int>(strlen(s)) - 1;
-						while(i >= 0 && (isdigit(s[i]) || s[i] == '_'))
+						while(i >= 0 && (IsADigit(s[i]) || s[i] == '_'))
 							--i;
 
 						char s2[1000];
@@ -279,7 +278,7 @@ static void ColouriseEclDoc(Sci_PositionU startPos, Sci_Position length, int ini
 					sc.SetState(SCE_ECL_DEFAULT);
 				} else if (sc.ch == '/') {
 					sc.Forward();
-					while ((sc.ch < 0x80) && islower(sc.ch))
+					while ((sc.ch < 0x80) && IsLowerCase(sc.ch))
 						sc.Forward();    // gobble regex flags
 					sc.SetState(SCE_ECL_DEFAULT);
 				} else if (sc.ch == '\\') {
@@ -391,8 +390,8 @@ static bool IsStreamCommentStyle(int style) {
 static bool MatchNoCase(Accessor & styler, Sci_PositionU & pos, const char *s) {
 	Sci_Position i=0;
 	for (; *s; i++) {
-		char compare_char = tolower(*s);
-		char styler_char = tolower(styler.SafeGetCharAt(pos+i));
+		char compare_char = MakeLowerCase(*s);
+		char styler_char = MakeLowerCase(styler.SafeGetCharAt(pos+i));
 		if (compare_char != styler_char)
 			return false;
 		s++;

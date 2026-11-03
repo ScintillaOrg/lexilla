@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -259,7 +258,7 @@ static void GetRangeUpper(Sci_PositionU start,Sci_PositionU end,Accessor &styler
 {
 	Sci_PositionU i = 0;
 	while ((i < end - start + 1) && (i < len-1)) {
-		s[i] = static_cast<char>(toupper(styler[start + i]));
+		s[i] = static_cast<char>(MakeUpperCase(styler[start + i]));
 		i++;
 	}
 	s[i] = '\0';

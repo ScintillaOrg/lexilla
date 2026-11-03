@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -61,8 +60,8 @@ static inline bool IsNumberChar(int ch, int chNext) {
 	// recognized and it will be styled together with the preceding number.
 	// This should not occur; at least not often. The coding style recommends
 	// putting spaces around operators.
-	return IsADigit(ch) || toupper(ch) == 'E' || ch == '.' ||
-		   ((ch == '-' || ch == '+') && toupper(chNext) == 'E');
+	return IsADigit(ch) || MakeUpperCase(ch) == 'E' || ch == '.' ||
+		   ((ch == '-' || ch == '+') && MakeUpperCase(chNext) == 'E');
 }
 
 // This function checks for the start or a natural number without any symbols
@@ -400,7 +399,7 @@ static void GetRangeLowered(Sci_PositionU start, Sci_PositionU end,
 							Accessor &styler, char *s, Sci_PositionU len) {
 	Sci_PositionU i = 0;
 	while (i < end - start + 1 && i < len - 1) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 		i++;
 	}
 	s[i] = '\0';
@@ -410,7 +409,7 @@ static void GetForwardWordLowered(Sci_PositionU start, Accessor &styler,
 								  char *s, Sci_PositionU len) {
 	Sci_PositionU i = 0;
 	while (i < len - 1 && IsAlpha(styler.SafeGetCharAt(start + i))) {
-		s[i] = static_cast<char>(tolower(styler.SafeGetCharAt(start + i)));
+		s[i] = static_cast<char>(MakeLowerCase(styler.SafeGetCharAt(start + i)));
 		i++;
 	}
 	s[i] = '\0';

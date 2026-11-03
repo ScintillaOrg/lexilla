@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -123,7 +122,7 @@ static void ColouriseLabel(StyleContext& sc, WordList& keywords, bool& apostroph
 	std::string identifier;
 
 	while (!sc.atLineEnd && !IsSeparatorOrDelimiterCharacter(sc.ch)) {
-		identifier += static_cast<char>(tolower(sc.ch));
+		identifier += static_cast<char>(MakeLowerCase(sc.ch));
 		sc.Forward();
 	}
 
@@ -198,7 +197,7 @@ static void ColouriseWord(StyleContext& sc, WordList& keywords, bool& apostrophe
 	std::string word;
 
 	while (!sc.atLineEnd && !IsSeparatorOrDelimiterCharacter(sc.ch)) {
-		word += static_cast<char>(tolower(sc.ch));
+		word += static_cast<char>(MakeLowerCase(sc.ch));
 		sc.Forward();
 	}
 
@@ -415,7 +414,7 @@ static bool IsValidNumber(const std::string& number) {
 		canBeSpecial = false;
 
 		for (; i < length; i++) {
-			int ch = tolower(number[i]);
+			int ch = MakeLowerCase(number[i]);
 
 			if (ch == '_') {
 				if (!canBeSpecial) {
@@ -510,5 +509,5 @@ static inline bool IsWordCharacter(int ch) {
 }
 
 static inline bool IsWordStartCharacter(int ch) {
-	return (IsASCII(ch) && isalpha(ch)) || ch == '_';
+	return (IsASCII(ch) && IsUpperOrLowerCase(ch)) || ch == '_';
 }

@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -35,7 +34,7 @@ using namespace Lexilla;
 //additionally numbers that follow 'M' can be contained in a keyword
 static inline bool IsSWordStart(const int ch, const int prev_ch)
 {
-    if (isalpha(ch) || (ch == '_') || ((isdigit(ch)) && (prev_ch == 'M')))
+    if (IsUpperOrLowerCase(ch) || (ch == '_') || ((IsADigit(ch)) && (prev_ch == 'M')))
         return true;
 
     return false;
@@ -45,7 +44,7 @@ static inline bool IsSWordStart(const int ch, const int prev_ch)
 //only digits that are not preceded by 'M' count as a number
 static inline bool IsSorcusNumber(const int ch, const int prev_ch)
 {
-    if ((isdigit(ch)) && (prev_ch != 'M'))
+    if ((IsADigit(ch)) && (prev_ch != 'M'))
         return true;
 
     return false;

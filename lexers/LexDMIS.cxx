@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cctype>
 
 #include <string>
 #include <string_view>
@@ -109,7 +108,7 @@ char * SCI_METHOD LexerDMIS::UpperCase(char *item)
 
 	itemStart = item;
 	while (item && *item) {
-		*item = toupper(*item);
+		*item = MakeUpperCase(*item);
 		item++;
 	};
 	return itemStart;

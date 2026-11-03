@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -30,17 +29,17 @@
 using namespace Lexilla;
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' ||
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '.' ||
 		ch == '_' || ch == '?');
 }
 
 static inline bool IsAWordStart(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.' ||
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' || ch == '.' ||
 		ch == '%' || ch == '@' || ch == '$' || ch == '?');
 }
 
 static inline bool IsCsoundOperator(char ch) {
-	if (IsASCII(ch) && isalnum(ch))
+	if (IsASCII(ch) && IsAlphaNumeric(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
 	if (ch == '*' || ch == '/' || ch == '-' || ch == '+' ||
@@ -129,7 +128,7 @@ static void ColouriseCsoundDoc(Sci_PositionU startPos, Sci_Position length, int 
 		if (sc.state == SCE_CSOUND_DEFAULT) {
 			if (sc.ch == ';'){
 				sc.SetState(SCE_CSOUND_COMMENT);
-			} else if (isdigit(sc.ch) || (sc.ch == '.' && isdigit(sc.chNext))) {
+			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				sc.SetState(SCE_CSOUND_NUMBER);
 			} else if (IsAWordStart(sc.ch)) {
 				sc.SetState(SCE_CSOUND_IDENTIFIER);

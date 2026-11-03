@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -103,7 +102,7 @@ inline bool checkStatement(
 		}
 	}
 	if( spaceAfter ) {
-		if( ! isspace( styler.SafeGetCharAt( curPos + i ) ) ) {
+		if( ! IsASpace( styler.SafeGetCharAt( curPos + i ) ) ) {
 			return false;
 		}
 	}
@@ -123,7 +122,7 @@ inline bool checkEndSemicolon(
 			return false;
 		}
 	}
-	while( isspace( styler.SafeGetCharAt( curPos + i ) ) ) {
+	while( IsASpace( styler.SafeGetCharAt( curPos + i ) ) ) {
 		i++;
 		if( ( curPos + i ) >= endPos ) return false;
 	}
@@ -145,29 +144,29 @@ inline bool checkKeyIdentOper(
 	newPos++;
 	if( newPos >= endPos )
 		return false;
-	if( ! isspace( styler.SafeGetCharAt( newPos ) ) )
+	if( ! IsASpace( styler.SafeGetCharAt( newPos ) ) )
 		return false;
 	newPos++;
 	if( newPos >= endPos )
 		return false;
-	while( isspace( styler.SafeGetCharAt( newPos ) ) ) {
+	while( IsASpace( styler.SafeGetCharAt( newPos ) ) ) {
 		newPos++;
 		if( newPos >= endPos )
 			return false;
 	}
-	if( ! isalpha( styler.SafeGetCharAt( newPos ) ) )
+	if( ! IsUpperOrLowerCase( styler.SafeGetCharAt( newPos ) ) )
 		return false;
 	newPos++;
 	if( newPos >= endPos )
 		return false;
 	char ch;
 	ch = styler.SafeGetCharAt( newPos );
-	while( isalpha( ch ) || isdigit( ch ) || ch == '_' ) {
+	while( IsUpperOrLowerCase( ch ) || IsADigit( ch ) || ch == '_' ) {
 		newPos++;
 		if( newPos >= endPos ) return false;
 		ch = styler.SafeGetCharAt( newPos );
 	}
-	while( isspace( styler.SafeGetCharAt( newPos ) ) ) {
+	while( IsASpace( styler.SafeGetCharAt( newPos ) ) ) {
 		newPos++;
 		if( newPos >= endPos ) return false;
 	}
@@ -193,7 +192,7 @@ void FoldModulaDoc( Sci_PositionU startPos,
 	int nextLevel = curLevel;
 
 	while( curPos < endPos ) {
-		if( ! isspace( styler.SafeGetCharAt( curPos ) ) ) visChars++;
+		if( ! IsASpace( styler.SafeGetCharAt( curPos ) ) ) visChars++;
 
 		switch( style ) {
 		case SCE_MODULA_COMMENT:
@@ -318,7 +317,7 @@ void FoldModulaDoc( Sci_PositionU startPos,
 }
 
 inline bool skipWhiteSpaces( StyleContext & sc ) {
-	while( isspace( sc.ch ) ) {
+	while( IsASpace( sc.ch ) ) {
 		sc.SetState( SCE_MODULA_DEFAULT );
 		if( sc.More() )
 			sc.Forward();
@@ -364,8 +363,8 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 				sc.Forward();
 			}
 			else
-			if( isalpha( sc.ch ) ) {
-				if( isupper( sc.ch ) && isupper( sc.chNext ) ) {
+			if( IsUpperOrLowerCase( sc.ch ) ) {
+				if( IsUpperCase( sc.ch ) && IsUpperCase( sc.chNext ) ) {
 					for( i = 0; i < BUFLEN - 1; i++ ) {
 						buf[i] = sc.GetRelative(i);
 						if( !(IsAlphaNumeric( buf[i] ) || buf[i] == '_') )
@@ -394,8 +393,8 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 				} else {
 					for( i = 0; i < BUFLEN - 1; i++ ) {
 						buf[i] = sc.GetRelative(i);
-						if( !isalpha( buf[i] ) &&
-							!isdigit( buf[i] ) &&
+						if( !IsUpperOrLowerCase( buf[i] ) &&
+							!IsADigit( buf[i] ) &&
 							!(buf[i] == '_') )
 							break;
 					}
@@ -408,7 +407,7 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 				}
 			}
 			else
-			if( isdigit( sc.ch ) ) {
+			if( IsADigit( sc.ch ) ) {
 				sc.SetState( SCE_MODULA_NUMBER );
 				continue;
 			}
@@ -457,10 +456,10 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 				break;
 
 			case '@':
-				if( islower( sc.chNext ) ) {
+				if( IsLowerCase( sc.chNext ) ) {
 					for( i = 0; i < BUFLEN - 1; i++ ) {
 						buf[i] = sc.GetRelative(i+1);
-						if( isspace( buf[i] ) ) break;
+						if( IsASpace( buf[i] ) ) break;
 					}
 					buf[i] = 0;
 					kl = i;
@@ -483,7 +482,7 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 				buf[0] = sc.ch;
 				for( i = 1; i < BUFLEN - 1; i++ ) {
 					buf[i] = sc.GetRelative(i);
-					if( ! isdigit( buf[i] ) )
+					if( ! IsADigit( buf[i] ) )
 						break;
 				}
 				kl = i;
@@ -538,9 +537,9 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 						kl++;
 
 						buf[0] = sc.GetRelative(kl);
-						if( isdigit( buf[0] ) ) {
+						if( IsADigit( buf[0] ) ) {
 							for( i = 0;; i++ ) {
-								if( !isdigit(sc.GetRelative(kl+i)) )
+								if( !IsADigit(sc.GetRelative(kl+i)) )
 									break;
 							}
 							kl += i;
@@ -560,9 +559,9 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 									kl++;
 								}
 								buf[0] = sc.GetRelative(kl);
-								if( isdigit( buf[0] ) ) {
+								if( IsADigit( buf[0] ) ) {
 									for( i = 0;; i++ ) {
-										if( !isdigit(sc.GetRelative(kl+i)) ) {
+										if( !IsADigit(sc.GetRelative(kl+i)) ) {
 											buf[0] = sc.GetRelative(kl+i);
 											break;
 										}
@@ -583,7 +582,7 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 						}
 
 						if( doNext ) {
-							if( ! isspace( buf[0] ) &&
+							if( ! IsASpace( buf[0] ) &&
 								buf[0] != ')' &&
 								buf[0] != '>' &&
 								buf[0] != '<' &&
@@ -706,12 +705,12 @@ void ColouriseModulaDoc(	Sci_PositionU startPos,
 				continue;
 			}
 			else
-			if( isupper( sc.ch ) && isupper( sc.chNext ) ) {
+			if( IsUpperCase( sc.ch ) && IsUpperCase( sc.chNext ) ) {
 				buf[0] = sc.ch;
 				buf[1] = sc.chNext;
 				for( i = 2; i < BUFLEN - 1; i++ ) {
 					buf[i] = sc.GetRelative(i);
-					if( !isupper( buf[i] ) )
+					if( !IsUpperCase( buf[i] ) )
 						break;
 				}
 				kl = i;

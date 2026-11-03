@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -103,7 +102,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
       }
 
     // Handle numbers. Numbers always begin with a digit.
-    if(IsASCII(ch) && isdigit(ch))
+    if(IsASCII(ch) && IsADigit(ch))
       {
 	i++;
 	for (; i < lengthDoc; i++)
@@ -123,7 +122,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 		continue;
 	      }
 
-	    if(!IsASCII(ch) || !(isdigit(ch) || islower(ch) || isupper(ch)))
+	    if(!IsASCII(ch) || !(IsADigit(ch) || IsLowerCase(ch) || IsUpperCase(ch)))
 	      {
 		i--;
 		break;
@@ -154,7 +153,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
       }
 
     // Handle keywords. Maxima treats Non-ASCII chars as ordinary letters.
-    if(((!IsASCII(ch))) || isalpha(ch) || (ch == '_'))
+    if(((!IsASCII(ch))) || IsUpperOrLowerCase(ch) || (ch == '_'))
       {
 	char cmd[100];
 	int cmdidx = 0;
@@ -174,7 +173,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 		  cmd[cmdidx++] = ch;
 		continue;
 	      }
-	    if(isMaximaoperator(ch) || ((IsASCII(ch) && !isalpha(ch) && !isdigit(ch) && (ch != '_'))))
+	    if(isMaximaoperator(ch) || ((IsASCII(ch) && !IsUpperOrLowerCase(ch) && !IsADigit(ch) && (ch != '_'))))
 	      {
 		i--;
 		break;

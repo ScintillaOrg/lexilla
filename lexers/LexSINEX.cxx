@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 
@@ -103,7 +102,7 @@ inline bool IsSINEXNumber(const char *text, Sci_PositionU len) {
 				return false;
 			}
 
-		} else if (isdigit(text[i])) {
+		} else if (IsADigit(text[i])) {
 			if ((parsingState == NOTHING) || (parsingState == SIGN_1) \
 			|| (parsingState == MANTISSA_1)) {
 				parsingState = MANTISSA_1;

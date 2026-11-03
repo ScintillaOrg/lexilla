@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-#include <cctype>
 #include <cstdio>
 
 #include <string>
@@ -46,13 +45,13 @@ bool isCOBOLoperator(char ch)
 
 bool isCOBOLwordchar(char ch)
     {
-    return IsASCII(ch) && (isalnum(ch) || ch == '-');
+    return IsASCII(ch) && (IsAlphaNumeric(ch) || ch == '-');
 
     }
 
 bool isCOBOLwordstart(char ch)
     {
-    return IsASCII(ch) && isalnum(ch);
+    return IsASCII(ch) && IsAlphaNumeric(ch);
     }
 
 int CountBits(int nBits)
@@ -73,7 +72,7 @@ void getRange(Sci_PositionU start,
         Sci_PositionU len) {
     Sci_PositionU i = 0;
     while ((i < end - start + 1) && (i < len-1)) {
-        s[i] = static_cast<char>(tolower(styler[start + i]));
+        s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
         i++;
     }
     s[i] = '\0';
@@ -93,11 +92,11 @@ int classifyWordCOBOL(Sci_PositionU start, Sci_PositionU end, /*WordList &keywor
     getRange(start, end, styler, s, sizeof(s));
 
     int chAttr = SCE_COBOL_IDENTIFIER;
-    if (isdigit(s[0]) || (s[0] == '.') || (s[0] == 'v')) {
+    if (IsADigit(s[0]) || (s[0] == '.') || (s[0] == 'v')) {
         chAttr = SCE_COBOL_NUMBER;
         char *p = s + 1;
         while (*p) {
-            if ((!isdigit(*p) && (*p) != 'v') && isCOBOLwordchar(*p)) {
+            if ((!IsADigit(*p) && (*p) != 'v') && isCOBOLwordchar(*p)) {
                 chAttr = SCE_COBOL_IDENTIFIER;
                 break;
             }
@@ -209,7 +208,7 @@ void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int initStyl
         }
 
         if (state == SCE_COBOL_DEFAULT) {
-            if (isCOBOLwordstart(ch) || (ch == '$' && IsASCII(chNext) && isalpha(chNext))) {
+            if (isCOBOLwordstart(ch) || (ch == '$' && IsASCII(chNext) && IsUpperOrLowerCase(chNext))) {
                 ColourTo(styler, i-1, state);
                 state = SCE_COBOL_IDENTIFIER;
             } else if (column == 6 && (ch == '*' || ch == '/')) {

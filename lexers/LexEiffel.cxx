@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -40,11 +39,11 @@ static inline bool isEiffelOperator(unsigned int ch) {
 }
 
 static inline bool IsAWordChar(unsigned int  ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 static inline bool IsAWordStart(unsigned int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+	return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_');
 }
 
 static void ColouriseEiffelDoc(Sci_PositionU startPos,

@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -39,11 +38,11 @@ using namespace Lexilla;
 
 /***********************************************/
 static inline bool IsAWordChar(const int ch) {
-    return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '%');
+    return (ch < 0x80) && (IsAlphaNumeric(ch) || ch == '_' || ch == '%');
 }
 /**********************************************/
 static inline bool IsAWordStart(const int ch) {
-    return (ch < 0x80) && (isalnum(ch));
+    return (ch < 0x80) && (IsAlphaNumeric(ch));
 }
 /***************************************/
 static void ColouriseDMAPDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
@@ -196,7 +195,7 @@ static void FoldDMAPDoc(Sci_PositionU startPos, Sci_Position length, int initSty
                 char s[32];
                 Sci_PositionU k;
                 for(k=0; (k<31 ) && (k<i-lastStart+1 ); k++) {
-                    s[k] = static_cast<char>(tolower(styler[lastStart+k]));
+                    s[k] = static_cast<char>(MakeLowerCase(styler[lastStart+k]));
                 }
                 s[k] = '\0';
                 levelCurrent += classifyFoldPointDMAP(s, prevWord);

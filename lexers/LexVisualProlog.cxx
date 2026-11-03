@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4786)

@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 #include <string>
 #include <string_view>
@@ -344,7 +343,7 @@ static int ParseMetapostWord(Sci_PositionU pos, Accessor &styler, char *word)
   char ch=styler.SafeGetCharAt(pos);
   *word=0;
 
-  while(isMETAPOSTidentifier(ch) && isalpha(ch) && length<100){
+  while(isMETAPOSTidentifier(ch) && IsUpperOrLowerCase(ch) && length<100){
           word[length]=ch;
           length++;
           ch=styler.SafeGetCharAt(pos+length);
