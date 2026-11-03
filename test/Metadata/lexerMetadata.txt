@@ -2229,10 +2229,10 @@ Lexer python
 Lexer r
     Word Lists:
         Language Keywords
-        Base / Default package function
-        Other Package Functions
-        Unused
-        Unused
+        Functions from Base-Priority R Packages
+        Functions from Recommended-Priority R Packages
+        Non-Function Objects
+        User-Defined Objects
 
 Lexer raku
     Properties:

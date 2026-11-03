@@ -1285,6 +1285,7 @@ $(DIR_O)/LexR.obj: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
 	../lexlib/LexerModule.h
 $(DIR_O)/LexRaku.obj: \
 	../lexers/LexRaku.cxx \
