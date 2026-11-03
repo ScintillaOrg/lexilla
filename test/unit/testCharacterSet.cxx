@@ -148,4 +148,25 @@ TEST_CASE("Functions") {
 		REQUIRE(!EqualCaseInsensitive("aa", "A"));
 		REQUIRE(!EqualCaseInsensitive("a", "AA"));
 	}
+
+	SECTION("MatchCType") {
+		// Check that the CharacterSet functions match the ctype functions over ASCII
+		for (int ch = 0; ch < 128; ch++) {
+			REQUIRE(!!isascii(ch) == IsASCII(ch));
+			REQUIRE(!!isalnum(ch) == IsAlphaNumeric(ch));
+			REQUIRE(!!isalpha(ch) == IsUpperOrLowerCase(ch));
+			REQUIRE(!!isspace(ch) == IsASpace(ch));
+			REQUIRE(!!isblank(ch) == IsASpaceOrTab(ch));
+			REQUIRE(!!isdigit(ch) == IsADigit(ch));
+			REQUIRE(!!isxdigit(ch) == IsAHeXDigit(ch));
+			REQUIRE(!!islower(ch) == IsLowerCase(ch));
+			REQUIRE(!!isupper(ch) == IsUpperCase(ch));
+			REQUIRE(!!isgraph(ch) == IsAGraphic(ch));
+			REQUIRE(!!ispunct(ch) == IsPunctuation(ch));
+			REQUIRE(!!iscntrl(ch) == IsControl(ch));
+			//REQUIRE(!!isprint(ch) == no replacement);
+			REQUIRE(tolower(ch) == MakeLowerCase(ch));
+			REQUIRE(toupper(ch) == MakeUpperCase(ch));
+		}
+	}
 }
