@@ -1,0 +1,90 @@
+ 0 400 400   # coding:utf-8
+ 0 400 400   ### hexadecimal floating-point numbers styled 5 SCE_R_NUMBER
+ 1 400 400   
+ 0 400 400   # point followed by a digit
+ 0 400 400   0x1.3ae147ae147aep+0 + 0x1.23d70a3d70a3dp+2i # 1.23 + 4.56i
+ 1 400 400   
+ 0 400 400   # point not followed by a digit
+ 0 400 400   0x1.ccccccccccccdp-1 + 0x1.ccccccccccccdp-1i # 0.9 + 0.9i
+ 0 400 400   0x1.ccccccccccccdp-1
+ 1 400 400   
+ 0 400 400   # upper case letters:
+ 0 400 400   0X1.CCCCCCCCCCCCDP-1 # 0.9
+ 0 400 400   0X1.1CCCCCCCCCCCDP-1
+ 1 400 400   
+ 0 400 400   # imaginary numbers
+ 0 400 400   0x.1p1i
+ 0 400 400   0x0.1p1i
+ 0 400 400   0xa.1p1i
+ 0 400 400   0xa.a1p1i
+ 1 400 400   
+ 1 400 400   
+ 1 400 400   
+ 0 400 400   ### identifiers styled 9 SCE_R_IDENTIFIER
+ 1 400 400   
+ 0 400 400   # identifiers can start with a letter or a dot:
+ 0 400 400   .a._x123
+ 0 400 400   ..a
+ 0 400 400   ._1
+ 1 400 400   
+ 0 400 400   # identifiers must not start with an underscore or a digit:
+ 0 400 400   _1test._x
+ 0 400 400   __a__
+ 0 400 400   2values
+ 1 400 400   
+ 1 400 400   
+ 1 400 400   
+ 0 400 400   ### dot-dot-dot styling
+ 1 400 400   
+ 0 400 400   # styled 2 SCE_R_KWORD because they are reserved words
+ 0 400 400   ..1
+ 0 400 400   ..2
+ 0 400 400   ..123
+ 0 400 400   ...
+ 0 400 400   # these are 9 SCE_R_IDENTIFIER because they are just identifiers
+ 0 400 400   ._
+ 0 400 400   ..
+ 0 400 400   ....
+ 0 400 400   ...object
+ 0 400 400   ...2.objects
+ 0 400 400   ..._objectname_.1
+ 1 400 400   
+ 1 400 400   
+ 1 400 400   
+ 0 400 400   ### non-ASCII characters
+ 1 400 400   
+ 0 400 400   nem_egyenlő <- 5L != 1L # Hungarian
+ 0 400 400   größer      <- 5L > 1L  # German umlaut and eszett
+ 0 400 400   мање        <- 1L < 5L  # Serbian Cyrillic
+ 1 400 400   
+ 1 400 400   
+ 1 400 400   
+ 0 400 400   ### real world examples
+ 1 400 400   
+ 0 400 400   deg <- seq(0.0, 2 * pi, length.out = 6L)
+ 0 400 400   rad <- deg * pi / 180.0
+ 1 400 400   
+ 0 400 400   variable <- 0x5.ABCp-5
+ 0 400 400   new_var <- if(is.null(variable)) NA_integer_ else variable
+ 0 400 400   new_var == variable %||% NA_integer_
+ 1 400 400   
+ 0 400 400   new_fun <- function(...){ list(...) }
+ 1 400 400   
+ 0 400 400   sqrt(.Machine$double.eps)
+ 1 400 400   
+ 0 400 400   abbreviate(month.name) |> cbind()
+ 1 400 400   
+ 0 400 400   data.frame(num = seq_len(26L), char = letters)
+ 1 400 400   
+ 0 400 400   object_name@slot_name <- TRUE
+ 1 400 400   
+ 0 400 400   library(lattice)
+ 0 400 400   histogram(~ height | voice.part, data = singer, xlab = "Height (inches)")
+ 0 400 400   singer |> densityplot( ~ height | voice.part, data = _, xlab = "Height (inches)", bw = 5.0)
+ 1 400 400   
+ 0 400 400   is.environment(.GlobalEnv)
+ 1 400 400   
+ 0 400 400   head(boot::acme)
+ 1 400 400   
+ 0 400 400   tidyverse::tidyverse_packages()
+ 0 400   0   

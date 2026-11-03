@@ -1,0 +1,89 @@
+{1}# coding:utf-8{0}
+{1}### hexadecimal floating-point numbers styled 5 SCE_R_NUMBER{0}
+
+{1}# point followed by a digit{0}
+{5}0x1.3ae147ae147aep+0{0} {8}+{0} {5}0x1.23d70a3d70a3dp+2i{0} {1}# 1.23 + 4.56i{0}
+
+{1}# point not followed by a digit{0}
+{5}0x1.ccccccccccccdp-1{0} {8}+{0} {5}0x1.ccccccccccccdp-1i{0} {1}# 0.9 + 0.9i{0}
+{5}0x1.ccccccccccccdp-1{0}
+
+{1}# upper case letters:{0}
+{5}0X1.CCCCCCCCCCCCDP-1{0} {1}# 0.9{0}
+{5}0X1.1CCCCCCCCCCCDP-1{0}
+
+{1}# imaginary numbers{0}
+{5}0x.1p1i{0}
+{5}0x0.1p1i{0}
+{5}0xa.1p1i{0}
+{5}0xa.a1p1i{0}
+
+
+
+{1}### identifiers styled 9 SCE_R_IDENTIFIER{0}
+
+{1}# identifiers can start with a letter or a dot:{0}
+{9}.a._x123{0}
+{9}..a{0}
+{9}._1{0}
+
+{1}# identifiers must not start with an underscore or a digit:{0}
+{8}_{5}1{9}test._x{0}
+{8}__{9}a__{0}
+{5}2{9}values{0}
+
+
+
+{1}### dot-dot-dot styling{0}
+
+{1}# styled 2 SCE_R_KWORD because they are reserved words{0}
+{2}..1{0}
+{2}..2{0}
+{2}..123{0}
+{2}...{0}
+{1}# these are 9 SCE_R_IDENTIFIER because they are just identifiers{0}
+{9}._{0}
+{9}..{0}
+{9}....{0}
+{9}...object{0}
+{9}...2.objects{0}
+{9}..._objectname_.1{0}
+
+
+
+{1}### non-ASCII characters{0}
+
+{9}nem_egyenlő{0} {8}<-{0} {5}5L{0} {8}!={0} {5}1L{0} {1}# Hungarian{0}
+{9}größer{0}      {8}<-{0} {5}5L{0} {8}>{0} {5}1L{0}  {1}# German umlaut and eszett{0}
+{9}мање{0}        {8}<-{0} {5}1L{0} {8}<{0} {5}5L{0}  {1}# Serbian Cyrillic{0}
+
+
+
+{1}### real world examples{0}
+
+{9}deg{0} {8}<-{0} {3}seq{8}({5}0.0{0}, {5}2{0} {8}*{0} {9}pi{0}, {9}length.out{0} {8}={0} {5}6L{8}){0}
+{9}rad{0} {8}<-{0} {9}deg{0} {8}*{0} {9}pi{0} {8}/{0} {5}180.0{0}
+
+{9}variable{0} {8}<-{0} {5}0x5.ABCp-5{0}
+{9}new_var{0} {8}<-{0} {2}if{8}({3}is.null{8}({9}variable{8})){0} {2}NA_integer_{0} {2}else{0} {9}variable{0}
+{9}new_var{0} {8}=={0} {9}variable{0} {10}%||%{0} {2}NA_integer_{0}
+
+{9}new_fun{0} {8}<-{0} {2}function{8}({2}...{8}){{0} {3}list{8}({2}...{8}){0} {8}}{0}
+
+{3}sqrt{8}({9}.Machine{8}${9}double.eps{8}){0}
+
+{3}abbreviate{8}({9}month.name{8}){0} {8}|>{0} {3}cbind{8}(){0}
+
+{3}data.frame{8}({9}num{0} {8}={0} {3}seq_len{8}({5}26L{8}){0}, {9}char{0} {8}={0} {9}letters{8}){0}
+
+{9}object_name{8}@{9}slot_name{0} {8}<-{0} {2}TRUE{0}
+
+{3}library{8}({9}lattice{8}){0}
+{4}histogram{8}(~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {9}singer{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{8}){0}
+{9}singer{0} {8}|>{0} {4}densityplot{8}({0} {8}~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {8}_{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{0}, {9}bw{0} {8}={0} {5}5.0{8}){0}
+
+{3}is.environment{8}({9}.GlobalEnv{8}){0}
+
+{3}head{8}({9}boot{8}::{4}acme{8}){0}
+
+{9}tidyverse{8}::{9}tidyverse_packages{8}(){0}

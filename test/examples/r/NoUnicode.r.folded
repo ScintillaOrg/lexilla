@@ -1,0 +1,6 @@
+ 0 400 400   # coding:utf-8
+ 0 400 400   ### Non-ASCII identifiers will not be styled
+ 0 400 400   nem_egyenlő <- 5L != 1L # Hungarian
+ 0 400 400   größer      <- 5L > 1L  # German umlaut and eszett
+ 0 400 400   мање        <- 1L < 5L  # Serbian Cyrillic
+ 0 400   0   

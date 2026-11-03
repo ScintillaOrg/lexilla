@@ -10,6 +10,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -20,28 +21,44 @@
 #include "Accessor.h"
 #include "StyleContext.h"
 #include "CharacterSet.h"
+#include "CharacterCategory.h"
 #include "LexerModule.h"
 
 using namespace Lexilla;
 
 namespace {
 
-inline bool IsAWordChar(int ch) noexcept {
-	return IsAlphaNumeric(ch) || ch == '.' || ch == '_';
+// https://cran.r-project.org/doc/manuals/r-devel/R-lang.html#Identifiers-1
+inline bool IsAWordChar(int ch, bool unicodeIdentifiers) noexcept {
+	if (IsASCII(ch))
+		return (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
+
+	if (!unicodeIdentifiers)
+		return false;
+
+	// R uses the XID_Continue set from Unicode data
+	return IsXidContinue(ch);
 }
 
-inline bool IsAWordStart(int ch) noexcept {
-	return IsAlphaNumeric(ch) || ch == '_';
+inline bool IsAWordStart(int ch, bool unicodeIdentifiers) noexcept {
+	if (IsASCII(ch))
+		return IsUpperOrLowerCase(ch) || ch == '.';
+
+	if (!unicodeIdentifiers)
+		return false;
+
+	// R uses the XID_Start set from Unicode data
+	return IsXidStart(ch);
 }
 
 constexpr bool IsAnOperator(int ch) noexcept {
-	// '.' left out as it is used to make up numbers
+	// '.' left out as it is used to make up numbers and identifiers
 	if (ch == '-' || ch == '+' || ch == '!' || ch == '~' ||
 	        ch == '?' || ch == ':' || ch == '*' || ch == '/' ||
 	        ch == '^' || ch == '<' || ch == '>' || ch == '=' ||
 	        ch == '&' || ch == '|' || ch == '$' || ch == '(' ||
 	        ch == ')' || ch == '}' || ch == '{' || ch == '[' ||
-		ch == ']')
+		ch == ']' || ch == '_' || ch == '@')
 		return true;
 	return false;
 }
@@ -111,6 +128,10 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 	int matchingDelimiter = 0;
 	int dashCount = 0;
 
+	// lexer.r.unicode.identifiers
+	// Set to 0 to not recognise R Unicode identifiers.
+	const bool unicodeIdentifiers = styler.GetPropertyInt("lexer.r.unicode.identifiers", 1) != 0;
+
 	// property lexer.r.escape.sequence
 	//	Set to 1 to enable highlighting of escape sequences in strings.
 	const bool escapeSequence = styler.GetPropertyInt("lexer.r.escape.sequence", 0) != 0;
@@ -134,7 +155,7 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			// https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Literal-constants
 			if (AnyOf(sc.ch, 'e', 'E', 'p', 'P') && (IsADigit(sc.chNext) || sc.chNext == '+' || sc.chNext == '-')) {
 				sc.Forward(); // exponent part
-			} else if (!(IsAHeXDigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext)))) {
+			} else if (!(IsAHeXDigit(sc.ch) || (sc.ch == '.' && IsAHeXDigit(sc.chNext)))) {
 				if (AnyOf(sc.ch, 'L', 'i')) {
 					sc.Forward(); // integer and complex qualifier
 				}
@@ -143,7 +164,7 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 			break;
 
 		case SCE_R_IDENTIFIER:
-			if (!IsAWordChar(sc.ch)) {
+			if (!IsAWordChar(sc.ch, unicodeIdentifiers)) {
 				char s[100];
 				sc.GetCurrent(s, sizeof(s));
 				if (keywords.InList(s)) {
@@ -250,7 +271,7 @@ void ColouriseRDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, W
 					sc.SetState(SCE_R_IDENTIFIER);
 					sc.ForwardSetState((chNext == '\"') ? SCE_R_STRING : SCE_R_STRING2);
 				}
-			} else if (IsAWordStart(sc.ch) ) {
+			} else if (IsAWordStart(sc.ch, unicodeIdentifiers) ) {
 				sc.SetState(SCE_R_IDENTIFIER);
 			} else if (sc.Match('#')) {
 				sc.SetState(SCE_R_COMMENT);

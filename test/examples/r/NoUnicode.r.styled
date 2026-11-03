@@ -1,0 +1,5 @@
+{1}# coding:utf-8{0}
+{1}### Non-ASCII identifiers will not be styled{0}
+{9}nem_egyenl{0}ő {8}<-{0} {5}5L{0} {8}!={0} {5}1L{0} {1}# Hungarian{0}
+{9}gr{0}öß{9}er{0}      {8}<-{0} {5}5L{0} {8}>{0} {5}1L{0}  {1}# German umlaut and eszett{0}
+мање        {8}<-{0} {5}1L{0} {8}<{0} {5}5L{0}  {1}# Serbian Cyrillic{0}
