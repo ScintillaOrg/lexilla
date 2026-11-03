@@ -1,0 +1,54 @@
+ 0 400 400   # https://cran.r-project.org/doc/manuals/r-devel/R-lang.html#Constants
+ 0 400 400   "x\'x" == "x\x27x"
+ 0 400 400   "x\"x" == "x\x22x"
+ 0 400 400   "x\nx" == "x\x0ax"
+ 0 400 400   "x\rx" == "x\x0dx"
+ 0 400 400   "x\tx" == "x\x09x"
+ 0 400 400   "x\bx" == "x\x08x"
+ 0 400 400   "x\ax" == "x\x07x"
+ 0 400 400   "x\fx" == "x\x0cx"
+ 0 400 400   "x\vx" == "x\x0bx"
+ 0 400 400   "x\\x" == "x\x5cx"
+ 1 400 400   
+ 0 400 400   # octal: x<U+0001>x
+ 0 400 400   "x\1x"   == "x\x01x"
+ 0 400 400   "x\01x"  == "x\x01x"
+ 0 400 400   "x\001x" == "x\x01x"
+ 1 400 400   
+ 0 400 400   # \x: x<U+000f>x
+ 0 400 400   "x\xfx"  == "x\017x"
+ 0 400 400   "x\x0fx" == "x\017x"
+ 1 400 400   
+ 0 400 400   # \u
+ 0 400 400   # x<U+000a>x
+ 0 400 400   "x\uax"    == "x\u{a}x"
+ 0 400 400   "x\u0ax"   == "x\u{a}x"
+ 0 400 400   "x\u00ax"  == "x\u{a}x"
+ 0 400 400   "x\u000ax" == "x\u{a}x"
+ 1 400 400   
+ 0 400 400   "x\uax"    == "x\u{a}x"      # x<U+000a>x
+ 0 400 400   "x\uaax"   == "x\u{aa}x"     # x<U+00aa>x
+ 0 400 400   "x\uaaax"  == "x\u{aaa}x"    # x<U+0aaa>x
+ 0 400 400   "x\uaaaax" == "x\u{aaaa}x"   # x<U+aaaa>x
+ 1 400 400   
+ 0 400 400   # \U
+ 0 400 400   # x<U+000a>x
+ 0 400 400   "x\Uax"        == "x\U{a}x"
+ 0 400 400   "x\U0ax"       == "x\U{a}x"
+ 0 400 400   "x\U00ax"      == "x\U{a}x"
+ 0 400 400   "x\U000ax"     == "x\U{a}x"
+ 0 400 400   "x\U0000ax"    == "x\U{a}x"
+ 0 400 400   "x\U00000ax"   == "x\U{a}x"
+ 0 400 400   "x\U000000ax"  == "x\U{a}x"
+ 0 400 400   "x\U0000000ax" == "x\U{a}x"
+ 1 400 400   
+ 0 400 400   "x\Uax"        == "x\U{a}x"          # x<U+000A>x
+ 0 400 400   "x\Uaax"       == "x\U{aa}x"         # x<U+00AA>x
+ 0 400 400   "x\Uaaax"      == "x\U{aaa}x"        # x<U+0AAA>x
+ 0 400 400   "x\Uaaaax"     == "x\U{aaaa}x"       # x<U+AAAA>x
+ 0 400 400   "x\Uaaaaax"    == "x\U{aaaaa}x"      # x<U+AAAAA>x
+ 0 400 400   "x\U0aaaaax"   == "x\U{0aaaaa}x"     # x<U+AAAAA>x
+ 0 400 400   "x\U00aaaaax"  == "x\U{00aaaaa}x"    # x<U+AAAAA>x
+ 0 400 400   "x\U000aaaaax" == "x\U{000aaaaa}x"   # x<U+AAAAA>x
+ 0 400 400   "x\U0010FFFFx" == "x\U{0010FFFF}x"   # x<U+10FFFF>x
+ 0 400   0   
