@@ -183,23 +183,23 @@ static int character_classification[128] =
 };
 
 static bool IsSpace(int c) {
-	return c < 128 && (character_classification[c] & 1);
+	return IsASCII(c) && (character_classification[c] & 1);
 }
 
 static bool IsOperator(int c) {
-	return c < 128 && (character_classification[c] & 2);
+	return IsASCII(c) && (character_classification[c] & 2);
 }
 
 static bool IsIdentifier(int c) {
-	return c < 128 && (character_classification[c] & 4);
+	return IsASCII(c) && (character_classification[c] & 4);
 }
 
 static bool IsDigit(int c) {
-	return c < 128 && (character_classification[c] & 8);
+	return IsASCII(c) && (character_classification[c] & 8);
 }
 
 static bool IsHexDigit(int c) {
-	return c < 128 && (character_classification[c] & 16);
+	return IsASCII(c) && (character_classification[c] & 16);
 }
 
 static int LowerCase(int c)

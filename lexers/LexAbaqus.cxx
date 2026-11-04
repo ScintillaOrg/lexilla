@@ -287,11 +287,11 @@ static int character_classification[128] =
 };
 
 static bool IsSpace(int c) {
-	return c < 128 && (character_classification[c] & 1);
+	return IsASCII(c) && (character_classification[c] & 1);
 }
 
 static bool IsIdentifier(int c) {
-	return c < 128 && (character_classification[c] & 4);
+	return IsASCII(c) && (character_classification[c] & 4);
 }
 
 static int LowerCase(int c)
