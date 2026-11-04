@@ -58,7 +58,7 @@ constexpr bool IsAnOperator(int ch) noexcept {
 		ch == '^' || ch == '<' || ch == '>' || ch == '=' ||
 		ch == '&' || ch == '|' || ch == '$' || ch == '(' ||
 		ch == ')' || ch == '}' || ch == '{' || ch == '[' ||
-		ch == ']')
+		ch == ']' || ch == '_' || ch == '@')
 		return true;
 	return false;
 }

@@ -78,9 +78,11 @@ abbreviate(month.name) |> cbind()
 
 data.frame(num = seq_len(26L), char = letters)
 
+object_name@slot_name <- TRUE
+
 library(lattice)
 histogram(~ height | voice.part, data = singer, xlab = "Height (inches)")
-densityplot( ~ height | voice.part, data = singer, xlab = "Height (inches)", bw = 5.0)
+singer |> densityplot( ~ height | voice.part, data = _, xlab = "Height (inches)", bw = 5.0)
 
 is.environment(.GlobalEnv)
 

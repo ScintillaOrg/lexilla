@@ -30,8 +30,8 @@
 {16}.GlobalEnv{8}${9}.Random.seed{0}
 
 {1}# identifiers must not start with an underscore or a digit:{0}
-_{5}1{9}test._x{0}
-__{9}a__{0}
+{8}_{5}1{9}test._x{0}
+{8}__{9}a__{0}
 {5}2{9}values{0}
 
 
@@ -78,9 +78,11 @@ __{9}a__{0}
 
 {3}data.frame{8}({9}num{0} {8}={0} {3}seq_len{8}({5}26L{8}){0}, {9}char{0} {8}={0} {16}letters{8}){0}
 
+{9}object_name{8}@{9}slot_name{0} {8}<-{0} {2}TRUE{0}
+
 {3}library{8}({9}lattice{8}){0}
 {4}histogram{8}(~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {16}singer{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{8}){0}
-{4}densityplot{8}({0} {8}~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {16}singer{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{0}, {9}bw{0} {8}={0} {5}5.0{8}){0}
+{16}singer{0} {8}|>{0} {4}densityplot{8}({0} {8}~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {8}_{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{0}, {9}bw{0} {8}={0} {5}5.0{8}){0}
 
 {3}is.environment{8}({16}.GlobalEnv{8}){0}
 
