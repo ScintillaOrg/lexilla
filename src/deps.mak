@@ -1286,7 +1286,10 @@ $(DIR_O)/LexR.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/CharacterCategory.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/SubStyles.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexRaku.o: \
 	../lexers/LexRaku.cxx \
 	../../scintilla/include/ILexer.h \
