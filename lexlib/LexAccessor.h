@@ -52,6 +52,10 @@ public:
 	char operator[](Sci_Position position) {
 		if (position < startPos || position >= endPos) {
 			Fill(position);
+			if (position < startPos || position >= endPos) {
+				// Position is outside range of document
+				return 0;
+			}
 		}
 		return buf[position - startPos];
 	}
