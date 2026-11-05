@@ -2241,8 +2241,6 @@ Lexer r
         Language Keywords
         Functions from Base-Priority R Packages
         Functions from Recommended-Priority R Packages
-        Non-Function Objects
-        User-Defined Objects
     Sub-Style Bases:
           9
     Styles:
