@@ -15,6 +15,7 @@ TESTEDSRC=\
  ../../lexlib/Accessor.cxx \
  ../../lexlib/CharacterSet.cxx \
  ../../lexlib/InList.cxx \
+ ../../lexlib/LexAccessor.cxx \
  ../../lexlib/LexerBase.cxx \
  ../../lexlib/LexerModule.cxx \
  ../../lexlib/LexerSimple.cxx \

@@ -55,6 +55,7 @@ TESTEDOBJ=\
  Accessor.o \
  CharacterSet.o \
  InList.o \
+ LexAccessor.o \
  LexerBase.o \
  LexerModule.o \
  LexerSimple.o \
