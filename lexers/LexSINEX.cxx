@@ -41,7 +41,7 @@ typedef enum {
 		MANTISSA_2=4, // one or more consecutive digits were encountered after a dot
 		D_OR_E=5,     // the scientific notation letter (e,E,d,D) was encountered
 		SIGN_2=6,     // a sign (+/-) was encountered for the second time
-		EXPONENT=7    // one or more consecutive digits were encountered 
+		EXPONENT=7    // one or more consecutive digits were encountered
 } E_REAL_PARSING_STATE ;
 
 
@@ -67,7 +67,7 @@ inline bool IsSINEXNumber(const char *text, Sci_PositionU len) {
 
 	E_REAL_PARSING_STATE	parsingState = NOTHING ;
 	bool   firstDigitsFound = false;
-	
+
 	if (len == 0)
 		return false;
 
@@ -116,7 +116,7 @@ inline bool IsSINEXNumber(const char *text, Sci_PositionU len) {
 			} else {
 				return false;
 			}
-		
+
 		} else {
 			// other characters are not valid
 			return false ;
@@ -134,13 +134,13 @@ inline bool IsSINEXDate(const char *text, Sci_PositionU len) {
 	if (len < 11) return false;
 	return (IsADigit(text[0]) && IsADigit(text[1]) && text[2] == ':' &&
 	        IsADigit(text[3]) && IsADigit(text[4]) && IsADigit(text[5]) && text[6] == ':' &&
-	        IsADigit(text[7]) && IsADigit(text[8]) && IsADigit(text[9]) && 
+	        IsADigit(text[7]) && IsADigit(text[8]) && IsADigit(text[9]) &&
 	        IsADigit(text[10]) && IsADigit(text[11]));
 }
 
 // Find next space in the string : return an offset in the string >= start
 // or len if not found
-static Sci_PositionU FindNextSpace(const char *text, 
+static Sci_PositionU FindNextSpace(const char *text,
                                    Sci_PositionU start, Sci_PositionU len) {
 	Sci_PositionU  pos ;
 	for (pos = start ; pos < len ; pos ++ ) {
@@ -158,7 +158,7 @@ void ColouriseSinexLine(
 	Sci_PositionU endPos,
 	Accessor &styler) {
 
-	if (lengthLine == 0) 
+	if (lengthLine == 0)
 		return;
 
 	// comment line
@@ -177,7 +177,7 @@ void ColouriseSinexLine(
 	} else {
 		Sci_PositionU i = 0 ;
 		Sci_PositionU nextSpace ;
-		
+
 		// process word by word
 		while ((nextSpace = FindNextSpace(lineBuffer,i,lengthLine)) < lengthLine) {
 			// Detect dates YY:DDD:SSSSS (first test aims at speeding up detection)
@@ -224,7 +224,7 @@ void ColouriseSinexDoc(Sci_PositionU startPos, Sci_Position length, int, WordLis
 // Folding logic
 void FoldSinexDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 
-	if (AtEOL(styler, startPos)) 
+	if (AtEOL(styler, startPos))
 		return ;
 
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;

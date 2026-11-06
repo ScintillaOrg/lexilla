@@ -149,9 +149,9 @@ int GetIndent(const Sci_Position line, Accessor &styler) {
     if (!(IsStreamComment(style) || IsLineComment(style)))
         indent += SC_FOLDLEVELBASE;
 
-    if (styler.LineStart(line) == styler.Length() 
-        || IsASpaceOrTab(ch) 
-        || IsNewline(ch) 
+    if (styler.LineStart(line) == styler.Length()
+        || IsASpaceOrTab(ch)
+        || IsNewline(ch)
         || IsStreamComment(style)
         || IsLineComment(style)) {
         return indent | SC_FOLDLEVELWHITEFLAG;
@@ -367,9 +367,9 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
             case SCE_NIM_NUMBER:
                 // For a type suffix, such as 0x80'u8
                 if (sc.ch == '\'') {
-                    if (sc.chNext == 'i' || sc.chNext == 'I' || 
+                    if (sc.chNext == 'i' || sc.chNext == 'I' ||
                         sc.chNext == 'u' || sc.chNext == 'U' ||
-                        sc.chNext == 'f' || sc.chNext == 'F' || 
+                        sc.chNext == 'f' || sc.chNext == 'F' ||
                         sc.chNext == 'd' || sc.chNext == 'D') {
                         sc.Forward(2);
                     }
@@ -653,7 +653,7 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
 
                 if (sc.Match(R"(""")")) {
                     sc.SetState(SCE_NIM_TRIPLEDOUBLE);
-                    
+
                     // Keep forwarding until the total opening literal count is 5
                     // A valid example where this is needed is: """""<-5 double quotes"""
                     while (sc.ch == '"') {

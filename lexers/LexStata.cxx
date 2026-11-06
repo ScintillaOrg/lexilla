@@ -39,7 +39,7 @@ static void ColouriseStataDoc(Sci_PositionU startPos, Sci_Position length, int i
 
     WordList &keywords = *keywordlists[0];
     WordList &types = *keywordlists[1];
-    
+
     CharacterSet setCouldBePostOp(CharacterSet::setNone, "+-");
     CharacterSet setWordStart(CharacterSet::setAlpha, "_", 0x80, true);
     CharacterSet setWord(CharacterSet::setAlphaNum, "._", 0x80, true);

@@ -280,7 +280,7 @@ void LexerEDIFACT::Fold(Sci_PositionU startPos, Sci_Position length, int, IDocum
 			startPos++;
 			continue;
 		}
-		
+
 		// Segment!
 		pAccess->GetCharRange(SegmentHeader, startPos, 3);
 		if (SegmentHeader[0] != 'U' || SegmentHeader[1] != 'N')

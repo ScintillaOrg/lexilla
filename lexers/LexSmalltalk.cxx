@@ -196,7 +196,7 @@ static void handleNumeric(StyleContext& sc)
         sc.Forward();
         skipInt(sc, radix);
     }
-    
+
     if (sc.chNext == 's') {
         // ScaledDecimal
         sc.Forward();
