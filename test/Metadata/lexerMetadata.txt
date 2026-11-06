@@ -2227,7 +2227,6 @@ Lexer python
          20 SCE_P_ATTRIBUTE [identifier] Attribute of identifier
 
 Lexer r
-    UnicodeLineEnds
     Properties:
         bool   fold
         bool   fold.compact

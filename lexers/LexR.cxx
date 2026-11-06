@@ -135,7 +135,7 @@ public:
 	}
 
 	int SCI_METHOD LineEndTypesSupported() override {
-		return SC_LINE_END_TYPE_UNICODE;
+		return SC_LINE_END_TYPE_DEFAULT;
 	}
 
 	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override {
