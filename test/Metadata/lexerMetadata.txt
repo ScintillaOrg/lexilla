@@ -2227,12 +2227,38 @@ Lexer python
          20 SCE_P_ATTRIBUTE [identifier] Attribute of identifier
 
 Lexer r
+    Properties:
+        bool   fold
+        bool   fold.compact
+        bool   fold.at.else
+               This option enables R folding on a "} else {" line of an if statement.
+        bool   lexer.r.unicode.identifiers
+               Set to 0 to not recognise R Unicode identifiers.
+        bool   lexer.r.escape.sequence
+               Set to 1 to enable highlighting of escape sequences in strings.
     Word Lists:
         Language Keywords
-        Base / Default package function
-        Other Package Functions
-        Unused
-        Unused
+        Functions from Base-Priority R Packages
+        Functions from Recommended-Priority R Packages
+    Sub-Style Bases:
+          9
+    Styles:
+          0 SCE_R_DEFAULT [default] White space
+          1 SCE_R_COMMENT [comment line] Comment
+          2 SCE_R_KWORD [keyword] Keywords
+          3 SCE_R_BASEKWORD [identifier] Keywords 2
+          4 SCE_R_OTHERKWORD [identifier] Keywords 3
+          5 SCE_R_NUMBER [literal numeric] Number
+          6 SCE_R_STRING [literal string] Double quoted String
+          7 SCE_R_STRING2 [literal string] Single quoted String
+          8 SCE_R_OPERATOR [operator] Operator
+          9 SCE_R_IDENTIFIER [identifier] Identifier
+         10 SCE_R_INFIX [operator] Infix operator
+         11 SCE_R_INFIXEOL [error operator] End of line where infix operator is not closed
+         12 SCE_R_BACKTICKS [backtick] Backticks
+         13 SCE_R_RAWSTRING [literal string raw] Double quoted raw string
+         14 SCE_R_RAWSTRING2 [literal string raw] Single quoted raw string
+         15 SCE_R_ESCAPESEQUENCE [literal string escapesequence] Escape sequence
 
 Lexer raku
     Properties:
