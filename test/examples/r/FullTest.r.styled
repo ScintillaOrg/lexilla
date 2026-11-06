@@ -61,14 +61,14 @@
 
 {1}### real world examples{0}
 
-{9}deg{0} {8}<-{0} {3}seq{8}({5}0.0{0}, {5}2{0} {8}*{0} {9}pi{0}, {9}length.out{0} {8}={0} {5}6L{8}){0}
-{9}rad{0} {8}<-{0} {9}deg{0} {8}*{0} {9}pi{0} {8}/{0} {5}180.0{0}
+{9}deg{0} {8}<-{0} {3}seq{8}({5}0.0{0}, {5}2{0} {8}*{0} {128}pi{0}, {9}length.out{0} {8}={0} {5}6L{8}){0}
+{9}rad{0} {8}<-{0} {9}deg{0} {8}*{0} {128}pi{0} {8}/{0} {5}180.0{0}
 
 {9}variable{0} {8}<-{0} {5}0x5.ABCp-5{0}
-{9}new_var{0} {8}<-{0} {2}if{8}({3}is.null{8}({9}variable{8})){0} {2}NA_integer_{0} {2}else{0} {9}variable{0}
-{9}new_var{0} {8}=={0} {9}variable{0} {10}%||%{0} {2}NA_integer_{0}
+{130}new_var{0} {8}<-{0} {2}if{8}({3}is.null{8}({9}variable{8})){0} {2}NA_integer_{0} {2}else{0} {9}variable{0}
+{130}new_var{0} {8}=={0} {9}variable{0} {10}%||%{0} {2}NA_integer_{0}
 
-{9}new_fun{0} {8}<-{0} {2}function{8}({2}...{8}){{0} {3}list{8}({2}...{8}){0} {8}}{0}
+{131}new_fun{0} {8}<-{0} {2}function{8}({2}...{8}){{0} {3}list{8}({2}...{8}){0} {8}}{0}
 
 {3}sqrt{8}({9}.Machine{8}${9}double.eps{8}){0}
 
@@ -82,8 +82,8 @@
 {4}histogram{8}(~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {9}singer{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{8}){0}
 {9}singer{0} {8}|>{0} {4}densityplot{8}({0} {8}~{0} {9}height{0} {8}|{0} {9}voice.part{0}, {9}data{0} {8}={0} {8}_{0}, {9}xlab{0} {8}={0} {6}"Height (inches)"{0}, {9}bw{0} {8}={0} {5}5.0{8}){0}
 
-{3}is.environment{8}({9}.GlobalEnv{8}){0}
+{3}is.environment{8}({128}.GlobalEnv{8}){0}
 
 {3}head{8}({9}boot{8}::{4}acme{8}){0}
 
-{9}tidyverse{8}::{9}tidyverse_packages{8}(){0}
+{9}tidyverse{8}::{129}tidyverse_packages{8}(){0}
