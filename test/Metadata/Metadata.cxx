@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
 			std::string content((std::istreambuf_iterator<char>(ifs)),
 				(std::istreambuf_iterator<char>()));
 			if (content != sMetadata) {
-				std::cerr << "Different metadata\n";
+				std::cerr << "lexerMetadata.txt:1: Different metadata\n";
 				std::ofstream ofs("lexerMetadata.txt.new");
 				ofs << sMetadata;
 				return 1;

@@ -1145,7 +1145,7 @@ void SCI_METHOD LexerJulia::Fold(Sci_PositionU startPos, Sci_Position length, in
     // level of nested parenthesis or brackets
     int list_comprehension = (int)((lineState >> 8) & 0x0F); // 4 bits of parenthesis nesting counter
     //int commentDepth = (int)((lineState >> 12) & 0x0F);      // 4 bits of nested comment counter
-    
+
 	Sci_PositionU lineStartNext = styler.LineStart(lineCurrent+1);
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];

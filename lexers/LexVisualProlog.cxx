@@ -565,7 +565,7 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
             styler.SetLineState(currentLineEntry, ls.getState());
         }
         if (sc.MatchLineEnd() | sc.atLineEnd) {
-            if (sc.More()) { // currentLine can be outside the document 
+            if (sc.More()) { // currentLine can be outside the document
                 styler.SetLineState(sc.currentLine, ls.getState());
             }
         }

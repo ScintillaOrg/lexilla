@@ -412,7 +412,7 @@ void SCI_METHOD LexerGDScript::Lex(Sci_PositionU startPos, Sci_Position length, 
 	bool inContinuedString = false;
 	bool percentIsNodePath = false;
 	int nodePathStringState = SCE_GD_DEFAULT;
-	
+
 	for (; sc.More(); sc.Forward()) {
 
 		if (sc.atLineStart) {

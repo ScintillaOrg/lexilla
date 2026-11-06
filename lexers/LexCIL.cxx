@@ -330,7 +330,7 @@ void SCI_METHOD LexerCIL::Lex(Sci_PositionU startPos, Sci_Position length,
     sc.Complete();
 }
 
-void SCI_METHOD LexerCIL::Fold(Sci_PositionU startPos, Sci_Position length, 
+void SCI_METHOD LexerCIL::Fold(Sci_PositionU startPos, Sci_Position length,
                                int initStyle, IDocument *pAccess) {
     if (!options.fold) {
         return;
@@ -344,7 +344,7 @@ void SCI_METHOD LexerCIL::Fold(Sci_PositionU startPos, Sci_Position length,
     int levelCurrent = SC_FOLDLEVELBASE;
     if (lineCurrent > 0)
         levelCurrent = styler.LevelAt(lineCurrent - 1) >> 16;
-    
+
     int style = initStyle;
     int styleNext = styler.StyleAt(startPos);
     int levelNext = levelCurrent;
@@ -362,7 +362,7 @@ void SCI_METHOD LexerCIL::Fold(Sci_PositionU startPos, Sci_Position length,
 
         const bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
-        if (options.foldComment && 
+        if (options.foldComment &&
             options.foldCommentMultiline && IsStreamCommentStyle(style)) {
             if (!IsStreamCommentStyle(stylePrev)) {
                 levelNext++;
@@ -392,10 +392,10 @@ void SCI_METHOD LexerCIL::Fold(Sci_PositionU startPos, Sci_Position length,
             if (lev != styler.LevelAt(lineCurrent)) {
                 styler.SetLevel(lineCurrent, lev);
             }
-            
+
             lineCurrent++;
             levelCurrent = levelNext;
-            
+
             if (options.foldCompact &&
                 i == static_cast<Sci_PositionU>(styler.Length() - 1)) {
                 styler.SetLevel(lineCurrent, lev | SC_FOLDLEVELWHITEFLAG);

@@ -20,8 +20,8 @@ Folding is supported in the following cases:
 - Folding of stream-like comments
 - Folding of groups of consecutive line comments
 - Folding of preprocessor blocks (the following preprocessor blocks are
-supported: #IFDEF, #IFNDEF, #ENDIF and #HEADER / #ENDHEADER 
-blocks), 
+supported: #IFDEF, #IFNDEF, #ENDIF and #HEADER / #ENDHEADER
+blocks),
 - Folding of code blocks on appropriate keywords (the following code blocks are
 supported: "begin, struct, type, case / end" blocks, class & object
 declarations and interface declarations)
@@ -36,7 +36,7 @@ Remarks:
 These lists are all mutually exclusive, scope open words should not be in the keyword list and vice versa
 
 - Folding of code blocks tries to handle all special cases in which folding
-should not occur. 
+should not occur.
 
 ~ KEYWORDS:
 
@@ -156,31 +156,31 @@ static void ClassifyDataFlexWord(WordList *keywordlists[], StyleContext &sc, Acc
 			if (!IsADataFlexField(sc.GetRelative(-static_cast<int>(tokenlen+1)))) {
 				newState = SCE_DF_SCOPEWORD;
 			}
-		} 
+		}
 		// no code folding on the next words, but just want to paint them like keywords (as they are) (??? doesn't the code to the opposite?)
-		if (strcmp(s, "if") == 0 ||  
+		if (strcmp(s, "if") == 0 ||
 			strcmp(s, "ifnot") == 0 ||
 			strcmp(s, "case") == 0 ||
 			strcmp(s, "else") == 0 ) {
 				newState = SCE_DF_SCOPEWORD;
-		} 
+		}
 	}
 	if (oldState != newState && newState == SCE_DF_WORD) {
 		// a for loop must have for at the start of the line, for is also used in "define abc for 123"
-		if ( (strcmp(s, "for") == 0) && (IsFirstDataFlexWord(sc.currentPos-3, styler)) ) {   
+		if ( (strcmp(s, "for") == 0) && (IsFirstDataFlexWord(sc.currentPos-3, styler)) ) {
 				newState = SCE_DF_SCOPEWORD;
-		} 
+		}
 	}
 	if (oldState != newState && newState == SCE_DF_WORD) {
 		// a repeat loop must have repeat at the start of the line, repeat is also used in 'move (repeat("d",5)) to sFoo'
-		if ( (strcmp(s, "repeat") == 0) && (IsFirstDataFlexWord(sc.currentPos-6, styler)) ) {   
+		if ( (strcmp(s, "repeat") == 0) && (IsFirstDataFlexWord(sc.currentPos-6, styler)) ) {
 				newState = SCE_DF_SCOPEWORD;
-		} 
+		}
 	}
 	if (oldState == newState)  {
 	  if (operators.InList(s)) {
 		  newState = SCE_DF_OPERATOR;
-		} 
+		}
 	}
 
 	if (oldState != newState) {
@@ -438,7 +438,7 @@ static void ClassifyDataFlexWordFoldPoint(int &levelCurrent, int &lineFoldStateC
 		strcmp(s, "begin_constraints") == 0 ||
 		strcmp(s, "begin_transaction") == 0 ||
 		strcmp(s, "enum_list") == 0 ||
-		strcmp(s, "class") == 0 || 
+		strcmp(s, "class") == 0 ||
 		strcmp(s, "object") == 0 ||
 		strcmp(s, "cd_popup_object") == 0 ||
 		strcmp(s, "procedure") == 0 ||
@@ -479,7 +479,7 @@ static void ClassifyDataFlexWordFoldPoint(int &levelCurrent, int &lineFoldStateC
 }
 
 
-static void ClassifyDataFlexMetaDataFoldPoint(int &levelCurrent, 
+static void ClassifyDataFlexMetaDataFoldPoint(int &levelCurrent,
 		Sci_PositionU lastStart, Sci_PositionU currentPos, WordList *[], Accessor &styler) {
 	char s[100];
 

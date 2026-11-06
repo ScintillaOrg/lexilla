@@ -176,7 +176,7 @@ static Sci_PositionU TroffEscapeQuoteSize(Sci_PositionU startLine, Sci_PositionU
 			i += TroffEscapeBracketSize(i, endPos, styler);
 		}
 	}
-	
+
 	return endPos-startLine+1;
 }
 
@@ -317,7 +317,7 @@ static Sci_PositionU ColouriseTroffEscape(Sci_PositionU startLine, Sci_PositionU
 	case '}':
 		// Closing code block
 		// This exists only for the rare case of closing a
-		// block in the middle of a line. 
+		// block in the middle of a line.
 		i += 1;
 		styler.ColourTo(i-1, SCE_TROFF_OPERATOR);
 		break;
