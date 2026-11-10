@@ -41,7 +41,7 @@ endif
 LEXILLA=$(DIR_BIN)/$(SHARED_NAME).$(SHAREDEXTENSION)
 LIBLEXILLA=$(DIR_BIN)/liblexilla.a
 
-BASE_FLAGS += --std=c++17
+BASE_FLAGS += --std=c++20
 
 ifdef CLANG
 CXX = clang++

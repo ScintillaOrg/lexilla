@@ -9,13 +9,13 @@
 // license as Scintilla. https://www.scintilla.org/License.txt
 
 // Windows/MSVC
-// cl -std:c++17 -EHsc -LD -I ../../../scintilla/include -I ../../include -I ../../lexlib SimpleLexer.cxx ../../lexlib/*.cxx
+// cl -std:c++20 -EHsc -LD -I ../../../scintilla/include -I ../../include -I ../../lexlib SimpleLexer.cxx ../../lexlib/*.cxx
 
 // macOS/clang
-// clang++ -dynamiclib --std=c++17 -I ../../../scintilla/include -I ../../include -I ../../lexlib SimpleLexer.cxx ../../lexlib/*.cxx -o SimpleLexer.dylib
+// clang++ -dynamiclib --std=c++20 -I ../../../scintilla/include -I ../../include -I ../../lexlib SimpleLexer.cxx ../../lexlib/*.cxx -o SimpleLexer.dylib
 
 // Linux/g++
-// g++ -fPIC -shared --std=c++17 -I ../../../scintilla/include -I ../../include -I ../../lexlib SimpleLexer.cxx ../../lexlib/*.cxx -o SimpleLexer.so
+// g++ -fPIC -shared --std=c++20 -I ../../../scintilla/include -I ../../include -I ../../lexlib SimpleLexer.cxx ../../lexlib/*.cxx -o SimpleLexer.so
 
 /* It can be demonstrated in SciTE like this, substituting the actual shared library location as lexilla.path:
 lexilla.path=.;C:\u\hg\lexilla\examples\SimpleLexer\SimpleLexer.dll

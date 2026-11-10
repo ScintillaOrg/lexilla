@@ -10,7 +10,7 @@ Windows.
 The static library is called liblexilla.a when built with GCC or Clang and liblexilla.lib
 when built with MSVC.
 
-Lexilla is developed on Windows, Linux, and macOS and requires a C++17 compiler.
+Lexilla is developed on Windows, Linux, and macOS and requires a C++20 compiler.
 It may work on other Unix platforms like BSD but that is not a development focus.
 MSVC 2019.4, GCC 9.0, Clang 9.0, and Apple Clang 11.0 are known to work.
 

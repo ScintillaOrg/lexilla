@@ -6,7 +6,7 @@ QT       += core
 TARGET = Lexilla
 TEMPLATE = lib
 CONFIG += lib_bundle
-CONFIG += c++1z
+CONFIG += c++20
 
 VERSION = 5.1.3
 

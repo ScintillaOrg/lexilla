@@ -2,7 +2,7 @@
 
 INCLUDES = -I ../../../scintilla/include -I ../../include -I ../../lexlib
 
-BASE_FLAGS += --std=c++17
+BASE_FLAGS += --std=c++20
 
 ifdef windir
     SHAREDEXTENSION = dll

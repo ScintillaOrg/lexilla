@@ -5,7 +5,7 @@
 # clang works only with libc++, not libstdc++
 # Tested with clang 9 and g++ 9
 
-CXXSTD=c++17
+CXXSTD=c++20
 
 ifndef windir
 ifeq ($(shell uname),Darwin)
