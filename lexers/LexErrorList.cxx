@@ -145,6 +145,8 @@ public:
 		return osErrorList.DescribeWordListSets();
 	}
 
+	void ColouriseLine(const std::string &lineBuffer, Sci_PositionU endPos, LexAccessor &styler) const;
+
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
 	static ILexer5 *LexerFactoryErrorList() {
@@ -185,11 +187,6 @@ constexpr bool Is0To9(char ch) noexcept {
 
 constexpr bool Is1To9(char ch) noexcept {
 	return (ch >= '1') && (ch <= '9');
-}
-
-bool AtEOL(Accessor &styler, Sci_Position i) {
-	return (styler[i] == '\n') ||
-	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
 std::string_view LetterPrefix(std::string_view sv) noexcept {
@@ -496,15 +493,10 @@ int StyleFromSequence(const char *seq) noexcept {
 	return style;
 }
 
-void ColouriseErrorListLine(
-    const std::string &lineBuffer,
-    Sci_PositionU endPos,
-    Accessor &styler,
-	bool valueSeparate,
-	bool escapeSequences) {
+void LexerErrorList::ColouriseLine(const std::string &lineBuffer, Sci_PositionU endPos, LexAccessor &styler) const {
 	Sci_Position startValue = -1;
 	const int style = RecogniseErrorListLine(lineBuffer, startValue);
-	if (escapeSequences && Contains(lineBuffer, CSI)) {
+	if (options.escapeSequences && Contains(lineBuffer, CSI)) {
 		const Sci_Position startPos = endPos - lineBuffer.length();
 		const char *linePortion = lineBuffer.c_str();
 		Sci_Position startPortion = startPos;
@@ -537,7 +529,7 @@ void ColouriseErrorListLine(
 		}
 		styler.ColourTo(endPos, portionStyle);
 	} else {
-		if (valueSeparate && (startValue >= 0)) {
+		if (options.valueSeparate && (startValue >= 0)) {
 			styler.ColourTo(endPos - (lineBuffer.length() - startValue), style);
 			styler.ColourTo(endPos, SCE_ERR_VALUE);
 		} else {
@@ -547,23 +539,22 @@ void ColouriseErrorListLine(
 }
 
 void LexerErrorList::Lex(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, IDocument *pAccess) {
-	Accessor styler(pAccess, nullptr);
+	LexAccessor styler(pAccess);
 	std::string lineBuffer;
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 
-	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
-		lineBuffer.push_back(styler[i]);
-		if (AtEOL(styler, i)) {
-			// End of line met, colourise it
-			ColouriseErrorListLine(lineBuffer, i, styler, options.valueSeparate, options.escapeSequences);
-			lineBuffer.clear();
-		}
+	const Sci_Position endPos = startPos + length;
+	Sci_Position line = styler.GetLine(startPos);
+	Sci_Position startOfLine = styler.LineStart(line);
+	while (startOfLine < endPos) {
+		const Sci_Position endLine = styler.LineStart(line + 1);
+		lineBuffer.resize(endLine - startOfLine);
+		styler.GetRange(startOfLine, endLine, lineBuffer.data(), lineBuffer.size() + 1);
+		ColouriseLine(lineBuffer, endLine-1, styler);
+		line++;
+		startOfLine = endLine;
 	}
-	if (!lineBuffer.empty()) {	// Last line does not have ending characters
-		ColouriseErrorListLine(lineBuffer, startPos + length - 1, styler, options.valueSeparate, options.escapeSequences);
-	}
-
 	styler.Flush();
 }
 
