@@ -161,11 +161,6 @@ Sci_Position SCI_METHOD LexerErrorList::PropertySet(const char *key, const char 
 	return -1;
 }
 
-constexpr bool StartsWith(std::string_view haystack, std::string_view needle) noexcept {
-	return (needle.length() <= haystack.length()) &&
-		(haystack.substr(0, needle.length()) == needle);
-}
-
 constexpr bool Contains(std::string_view text, std::string_view a) noexcept {
 	const size_t pos = text.find(a);
 	return pos != std::string_view::npos;
@@ -240,13 +235,13 @@ int RecogniseErrorListLine(std::string_view lineBuffer, Sci_Position &startValue
 	case '!':
 		return SCE_ERR_DIFF_CHANGED;
 	case '+':
-		if (StartsWith(lineBuffer, "+++ ")) {
+		if (lineBuffer.starts_with("+++ ")) {
 			return SCE_ERR_DIFF_MESSAGE;
 		} else {
 			return SCE_ERR_DIFF_ADDITION;
 		}
 	case '-':
-		if (StartsWith(lineBuffer, "--- ")) {
+		if (lineBuffer.starts_with("--- ")) {
 			return SCE_ERR_DIFF_MESSAGE;
 		} else {
 			return SCE_ERR_DIFF_DELETION;
@@ -255,25 +250,25 @@ int RecogniseErrorListLine(std::string_view lineBuffer, Sci_Position &startValue
 		break;
 	}
 
-	if (StartsWith(lineBuffer, "cf90-")) {
+	if (lineBuffer.starts_with("cf90-")) {
 		// Absoft Pro Fortran 90/95 v8.2 error and/or warning message
 		return SCE_ERR_ABSF;
-	} else if (StartsWith(lineBuffer, "fortcom:")) {
+	} else if (lineBuffer.starts_with("fortcom:")) {
 		// Intel Fortran Compiler v8.0 error/warning message
 		return SCE_ERR_IFORT;
 	} else if (Contains(lineBuffer, "File \"") && Contains(lineBuffer, ", line ")) {
 		return SCE_ERR_PYTHON;
 	} else if (Contains(lineBuffer, " in ") && Contains(lineBuffer, " on line ")) {
 		return SCE_ERR_PHP;
-	} else if ((StartsWith(lineBuffer, "Error ") ||
-	            StartsWith(lineBuffer, "Warning ")) &&
+	} else if ((lineBuffer.starts_with("Error ") ||
+	            lineBuffer.starts_with("Warning ")) &&
 	           ContainsOrdered(lineBuffer, " at (", ") : ")) {
 		// Intel Fortran Compiler error/warning message
 		return SCE_ERR_IFC;
-	} else if (StartsWith(lineBuffer, "Error ")) {
+	} else if (lineBuffer.starts_with("Error ")) {
 		// Borland error message
 		return SCE_ERR_BORLAND;
-	} else if (StartsWith(lineBuffer, "Warning ")) {
+	} else if (lineBuffer.starts_with("Warning ")) {
 		// Borland warning message
 		return SCE_ERR_BORLAND;
 	} else if (Contains(lineBuffer, "at line ") &&
@@ -284,28 +279,28 @@ int RecogniseErrorListLine(std::string_view lineBuffer, Sci_Position &startValue
 		// perl error message:
 		// <message> at <file> line <line>
 		return SCE_ERR_PERL;
-	} else if (StartsWith(lineBuffer, "   at ") &&
+	} else if (lineBuffer.starts_with("   at ") &&
 	           Contains(lineBuffer, ":line ")) {
 		// A .NET traceback
 		return SCE_ERR_NET;
-	} else if (StartsWith(lineBuffer, "Line ") &&
+	} else if (lineBuffer.starts_with("Line ") &&
 	           Contains(lineBuffer, ", file ")) {
 		// Essential Lahey Fortran error message
 		return SCE_ERR_ELF;
-	} else if (StartsWith(lineBuffer, "line ") &&
+	} else if (lineBuffer.starts_with("line ") &&
 	           Contains(lineBuffer, " column ")) {
 		// HTML tidy style: line 42 column 1
 		return SCE_ERR_TIDY;
-	} else if (StartsWith(lineBuffer, "\tat ") &&
+	} else if (lineBuffer.starts_with("\tat ") &&
 	           Contains(lineBuffer, "(") &&
 	           Contains(lineBuffer, ".java:")) {
 		// Java stack back trace
 		return SCE_ERR_JAVA_STACK;
-	} else if (StartsWith(lineBuffer, "In file included from ") ||
-	           StartsWith(lineBuffer, "                 from ")) {
+	} else if (lineBuffer.starts_with("In file included from ") ||
+	           lineBuffer.starts_with("                 from ")) {
 		// GCC showing include path to following error
 		return SCE_ERR_GCC_INCLUDED_FROM;
-	} else if (StartsWith(lineBuffer, "NMAKE : fatal error")) {
+	} else if (lineBuffer.starts_with("NMAKE : fatal error")) {
 		// Microsoft nmake fatal error:
 		// NMAKE : fatal error <code>: <program> : return code <return>
 		return SCE_ERR_MS;
@@ -412,7 +407,8 @@ int RecogniseErrorListLine(std::string_view lineBuffer, Sci_Position &startValue
 				if (ch == ')') {
 					state = stMsDotNet;
 					break;
-				} else if ((ch != ' ') && !Is0To9(ch)) {
+				}
+				if ((ch != ' ') && !Is0To9(ch)) {
 					state = stUnrecognized;
 				}
 			} else if (state == stCtagsStart) {
@@ -424,7 +420,8 @@ int RecogniseErrorListLine(std::string_view lineBuffer, Sci_Position &startValue
 				        ((ch == '/' && chNext == '^') || Is0To9(ch))) {
 					state = stCtags;
 					break;
-				} else if ((ch == '/') && (chNext == '^')) {
+				}
+				if ((ch == '/') && (chNext == '^')) {
 					state = stCtagsStartString;
 				}
 			} else if ((state == stCtagsStartString) && ((lineBuffer[i] == '$') && (lineBuffer[i + 1] == '/'))) {
