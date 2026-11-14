@@ -59,6 +59,7 @@ TESTEDOBJ=\
  LexerBase.o \
  LexerModule.o \
  LexerSimple.o \
+ OptionSet.o \
  PropSetSimple.o \
  WordList.o
 

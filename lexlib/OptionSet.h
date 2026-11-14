@@ -12,17 +12,11 @@
 
 namespace Lexilla {
 
-inline std::string JoinWordListDescriptions(const char *const wordListDescriptions[]) {
-	std::string wordLists;
-	if (wordListDescriptions) {
-		for (size_t wl = 0; wordListDescriptions[wl]; wl++) {
-			if (wl > 0)
-				wordLists += "\n";
-			wordLists += wordListDescriptions[wl];
-		}
-	}
-	return wordLists;
-}
+std::string JoinWordListDescriptions(const char *const wordListDescriptions[]);
+
+bool SetOptionValue(bool &b, const char *val);
+bool SetOptionValue(int &i, const char *val);
+bool SetOptionValue(std::string &s, const char *val);
 
 // Allow OptionSet<T> to be called without knowing T
 struct OptionSetInterface {
@@ -63,29 +57,12 @@ class OptionSet : public OptionSetInterface {
 		bool Set(T *base, const char *val) {
 			value = val;
 			switch (opType) {
-			case SC_TYPE_BOOLEAN: {
-					const bool option = atoi(val) != 0;
-					if ((*base).*pb != option) {
-						(*base).*pb = option;
-						return true;
-					}
-					break;
-				}
-			case SC_TYPE_INTEGER: {
-					const int option = atoi(val);
-					if ((*base).*pi != option) {
-						(*base).*pi = option;
-						return true;
-					}
-					break;
-				}
-			case SC_TYPE_STRING: {
-					if ((*base).*ps != val) {
-						(*base).*ps = val;
-						return true;
-					}
-					break;
-				}
+			case SC_TYPE_BOOLEAN:
+				return SetOptionValue((*base).*pb, val);
+			case SC_TYPE_INTEGER:
+				return SetOptionValue((*base).*pi, val);
+			case SC_TYPE_STRING:
+				return SetOptionValue((*base).*ps, val);
 			default:
 				break;
 			}

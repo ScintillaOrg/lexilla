@@ -19,6 +19,7 @@ TESTEDSRC=\
  ../../lexlib/LexerBase.cxx \
  ../../lexlib/LexerModule.cxx \
  ../../lexlib/LexerSimple.cxx \
+ ../../lexlib/OptionSet.cxx \
  ../../lexlib/PropSetSimple.cxx \
  ../../lexlib/WordList.cxx
 

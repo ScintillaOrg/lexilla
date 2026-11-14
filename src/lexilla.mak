@@ -231,6 +231,7 @@ LEXLIB_OBJS=\
 	$(DIR_O)\LexerBase.obj \
 	$(DIR_O)\LexerModule.obj \
 	$(DIR_O)\LexerSimple.obj \
+	$(DIR_O)\OptionSet.obj \
 	$(DIR_O)\PropSetSimple.obj \
 	$(DIR_O)\StyleContext.obj \
 	$(DIR_O)\WordList.obj

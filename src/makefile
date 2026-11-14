@@ -121,6 +121,7 @@ LEXLIB_OBJS=\
 	LexerBase.o \
 	LexerModule.o \
 	LexerSimple.o \
+	OptionSet.o \
 	PropSetSimple.o \
 	StyleContext.o \
 	WordList.o

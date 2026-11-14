@@ -83,6 +83,11 @@ $(DIR_O)/LexerSimple.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/LexerBase.h \
 	../lexlib/LexerSimple.h
+$(DIR_O)/OptionSet.o: \
+	../lexlib/OptionSet.cxx \
+	../../scintilla/include/Scintilla.h \
+	../../scintilla/include/Sci_Position.h \
+	../lexlib/OptionSet.h
 $(DIR_O)/PropSetSimple.o: \
 	../lexlib/PropSetSimple.cxx \
 	../lexlib/PropSetSimple.h
