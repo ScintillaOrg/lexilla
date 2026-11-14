@@ -173,7 +173,7 @@
 		283639BB268FD4EA009D58A1 /* LexAccessor.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAccessor.cxx; path = ../../lexlib/LexAccessor.cxx; sourceTree = "<group>"; };
 		283A17AC2B47E61100DF5C82 /* InList.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InList.cxx; path = ../../lexlib/InList.cxx; sourceTree = "<group>"; };
 		283A17AD2B47E61100DF5C82 /* InList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InList.h; path = ../../lexlib/InList.h; sourceTree = "<group>"; };
-		2857C92930A91B85004AE22F /* OptionSet.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ../../lexlib/OptionSet.cxx; sourceTree = "<group>"; };
+		2857C92930A91B85004AE22F /* OptionSet.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = OptionSet.cxx; path = ../../lexlib/OptionSet.cxx; sourceTree = "<group>"; };
 		28BA728F24E34D5A00272C2D /* LexerBase.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexerBase.cxx; path = ../../lexlib/LexerBase.cxx; sourceTree = "<group>"; };
 		28BA729024E34D5A00272C2D /* LexAccessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexAccessor.h; path = ../../lexlib/LexAccessor.h; sourceTree = "<group>"; };
 		28BA729124E34D5A00272C2D /* DefaultLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DefaultLexer.h; path = ../../lexlib/DefaultLexer.h; sourceTree = "<group>"; };
