@@ -672,10 +672,10 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_WORD:
 				// "." never used in Bash variable names but used in file names
 				if (!setWord.Contains(sc.ch) || sc.Match('+', '=') || sc.Match('.', '.')) {
-					char s[500];
-					sc.GetCurrent(s, sizeof(s));
+					char identifier[500];
+					sc.GetCurrent(identifier, sizeof(identifier));
 					int identifierStyle = SCE_SH_IDENTIFIER | insideCommand;
-					const int subStyle = classifierIdentifiers.ValueFor(s);
+					const int subStyle = classifierIdentifiers.ValueFor(identifier);
 					if (subStyle >= 0) {
 						identifierStyle = subStyle | insideCommand;
 					}
@@ -686,9 +686,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					const bool keywordEnds = IsASpace(sc.ch) || setMetaCharacter.Contains(sc.ch) || cmdDelimiter.InList(s2);
 					// 'in' or 'do' may be construct keywords
 					if (cmdState == CmdState::Word) {
-						if (strcmp(s, "in") == 0 && keywordEnds)
+						if (strcmp(identifier, "in") == 0 && keywordEnds)
 							cmdStateNew = CmdState::Body;
-						else if (strcmp(s, "do") == 0 && keywordEnds)
+						else if (strcmp(identifier, "do") == 0 && keywordEnds)
 							cmdStateNew = CmdState::Start;
 						else
 							sc.ChangeState(identifierStyle);
@@ -696,35 +696,35 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						break;
 					}
 					// a 'test' keyword starts a test expression
-					if (strcmp(s, "test") == 0) {
+					if (strcmp(identifier, "test") == 0) {
 						if (cmdState == CmdState::Start && keywordEnds) {
 							cmdStateNew = CmdState::Test;
 						} else
 							sc.ChangeState(identifierStyle);
 					}
 					// detect bash construct keywords
-					else if (bashStruct.InList(s)) {
+					else if (bashStruct.InList(identifier)) {
 						if (cmdState == CmdState::Start && keywordEnds)
 							cmdStateNew = CmdState::Start;
 						else
 							sc.ChangeState(identifierStyle);
 					}
 					// 'for'|'case'|'select' needs 'in'|'do' to be highlighted later
-					else if (bashStruct_in.InList(s)) {
+					else if (bashStruct_in.InList(identifier)) {
 						if (cmdState == CmdState::Start && keywordEnds)
 							cmdStateNew = CmdState::Word;
 						else
 							sc.ChangeState(identifierStyle);
 					}
 					// disambiguate option items and file test operators
-					else if (s[0] == '-') {
+					else if (identifier[0] == '-') {
 						if (!AnyOf(cmdState, CmdState::Test, CmdState::SingleBracket, CmdState::DoubleBracket)
-							  || !keywordEnds || !IsTestOperator(s, setSingleCharOp))
+							  || !keywordEnds || !IsTestOperator(identifier, setSingleCharOp))
 							sc.ChangeState(identifierStyle);
 					}
 					// disambiguate keywords and identifiers
 					else if (cmdState != CmdState::Start
-						  || !(keywords.InList(s) && keywordEnds)) {
+						  || !(keywords.InList(identifier) && keywordEnds)) {
 						sc.ChangeState(identifierStyle);
 					}
 					sc.SetState(SCE_SH_DEFAULT | insideCommand);
@@ -733,9 +733,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_IDENTIFIER:
 				if (!setWord.Contains(sc.ch) ||
 					  (cmdState == CmdState::Arithmetic && !setWordStart.Contains(sc.ch))) {
-					char s[500];
-					sc.GetCurrent(s, sizeof(s));
-					const int subStyle = classifierIdentifiers.ValueFor(s);
+					char identifier[500];
+					sc.GetCurrent(identifier, sizeof(identifier));
+					const int subStyle = classifierIdentifiers.ValueFor(identifier);
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle | insideCommand);
 					}
@@ -746,9 +746,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				digit = translateBashDigit(sc.ch);
 				if (numBase == BASH_BASE_DECIMAL) {
 					if (sc.ch == '#') {
-						char s[10];
-						sc.GetCurrent(s, sizeof(s));
-						numBase = getBashNumberBase(s);
+						char number[10];
+						sc.GetCurrent(number, sizeof(number));
+						numBase = getBashNumberBase(number);
 						if (numBase != BASH_BASE_ERROR)
 							break;
 					} else if (IsADigit(sc.ch))
@@ -867,9 +867,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				break;
 			case SCE_SH_SCALAR:	// variable names
 				if (!setParam.Contains(sc.ch)) {
-					char s[500];
-					sc.GetCurrent(s, sizeof(s));
-					const int subStyle = classifierScalars.ValueFor(&s[1]); // skip the $
+					char identifier[500];
+					sc.GetCurrent(identifier, sizeof(identifier));
+					const int subStyle = classifierScalars.ValueFor(&identifier[1]); // skip the $
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle | insideCommand);
 					}
@@ -1122,18 +1122,18 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				// handle command delimiters in command Start|Body|Word state, also Test if 'test' or '[]'
 				if (cmdState < CmdState::DoubleBracket) {
-					char s[10]{};
-					s[0] = static_cast<char>(sc.ch);
+					char delimiter[10]{};
+					delimiter[0] = static_cast<char>(sc.ch);
 					if (setBashOperator.Contains(sc.chNext)) {
-						s[1] = static_cast<char>(sc.chNext);
-						s[2] = '\0';
-						isCmdDelim = cmdDelimiter.InList(s);
+						delimiter[1] = static_cast<char>(sc.chNext);
+						delimiter[2] = '\0';
+						isCmdDelim = cmdDelimiter.InList(delimiter);
 						if (isCmdDelim)
 							sc.Forward();
 					}
 					if (!isCmdDelim) {
-						s[1] = '\0';
-						isCmdDelim = cmdDelimiter.InList(s);
+						delimiter[1] = '\0';
+						isCmdDelim = cmdDelimiter.InList(delimiter);
 					}
 					if (isCmdDelim) {
 						cmdState = CmdState::Delimiter;
