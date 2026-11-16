@@ -129,7 +129,7 @@ struct BracketPair {
 };
 
 BracketPair FindBracketPair(Tokens &tokens) {
-	const Tokens::iterator itBracket = std::find(tokens.begin(), tokens.end(), "(");
+	const Tokens::iterator itBracket = std::ranges::find(tokens, "(");
 	if (itBracket != tokens.end()) {
 		ptrdiff_t nest = 0;
 		for (Tokens::iterator itTok = itBracket; itTok != tokens.end(); ++itTok) {
@@ -905,8 +905,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	if (!options.updatePreprocessor)
 		ppDefineHistory.clear();
 
-	const std::vector<PPDefinition>::iterator itInvalid = std::find_if(
-		ppDefineHistory.begin(), ppDefineHistory.end(),
+	const std::vector<PPDefinition>::iterator itInvalid = std::ranges::find_if(
+		ppDefineHistory,
 		[lineCurrent](const PPDefinition &p) noexcept { return p.line >= lineCurrent; });
 	if (itInvalid != ppDefineHistory.end()) {
 		ppDefineHistory.erase(itInvalid, ppDefineHistory.end());
@@ -1419,7 +1419,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 							const bool isIfDef = sc.Match("ifdef");
 							const int startRest = isIfDef ? 5 : 6;
 							const std::string restOfLine = GetRestOfLine(styler, sc.currentPos + startRest + 1, false);
-							const bool foundDef = preprocessorDefinitions.find(restOfLine) != preprocessorDefinitions.end();
+							const bool foundDef = preprocessorDefinitions.contains(restOfLine);
 							preproc.StartSection(isIfDef == foundDef);
 						} else if (sc.Match("if")) {
 							const std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 2, true);
@@ -1666,7 +1666,7 @@ void SCI_METHOD LexerCPP::Fold(Sci_PositionU startPos, Sci_Position length, int 
 void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDefinitions) {
 
 	// Remove whitespace tokens
-	tokens.erase(std::remove_if(tokens.begin(), tokens.end(), OnlySpaceOrTab), tokens.end());
+	std::erase_if(tokens, OnlySpaceOrTab);
 
 	// Evaluate defined statements to either 0 or 1
 	for (size_t i=0; (i+1)<tokens.size();) {
@@ -1735,7 +1735,7 @@ void LexerCPP::EvaluateTokens(Tokens &tokens, const SymbolTable &preprocessorDef
 						tokens.erase(tokens.begin() + i, tokens.begin() + tok + 1);
 
 						// Substitute values into macro
-						macroTokens.erase(std::remove_if(macroTokens.begin(), macroTokens.end(), OnlySpaceOrTab), macroTokens.end());
+						std::erase_if(macroTokens, OnlySpaceOrTab);
 
 						for (size_t iMacro = 0; iMacro < macroTokens.size();) {
 							if (setWordStart.Contains(macroTokens[iMacro][0])) {
