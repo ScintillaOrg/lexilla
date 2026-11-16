@@ -1248,9 +1248,10 @@ $(DIR_O)/LexProps.obj: \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h \
-	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexPS.obj: \
 	../lexers/LexPS.cxx \
 	../../scintilla/include/ILexer.h \

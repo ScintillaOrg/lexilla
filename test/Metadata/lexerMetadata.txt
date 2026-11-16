@@ -2138,6 +2138,18 @@ Lexer abl
         Task Marker
 
 Lexer props
+    Properties:
+        bool   lexer.props.allow.initial.spaces
+               For properties files, set to 0 to style all lines that start with whitespace in the default style. This is not suitable for SciTE .properties files which use indentation for flow control but can be used for RFC2822 text where indentation is used for continuation lines.
+        bool   fold
+        bool   fold.compact
+    Styles:
+          0 SCE_PROPS_DEFAULT [default] Default
+          1 SCE_PROPS_COMMENT [comment] Comment
+          2 SCE_PROPS_SECTION [keyword] Section
+          3 SCE_PROPS_ASSIGNMENT [operator] Assignment operator
+          4 SCE_PROPS_DEFVAL [literal string] Default value (@)
+          5 SCE_PROPS_KEY [identifier] Key
 
 Lexer ps
     Word Lists:
