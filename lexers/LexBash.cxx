@@ -109,11 +109,11 @@ constexpr int translateBashDigit(int ch) noexcept {
 	return BASH_BASE_ERROR;
 }
 
-int getBashNumberBase(const char *s) noexcept {
+int getBashNumberBase(std::string_view s) noexcept {
 	int i = 0;
 	int base = 0;
-	while (*s) {
-		base = base * 10 + (*s++ - '0');
+	for (const char ch : s) {
+		base = (base * 10) + (ch - '0');
 		i++;
 	}
 	if (base > 64 || i > 2) {
@@ -534,9 +534,9 @@ public:
 		return styleSubable;
 	}
 
-	bool IsTestOperator(const char *s, const CharacterSet &setSingleCharOp) const noexcept {
-		return (s[2] == '\0' && setSingleCharOp.Contains(s[1]))
-			|| testOperator.InList(s + 1);
+	bool IsTestOperator(std::string_view s, const CharacterSet &setSingleCharOp) const noexcept {
+		return (s.length() == 2 && setSingleCharOp.Contains(s[1]))
+			|| testOperator.InList(s.substr(1));
 	}
 
 	static ILexer5 *LexerFactoryBash() {
@@ -672,23 +672,20 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_WORD:
 				// "." never used in Bash variable names but used in file names
 				if (!setWord.Contains(sc.ch) || sc.Match('+', '=') || sc.Match('.', '.')) {
-					char identifier[500];
-					sc.GetCurrent(identifier, sizeof(identifier));
+					const std::string_view identifier = sc.CurrentView();
 					int identifierStyle = SCE_SH_IDENTIFIER | insideCommand;
 					const int subStyle = classifierIdentifiers.ValueFor(identifier);
 					if (subStyle >= 0) {
 						identifierStyle = subStyle | insideCommand;
 					}
 					// allow keywords ending in a whitespace, meta character or command delimiter
-					char s2[10]{};
-					s2[0] = static_cast<char>(sc.ch);
-					s2[1] = '\0';
+					const char s2[]{ static_cast<char>(sc.ch), '\0' };
 					const bool keywordEnds = IsASpace(sc.ch) || setMetaCharacter.Contains(sc.ch) || cmdDelimiter.InList(s2);
 					// 'in' or 'do' may be construct keywords
 					if (cmdState == CmdState::Word) {
-						if (strcmp(identifier, "in") == 0 && keywordEnds)
+						if (identifier == "in" && keywordEnds)
 							cmdStateNew = CmdState::Body;
-						else if (strcmp(identifier, "do") == 0 && keywordEnds)
+						else if (identifier == "do" && keywordEnds)
 							cmdStateNew = CmdState::Start;
 						else
 							sc.ChangeState(identifierStyle);
@@ -696,7 +693,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						break;
 					}
 					// a 'test' keyword starts a test expression
-					if (strcmp(identifier, "test") == 0) {
+					if (identifier == "test") {
 						if (cmdState == CmdState::Start && keywordEnds) {
 							cmdStateNew = CmdState::Test;
 						} else
@@ -717,7 +714,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							sc.ChangeState(identifierStyle);
 					}
 					// disambiguate option items and file test operators
-					else if (identifier[0] == '-') {
+					else if (identifier.starts_with('-')) {
 						if (!AnyOf(cmdState, CmdState::Test, CmdState::SingleBracket, CmdState::DoubleBracket)
 							  || !keywordEnds || !IsTestOperator(identifier, setSingleCharOp))
 							sc.ChangeState(identifierStyle);
@@ -733,8 +730,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			case SCE_SH_IDENTIFIER:
 				if (!setWord.Contains(sc.ch) ||
 					  (cmdState == CmdState::Arithmetic && !setWordStart.Contains(sc.ch))) {
-					char identifier[500];
-					sc.GetCurrent(identifier, sizeof(identifier));
+					const std::string_view identifier = sc.CurrentView();
 					const int subStyle = classifierIdentifiers.ValueFor(identifier);
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle | insideCommand);
@@ -746,8 +742,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				digit = translateBashDigit(sc.ch);
 				if (numBase == BASH_BASE_DECIMAL) {
 					if (sc.ch == '#') {
-						char number[10];
-						sc.GetCurrent(number, sizeof(number));
+						const std::string_view number = sc.CurrentView();
 						numBase = getBashNumberBase(number);
 						if (numBase != BASH_BASE_ERROR)
 							break;
@@ -867,9 +862,8 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				break;
 			case SCE_SH_SCALAR:	// variable names
 				if (!setParam.Contains(sc.ch)) {
-					char identifier[500];
-					sc.GetCurrent(identifier, sizeof(identifier));
-					const int subStyle = classifierScalars.ValueFor(&identifier[1]); // skip the $
+					const std::string_view identifier = sc.CurrentView();
+					const int subStyle = classifierScalars.ValueFor(identifier.substr(1)); // skip the $
 					if (subStyle >= 0) {
 						sc.ChangeState(subStyle | insideCommand);
 					}
@@ -1187,7 +1181,6 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 	char chNext = styler[startPos];
 	int styleNext = MaskCommand(styler.StyleIndexAt(startPos));
 	int style = MaskCommand(initStyle);
-	char word[8] = { '\0' }; // we're not interested in long words anyway
 	size_t wordlen = 0;
 	for (Sci_Position i = startPos; i < endPos; i++) {
 		const char ch = chNext;
@@ -1209,10 +1202,9 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 
 		switch (style) {
 		case SCE_SH_WORD:
-			if ((wordlen + 1) < sizeof(word))
-				word[wordlen++] = ch;
+			wordlen++;
 			if (styleNext != style) {
-				word[wordlen] = '\0';
+				const std::string_view word = styler.RangeView(i - wordlen + 1, i + 1);
 				wordlen = 0;
 				if (InList(word, {"if", "case", "do"})) {
 					levelCurrent++;

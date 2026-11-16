@@ -86,3 +86,8 @@ void StyleContext::GetCurrentString(std::string &string, Transform transform) co
 		styler.GetRange(startPos, currentPos, string.data(), len + 1);
 	}
 }
+
+std::string_view StyleContext::CurrentView() const {
+	const Sci_PositionU startPos = styler.GetStartSegment();
+	return styler.RangeView(startPos, currentPos);
+}

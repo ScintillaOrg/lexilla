@@ -112,6 +112,21 @@ std::string LexAccessor::GetRangeLowered(Sci_PositionU startPos_, Sci_PositionU 
 	return s;
 }
 
+std::string_view LexAccessor::RangeView(Sci_PositionU startPos_, Sci_PositionU endPos_) {
+	constexpr Sci_PositionU maxViewLength = bufferSize - slopSize;
+	const Sci_PositionU uLenDoc = lenDoc;
+	if ((startPos_ > uLenDoc) || (endPos_ < startPos_)) {
+		// Return empty view with valid start
+		return {buf, 0};
+	}
+	endPos_ = std::min(endPos_, uLenDoc);
+	const Sci_PositionU len = std::min(endPos_ - startPos_, maxViewLength);
+	if ((startPos_ < static_cast<Sci_PositionU>(startPos)) || ((startPos_ + len) >= static_cast<Sci_PositionU>(endPos))) {
+		Fill(startPos_);
+	}
+	return { buf + startPos_ - startPos, len };
+}
+
 void LexAccessor::SetLevelIfDifferent(Sci_Position line, int level) {
 	if (level != pAccess->GetLevel(line)) {
 		pAccess->SetLevel(line, level);

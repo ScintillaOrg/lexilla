@@ -187,6 +187,7 @@ public:
 	void GetCurrentLowered(char *s, Sci_PositionU len) const;
 	enum class Transform { none, lower };
 	void GetCurrentString(std::string &string, Transform transform) const;
+	std::string_view CurrentView() const;
 };
 
 }

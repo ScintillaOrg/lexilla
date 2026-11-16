@@ -384,17 +384,19 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 
 void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
                              const WordList &keywords, const WordClassifier &classifier, const WordClassifier &classifierServer, Accessor &styler, script_mode inScriptType) {
-	const std::string s = styler.GetRange(start, end+1);
+	const std::string_view s = styler.RangeView(start, end + 1);
 	int chAttr = SCE_HJ_WORD;
-	const bool wordIsNumber = IsADigit(s[0]) || ((s[0] == '.') && IsADigit(s[1]));
-	if (wordIsNumber) {
-		chAttr = SCE_HJ_NUMBER;
-	} else if (keywords.InList(s)) {
-		chAttr = SCE_HJ_KEYWORD;
-	} else {
-		const int subStyle = (inScriptType == eNonHtmlScript) ? classifier.ValueFor(s) : classifierServer.ValueFor(s);
-		if (subStyle >= 0) {
-			chAttr = subStyle;
+	if (!s.empty()) {
+		const bool wordIsNumber = IsADigit(s[0]) || ((s.length() > 1) && (s[0] == '.') && IsADigit(s[1]));
+		if (wordIsNumber) {
+			chAttr = SCE_HJ_NUMBER;
+		} else if (keywords.InList(s)) {
+			chAttr = SCE_HJ_KEYWORD;
+		} else {
+			const int subStyle = (inScriptType == eNonHtmlScript) ? classifier.ValueFor(s) : classifierServer.ValueFor(s);
+			if (subStyle >= 0) {
+				chAttr = subStyle;
+			}
 		}
 	}
 
@@ -428,7 +430,7 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &key
 
 void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const WordClassifier &classifier, Accessor &styler, std::string &prevWord, script_mode inScriptType, bool isMako) {
 	const bool wordIsNumber = IsADigit(styler[start]);
-	const std::string s = styler.GetRange(start, end + 1);
+	const std::string_view s = styler.RangeView(start, end + 1);
 	int chAttr = SCE_HP_IDENTIFIER;
 	if (prevWord == "class")
 		chAttr = SCE_HP_CLASSNAME;
@@ -471,13 +473,13 @@ void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &k
 	styler.ColourTo(end, chAttr);
 }
 
-bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, const Accessor &styler) {
-	const std::string s = styler.GetRange(start, end + 1);
+bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
+	const std::string_view s = styler.RangeView(start, end + 1);
 	return keywords.InList(s);
 }
 
-bool isWordCdata(Sci_PositionU start, Sci_PositionU end, const Accessor &styler) {
-	const std::string s = styler.GetRange(start, end + 1);
+bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
+	const std::string_view s = styler.RangeView(start, end + 1);
 	return s == "[CDATA[";
 }
 

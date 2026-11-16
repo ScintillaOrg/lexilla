@@ -186,8 +186,8 @@ constexpr FrontMatter FrontMatterFromString(std::string_view value) {
     return FrontMatter::None;
 }
 
-FrontMatter DetectFrontMatter(const Accessor &styler) {
-    return FrontMatterFromString(styler.GetRange(0, 3));
+FrontMatter DetectFrontMatter(Accessor &styler) {
+    return FrontMatterFromString(styler.RangeView(0, 3));
 }
 
 constexpr std::string_view header5 = "#####";
@@ -331,7 +331,7 @@ void SCI_METHOD LexerMarkdown::Lex(Sci_PositionU startPos, Sci_Position length, 
         case SCE_MARKDOWN_FRONT:
             if (sc.atLineStart) {
                 const FrontMatter frontMatterMark = FrontMatterFromString(
-                    styler.GetRange(sc.currentPos, sc.currentPos + 3));
+                    styler.RangeView(sc.currentPos, sc.currentPos + 3));
                 if (frontMatterMark == frontMatter) {
                     sc.SetState(SCE_MARKDOWN_FRONT_MARK);
                 } else if (AnyOf(sc.ch, '{', '}')) {
