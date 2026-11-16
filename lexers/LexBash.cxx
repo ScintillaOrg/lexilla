@@ -39,18 +39,18 @@ using namespace Lexilla;
 
 namespace {
 
-#define HERE_DELIM_MAX			256
+constexpr int hereDelimMax = 256;
 
 // define this if you want 'invalid octals' to be marked as errors
 // usually, this is not a good idea, permissive lexing is better
 #undef PEDANTIC_OCTAL
 
-#define BASH_BASE_ERROR			65
-#define BASH_BASE_DECIMAL		66
-#define BASH_BASE_HEX			67
+constexpr int bashBaseError = 65;
+constexpr int bashBaseDecimal = 66;
+constexpr int bashBaseHex = 67;
 #ifdef PEDANTIC_OCTAL
-#define BASH_BASE_OCTAL			68
-#define	BASH_BASE_OCTAL_ERROR	69
+constexpr int bashBaseOctal = 68;
+constexpr int bashBaseOctalError = 69;
 #endif
 
 // state constants for parts of a bash command segment
@@ -86,7 +86,7 @@ enum class QuoteStyle {
 	Arithmetic,		// $(()), $[]
 };
 
-#define BASH_QUOTE_STACK_MAX	7
+constexpr int bashQuoteStackMax = 7;
 #define BASH_SPECIAL_PARAMETER	"*@#?-$!"
 
 constexpr int commandSubstitutionFlag = 0x40;
@@ -94,11 +94,13 @@ constexpr int MaskCommand(int state) noexcept {
 	return state & ~commandSubstitutionFlag;
 }
 
+constexpr int decimalBase = 10;
+
 constexpr int translateBashDigit(int ch) noexcept {
 	if (ch >= '0' && ch <= '9') {
 		return ch - '0';
 	} else if (ch >= 'a' && ch <= 'z') {
-		return ch - 'a' + 10;
+		return ch - 'a' + decimalBase;
 	} else if (ch >= 'A' && ch <= 'Z') {
 		return ch - 'A' + 36;
 	} else if (ch == '@') {
@@ -106,18 +108,18 @@ constexpr int translateBashDigit(int ch) noexcept {
 	} else if (ch == '_') {
 		return 63;
 	}
-	return BASH_BASE_ERROR;
+	return bashBaseError;
 }
 
 int getBashNumberBase(std::string_view s) noexcept {
 	int i = 0;
 	int base = 0;
 	for (const char ch : s) {
-		base = (base * 10) + (ch - '0');
+		base = (base * decimalBase) + (ch - '0');
 		i++;
 	}
 	if (base > 64 || i > 2) {
-		return BASH_BASE_ERROR;
+		return bashBaseError;
 	}
 	return base;
 }
@@ -279,9 +281,9 @@ public:
 	int insideCommand = 0;
 	unsigned backtickLevel = 0;
 	QuoteCls Current;
-	QuoteCls Stack[BASH_QUOTE_STACK_MAX];
+	QuoteCls Stack[bashQuoteStackMax];
 	const CharacterSet &setParamStart;
-	QuoteStackCls(const CharacterSet &setParamStart_) noexcept : setParamStart{setParamStart_} {}
+	explicit QuoteStackCls(const CharacterSet &setParamStart_) noexcept : setParamStart{setParamStart_} {}
 	[[nodiscard]] bool Empty() const noexcept {
 		return Current.Up == '\0';
 	}
@@ -296,7 +298,7 @@ public:
 		}
 	}
 	void Push(int u, QuoteStyle s, int outer, CmdState state) noexcept {
-		if (Depth >= BASH_QUOTE_STACK_MAX) {
+		if (Depth >= bashQuoteStackMax) {
 			return;
 		}
 		Stack[Depth] = Current;
@@ -534,7 +536,7 @@ public:
 		return styleSubable;
 	}
 
-	bool IsTestOperator(std::string_view s, const CharacterSet &setSingleCharOp) const noexcept {
+	[[nodiscard]] bool IsTestOperator(std::string_view s, const CharacterSet &setSingleCharOp) const noexcept {
 		return (s.length() == 2 && setSingleCharOp.Contains(s[1]))
 			|| testOperator.InList(s.substr(1));
 	}
@@ -595,7 +597,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		bool Indent = false;		// indented delimiter (for <<-)
 		int BackslashCount = 0;
 		int DelimiterLength = 0;	// strlen(Delimiter)
-		char Delimiter[HERE_DELIM_MAX]{};	// the Delimiter
+		char Delimiter[hereDelimMax]{};	// the Delimiter
 		HereDocCls() noexcept = default;
 		void Append(int ch) {
 			Delimiter[DelimiterLength++] = static_cast<char>(ch);
@@ -696,8 +698,9 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					if (identifier == "test") {
 						if (cmdState == CmdState::Start && keywordEnds) {
 							cmdStateNew = CmdState::Test;
-						} else
+						} else {
 							sc.ChangeState(identifierStyle);
+						}
 					}
 					// detect bash construct keywords
 					else if (bashStruct.InList(identifier)) {
@@ -740,32 +743,33 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				break;
 			case SCE_SH_NUMBER:
 				digit = translateBashDigit(sc.ch);
-				if (numBase == BASH_BASE_DECIMAL) {
+				if (numBase == bashBaseDecimal) {
 					if (sc.ch == '#') {
 						const std::string_view number = sc.CurrentView();
 						numBase = getBashNumberBase(number);
-						if (numBase != BASH_BASE_ERROR)
+						if (numBase != bashBaseError)
 							break;
-					} else if (IsADigit(sc.ch))
+					} else if (IsADigit(sc.ch)) {
 						break;
-				} else if (numBase == BASH_BASE_HEX) {
+					}
+				} else if (numBase == bashBaseHex) {
 					if (IsADigit(sc.ch, 16))
 						break;
 #ifdef PEDANTIC_OCTAL
-				} else if (numBase == BASH_BASE_OCTAL ||
-						   numBase == BASH_BASE_OCTAL_ERROR) {
+				} else if (numBase == bashBaseOctal ||
+						   numBase == bashBaseOctalError) {
 					if (digit <= 7)
 						break;
 					if (digit <= 9) {
-						numBase = BASH_BASE_OCTAL_ERROR;
+						numBase = bashBaseOctalError;
 						break;
 					}
 #endif
-				} else if (numBase == BASH_BASE_ERROR) {
+				} else if (numBase == bashBaseError) {
 					if (digit <= 9)
 						break;
 				} else {	// DD#DDDD number style handling
-					if (digit != BASH_BASE_ERROR) {
+					if (digit != bashBaseError) {
 						if (numBase <= 36) {
 							// case-insensitive if base<=36
 							if (digit >= 36) digit -= 26;
@@ -773,15 +777,15 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						if (digit < numBase)
 							break;
 						if (digit <= 9) {
-							numBase = BASH_BASE_ERROR;
+							numBase = bashBaseError;
 							break;
 						}
 					}
 				}
 				// fallthrough when number is at an end or error
-				if (numBase == BASH_BASE_ERROR
+				if (numBase == bashBaseError
 #ifdef PEDANTIC_OCTAL
-					|| numBase == BASH_BASE_OCTAL_ERROR
+					|| numBase == bashBaseOctalError
 #endif
 				) {
 					sc.ChangeState(SCE_SH_ERROR | insideCommand);
@@ -854,7 +858,7 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					} else {
 						sc.SetState(SCE_SH_DEFAULT | insideCommand);
 					}
-					if (HereDoc.DelimiterLength >= HERE_DELIM_MAX - 1) {	// force blowup
+					if (HereDoc.DelimiterLength >= hereDelimMax - 1) {	// force blowup
 						sc.SetState(SCE_SH_ERROR | insideCommand);
 						HereDoc.State = 0;
 					}
@@ -1007,14 +1011,14 @@ void SCI_METHOD LexerBash::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				QuoteStack.Escape(sc);
 			} else if (IsADigit(sc.ch)) {
 				sc.SetState(SCE_SH_NUMBER | insideCommand);
-				numBase = BASH_BASE_DECIMAL;
+				numBase = bashBaseDecimal;
 				if (sc.ch == '0') {	// hex,octal
 					if (sc.chNext == 'x' || sc.chNext == 'X') {
-						numBase = BASH_BASE_HEX;
+						numBase = bashBaseHex;
 						sc.Forward();
 					} else if (IsADigit(sc.chNext)) {
 #ifdef PEDANTIC_OCTAL
-						numBase = BASH_BASE_OCTAL;
+						numBase = bashBaseOctal;
 #endif
 					}
 				}
