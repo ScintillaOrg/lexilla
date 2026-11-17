@@ -636,19 +636,11 @@ void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position leng
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
 
-#if defined(__clang__)
-#if __has_warning("-Wunused-but-set-variable")
-// Disable warning for visibleChars
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#endif
-
 void SCI_METHOD LexerVisualProlog::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument* pAccess) {
 
     LexAccessor styler(pAccess);
 
     Sci_PositionU endPos = startPos + length;
-    int visibleChars = 0;
     Sci_Position currentLine = styler.GetLine(startPos);
     int levelCurrent = SC_FOLDLEVELBASE;
     if (currentLine > 0)
@@ -676,8 +668,6 @@ void SCI_METHOD LexerVisualProlog::Fold(Sci_PositionU startPos, Sci_Position len
                 levelNext--;
             }
         }
-        if (!IsASpace(ch))
-            visibleChars++;
         if (atEOL || (i == endPos - 1)) {
             int levelUse = levelCurrent;
             int lev = levelUse | levelNext << 16;
@@ -693,7 +683,6 @@ void SCI_METHOD LexerVisualProlog::Fold(Sci_PositionU startPos, Sci_Position len
                 // There is an empty line at end of file so give it same level and empty
                 styler.SetLevel(currentLine, (levelCurrent | levelCurrent << 16) | SC_FOLDLEVELWHITEFLAG);
             }
-            visibleChars = 0;
         }
     }
 }

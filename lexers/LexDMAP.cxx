@@ -27,13 +27,6 @@
 #include "LexerModule.h"
 /***************************************/
 
-#if defined(__clang__)
-#if __has_warning("-Wunused-but-set-variable")
-// Disable warning for numNonBlank
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#endif
-
 using namespace Lexilla;
 
 /***********************************************/
@@ -51,7 +44,7 @@ static void ColouriseDMAPDoc(Sci_PositionU startPos, Sci_Position length, int in
     WordList &keywords2 = *keywordlists[1];
     WordList &keywords3 = *keywordlists[2];
     /***************************************/
-    Sci_Position posLineStart = 0, numNonBlank = 0;
+    Sci_Position posLineStart = 0;
     Sci_Position endPos = startPos + length;
     /***************************************/
     // backtrack to the nearest keyword
@@ -66,10 +59,8 @@ static void ColouriseDMAPDoc(Sci_PositionU startPos, Sci_Position length, int in
         // remember the start position of the line
         if (sc.atLineStart) {
             posLineStart = sc.currentPos;
-            numNonBlank = 0;
             sc.SetState(SCE_DMAP_DEFAULT);
         }
-        if (!IsASpaceOrTab(sc.ch)) numNonBlank ++;
         /***********************************************/
         // Handle data appearing after column 72; it is ignored
         Sci_Position toLineStart = sc.currentPos - posLineStart;

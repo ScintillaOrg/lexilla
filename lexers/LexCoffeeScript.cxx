@@ -103,13 +103,6 @@ static bool followsKeyword(StyleContext &sc, Accessor &styler) {
 	return styler.StyleAt(pos) == SCE_COFFEESCRIPT_WORD;
 }
 
-#if defined(__clang__)
-#if __has_warning("-Wunused-but-set-variable")
-// Disable warning for visibleChars
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
-#endif
-#endif
-
 static void ColouriseCoffeeScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
@@ -124,7 +117,6 @@ static void ColouriseCoffeeScriptDoc(Sci_PositionU startPos, Sci_Position length
 	CharacterSet setWord(CharacterSet::setAlphaNum, "._$", 0x80, true);
 
 	int chPrevNonWhite = ' ';
-	int visibleChars = 0;
 
 	// String/Regex interpolation variables, based on LexRuby.cxx.
 	// In most cases a value of 2 should be ample for the code the user is
@@ -169,12 +161,6 @@ static void ColouriseCoffeeScriptDoc(Sci_PositionU startPos, Sci_Position length
 	StyleContext sc(startPos, endPos - startPos, initStyle, styler);
 
 	for (; sc.More();) {
-
-		if (sc.atLineStart) {
-			// Reset states to beginning of colourise so no surprises
-			// if different sets of lines lexed.
-			visibleChars = 0;
-		}
 
 		// Determine if the current state should terminate.
 		switch (sc.state) {
@@ -338,7 +324,6 @@ static void ColouriseCoffeeScriptDoc(Sci_PositionU startPos, Sci_Position length
 
 		if (!IsASpace(sc.ch) && !IsSpaceEquiv(sc.state)) {
 			chPrevNonWhite = sc.ch;
-			visibleChars++;
 		}
 		sc.Forward();
 	}
