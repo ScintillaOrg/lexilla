@@ -817,6 +817,21 @@ Lexer dataflex
         Operators
 
 Lexer diff
+    Properties:
+        bool   fold
+    Styles:
+          0 SCE_DIFF_DEFAULT [default] Default
+          1 SCE_DIFF_COMMENT [comment] Comment
+          2 SCE_DIFF_COMMAND [literal string] Command
+          3 SCE_DIFF_HEADER [literal string] Source and destination file
+          4 SCE_DIFF_POSITION [literal string] Position
+          5 SCE_DIFF_DELETED [default] Line removal
+          6 SCE_DIFF_ADDED [default] Line addition
+          7 SCE_DIFF_CHANGED [default] Line changed
+          8 SCE_DIFF_PATCH_ADD [default] Patch add
+          9 SCE_DIFF_PATCH_DELETE [default] Patch delete
+         10 SCE_DIFF_REMOVED_PATCH_ADD [default] Removed patch add
+         11 SCE_DIFF_REMOVED_PATCH_DELETE [default] Removed patch delete
 
 Lexer DMAP
     Word Lists:
