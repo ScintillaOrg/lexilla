@@ -414,6 +414,7 @@ struct OptionsCPP {
 	BackQuotedString backQuotedStrings = BackQuotedString::None;
 	bool escapeSequence = false;
 	bool continuationOnlyStrings = false;
+	std::string digitSeparator = "'";
 	bool fold = false;
 	bool foldSyntaxBased = true;
 	bool foldComment = false;
@@ -480,6 +481,12 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 
 		DefineProperty("lexer.cpp.continuation.only.in.strings", &OptionsCPP::continuationOnlyStrings,
 			"Set to 1 to only handle line continuation inside string literals");
+
+		DefineProperty("lexer.cpp.digit.separator", &OptionsCPP::digitSeparator,
+			"Set which character may separate digits in numeric literals. "
+			"\"'\" (the default) allows separation with single quotes. "
+			"\"_\" allows separation with underscores. "
+			"\"\" disallows separating by any character.");
 
 		DefineProperty("fold", &OptionsCPP::fold);
 
@@ -839,6 +846,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 		setWordStart.Add('#');
 	}
 
+	const char digitSep = options.digitSeparator.empty() ? '\0' : options.digitSeparator[0];
+
 	int chPrevNonWhite = ' ';
 	int visibleChars = 0;
 	bool lastWordWasUUID = false;
@@ -1008,10 +1017,10 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				break;
 			case SCE_C_NUMBER:
 				// We accept almost anything because of hex. and number suffixes
-				if (sc.ch == '_') {
+				if (sc.ch == '_' && digitSep != '_') {
 					sc.ChangeState(SCE_C_USERLITERAL|activitySet);
-				} else if (!(setWord.Contains(sc.ch)
-				   || (sc.ch == '\'')
+				} else if (!((setWord.Contains(sc.ch) && sc.ch != '_')
+				   || (sc.ch == digitSep)
 				   || (AnyOf(sc.chPrev, 'e', 'E', 'p', 'P') && AnyOf(sc.ch, '+', '-')))) {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
 				}
@@ -1204,7 +1213,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					}
 					sc.Forward(); // Skip all characters after the backslash
 				} else if (sc.ch == '\"') {
-					if (sc.chNext == '_') {
+					if (sc.chNext == '_' && digitSep != '_') {
 						sc.ChangeState(SCE_C_USERLITERAL|activitySet);
 					} else {
 						sc.ForwardSetState(SCE_C_DEFAULT|activitySet);
@@ -1257,7 +1266,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						sc.Forward();
 					}
 				} else if (sc.ch == '\'') {
-					if (sc.chNext == '_') {
+					if (sc.chNext == '_' && digitSep != '_') {
 						sc.ChangeState(SCE_C_USERLITERAL|activitySet);
 					} else {
 						sc.ForwardSetState(SCE_C_DEFAULT|activitySet);

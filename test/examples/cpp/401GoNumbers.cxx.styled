@@ -1,0 +1,28 @@
+{2}// Examples of numeric literals for issue 401.
+// New property lexer.cpp.digit.separator.
+{0}
+{1}/* No digit separators */{0}
+
+{2}// Integer literals
+{4}1{0}
+{4}75{0}
+{4}0113{0}
+{4}0x4b{0}
+
+{2}// Floating point literals
+{4}3.14159{0}
+{4}6.02e23{0}
+{4}1.6e-19{0}
+{4}1.0{0}
+
+{1}/* C++ digit separator ' */{0}
+{4}7{12}'500
+{4}3.141{12}'59
+{0}
+{1}/* C++ user literal */{0}
+{4}1_date_{0}
+
+{1}/* Go, Java, etc. digit separator _ */{0}
+{4}7_500{0}
+{4}3.141_59{0}
+{5}const{0} {11}x{0} {10}={0} {4}100_000{0}

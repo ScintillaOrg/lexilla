@@ -599,6 +599,7 @@
       </tr><tr>
 	<td>Allen Yen</td>
 	<td>Marco Johannes Maier</td>
+	<td>GeorgeTR1</td>
     </tr>
     </table>
     <h2 id="Releases">Releases</h2>
@@ -618,6 +619,12 @@
 	Prefer IsASCII to less-safe code.
 	<a href="https://github.com/ScintillaOrg/lexilla/issues/396">Issue #396</a>,
 	<a href="https://github.com/ScintillaOrg/lexilla/issues/388">Issue #388</a>.
+	</li>
+	<li>
+	Go: Option lexer.cpp.digit.separator to choose a digit separator in numeric literals.
+	Defaults to ' (quote) which is correct for C++.
+	_ (underscore) is correct for Go and some other languages.
+	<a href="https://github.com/ScintillaOrg/lexilla/issues/401/">Issue #401</a>.
 	</li>
 	<li>
 	R: Support more forms of hexadecimal floating point literals,

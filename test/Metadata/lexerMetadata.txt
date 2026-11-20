@@ -518,6 +518,8 @@ Lexer cpp
                Set to 1 to enable highlighting of escape sequences in strings
         bool   lexer.cpp.continuation.only.in.strings
                Set to 1 to only handle line continuation inside string literals
+        string lexer.cpp.digit.separator
+               Set which character may separate digits in numeric literals. "'" (the default) allows separation with single quotes. "_" allows separation with underscores. "" disallows separating by any character.
         bool   fold
         bool   fold.cpp.syntax.based
                Set this property to 0 to disable syntax based folding.
@@ -635,6 +637,8 @@ Lexer cppnocase
                Set to 1 to enable highlighting of escape sequences in strings
         bool   lexer.cpp.continuation.only.in.strings
                Set to 1 to only handle line continuation inside string literals
+        string lexer.cpp.digit.separator
+               Set which character may separate digits in numeric literals. "'" (the default) allows separation with single quotes. "_" allows separation with underscores. "" disallows separating by any character.
         bool   fold
         bool   fold.cpp.syntax.based
                Set this property to 0 to disable syntax based folding.
