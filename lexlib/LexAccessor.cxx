@@ -112,6 +112,22 @@ std::string LexAccessor::GetRangeLowered(Sci_PositionU startPos_, Sci_PositionU 
 	return s;
 }
 
+void LexAccessor::GetRange(Sci_PositionU startPos_, Sci_PositionU endPos_, std::string &s) const {
+	assert(startPos_ <= endPos_);
+	endPos_ = std::min(endPos_, static_cast<Sci_PositionU>(lenDoc));
+	const Sci_PositionU len = endPos_ - startPos_;
+	s.resize(len, '\0');
+	GetRange(startPos_, endPos_, s.data(), len + 1);
+}
+
+void LexAccessor::GetRangeLowered(Sci_PositionU startPos_, Sci_PositionU endPos_, std::string &s) const {
+	assert(startPos_ <= endPos_);
+	endPos_ = std::min(endPos_, static_cast<Sci_PositionU>(lenDoc));
+	const Sci_PositionU len = endPos_ - startPos_;
+	s.resize(len, '\0');
+	GetRangeLowered(startPos_, endPos_, s.data(), len + 1);
+}
+
 std::string_view LexAccessor::RangeView(Sci_PositionU startPos_, Sci_PositionU endPos_) {
 	constexpr Sci_PositionU maxViewLength = bufferSize - slopSize;
 	const Sci_PositionU uLenDoc = lenDoc;

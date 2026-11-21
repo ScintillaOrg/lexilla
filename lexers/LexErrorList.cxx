@@ -546,8 +546,7 @@ void LexerErrorList::Lex(Sci_PositionU startPos, Sci_Position length, int /* ini
 	Sci_Position startOfLine = styler.LineStart(line);
 	while (startOfLine < endPos) {
 		const Sci_Position endLine = styler.LineStart(line + 1);
-		lineBuffer.resize(endLine - startOfLine);
-		styler.GetRange(startOfLine, endLine, lineBuffer.data(), lineBuffer.size() + 1);
+		styler.GetRange(startOfLine, endLine, lineBuffer);
 		ColouriseLine(lineBuffer, endLine-1, styler);
 		line++;
 		startOfLine = endLine;

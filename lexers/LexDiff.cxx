@@ -165,8 +165,7 @@ void LexerDiff::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
 	Sci_Position startOfLine = styler.LineStart(line);
 	while (startOfLine < endPos) {
 		const Sci_Position endLine = styler.LineStart(line + 1);
-		lineBuffer.resize(endLine - startOfLine);
-		styler.GetRange(startOfLine, endLine, lineBuffer.data(), lineBuffer.size() + 1);
+		styler.GetRange(startOfLine, endLine, lineBuffer);
 		const int lineType = StyleForLine(lineBuffer);
 		if (lineType != initStyle) {
 			styler.ColourTo(startOfLine-1, initStyle);

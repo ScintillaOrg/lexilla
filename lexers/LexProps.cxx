@@ -149,8 +149,7 @@ void LexerProps::Lex(Sci_PositionU startPos, Sci_Position length, int /* initSty
 	Sci_Position startOfLine = styler.LineStart(line);
 	while (startOfLine < endPos) {
 		const Sci_Position endLine = styler.LineStart(line + 1);
-		lineBuffer.resize(endLine - startOfLine);
-		styler.GetRange(startOfLine, endLine, lineBuffer.data(), lineBuffer.size() + 1);
+		styler.GetRange(startOfLine, endLine, lineBuffer);
 		ColouriseLine(lineBuffer, startOfLine, endLine - 1, styler);
 		line++;
 		startOfLine = endLine;

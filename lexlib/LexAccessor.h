@@ -101,6 +101,8 @@ public:
 	// Get all characters in range [startPos_, endPos_).
 	std::string GetRange(Sci_PositionU startPos_, Sci_PositionU endPos_) const;
 	std::string GetRangeLowered(Sci_PositionU startPos_, Sci_PositionU endPos_) const;
+	void GetRange(Sci_PositionU startPos_, Sci_PositionU endPos_, std::string &s) const;
+	void GetRangeLowered(Sci_PositionU startPos_, Sci_PositionU endPos_, std::string &s) const;
 	// Create a view over a range in the internal buffer, may be truncated if too long.
 	std::string_view RangeView(Sci_PositionU startPos_, Sci_PositionU endPos_);
 
