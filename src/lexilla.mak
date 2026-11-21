@@ -11,7 +11,6 @@
 # Command line options
 #     DEBUG Debug build.
 #     QUIET Avoid most compiler invocation output and copyright info.
-#     SUPPORT_XP Build for Windows XP.
 
 .SUFFIXES: .cxx
 
@@ -27,22 +26,11 @@ LD=link
 ARM64=1
 !ENDIF
 
-!IFDEF SUPPORT_XP
-ADD_DEFINE=-D_USING_V110_SDK71_
-# Different subsystems for 32-bit and 64-bit Windows XP so detect based on Platform
-# environment variable set by vcvars*.bat to be either x86 or x64
-!IF "$(PLATFORM)" == "x64"
-SUBSYSTEM=-SUBSYSTEM:WINDOWS,5.02
-!ELSE
-SUBSYSTEM=-SUBSYSTEM:WINDOWS,5.01
-!ENDIF
-!ELSE
 !IFDEF ARM64
 ADD_DEFINE=-D_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1
 SUBSYSTEM=-SUBSYSTEM:WINDOWS,10.00
 !ELSE
 CETCOMPAT=-CETCOMPAT
-!ENDIF
 !ENDIF
 
 CRTFLAGS=-D_CRT_SECURE_NO_DEPRECATE=1 $(ADD_DEFINE)
