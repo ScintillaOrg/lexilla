@@ -80,8 +80,6 @@ public:
 		return -1;
 	}
 
-	static void ColouriseLine(const std::string &lineBuffer, Sci_PositionU endLine, LexAccessor &styler);
-
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
@@ -90,72 +88,72 @@ public:
 	}
 };
 
-void LexerDiff::ColouriseLine(const std::string &lineBuffer, Sci_PositionU endLine, LexAccessor &styler) {
+int StyleForLine(const std::string &lineBuffer) noexcept {
 	// It is needed to remember the current state to recognize starting
 	// comment lines before the first "diff " or "--- ". If a real
 	// difference starts then each line starting with ' ' is a whitespace
 	// otherwise it is considered a comment (Only in..., Binary file...)
 	if (lineBuffer.starts_with("diff ")) {
-		styler.ColourTo(endLine, SCE_DIFF_COMMAND);
+		return SCE_DIFF_COMMAND;
 	} else if (lineBuffer.starts_with("Index: ")) {  // For subversion's diff
-		styler.ColourTo(endLine, SCE_DIFF_COMMAND);
+		return SCE_DIFF_COMMAND;
 	} else if (lineBuffer.starts_with("---") && lineBuffer[3] != '-') {
 		// In a context diff, --- appears in both the header and the position markers
 		if (lineBuffer[3] == ' ' && atoi(lineBuffer.c_str() + 4) && (lineBuffer.find('/') == std::string::npos))
-			styler.ColourTo(endLine, SCE_DIFF_POSITION);
+			return SCE_DIFF_POSITION;
 		else if (lineBuffer[3] == '\r' || lineBuffer[3] == '\n')
-			styler.ColourTo(endLine, SCE_DIFF_POSITION);
+			return SCE_DIFF_POSITION;
 		else if (lineBuffer[3] == ' ')
-			styler.ColourTo(endLine, SCE_DIFF_HEADER);
+			return SCE_DIFF_HEADER;
 		else
-			styler.ColourTo(endLine, SCE_DIFF_DELETED);
+			return SCE_DIFF_DELETED;
 	} else if (lineBuffer.starts_with("+++ ")) {
 		// I don't know of any diff where "+++ " is a position marker, but for
 		// consistency, do the same as with "--- " and "*** ".
 		if (atoi(lineBuffer.c_str() + 4) && (lineBuffer.find('/') == std::string::npos))
-			styler.ColourTo(endLine, SCE_DIFF_POSITION);
+			return SCE_DIFF_POSITION;
 		else
-			styler.ColourTo(endLine, SCE_DIFF_HEADER);
+			return SCE_DIFF_HEADER;
 	} else if (lineBuffer.starts_with("====")) {  // For p4's diff
-		styler.ColourTo(endLine, SCE_DIFF_HEADER);
+		return SCE_DIFF_HEADER;
 	} else if (lineBuffer.starts_with("***")) {
 		// In a context diff, *** appears in both the header and the position markers.
 		// Also ******** is a chunk header, but here it's treated as part of the
 		// position marker since there is no separate style for a chunk header.
 		if (lineBuffer[3] == ' ' && atoi(lineBuffer.c_str() + 4) && (lineBuffer.find('/') == std::string::npos))
-			styler.ColourTo(endLine, SCE_DIFF_POSITION);
+			return SCE_DIFF_POSITION;
 		else if (lineBuffer[3] == '*')
-			styler.ColourTo(endLine, SCE_DIFF_POSITION);
+			return SCE_DIFF_POSITION;
 		else
-			styler.ColourTo(endLine, SCE_DIFF_HEADER);
+			return SCE_DIFF_HEADER;
 	} else if (lineBuffer.starts_with("? ")) {    // For difflib
-		styler.ColourTo(endLine, SCE_DIFF_HEADER);
+		return SCE_DIFF_HEADER;
 	} else if (lineBuffer[0] == '@') {
-		styler.ColourTo(endLine, SCE_DIFF_POSITION);
+		return SCE_DIFF_POSITION;
 	} else if (lineBuffer[0] >= '0' && lineBuffer[0] <= '9') {
-		styler.ColourTo(endLine, SCE_DIFF_POSITION);
+		return SCE_DIFF_POSITION;
 	} else if (lineBuffer.starts_with("++")) {
-		styler.ColourTo(endLine, SCE_DIFF_PATCH_ADD);
+		return SCE_DIFF_PATCH_ADD;
 	} else if (lineBuffer.starts_with("+-")) {
-		styler.ColourTo(endLine, SCE_DIFF_PATCH_DELETE);
+		return SCE_DIFF_PATCH_DELETE;
 	} else if (lineBuffer.starts_with("-+")) {
-		styler.ColourTo(endLine, SCE_DIFF_REMOVED_PATCH_ADD);
+		return SCE_DIFF_REMOVED_PATCH_ADD;
 	} else if (lineBuffer.starts_with("--")) {
-		styler.ColourTo(endLine, SCE_DIFF_REMOVED_PATCH_DELETE);
+		return SCE_DIFF_REMOVED_PATCH_DELETE;
 	} else if (lineBuffer[0] == '-' || lineBuffer[0] == '<') {
-		styler.ColourTo(endLine, SCE_DIFF_DELETED);
+		return SCE_DIFF_DELETED;
 	} else if (lineBuffer[0] == '+' || lineBuffer[0] == '>') {
-		styler.ColourTo(endLine, SCE_DIFF_ADDED);
+		return SCE_DIFF_ADDED;
 	} else if (lineBuffer[0] == '!') {
-		styler.ColourTo(endLine, SCE_DIFF_CHANGED);
+		return SCE_DIFF_CHANGED;
 	} else if (lineBuffer[0] != ' ') {
-		styler.ColourTo(endLine, SCE_DIFF_COMMENT);
+		return SCE_DIFF_COMMENT;
 	} else {
-		styler.ColourTo(endLine, SCE_DIFF_DEFAULT);
+		return SCE_DIFF_DEFAULT;
 	}
 }
 
-void LexerDiff::Lex(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, IDocument *pAccess) {
+void LexerDiff::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
 	std::string lineBuffer;
@@ -169,11 +167,16 @@ void LexerDiff::Lex(Sci_PositionU startPos, Sci_Position length, int /* initStyl
 		const Sci_Position endLine = styler.LineStart(line + 1);
 		lineBuffer.resize(endLine - startOfLine);
 		styler.GetRange(startOfLine, endLine, lineBuffer.data(), lineBuffer.size() + 1);
-		ColouriseLine(lineBuffer, endLine - 1, styler);
+		const int lineType = StyleForLine(lineBuffer);
+		if (lineType != initStyle) {
+			styler.ColourTo(startOfLine-1, initStyle);
+			initStyle = lineType;
+		}
 		line++;
 		startOfLine = endLine;
 	}
 
+	styler.ColourTo(endPos-1, initStyle);
 	styler.Flush();
 }
 
@@ -216,8 +219,6 @@ void LexerDiff::Fold(Sci_PositionU startPos, Sci_Position length, int /* initSty
 
 		curLineStart = styler.LineStart(++curLine);
 	} while (curLineStart < endPos);
-
-	styler.Flush();
 }
 
 }
