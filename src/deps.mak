@@ -507,7 +507,9 @@ $(DIR_O)/LexDiff.o: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexDMAP.o: \
 	../lexers/LexDMAP.cxx \
 	../../scintilla/include/ILexer.h \
