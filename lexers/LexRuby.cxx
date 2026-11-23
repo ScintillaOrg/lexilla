@@ -37,41 +37,37 @@ using namespace Lexilla;
 
 namespace {
 
-//XXX Identical to Perl, put in common area
 constexpr bool isEOLChar(char ch) noexcept {
     return (ch == '\r') || (ch == '\n');
 }
 
-constexpr bool isSafeASCII(char ch) noexcept {
-    return static_cast<unsigned char>(ch) <= 127;
-}
-
-// This one's redundant, but makes for more readable code
 constexpr bool isHighBitChar(char ch) noexcept {
-    return static_cast<unsigned char>(ch) > 127;
+    constexpr int maxASCII = 127;
+    const unsigned char uch = ch;
+    return uch > maxASCII;
 }
 
-bool isSafeAlpha(char ch) noexcept {
-    return (isSafeASCII(ch) && IsUpperOrLowerCase(ch)) || ch == '_';
+constexpr bool isSafeAlpha(char ch) noexcept {
+    return IsUpperOrLowerCase(ch) || ch == '_';
 }
 
-bool isSafeAlphaOrHigh(char ch) noexcept {
+constexpr bool isSafeAlphaOrHigh(char ch) noexcept {
 	return isHighBitChar(ch) || IsUpperOrLowerCase(ch) || ch == '_';
 }
 
-bool isSafeAlnum(char ch) noexcept {
-    return (isSafeASCII(ch) && IsAlphaNumeric(ch)) || ch == '_';
+constexpr bool isSafeAlnum(char ch) noexcept {
+    return IsAlphaNumeric(ch) || ch == '_';
 }
 
-bool isSafeAlnumOrHigh(char ch) noexcept {
+constexpr bool isSafeAlnumOrHigh(char ch) noexcept {
     return isHighBitChar(ch) || IsAlphaNumeric(ch) || ch == '_';
 }
 
-bool isSafeDigit(char ch) noexcept {
-    return isSafeASCII(ch) && IsADigit(ch);
+constexpr bool isSafeDigit(char ch) noexcept {
+    return IsADigit(ch);
 }
 
-bool isSafeWordcharOrHigh(char ch) noexcept {
+constexpr bool isSafeWordcharOrHigh(char ch) noexcept {
     // Error: scintilla's KeyWords.h includes '.' as a word-char
     // we want to separate things that can take methods from the
     // methods.
@@ -334,30 +330,30 @@ bool keywordIsModifier(const std::string &word, Sci_Position pos, Accessor &styl
 
 int ClassifyWordRb(Sci_PositionU end, char ch, char chNext, const WordList &keywords, Accessor &styler, std::string &prevWord, const WordClassifier &idClasser) {
     const Sci_PositionU start = styler.GetStartSegment();
-    const std::string s = styler.GetRange(start, end);
+    const std::string word = styler.GetRange(start, end);
     int chAttr = SCE_RB_IDENTIFIER;
     int style = SCE_RB_DEFAULT;
-    if (prevWord == "class")
+    if (prevWord == "class") {
         chAttr = SCE_RB_CLASSNAME;
-    else if (prevWord == "module")
+    } else if (prevWord == "module") {
         chAttr = SCE_RB_MODULE_NAME;
-    else if (prevWord == "def") {
+    } else if (prevWord == "def") {
         chAttr = SCE_RB_DEFNAME;
         if (ch == '.' || (ch == ':' && chNext == ':')) {
-            if (s == "self") {
+            if (word == "self") {
                 style = SCE_RB_WORD_DEMOTED;
             } else {
                 style = SCE_RB_IDENTIFIER;
-                const int subStyle = idClasser.ValueFor(s);
+                const int subStyle = idClasser.ValueFor(word);
                 if (subStyle >= 0) {
                     style = subStyle;
                 }
             }
         }
     } else if ((start == 0) || !followsDot(start - 1, styler)) {
-        if (keywords.InList(s)) {
-            if (keywordIsAmbiguous(s)
-                && keywordIsModifier(s, start, styler)) {
+        if (keywords.InList(word)) {
+            if (keywordIsAmbiguous(word)
+                && keywordIsModifier(word, start, styler)) {
 
                 // Demoted keywords are colored as keywords,
                 // but do not affect changes in indentation.
@@ -372,10 +368,10 @@ int ClassifyWordRb(Sci_PositionU end, char ch, char chNext, const WordList &keyw
             } else {
                 chAttr = SCE_RB_WORD;
                 style = SCE_RB_WORD;
-                prevWord = s;
+                prevWord = word;
             }
         } else {
-            const int subStyle = idClasser.ValueFor(s);
+            const int subStyle = idClasser.ValueFor(word);
             if (subStyle >= 0) {
                 style = subStyle;
             }
@@ -390,7 +386,7 @@ int ClassifyWordRb(Sci_PositionU end, char ch, char chNext, const WordList &keyw
     if (chAttr == SCE_RB_IDENTIFIER) {
         // find heredoc in lib/ruby folder: rg "\w+\s+<<[\w\-~'\"`]"
         // Kernel methods
-        if (InList(s, { "puts", "print", "warn", "eval" } )) {
+        if (InList(word, { "puts", "print", "warn", "eval" } )) {
             chAttr = SCE_RB_IDENTIFIER_PREFERRE;
         }
     }
@@ -400,7 +396,7 @@ int ClassifyWordRb(Sci_PositionU end, char ch, char chNext, const WordList &keyw
 
 //XXX Identical to Perl, put in common area
 bool isMatch(Accessor &styler, Sci_Position lengthDoc, Sci_Position pos, const char *val) {
-    if ((pos < 0) || ((pos + static_cast<int>(strlen(val))) >= lengthDoc)) {
+    if ((pos < 0) || ((pos + static_cast<Sci_Position>(strlen(val))) >= lengthDoc)) {
         return false;
     }
     while (*val) {
@@ -424,7 +420,8 @@ bool lookingAtHereDocDelim(Accessor &styler, Sci_Position pos, Sci_Position leng
         const char ch = styler[pos];
         if (isEOLChar(ch)) {
             return true;
-        } else if (ch != ' ' && ch != '\t') {
+        }
+        if (ch != ' ' && ch != '\t') {
             return false;
         }
     }
@@ -752,7 +749,8 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
             } else if (ch == ':') {
                 if (styler.StyleIndexAt(++firstWordPosn) != SCE_RB_OPERATOR) {
                     return definitely_not_a_here_doc;
-                } else if (styler[firstWordPosn] != ':') {
+                }
+                if (styler[firstWordPosn] != ':') {
                     return definitely_not_a_here_doc;
                 }
             } else {
@@ -853,11 +851,9 @@ bool sureThisIsNotHeredoc(Sci_Position lt2StartPos, Accessor &styler) {
     }
 
     // Just look at the start of each line
-    Sci_Position last_line = styler.GetLine(lengthDoc - 1);
     // But don't go too far
-    if (last_line > lineStart + 50) {
-        last_line = lineStart + 50;
-    }
+	constexpr Sci_Position look_ahead_max = 50;
+    const Sci_Position last_line = std::min(styler.GetLine(lengthDoc - 1), lineStart + look_ahead_max);
     for (Sci_Position line_num = lineStart + 1; line_num <= last_line; line_num++) {
         j = styler.LineStart(line_num);
         if (allow_indent) {
@@ -1004,20 +1000,20 @@ void LexerRuby::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, 
     // list.  Keep in mind this code will be called every time the lexer
     // is invoked.
 
-#define INNER_STRINGS_MAX_COUNT 5
+    constexpr int innerStringsCount = 5;
     class InnerExpression {
         // These vars track our instances of "...#{,,,%Q<..#{,,,}...>,,,}..."
-        int inner_string_types[INNER_STRINGS_MAX_COUNT] {};
+        int inner_string_types[innerStringsCount] {};
         // Track # braces when we push a new #{ thing
-        int inner_expn_brace_counts[INNER_STRINGS_MAX_COUNT] {};
-        QuoteCls inner_quotes[INNER_STRINGS_MAX_COUNT];
+        int inner_expn_brace_counts[innerStringsCount] {};
+        QuoteCls inner_quotes[innerStringsCount];
         int inner_string_count = 0;
 
     public:
         int brace_counts = 0;   // Number of #{ ... } things within an expression
 
         [[nodiscard]] bool canEnter() const noexcept {
-            return inner_string_count < INNER_STRINGS_MAX_COUNT;
+            return inner_string_count < innerStringsCount;
         }
         [[nodiscard]] bool canExit() const noexcept {
             return inner_string_count > 0;
@@ -1802,7 +1798,7 @@ bool keywordIsAmbiguous(const std::string &prevWord) noexcept {
 // do after a while or until, as a noise word (like then after if)
 
 bool keywordIsModifier(const std::string &word, Sci_Position pos, Accessor &styler) {
-    if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
+    if (word == "do") {
         return keywordDoStartsLoop(pos, styler);
     }
     int style = SCE_RB_DEFAULT;
@@ -1957,7 +1953,7 @@ bool IsCommentLine(Sci_Position line, Accessor &styler) {
         const char ch = styler[i];
         if (ch == '#')
             return true;
-        else if (ch != ' ' && ch != '\t')
+        if (ch != ' ' && ch != '\t')
             return false;
     }
     return false;
