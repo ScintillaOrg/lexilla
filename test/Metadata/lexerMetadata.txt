@@ -2782,8 +2782,23 @@ Lexer xml
          31 SCE_H_SGML_BLOCK_DEFAULT [default] SGML block
 
 Lexer yaml
+    Properties:
+        bool   fold
+        bool   fold.comment.yaml
+               Set to 1 to allow folding of comment blocks in YAML.
     Word Lists:
         Keywords
+    Styles:
+          0 SCE_YAML_DEFAULT [default] Default
+          1 SCE_YAML_COMMENT [comment] Comment
+          2 SCE_YAML_IDENTIFIER [identifier] Identifier
+          3 SCE_YAML_KEYWORD [keyword] Keyword
+          4 SCE_YAML_NUMBER [number] Number
+          5 SCE_YAML_REFERENCE [identifier] Reference/repeating value
+          6 SCE_YAML_DOCUMENT [operator] Document delimiting line
+          7 SCE_YAML_TEXT [literal string] Text
+          8 SCE_YAML_ERROR [error] Text
+          9 SCE_YAML_OPERATOR [operator] Operator
 
 Lexer zig
     Properties:

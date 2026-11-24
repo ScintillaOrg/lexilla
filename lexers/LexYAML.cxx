@@ -13,6 +13,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -24,20 +25,50 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
+#include "DefaultLexer.h"
 
+using namespace Scintilla;
 using namespace Lexilla;
 
 namespace {
+
+// Options used for LexerYAML
+struct OptionsYAML {
+	bool fold = false;
+	bool foldComment = false;
+};
 
 const char * const yamlWordListDesc[] = {
 	"Keywords",
 	nullptr
 };
 
-inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
-	return (styler[i] == '\n') ||
-		((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
-}
+struct OptionSetYAML : public OptionSet<OptionsYAML> {
+	OptionSetYAML() {
+		DefineProperty("fold", &OptionsYAML::fold);
+
+		DefineProperty("fold.comment.yaml", &OptionsYAML::foldComment,
+			"Set to 1 to allow folding of comment blocks in YAML."
+		);
+
+		DefineWordListSets(yamlWordListDesc);
+	}
+};
+
+const LexicalClass lexicalClasses[] = {
+	// Lexer yaml SCLEX_YAML SCE_YAML_
+	0, "SCE_YAML_DEFAULT", "default", "Default",
+	1, "SCE_YAML_COMMENT", "comment", "Comment",
+	2, "SCE_YAML_IDENTIFIER", "identifier", "Identifier",
+	3, "SCE_YAML_KEYWORD", "keyword", "Keyword",
+	4, "SCE_YAML_NUMBER", "number", "Number",
+	5, "SCE_YAML_REFERENCE", "identifier", "Reference/repeating value",
+	6, "SCE_YAML_DOCUMENT", "operator", "Document delimiting line",
+	7, "SCE_YAML_TEXT", "literal string", "Text",
+	8, "SCE_YAML_ERROR", "error", "Text",
+	9, "SCE_YAML_OPERATOR", "operator", "Operator",
+};
 
 /**
  * Check for space, tab, line feed, or carriage return.
@@ -87,6 +118,42 @@ bool KeywordAtChar(const char* lineBuffer, const char* startComment, const WordL
 #define YAML_STATE_TEXT_PARENT	(4 << YAML_STATE_BITSIZE)
 #define YAML_STATE_TEXT			(5 << YAML_STATE_BITSIZE)
 
+class LexerYAML : public DefaultLexer {
+	OptionsYAML options;
+	OptionSetYAML osYaml;
+	WordList keywords;
+public:
+	LexerYAML() :
+		DefaultLexer("yaml", SCLEX_YAML, lexicalClasses, std::size(lexicalClasses)) {
+		SetOptionSet(&osYaml);
+	}
+
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override {
+		if (osYaml.PropertySet(&options, key, val)) {
+			return 0;
+		}
+		return -1;
+	}
+
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
+
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	static ILexer5 *LexerFactoryYAML() {
+		return new LexerYAML();
+	}
+};
+
+Sci_Position SCI_METHOD LexerYAML::WordListSet(int n, const char *wl) {
+	WordList *wordListN = (n == 0) ? &keywords : nullptr;
+	Sci_Position firstModification = -1;
+	if (wordListN && wordListN->Set(wl)) {
+		firstModification = 0;
+	}
+	return firstModification;
+}
+
 void ColouriseYAMLLine(
 	char *lineBuffer,
 	Sci_PositionU currentLine,
@@ -94,7 +161,7 @@ void ColouriseYAMLLine(
 	Sci_PositionU startLine,
 	Sci_PositionU endPos,
 	const WordList &keywords,
-	Accessor &styler) {
+	LexAccessor &styler) {
 
 	Sci_PositionU i = 0;
 	bool bInQuotes = false;
@@ -219,28 +286,24 @@ void ColouriseYAMLLine(
 	styler.ColourTo(endPos, SCE_YAML_DEFAULT);
 }
 
-void ColouriseYAMLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler) {
+void LexerYAML::Lex(Sci_PositionU startPos, Sci_Position length, int, IDocument *pAccess) {
+	LexAccessor styler(pAccess);
 	std::string lineBuffer;
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	Sci_PositionU startLine = startPos;
-	const Sci_PositionU endPos = startPos + length;
-	const Sci_PositionU maxPos = styler.Length();
-	Sci_PositionU lineCurrent = styler.GetLine(startPos);
 
-	for (Sci_PositionU i = startPos; i < maxPos && i < endPos; i++) {
-		lineBuffer.push_back(styler[i]);
-		if (AtEOL(styler, i)) {
-			// End of line (or of line buffer) met, colourise it
-			ColouriseYAMLLine(lineBuffer.data(), lineCurrent, lineBuffer.length(), startLine, i, *keywordLists[0], styler);
-			lineBuffer.clear();
-			startLine = i + 1;
-			lineCurrent++;
-		}
+	const Sci_Position endPos = startPos + length;
+	Sci_Position line = styler.GetLine(startPos);
+	Sci_Position startOfLine = styler.LineStart(line);
+	while (startOfLine < endPos) {
+		const Sci_Position endLine = styler.LineStart(line + 1);
+		styler.GetRange(startOfLine, endLine, lineBuffer);
+		ColouriseYAMLLine(lineBuffer.data(), line, lineBuffer.length(), startOfLine, endLine - 1, keywords, styler);
+		line++;
+		startOfLine = endLine;
 	}
-	if (!lineBuffer.empty()) {	// Last line does not have ending characters
-		ColouriseYAMLLine(lineBuffer.data(), lineCurrent, lineBuffer.length(), startLine, startPos + length - 1, *keywordLists[0], styler);
-	}
+
+	styler.Flush();
 }
 
 bool IsCommentLine(Sci_Position line, Accessor &styler) {
@@ -248,15 +311,16 @@ bool IsCommentLine(Sci_Position line, Accessor &styler) {
 	return styler[pos] == '#';
 }
 
-void FoldYAMLDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle - unused*/,
-                      WordList *[], Accessor &styler) {
+void LexerYAML::Fold(Sci_PositionU startPos, Sci_Position length, int /*initStyle - unused*/,
+                      IDocument *pAccess) {
+	if (!options.fold)
+		return;
+
+	Accessor styler(pAccess, nullptr);
+
 	const Sci_Position maxPos = startPos + length;
 	const Sci_Position maxLines = styler.GetLine(maxPos - 1);             // Requested last line
 	const Sci_Position docLines = styler.GetLine(styler.Length() - 1);  // Available last line
-
-	// property fold.comment.yaml
-	// Set to 1 to allow folding of comment blocks in YAML.
-	const bool foldComment = styler.GetPropertyInt("fold.comment.yaml") != 0;
 
 	// Backtrack to previous non-blank line so we can determine indent level
 	// for any white space lines
@@ -277,7 +341,7 @@ void FoldYAMLDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle - 
 	// Set up initial loop state
 	bool prevComment = false;
 	if (lineCurrent >= 1)
-		prevComment = foldComment && IsCommentLine(lineCurrent - 1, styler);
+		prevComment = options.foldComment && IsCommentLine(lineCurrent - 1, styler);
 
 	// Process all characters to end of requested range
 	// or comment that hangs over the end of the range.  Cap processing in all cases
@@ -292,7 +356,7 @@ void FoldYAMLDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle - 
 			// Information about next line is only available if not at end of document
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, nullptr);
 		}
-		const bool comment = foldComment && IsCommentLine(lineCurrent, styler);
+		const bool comment = options.foldComment && IsCommentLine(lineCurrent, styler);
 		const bool comment_start = (comment && !prevComment && (lineNext <= docLines) &&
 		                           IsCommentLine(lineNext, styler) && (lev > SC_FOLDLEVELBASE));
 		const bool comment_continue = comment && prevComment;
@@ -366,4 +430,4 @@ void FoldYAMLDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle - 
 
 }
 
-extern const LexerModule lmYAML(SCLEX_YAML, ColouriseYAMLDoc, "yaml", FoldYAMLDoc, yamlWordListDesc);
+extern const LexerModule lmYAML(SCLEX_YAML, LexerYAML::LexerFactoryYAML, "yaml", yamlWordListDesc);
