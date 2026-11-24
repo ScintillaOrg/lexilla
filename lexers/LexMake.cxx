@@ -62,11 +62,6 @@ const LexicalClass lexicalClasses[] = {
 	9, "SCE_MAKE_IDEOL", "error identifier", "Incomplete identifier reference",
 };
 
-bool AtEOL(Accessor &styler, Sci_PositionU i) {
-	return (styler[i] == '\n') ||
-		((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
-}
-
 class LexerMakeFile : public DefaultLexer {
 	WordList directives;
 	OptionsMake options;
@@ -74,28 +69,14 @@ class LexerMakeFile : public DefaultLexer {
 public:
 	LexerMakeFile() :
 		DefaultLexer("makefile", SCLEX_MAKEFILE, lexicalClasses, std::size(lexicalClasses)) {
+		SetOptionSet(&osMake);
 	}
 
-	const char *SCI_METHOD PropertyNames() override {
-		return osMake.PropertyNames();
-	}
-	int SCI_METHOD PropertyType(const char *name) override {
-		return osMake.PropertyType(name);
-	}
-	const char *SCI_METHOD DescribeProperty(const char *name) override {
-		return osMake.DescribeProperty(name);
-	}
 	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
-	const char *SCI_METHOD PropertyGet(const char *key) override {
-		return osMake.PropertyGet(key);
-	}
-	const char *SCI_METHOD DescribeWordListSets() override {
-		return osMake.DescribeWordListSets();
-	}
 	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 
 	void ColouriseMakeLine(std::string_view lineBuffer,
-		Sci_PositionU startLine, Sci_PositionU endPos, Accessor &styler);
+		Sci_PositionU startLine, Sci_PositionU endPos, LexAccessor &styler);
 
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 
@@ -131,7 +112,7 @@ void LexerMakeFile::ColouriseMakeLine(
 	const std::string_view lineBuffer,
 	Sci_PositionU startLine,
 	Sci_PositionU endPos,
-	Accessor &styler) {
+	LexAccessor &styler) {
 
 	const Sci_PositionU lengthLine = lineBuffer.length();
 	Sci_PositionU i = 0;
@@ -175,7 +156,8 @@ void LexerMakeFile::ColouriseMakeLine(
 			styler.ColourTo(startLine + i - 1, state);
 			styler.ColourTo(endPos, SCE_MAKE_COMMENT);
 			return;
-		} else if (lineBuffer.substr(i, 2) == "$(") {
+		}
+		if (lineBuffer.substr(i, 2) == "$(") {
 			styler.ColourTo(startLine + i - 1, state);
 			state = SCE_MAKE_IDENTIFIER;
 			varCount++;
@@ -218,23 +200,22 @@ void LexerMakeFile::ColouriseMakeLine(
 }
 
 void LexerMakeFile::Lex(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, IDocument *pAccess) {
-	Accessor styler(pAccess, nullptr);
+	LexAccessor styler(pAccess);
 	std::string lineBuffer;
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	Sci_PositionU startLine = startPos;
-	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
-		lineBuffer.push_back(styler[i]);
-		if (AtEOL(styler, i)) {
-			// End of line (or of line buffer) met, colourise it
-			ColouriseMakeLine(lineBuffer, startLine, i, styler);
-			lineBuffer.clear();
-			startLine = i + 1;
-		}
+
+	const Sci_Position endPos = startPos + length;
+	Sci_Position line = styler.GetLine(startPos);
+	Sci_Position startOfLine = styler.LineStart(line);
+	while (startOfLine < endPos) {
+		const Sci_Position endLine = styler.LineStart(line + 1);
+		styler.GetRange(startOfLine, endLine, lineBuffer);
+		ColouriseMakeLine(lineBuffer, startOfLine, endLine - 1, styler);
+		line++;
+		startOfLine = endLine;
 	}
-	if (!lineBuffer.empty()) {	// Last line does not have ending characters
-		ColouriseMakeLine(lineBuffer, startLine, startPos + length - 1, styler);
-	}
+
 	styler.Flush();
 }
 
