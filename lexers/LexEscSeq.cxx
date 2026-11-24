@@ -283,12 +283,6 @@ constexpr bool Is0To9(char ch) noexcept {
 }
 
 
-bool AtEOL(Accessor &styler, Sci_Position i) {
-	return (styler[i] == '\n') ||
-	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
-}
-
-
 constexpr bool SequenceEnd(int ch) noexcept {
 	return (ch == 0) || ((ch >= '@') && (ch <= '~'));
 }
@@ -417,19 +411,15 @@ void LexerEscSeq::Lex(Sci_PositionU startPos, Sci_Position length, int /* initSt
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 
-	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
-		lineBuffer.push_back(styler[i]);
-
-		// End of line met, colourise it
-		if (AtEOL(styler, i)) {
-			ColouriseEscSeqLine(lineBuffer, i, styler, options.colourText);
-			lineBuffer.clear();
-		}
-	}
-
-	// Last line does not have ending characters
-	if (!lineBuffer.empty()) {
-		ColouriseEscSeqLine(lineBuffer, startPos + length - 1, styler, options.colourText);
+	const Sci_Position endPos = startPos + length;
+	Sci_Position line = styler.GetLine(startPos);
+	Sci_Position startOfLine = styler.LineStart(line);
+	while (startOfLine < endPos) {
+		const Sci_Position endLine = styler.LineStart(line + 1);
+		styler.GetRange(startOfLine, endLine, lineBuffer);
+		ColouriseEscSeqLine(lineBuffer, endLine - 1, styler, options.colourText);
+		line++;
+		startOfLine = endLine;
 	}
 
 	styler.Flush();
