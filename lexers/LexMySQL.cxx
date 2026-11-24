@@ -152,9 +152,9 @@ void ColouriseMySQLDoc(Sci_PositionU startPos, Sci_Position length, int initStyl
       case SCE_MYSQL_SYSTEMVARIABLE:
         if (!IsAWordChar(sc.ch))
         {
-          Sci_Position length = sc.LengthCurrent() + 1;
-          char* s = new char[length];
-          sc.GetCurrentLowered(s, length);
+          Sci_Position lengthCurrent = sc.LengthCurrent() + 1;
+          char* s = new char[lengthCurrent];
+          sc.GetCurrentLowered(s, lengthCurrent);
 
           // Check for known system variables here.
           if (keywordlists[4]->InList(&s[2]))

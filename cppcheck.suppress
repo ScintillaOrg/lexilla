@@ -58,7 +58,6 @@ constParameterReference:lexilla/lexers/LexAda.cxx
 constParameterReference:lexilla/lexers/LexAsciidoc.cxx
 constParameterCallback:lexilla/lexers/LexAsn1.cxx
 knownConditionTrueFalse:lexilla/lexers/LexAU3.cxx
-shadowVariable:lexilla/lexers/LexAU3.cxx
 constParameterReference:lexilla/lexers/LexBaan.cxx
 unreadVariable:lexilla/lexers/LexBaan.cxx
 variableScope:lexilla/lexers/LexBaan.cxx
@@ -132,7 +131,6 @@ duplicateBreak:lexilla/lexers/LexModula.cxx
 variableScope:lexilla/lexers/LexModula.cxx
 constParameterReference:lexilla/lexers/LexMPT.cxx
 variableScope:lexilla/lexers/LexMSSQL.cxx
-shadowArgument:lexilla/lexers/LexMySQL.cxx
 constParameterReference:lexilla/lexers/LexNim.cxx
 constParameterReference:lexilla/lexers/LexNimrod.cxx
 knownConditionTrueFalse:lexilla/lexers/LexNimrod.cxx
@@ -155,7 +153,6 @@ variableScope:lexilla/lexers/LexPO.cxx
 constVariablePointer:lexilla/lexers/LexPOV.cxx
 constParameterReference:lexilla/lexers/LexPython.cxx
 knownConditionTrueFalse:lexilla/lexers/LexPython.cxx
-shadowVariable:lexilla/lexers/LexPowerPro.cxx
 knownConditionTrueFalse:lexilla/lexers/LexPowerPro.cxx
 variableScope:lexilla/lexers/LexProgress.cxx
 constParameterReference:lexilla/lexers/LexProgress.cxx
@@ -195,7 +192,6 @@ uselessCallsSubstr:lexilla/lexers/LexVerilog.cxx
 duplicateCondition:lexilla/lexers/LexVerilog.cxx
 constParameterReference:lexilla/lexers/LexVHDL.cxx
 constVariable:lexilla/lexers/LexVHDL.cxx
-shadowVariable:lexilla/lexers/LexVHDL.cxx
 unreadVariable:lexilla/lexers/LexVHDL.cxx
 variableScope:lexilla/lexers/LexVHDL.cxx
 unreadVariable:lexilla/lexers/LexVisualProlog.cxx

@@ -327,11 +327,11 @@ void FoldNoBoxVHDLDoc(
     chNext          = styler.SafeGetCharAt(i + 1);
     chPrev          = styler.SafeGetCharAt(i - 1);
     chNextNonBlank  = chNext;
-    Sci_PositionU j  = i+1;
-    while(IsABlank(chNextNonBlank) && j<endPos)
+    Sci_PositionU l  = i+1;
+    while(IsABlank(chNextNonBlank) && l<endPos)
     {
-      j ++ ;
-      chNextNonBlank = styler.SafeGetCharAt(j);
+      l ++ ;
+      chNextNonBlank = styler.SafeGetCharAt(l);
     }
     int style           = styleNext;
     styleNext       = styler.StyleAt(i + 1);

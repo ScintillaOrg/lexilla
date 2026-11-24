@@ -447,8 +447,8 @@ static void ColouriseAU3Doc(Sci_PositionU startPos,
 				{
 					si=0;
 					// at line end and not found a continuation char then reset to default
-					Sci_Position lineCurrent = styler.GetLine(sc.currentPos);
-					if (!IsContinuationLine(lineCurrent,styler))
+					const Sci_Position lineCurrentPos = styler.GetLine(sc.currentPos);
+					if (!IsContinuationLine(lineCurrentPos,styler))
 					{
 						sc.SetState(SCE_AU3_DEFAULT);
 						break;

@@ -186,20 +186,20 @@ static void ColourisePowerProDoc(Sci_PositionU startPos, Sci_Position length, in
 			case SCE_POWERPRO_IDENTIFIER:
 				//if ((sc.ch > 0) && !setWord.Contains(sc.ch) || (sc.ch == '.')) { // use this line if don't want to match keywords with . in them. ie: win.debug will match both win and debug so win debug will also be colorized
 				if ((sc.ch > 0) && !setWord.Contains(sc.ch)){  // || (sc.ch == '.')) { // use this line if you want to match keywords with a . ie: win.debug will only match win.debug neither win nor debug will be colorized separately
-					char s[1000];
+					char identifier[1000];
 					if (caseSensitive) {
-						sc.GetCurrent(s, sizeof(s));
+						sc.GetCurrent(identifier, sizeof(identifier));
 					} else {
-						sc.GetCurrentLowered(s, sizeof(s));
+						sc.GetCurrentLowered(identifier, sizeof(identifier));
 					}
 
-					if (keywords.InList(s)) {
+					if (keywords.InList(identifier)) {
 						sc.ChangeState(SCE_POWERPRO_WORD);
-					} else if (keywords2.InList(s)) {
+					} else if (keywords2.InList(identifier)) {
 						sc.ChangeState(SCE_POWERPRO_WORD2);
-					} else if (keywords3.InList(s)) {
+					} else if (keywords3.InList(identifier)) {
 						sc.ChangeState(SCE_POWERPRO_WORD3);
-					} else if (keywords4.InList(s)) {
+					} else if (keywords4.InList(identifier)) {
 						sc.ChangeState(SCE_POWERPRO_WORD4);
 					}
 					sc.SetState(SCE_POWERPRO_DEFAULT);
@@ -588,8 +588,8 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 				isDoLastWord = false;
 
 				//blank out first word
-				for (unsigned int i = 0; i < FIRST_WORD_MAX_LEN; i++)
-					szFirstWord[i] = '\0';
+				for (unsigned int b = 0; b < FIRST_WORD_MAX_LEN; b++)
+					szFirstWord[b] = '\0';
 			}
 		}
 
