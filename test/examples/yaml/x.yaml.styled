@@ -10,3 +10,15 @@
 {2}1{9}:{4} 1
 {0}
 {2}true{9}:{3} true
+{0}
+{2}some_text{9}:{0} |
+{7}  This block is text
+
+{2}values{9}:{5} &ref
+{0}  - Might be reused
+
+{1}# Error from tab after spaces
+{8} 	
+{0}
+{6}---
+{2}document{9}:{0} this is doc 2

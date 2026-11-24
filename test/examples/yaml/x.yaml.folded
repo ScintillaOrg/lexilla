@@ -10,4 +10,16 @@
  0 400   0   1: 1
  1 400   0   
  0 400   0   true: true
+ 1 400   0   
+ 2 400   0 + some_text: |
+ 0 402   0 |   This block is text
+ 1 400   0   
+ 2 400   0 + values: &ref
+ 0 402   0 |   - Might be reused
+ 1 402   0 | 
+ 0 402   0 | # Error from tab after spaces
+ 1 402   0 |  	
+ 1 400   0   
+ 0 400   0   ---
+ 0 400   0   document: this is doc 2
  0 400   0   

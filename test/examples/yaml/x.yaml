@@ -10,3 +10,15 @@ hanging_value:
 1: 1
 
 true: true
+
+some_text: |
+  This block is text
+
+values: &ref
+  - Might be reused
+
+# Error from tab after spaces
+ 	
+
+---
+document: this is doc 2
