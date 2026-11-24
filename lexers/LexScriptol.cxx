@@ -92,20 +92,17 @@ static int GetSolStringState(Accessor &styler, Sci_Position i, Sci_Position *nex
             return SCE_SCRIPTOL_DEFAULT;
 	}
         // ch is either single or double quotes in string
-        // code below seem non-sense but is here for future extensions
 	if (ch == chNext && ch == styler.SafeGetCharAt(i + 2))
         {
           *nextIndex = i + 3;
           if(ch == '\"') return SCE_SCRIPTOL_TRIPLE;
           if(ch == '\'') return SCE_SCRIPTOL_TRIPLE;
-          return SCE_SCRIPTOL_STRING;
 	}
         else
         {
           *nextIndex = i + 1;
-          if (ch == '"') return SCE_SCRIPTOL_STRING;
-          else           return SCE_SCRIPTOL_STRING;
 	}
+        return SCE_SCRIPTOL_STRING;
 }
 
 
