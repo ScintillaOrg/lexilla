@@ -1684,7 +1684,9 @@ $(DIR_O)/LexYAML.obj: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
-	../lexlib/LexerModule.h
+	../lexlib/LexerModule.h \
+	../lexlib/OptionSet.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)/LexZig.obj: \
 	../lexers/LexZig.cxx \
 	../../scintilla/include/ILexer.h \
