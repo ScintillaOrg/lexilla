@@ -142,6 +142,7 @@ int DocKeywordStyle(std::string_view word, int terminator, const WordList &keywo
 	return subStyle >= 0 ? subStyle : SCE_C_COMMENTDOCKEYWORDERROR;
 }
 
+// On a match, leave the character after the tag name for the main lexer to process.
 bool HighlightDocTag(StyleContext &sc, int activity, const WordList &keywords,
 		const WordClassifier &classifier, StyleContext::Transform transform) {
 	const bool closing = sc.chNext == '/';
