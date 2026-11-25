@@ -767,7 +767,7 @@ static void FoldAU3Doc(Sci_PositionU startPos, Sci_Position length, int, WordLis
 				}
 				else {
 					szThen[szThenlen++] = static_cast<char>(MakeLowerCase(ch));
-					if (szThenlen == 5) {
+					if (szThenlen == 4) {
 						szThen[4] = '\0';
 					}
 				}
