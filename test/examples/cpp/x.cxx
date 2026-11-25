@@ -30,7 +30,9 @@ b
 /// world() << myValue; Message<Enclosure<T>>.
 /// local()<<myValue; std::vector<int> values; std::vector<unsigned int> sizes;
 /// text<wrong/> text<wrong /> text<wrong id = "x"/>
-/// text<file name="example">more</file> <file/> <wrong> @file @wrong
+/// text<file name="example">more</file> <file/> <wrong> @file @file> @wrong
+/// <
+int member; ///< Member of <module>.
 /** remote() << myValue; Message<Enclosure<T>>.
  text<file>more</file> <wrong> \file
  */
