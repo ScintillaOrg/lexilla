@@ -56,6 +56,10 @@ $async$and$array
 `else
     parameter del = 1;
 `endif
+`undef __VAMS_ENABLE__
+`ifdef __VAMS_ENABLE__
+    parameter integer del = 1 from [1:100];
+`endif
 
 // SCE_V_OPERATOR {10}
 +-/=!@#%^&*()[]{}<|>~

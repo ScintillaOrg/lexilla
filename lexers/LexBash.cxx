@@ -1185,7 +1185,7 @@ void SCI_METHOD LexerBash::Fold(Sci_PositionU startPos_, Sci_Position length, in
 	char chNext = styler[startPos];
 	int styleNext = MaskCommand(styler.StyleIndexAt(startPos));
 	int style = MaskCommand(initStyle);
-	size_t wordlen = 0;
+	Sci_Position wordlen = 0;
 	for (Sci_Position i = startPos; i < endPos; i++) {
 		const char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);

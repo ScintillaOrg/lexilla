@@ -107,8 +107,12 @@ static void ColouriseCamlDoc(
 						baseC = "x";
 					}
 					// ... change to specified base AS REQUIRED
-					if (strchr(baseC, sc.chNext))
-						chBase = baseT[MakeLowerCase(sc.chNext) - 'a'], sc.Forward();
+					if (strchr(baseC, sc.chNext)) {
+						const size_t index = MakeLowerCase(sc.chNext) - 'a';
+						if (index < std::size(baseT)) {
+							chBase = baseT[index], sc.Forward();
+						}
+					}
 				}
 			} else if (!isSML && sc.Match('\''))	// (Caml char literal?)
 				state2 = SCE_CAML_CHAR, chLit = 0;

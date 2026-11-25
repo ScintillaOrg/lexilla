@@ -732,7 +732,7 @@ static void ColouriseSrecDoc(Sci_PositionU startPos, Sci_Position length, int in
 							break;
 						}
 					}
-				} else {
+				} else if (dataFieldSize >= 0) {
 					ForwardWithinLine(sc, dataFieldSize * 2);
 				}
 				break;

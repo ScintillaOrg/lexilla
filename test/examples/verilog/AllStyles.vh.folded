@@ -56,6 +56,10 @@
  2 400 401 + `else
  0 401 401 |     parameter del = 1;
  0 401 400 | `endif
+ 0 400 400   `undef __VAMS_ENABLE__
+ 2 400 401 + `ifdef __VAMS_ENABLE__
+ 0 401 401 |     parameter integer del = 1 from [1:100];
+ 0 401 400 | `endif
  0 400 400   
  0 400 400   // SCE_V_OPERATOR {10}
  0 400 400   +-/=!@#%^&*()[]{}<|>~
