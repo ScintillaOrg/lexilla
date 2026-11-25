@@ -27,6 +27,13 @@
  Next line should not start a keyword but before 5.4.1 did and caused bad styling or a crash depending on range lexed
  <
 **/{0}
+{15}/// world() << myValue; Message<Enclosure<T>>.
+/// local()<<myValue; std::vector<int> values; std::vector<unsigned int> sizes;
+/// text<{18}wrong{15}/> text<{18}wrong{15} /> text<{18}wrong{15} id = "x"/>
+/// text<{17}file{15} name="example">more</{17}file{15}> <{17}file{15}/> <{18}wrong{15}> {17}@file{15} {18}@wrong{15}
+{3}/** remote() << myValue; Message<Enclosure<T>>.
+ text<{17}file{3}>more</{17}file{3}> <{18}wrong{3}> {17}\file{3}
+ */{0}
 
 {9}#define M\
 

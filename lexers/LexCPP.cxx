@@ -97,6 +97,80 @@ bool CheckRegexClosed(StyleContext &sc) {
 	return false;
 }
 
+constexpr bool IsDocTagNameStart(int ch) noexcept {
+	return IsUpperOrLowerCase(ch) || AnyOf(ch, '_', ':');
+}
+
+constexpr bool IsDocTagNameChar(int ch) noexcept {
+	return IsDocTagNameStart(ch) || IsADigit(ch) || AnyOf(ch, '-', '.');
+}
+
+bool HasDocTagAttributeOrSlash(StyleContext &sc) {
+	Sci_Position offset = 0;
+	int ch = sc.ch;
+	while (IsASpaceOrTab(ch)) {
+		ch = sc.GetRelative(++offset);
+	}
+	if (ch == '/') {
+		return sc.GetRelative(offset + 1) == '>';
+	}
+	if (offset == 0 || !IsDocTagNameStart(ch)) {
+		return false;
+	}
+	do {
+		ch = sc.GetRelative(++offset);
+	} while (IsDocTagNameChar(ch));
+	while (IsASpaceOrTab(ch)) {
+		ch = sc.GetRelative(++offset);
+	}
+	return ch == '=' && sc.GetRelative(offset + 1) != '=';
+}
+
+int DocKeywordStyle(std::string_view word, int terminator, const WordList &keywords,
+		const WordClassifier &classifier) {
+	if (keywords.InList(word)) {
+		return SCE_C_COMMENTDOCKEYWORD;
+	}
+	if (word.starts_with('@') || word.starts_with('\\')) {
+		word.remove_prefix(1);
+		// Before '>', only the prefixed spelling matches the keyword list.
+		if (terminator != '>' && keywords.InList(word)) {
+			return SCE_C_COMMENTDOCKEYWORD;
+		}
+	}
+	const int subStyle = classifier.ValueFor(word);
+	return subStyle >= 0 ? subStyle : SCE_C_COMMENTDOCKEYWORDERROR;
+}
+
+bool HighlightDocTag(StyleContext &sc, int activity, const WordList &keywords,
+		const WordClassifier &classifier, StyleContext::Transform transform) {
+	const bool closing = sc.chNext == '/';
+	const int prefixLength = closing ? 2 : 1;
+	if (sc.chPrev == '<' || !IsDocTagNameStart(sc.GetRelative(prefixLength))) {
+		return false;
+	}
+	const int commentStyle = sc.state;
+	const bool afterIdentifier = iswordstart(sc.chPrev) || sc.chPrev > charLastASCII;
+	sc.Forward(prefixLength);
+	sc.SetState(commentStyle);
+	while (sc.More() && IsDocTagNameChar(sc.ch)) {
+		sc.Forward();
+	}
+
+	int style = SCE_C_COMMENTDOCKEYWORDERROR;
+	if (sc.ch == '>' || sc.Match('/', '>') || IsASpace(sc.ch)) {
+		std::string name;
+		sc.GetCurrentString(name, transform);
+		style = DocKeywordStyle(name, sc.ch, keywords, classifier);
+	}
+	// An unknown opening tag can be a template argument; attributes and '/>' identify markup.
+	const bool templateArgument = style == SCE_C_COMMENTDOCKEYWORDERROR && !closing &&
+		(sc.ch == '<' || (afterIdentifier && !HasDocTagAttributeOrSlash(sc)));
+	sc.ChangeState(templateArgument ? commentStyle : (style | activity));
+	sc.SetState(commentStyle);
+	return true;
+}
+
 constexpr bool IsOperatorOrSpace(int ch) noexcept {
 	return isoperator(ch) || IsASpace(ch);
 }
@@ -833,7 +907,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	const CharacterSet setOKBeforeRE("([{=,:;!%^&*|?~+-> ");
 	const CharacterSet setCouldBePostOp("+-");
 
-	const CharacterSet setDoxygen(CharacterSet::setAlpha, "$@\\&<>#{}[]");
+	const CharacterSet setDoxygen(CharacterSet::setAlpha, "$@\\&<#{}[]");
 
 	setWordStart = CharacterSet(CharacterSet::setAlpha, "_", true);
 
@@ -1128,10 +1202,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						styleBeforeDCKeyword = SCE_C_COMMENTDOC;
 						sc.SetState(SCE_C_COMMENTDOCKEYWORD|activitySet);
 					}
-				} else if ((sc.ch == '<' && !(IsASpace(sc.chNext) || sc.chNext == '/'))
-							|| (sc.ch == '/' && sc.chPrev == '<')) { // XML comment style
-					styleBeforeDCKeyword = SCE_C_COMMENTDOC;
-					sc.ForwardSetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
+				} else if (sc.ch == '<' && HighlightDocTag(sc, activitySet, keywords3, classifierDocKeyWords, transform)) {
+					continue;
 				}
 				break;
 			case SCE_C_COMMENTLINE:
@@ -1151,10 +1223,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 						styleBeforeDCKeyword = SCE_C_COMMENTLINEDOC;
 						sc.SetState(SCE_C_COMMENTDOCKEYWORD|activitySet);
 					}
-				} else if ((sc.ch == '<' && sc.chNext != '/')
-							|| (sc.ch == '/' && sc.chPrev == '<')) { // XML comment style
-					styleBeforeDCKeyword = SCE_C_COMMENTLINEDOC;
-					sc.ForwardSetState(SCE_C_COMMENTDOCKEYWORD | activitySet);
+				} else if (sc.ch == '<' && HighlightDocTag(sc, activitySet, keywords3, classifierDocKeyWords, transform)) {
+					continue;
 				}
 				break;
 			case SCE_C_COMMENTDOCKEYWORD:
@@ -1165,35 +1235,13 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 					seenDocKeyBrace = false;
 				} else if (sc.ch == '[' || sc.ch == '{') {
 					seenDocKeyBrace = true;
-				} else if (!setDoxygen.Contains(sc.ch)
-				           && !(seenDocKeyBrace && AnyOf(sc.ch, ',', '.'))) {
-					if (!(IsASpace(sc.ch) || (sc.ch == 0))) {
-						sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
-					} else {
+				} else if (!setDoxygen.Contains(sc.ch) && !(seenDocKeyBrace && AnyOf(sc.ch, ',', '.'))) {
+					int style = SCE_C_COMMENTDOCKEYWORDERROR;
+					if (sc.ch == '>' || IsASpace(sc.ch) || sc.ch == 0) {
 						sc.GetCurrentString(currentText, transform);
-						assert(!currentText.empty());
-						const std::string currentSuffix = currentText.substr(1);
-						if (!keywords3.InList(currentSuffix) && !keywords3.InList(currentText)) {
-							const int subStyleCDKW = classifierDocKeyWords.ValueFor(currentSuffix);
-							if (subStyleCDKW >= 0) {
-								sc.ChangeState(subStyleCDKW | activitySet);
-							} else {
-								sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR | activitySet);
-							}
-						}
+						style = DocKeywordStyle(currentText, sc.ch, keywords3, classifierDocKeyWords);
 					}
-					sc.SetState(styleBeforeDCKeyword|activitySet);
-					seenDocKeyBrace = false;
-				} else if (sc.ch == '>') {
-					sc.GetCurrentString(currentText, transform);
-					if (!keywords3.InList(currentText)) {
-						const int subStyleCDKW = classifierDocKeyWords.ValueFor(currentText.substr(1));
-						if (subStyleCDKW >= 0) {
-							sc.ChangeState(subStyleCDKW | activitySet);
-						} else {
-							sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR | activitySet);
-						}
-					}
+					sc.ChangeState(style | activitySet);
 					sc.SetState(styleBeforeDCKeyword | activitySet);
 					seenDocKeyBrace = false;
 				}
